@@ -22,15 +22,25 @@
 
 #include <KIO/TransferJob>
 
+#include "ewsclient.h"
+#include "ewsxmlitems.h"
+
 class EwsRequest : public QObject
 {
     Q_OBJECT
 public:
-    EwsRequest(QObject* parent);
+    EwsRequest(EwsClient* parent);
     virtual ~EwsRequest();
-    void send();
+    virtual void send() = 0;
+
+    void setMetaData(const KIO::MetaData &md);
+    void addMetaData(QString key, QString value);
 protected:
-    void prepare(const QString& body, const KIO::MetaData& md);
+    void doSend();
+    void prepare(const QString& body);
+    void prepare(const EwsXmlItemBase *item);
+
+    KIO::MetaData mMd;
 private:
     KIO::TransferJob *mJob;
 };

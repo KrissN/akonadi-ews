@@ -20,14 +20,14 @@
 #include "ewsrequest.h"
 
 #include "ewsclient.h"
+#include "ewsjobqueue.h"
 #include "ewsclient_debug.h"
 
-EwsRequest::EwsRequest(QObject *parent)
+static const QString ewsReqVersion = QStringLiteral("Exchange2010");
+
+EwsRequest::EwsRequest(EwsClient *parent)
     : QObject(parent), mJob(0)
 {
-    if (!qobject_cast<EwsClient*>(parent)) {
-        qCCritical(EWSCLIENT_LOG) << "Parent is not an EwsClient object!";
-    }
 }
 
 EwsRequest::~EwsRequest()
@@ -35,14 +35,65 @@ EwsRequest::~EwsRequest()
     delete mJob;
 }
 
-void EwsRequest::send()
+void EwsRequest::doSend()
 {
+    qobject_cast<EwsClient*>(parent())->mJobQueue->enqueue(mJob);
 }
 
-void EwsRequest::prepare(const QString &body, const KIO::MetaData &md)
+void EwsRequest::prepare(const QString &body)
 {
-    mJob = KIO::http_post(qobject_cast<EwsClient*>(parent())->url(), body.toUtf8(), KIO::HideProgressInfo);
+    mJob = KIO::http_post(qobject_cast<EwsClient*>(parent())->url(), body.toUtf8(),
+                          KIO::HideProgressInfo);
     mJob->addMetaData("content-type", "text/xml");
-    mJob->addMetaData(md);
+    mJob->addMetaData(mMd);
 }
 
+void EwsRequest::prepare(const EwsXmlItemBase *item)
+{
+    QString reqString;
+    QXmlStreamWriter writer(&reqString);
+
+    writer.setCodec("UTF-8");
+
+    writer.writeStartDocument();
+
+    writer.writeNamespace(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("soap"));
+    writer.writeNamespace(EwsXmlItemBase::ewsMsgNsUri, QStringLiteral("m"));
+    writer.writeNamespace(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("t"));
+
+    // SOAP Envelope
+    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Envelope"));
+
+    // SOAP Header
+    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Header"));
+    writer.writeStartElement(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("RequestServerVersion"));
+    writer.writeAttribute(QStringLiteral("Version"), ewsReqVersion);
+    writer.writeEndElement();
+    writer.writeEndElement();
+
+    // SOAP Body
+    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Body"));
+
+    // Content
+    item->write(writer);
+
+    // End SOAP Body
+    writer.writeEndElement();
+
+    // End SOAP Envelope
+    writer.writeEndElement();
+
+    writer.writeEndDocument();
+
+    prepare(reqString);
+}
+
+void EwsRequest::setMetaData(const KIO::MetaData &md)
+{
+    mMd = md;
+}
+
+void EwsRequest::addMetaData(QString key, QString value)
+{
+    mMd.insert(key, value);
+}

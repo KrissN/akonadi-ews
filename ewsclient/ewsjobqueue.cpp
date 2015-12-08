@@ -21,6 +21,8 @@
 
 #include "ewsclient_debug.h"
 
+static const int maxConrurrentJobs = 1;
+
 EwsJobQueue::EwsJobQueue(QObject *parent)
     : QObject(parent)
 {
@@ -32,10 +34,27 @@ EwsJobQueue::~EwsJobQueue()
 
 void EwsJobQueue::enqueue(KIO::TransferJob *job)
 {
+    qCDebug(EWSCLIENT_LOG) << "Adding job" << job << "to queue.";
     mJobQueue.enqueue(job);
     connect(job, SIGNAL(finished(KJob*)), SLOT(jobFinished(KJob*)));
+    maybeStartNextJob();
 }
 
 void EwsJobQueue::jobFinished(KJob *job)
 {
+    qCDebug(EWSCLIENT_LOG) << "Job" << job << "finished.";
+    mActiveJobs--;
+    maybeStartNextJob();
+}
+
+void EwsJobQueue::maybeStartNextJob()
+{
+    QMutexLocker l(&mJobStartMutex);
+    qCDebug(EWSCLIENT_LOG) << mActiveJobs << "active job(s).";
+    if (mActiveJobs < maxConrurrentJobs) {
+        mActiveJobs++;
+        KIO::TransferJob *job = mJobQueue.dequeue();
+        qCDebug(EWSCLIENT_LOG) << "Starting job" << job;
+        job->start();
+    }
 }

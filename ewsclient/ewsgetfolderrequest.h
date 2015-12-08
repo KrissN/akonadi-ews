@@ -17,29 +17,28 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSJOBQUEUE_H
-#define EWSJOBQUEUE_H
+#ifndef EWSGETFOLDERREQUEST_H
+#define EWSGETFOLDERREQUEST_H
 
-#include <QtCore/QQueue>
-#include <QtCore/QMutex>
-#include <KIO/TransferJob>
+#include "ewsrequest.h"
+#include "ewsxmlitems.h"
 
-class EwsJobQueue : public QObject
+class EwsGetFolderRequest : public EwsRequest
 {
     Q_OBJECT
 public:
-    EwsJobQueue(QObject *parent);
-    virtual ~EwsJobQueue();
+    EwsGetFolderRequest(EwsClient* parent);
+    virtual ~EwsGetFolderRequest();
 
-    void enqueue(KIO::TransferJob *job);
-private slots:
-    void jobFinished(KJob *job);
-    void maybeStartNextJob();
+    void setFolderId(QString id, QString changeKey);
+    void setDistinguishedFolderId(EwsDistinguishedFolderIdItem::DistinguishedId id);
+
+    void setFolderShape(EwsBaseShapeItem::Shape shape);
+
+    virtual void send();
 private:
-
-    QQueue<KIO::TransferJob*> mJobQueue;
-    QAtomicInteger<unsigned int> mActiveJobs;
-    QMutex mJobStartMutex;
+    EwsGetFolderItem *mGetFolderItem;
+    EwsGetFolderResponseMessageItem *mGetFolderResponseItem;
 };
 
 #endif

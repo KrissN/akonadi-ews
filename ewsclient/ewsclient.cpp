@@ -7,7 +7,7 @@
 
 
 EwsClient::EwsClient(QString url, QObject *parent)
-    : QObject(parent), mUrl(url), reqCnt(0)
+    : QObject(parent), mUrl(url)
 {
     
 }

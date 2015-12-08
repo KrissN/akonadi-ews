@@ -1,9 +1,11 @@
 
 set(EWSCLIENT_SRCS
   ewsclient.cpp
+  ewsgetfolderrequest.cpp
   ewsjobqueue.cpp
   ewsrequest.cpp
   ewsrequestwriter.cpp
+  ewsxmlitems.cpp
   ewsclient_debug.cpp)
 
 add_library(ewsclient STATIC ${EWSCLIENT_SRCS})
