@@ -85,6 +85,8 @@ void EwsRequest::prepare(const EwsXmlItemBase *item)
 
     writer.writeEndDocument();
 
+    qDebug() << reqString;
+
     prepare(reqString);
 }
 

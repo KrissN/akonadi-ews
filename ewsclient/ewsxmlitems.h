@@ -75,6 +75,7 @@ private:
 class EwsFolderIdItem : public EwsXmlItemBase
 {
 public:
+    EwsFolderIdItem();
     EwsFolderIdItem(QString id, QString changeKey);
     virtual ~EwsFolderIdItem();
 
@@ -84,6 +85,7 @@ public:
     void setChangeKey(QString changeKey) { mChangeKey = changeKey; };
 
     virtual void write(QXmlStreamWriter &writer) const;
+    virtual bool read(QXmlStreamReader &reader);
 private:
     QString mId;
     QString mChangeKey;
@@ -169,7 +171,7 @@ private:
     EwsFolderShapeItem *mFolderShape;
 };
 
-class EwsResponseMessageItem : public EwsXmlItemBase
+class EwsResponseMessageBase : public EwsXmlItemBase
 {
 public:
     enum ResponseClass {
@@ -178,8 +180,8 @@ public:
         Error
     };
 
-    EwsResponseMessageItem();
-    virtual ~EwsResponseMessageItem();
+    EwsResponseMessageBase();
+    virtual ~EwsResponseMessageBase();
 
     ResponseClass responseClass() const { return mResponseClass; };
 
@@ -192,16 +194,81 @@ private:
     QString mMessageText;
 };
 
-class EwsGetFolderResponseMessageItem : public EwsResponseMessageItem
+class EwsFolderBase : public EwsXmlItemBase
+{
+public:
+    enum FolderType {
+        Folder,
+        CalendarFolder,
+        ContactsFolser,
+        SearchFolder,
+        TasksFolder
+    };
+
+    EwsFolderBase();
+    virtual ~EwsFolderBase();
+
+    virtual FolderType type() const = 0;
+
+    const EwsFolderIdItem* folderId() const { return mFolderId; };
+    const EwsFolderIdItem* parentFolderId() const { return mParentFolderId; };
+    QString folderClass() const { return mFolderClass; };
+    QString displayName() const { return mDisplayName; };
+    int totalCount() const { return mTotalCount; };
+    int childFolderCount() const { return mChildFolderCount; };
+protected:
+    bool readFolderElement(QXmlStreamReader &reader);
+private:
+    EwsFolderIdItem *mFolderId;
+    EwsFolderIdItem *mParentFolderId;
+    QString mFolderClass;
+    QString mDisplayName;
+    int mTotalCount;
+    int mChildFolderCount;
+    // mExtendedProperties;
+    // mManagedFolderInformation;
+    // mEffectiveRights;
+};
+
+class EwsFolderItem : public EwsFolderBase
+{
+public:
+    EwsFolderItem();
+    virtual ~EwsFolderItem();
+
+    virtual bool read(QXmlStreamReader &reader);
+
+    virtual FolderType type() const { return Folder; };
+
+    int unreadCount() const { return mUnreadCount; };
+private:
+    // mPermissionSet;
+    int mUnreadCount;
+};
+
+class EwsFoldersItem : public EwsXmlItemBase
+{
+public:
+    EwsFoldersItem();
+    virtual ~EwsFoldersItem();
+
+    virtual bool read(QXmlStreamReader &reader);
+private:
+    QList<EwsFolderBase*> mFolders;
+};
+
+class EwsGetFolderResponseMessageItem : public EwsResponseMessageBase
 {
 public:
     EwsGetFolderResponseMessageItem();
     virtual ~EwsGetFolderResponseMessageItem();
 
+    const EwsFoldersItem* folders() const { return mFolders; };
+
     virtual bool read(QXmlStreamReader &reader);
 private:
+    EwsFoldersItem *mFolders;
 };
-
 
 
 #endif

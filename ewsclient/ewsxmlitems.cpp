@@ -44,6 +44,7 @@ bool EwsXmlItemBase::read(QXmlStreamReader &reader)
 {
     // Default implementation does nothing. It's useful for elements which only exist in requests
     // and therefore will never be read.
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,8 +105,12 @@ void EwsFolderShapeItem::write(QXmlStreamWriter &writer) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// EWS FolderId element (write only)
+// EWS FolderId element (read-write)
 //
+EwsFolderIdItem::EwsFolderIdItem()
+{
+}
+
 EwsFolderIdItem::EwsFolderIdItem(QString id, QString changeKey)
     : mId(id), mChangeKey(changeKey)
 {
@@ -121,6 +126,26 @@ void EwsFolderIdItem::write(QXmlStreamWriter &writer) const
     writer.writeAttribute(QStringLiteral("Id"), mId);
     writer.writeAttribute(QStringLiteral("ChangeKey"), mChangeKey);
     writer.writeEndElement();
+}
+
+bool EwsFolderIdItem::read(QXmlStreamReader &reader)
+{
+    const QXmlStreamAttributes &attrs = reader.attributes();
+    QStringRef ref = attrs.value(QStringLiteral("Id"));
+    if (ref.isNull()) {
+        qCWarning(EWSCLIENT_LOG) << "Missing Id attribute in FolderId element.";
+        return false;
+    }
+    mId = ref.toString();
+
+    ref = attrs.value(QStringLiteral("ChangeKey"));
+    if (ref.isNull()) {
+        qCWarning(EWSCLIENT_LOG) << "Missing ChangeKey attribute in FolderId element.";
+        return false;
+    }
+    mChangeKey = ref.toString();
+
+    return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +190,9 @@ void EwsDistinguishedFolderIdItem::write(QXmlStreamWriter &writer) const
         QStringLiteral("archiverecoverableitemsversions"),
         QStringLiteral("archiverecoverableitemspurges")
     };
-    writer.writeTextElement(ewsTypeNsUri, QStringLiteral("DistinguishedFolderId"), idNames[mId]);
+    writer.writeStartElement(ewsTypeNsUri, QStringLiteral("DistinguishedFolderId"));
+    writer.writeAttribute(QStringLiteral("Id"), idNames[mId]);
+    writer.writeEndElement();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +205,8 @@ EwsFolderIdsItem::EwsFolderIdsItem()
 
 EwsFolderIdsItem::~EwsFolderIdsItem()
 {
+    delete mFolderId;
+    delete mDistinguishedFolderId;
 }
 
 void EwsFolderIdsItem::write(QXmlStreamWriter &writer) const
@@ -234,16 +263,19 @@ EwsGetFolderItem::EwsGetFolderItem()
 
 EwsGetFolderItem::~EwsGetFolderItem()
 {
+    delete mFolderIds;
+    delete mFolderShape;
 }
 
 void EwsGetFolderItem::write(QXmlStreamWriter &writer) const
 {
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("GetFolder"));
-    if (mFolderIds) {
-        mFolderIds->write(writer);
-    }
+    // Note: the order of the items matters
     if (mFolderShape) {
         mFolderShape->write(writer);
+    }
+    if (mFolderIds) {
+        mFolderIds->write(writer);
     }
     writer.writeEndElement();
 }
@@ -263,16 +295,16 @@ void EwsGetFolderItem::setFolderShape(EwsFolderShapeItem *folderShape)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // EWS Response Message base class
 //
-EwsResponseMessageItem::EwsResponseMessageItem()
+EwsResponseMessageBase::EwsResponseMessageBase()
     : mResponseClass(Success)
 {
 }
 
-EwsResponseMessageItem::~EwsResponseMessageItem()
+EwsResponseMessageBase::~EwsResponseMessageBase()
 {
 }
 
-bool EwsResponseMessageItem::readResponseAttr(const QXmlStreamAttributes &attrs)
+bool EwsResponseMessageBase::readResponseAttr(const QXmlStreamAttributes &attrs)
 {
     static const QString respClasses[] = {
         QStringLiteral("Success"),
@@ -295,7 +327,7 @@ bool EwsResponseMessageItem::readResponseAttr(const QXmlStreamAttributes &attrs)
     return (i < sizeof(respClasses) / sizeof(respClasses[0]));
 }
 
-bool EwsResponseMessageItem::readResponseElement(QXmlStreamReader &reader)
+bool EwsResponseMessageBase::readResponseElement(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri) {
         qCWarning(EWSCLIENT_LOG) << "Unexpected namespace in response element:" << reader.namespaceUri();
@@ -324,6 +356,7 @@ bool EwsResponseMessageItem::readResponseElement(QXmlStreamReader &reader)
 // EWS GetFolderResponseMessage element (read only)
 //
 EwsGetFolderResponseMessageItem::EwsGetFolderResponseMessageItem()
+    : mFolders(0)
 {
 }
 
@@ -344,7 +377,9 @@ bool EwsGetFolderResponseMessageItem::read(QXmlStreamReader &reader)
         }
 
         if (reader.name() == QStringLiteral("Folders")) {
-
+            mFolders = new EwsFoldersItem();
+            if (!mFolders->read(reader))
+                return false;
         }
         else {
             if (!readResponseElement(reader))
@@ -355,3 +390,151 @@ bool EwsGetFolderResponseMessageItem::read(QXmlStreamReader &reader)
     return true;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// EWS Folder base class (read only)
+//
+EwsFolderBase::EwsFolderBase()
+    : mFolderId(0), mParentFolderId(0), mTotalCount(0), mChildFolderCount(0)
+{
+}
+
+EwsFolderBase::~EwsFolderBase()
+{
+    delete mFolderId;
+    delete mParentFolderId;
+}
+
+bool EwsFolderBase::readFolderElement(QXmlStreamReader &reader)
+{
+    if (reader.namespaceUri() != ewsTypeNsUri) {
+        qCWarning(EWSCLIENT_LOG) << "Unexpected namespace in folder element:" << reader.namespaceUri();
+        return false;
+    }
+    if (reader.name() == QStringLiteral("FolderId")) {
+        mFolderId = new EwsFolderIdItem();
+        mFolderId->read(reader);
+    }
+    if (reader.name() == QStringLiteral("ParentFolderId")) {
+        mParentFolderId = new EwsFolderIdItem();
+        mParentFolderId->read(reader);
+    }
+    if (reader.name() == QStringLiteral("FolderClass")) {
+        mFolderClass = reader.readElementText();
+    }
+    if (reader.name() == QStringLiteral("DisplayName")) {
+        mDisplayName = reader.readElementText();
+    }
+    if (reader.name() == QStringLiteral("TotalCount")) {
+        QString count = reader.readElementText();
+        bool ok;
+        mTotalCount = count.toInt(&ok);
+        if (!ok) {
+            qCWarning(EWSCLIENT_LOG) << "Failed to convert TotalCount value: " << count;
+            return false;
+        }
+    }
+    if (reader.name() == QStringLiteral("ChildFolderCount")) {
+        QString count = reader.readElementText();
+        bool ok;
+        mChildFolderCount = count.toInt(&ok);
+        if (!ok) {
+            qCWarning(EWSCLIENT_LOG) << "Failed to convert ChildFolderCount value: " << count;
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("ExtendedProperty")) {
+        reader.skipCurrentElement();
+    }
+    else if (reader.name() == QStringLiteral("ManagedFolderInformation")) {
+        reader.skipCurrentElement();
+    }
+    else if (reader.name() == QStringLiteral("EffectiveRights")) {
+        reader.skipCurrentElement();
+    }
+    else {
+        qCWarning(EWSCLIENT_LOG) << "Unknown child in Folder element:" << reader.qualifiedName();
+        return false;
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// EWS Folder base class (read only)
+//
+EwsFolderItem::EwsFolderItem()
+    : mUnreadCount(0)
+{
+}
+
+EwsFolderItem::~EwsFolderItem()
+{
+}
+
+bool EwsFolderItem::read(QXmlStreamReader &reader)
+{
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarning(EWSCLIENT_LOG) << "Unexpected namespace in Folder element:"
+                            << reader.namespaceUri();
+            return false;
+        }
+
+        if (reader.name() == QStringLiteral("UnreadCount")) {
+            QString count = reader.readElementText();
+            bool ok;
+            mUnreadCount = count.toInt(&ok);
+            if (!ok) {
+                qCWarning(EWSCLIENT_LOG) << "Failed to convert UnreadCount value: " << count;
+                return false;
+            }
+        }
+        else if (reader.name() == QStringLiteral("PermissionSet")) {
+            reader.skipCurrentElement();
+        }
+        else {
+            if (!readFolderElement(reader))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// EWS Folders base class (read only)
+//
+EwsFoldersItem::EwsFoldersItem()
+{
+}
+
+EwsFoldersItem::~EwsFoldersItem()
+{
+    foreach (EwsFolderBase *it, mFolders) {
+        delete it;
+    }
+}
+
+bool EwsFoldersItem::read(QXmlStreamReader &reader)
+{
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsMsgNsUri) {
+            qCWarning(EWSCLIENT_LOG) << "Unexpected namespace in Folders element:"
+                            << reader.namespaceUri();
+            return false;
+        }
+
+        if (reader.name() == QStringLiteral("Folder")) {
+            EwsFolderItem *folder = new EwsFolderItem();
+            if (!folder->read(reader))
+                return false;
+            mFolders.append(folder);
+        }
+        else {
+            qCWarning(EWSCLIENT_LOG) << "Unknown child in Folders element:" << reader.qualifiedName();
+            return false;
+        }
+    }
+
+    return true;
+}

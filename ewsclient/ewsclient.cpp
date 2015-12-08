@@ -4,10 +4,10 @@
 #include "ewsclient.h"
 
 #include "ewsrequestwriter.h"
-
+#include "ewsjobqueue.h"
 
 EwsClient::EwsClient(QString url, QObject *parent)
-    : QObject(parent), mUrl(url)
+    : QObject(parent), mUrl(url), mJobQueue(new EwsJobQueue(this))
 {
     
 }
@@ -52,7 +52,8 @@ void EwsClient::getServiceConfiguration(QVector<RequestedConfiguration> conf)
 
     sendRequest(reqWriter.toString());
 }
-        
+
+
 void EwsClient::sendRequest(QString body)
 {
 #if 0

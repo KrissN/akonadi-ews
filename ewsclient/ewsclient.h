@@ -26,7 +26,6 @@
 #include <QtCore/QUrl>
 
 class EwsJobQueue;
-class EwsRequest;
 
 class EwsClient : public QObject
 {
@@ -49,19 +48,19 @@ public:
     };
 
     void getServiceConfiguration(QVector<RequestedConfiguration> conf);
-    
+
     QUrl url() const
     {
         return mUrl;
     }
-    
+
 private:
     void sendRequest(QString body);
-    
+
     QUrl mUrl;
     QString mUsername;
     QString mPassword;
-    
+
     QPointer<EwsJobQueue> mJobQueue;
 
     friend class EwsRequest;

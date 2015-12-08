@@ -51,7 +51,7 @@ void EwsJobQueue::maybeStartNextJob()
 {
     QMutexLocker l(&mJobStartMutex);
     qCDebug(EWSCLIENT_LOG) << mActiveJobs << "active job(s).";
-    if (mActiveJobs < maxConrurrentJobs) {
+    if ((mActiveJobs < maxConrurrentJobs) && (!mJobQueue.isEmpty())) {
         mActiveJobs++;
         KIO::TransferJob *job = mJobQueue.dequeue();
         qCDebug(EWSCLIENT_LOG) << "Starting job" << job;

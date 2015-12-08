@@ -41,7 +41,6 @@ protected:
     void prepare(const EwsXmlItemBase *item);
 
     KIO::MetaData mMd;
-private:
     KIO::TransferJob *mJob;
 };
 

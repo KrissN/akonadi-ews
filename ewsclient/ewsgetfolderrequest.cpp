@@ -20,15 +20,18 @@
 #include <QtCore/QXmlStreamWriter>
 
 #include "ewsgetfolderrequest.h"
+#include "ewsclient_debug.h"
 
 EwsGetFolderRequest::EwsGetFolderRequest(EwsClient* parent)
-    : EwsRequest(parent), mGetFolderItem(new EwsGetFolderItem())
+    : EwsRequest(parent), mGetFolderItem(new EwsGetFolderItem()),
+      mGetFolderResponseItem(new EwsGetFolderResponseMessageItem())
 {
 }
 
 EwsGetFolderRequest::~EwsGetFolderRequest()
 {
     delete mGetFolderItem;
+    delete mGetFolderResponseItem;
 }
 
 void EwsGetFolderRequest::setFolderId(QString id, QString changeKey)
@@ -59,5 +62,18 @@ void EwsGetFolderRequest::send()
 {
     prepare(mGetFolderItem);
 
+    connect(mJob, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
+    connect(mJob, SIGNAL(data(KIO::Job*, const QByteArray&)), SLOT(requestData(KIO::Job*, const QByteArray&)));
+
     doSend();
+}
+
+void EwsGetFolderRequest::requestResult(KJob *job)
+{
+    qDebug() << "result";
+}
+
+void EwsGetFolderRequest::requestData(KIO::Job *job, const QByteArray &data)
+{
+    qCDebug(EWSCLIENT_LOG) << "data" << data;
 }

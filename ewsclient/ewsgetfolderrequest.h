@@ -36,6 +36,9 @@ public:
     void setFolderShape(EwsBaseShapeItem::Shape shape);
 
     virtual void send();
+private slots:
+    void requestResult(KJob *job);
+    void requestData(KIO::Job *job, const QByteArray &data);
 private:
     EwsGetFolderItem *mGetFolderItem;
     EwsGetFolderResponseMessageItem *mGetFolderResponseItem;
