@@ -40,11 +40,21 @@ protected:
     void doSend();
     void prepare(const QString& body);
     void prepare(const EwsXmlItemBase *item);
+    virtual bool parseResult(QXmlStreamReader &reader) = 0;
 
     KIO::MetaData mMd;
     QPointer<KIO::TransferJob> mJob;    // The job object deletes itself automatically once finished
                                         // Use a smart pointer to make sure we don't try to do it
                                         // again.
+    bool mError;
+    QString mErrorString;
+private slots:
+    void requestResult(KJob *job);
+    void requestData(KIO::Job *job, const QByteArray &data);
+private:
+    bool readSoapBody(QXmlStreamReader &reader);
+    bool readSoapFault(QXmlStreamReader &reader);
+    QString mResponseData;
 };
 
 #endif

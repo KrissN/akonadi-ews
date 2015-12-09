@@ -46,6 +46,11 @@ void EwsRequest::prepare(const QString &body)
                           KIO::HideProgressInfo);
     mJob->addMetaData("content-type", "text/xml");
     mJob->addMetaData(mMd);
+
+    connect(mJob, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
+    connect(mJob, SIGNAL(data(KIO::Job*, const QByteArray&)),
+            SLOT(requestData(KIO::Job*, const QByteArray&)));
+
 }
 
 void EwsRequest::prepare(const EwsXmlItemBase *item)
@@ -85,7 +90,7 @@ void EwsRequest::prepare(const EwsXmlItemBase *item)
 
     writer.writeEndDocument();
 
-    qDebug() << reqString;
+    qCDebug(EWSCLIENT_LOG) << reqString;
 
     prepare(reqString);
 }
@@ -99,3 +104,88 @@ void EwsRequest::addMetaData(QString key, QString value)
 {
     mMd.insert(key, value);
 }
+
+void EwsRequest::requestResult(KJob *job)
+{
+    qCDebug(EWSCLIENT_LOG) << "result" << job->error();
+
+    if (job->error() != 0) {
+        qCWarning(EWSCLIENT_LOG) << "Failed to process EWS request." << job->errorString();
+        mError = true;
+        mErrorString = job->errorString();
+        return;
+    }
+
+    QXmlStreamReader reader(mResponseData);
+
+    if (!reader.readNextStartElement()) {
+        mError = true;
+        mErrorString = QStringLiteral("Failed to read EWS request XML");
+        qCWarning(EWSCLIENT_LOG) << mErrorString;
+        return;
+    }
+
+    if ((reader.name() != QStringLiteral("Envelope")) || (reader.namespaceUri() != EwsXmlItemBase::soapEnvNsUri)) {
+        mError = true;
+        mErrorString = QStringLiteral("Failed to read EWS request - not a SOAP XML");
+        qCWarning(EWSCLIENT_LOG) << mErrorString;
+        return;
+    }
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != EwsXmlItemBase::soapEnvNsUri) {
+            mError = true;
+            mErrorString = QStringLiteral("Failed to read EWS request - not a SOAP XML");
+            qCWarning(EWSCLIENT_LOG) << mErrorString;
+            return;
+        }
+
+        if (reader.name() == QStringLiteral("Body")) {
+            if (!readSoapBody(reader))
+                return;
+        }
+        else if (reader.name() == QStringLiteral("Header")) {
+            reader.skipCurrentElement();
+        }
+    }
+}
+
+bool EwsRequest::readSoapBody(QXmlStreamReader &reader)
+{
+    while (reader.readNextStartElement()) {
+        if ((reader.name() == QStringLiteral("Fault"))
+            && (reader.namespaceUri() == EwsXmlItemBase::soapEnvNsUri)) {
+            return readSoapFault(reader);
+        }
+
+        if (!parseResult(reader))
+            return false;
+    }
+    return true;
+}
+
+bool EwsRequest::readSoapFault(QXmlStreamReader &reader)
+{
+    QString faultCode;
+    QString faultString;
+    while (reader.readNextStartElement()) {
+        if (reader.name() == QStringLiteral("faultcode")) {
+            faultCode = reader.readElementText();
+        }
+        else if (reader.name() == QStringLiteral("faultstring")) {
+            faultString = reader.readElementText();
+        }
+    }
+
+    mError = true;
+    mErrorString = faultCode + QStringLiteral(": ") + faultString;
+
+    return false;
+}
+
+void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
+{
+    qCDebug(EWSCLIENT_LOG) << "data" << data;
+    mResponseData += QString::fromUtf8(data);
+}
+

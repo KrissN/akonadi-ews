@@ -62,18 +62,12 @@ void EwsGetFolderRequest::send()
 {
     prepare(mGetFolderItem);
 
-    connect(mJob, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
-    connect(mJob, SIGNAL(data(KIO::Job*, const QByteArray&)), SLOT(requestData(KIO::Job*, const QByteArray&)));
-
     doSend();
 }
 
-void EwsGetFolderRequest::requestResult(KJob *job)
+bool EwsGetFolderRequest::parseResult(QXmlStreamReader &reader)
 {
-    qDebug() << "result";
-}
+    reader.skipCurrentElement();
 
-void EwsGetFolderRequest::requestData(KIO::Job *job, const QByteArray &data)
-{
-    qCDebug(EWSCLIENT_LOG) << "data" << data;
+    return true;
 }
