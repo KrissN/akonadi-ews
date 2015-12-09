@@ -20,6 +20,7 @@
 #ifndef EWSREQUEST_H
 #define EWSREQUEST_H
 
+#include <QtCore/QPointer>
 #include <KIO/TransferJob>
 
 #include "ewsclient.h"
@@ -41,7 +42,9 @@ protected:
     void prepare(const EwsXmlItemBase *item);
 
     KIO::MetaData mMd;
-    KIO::TransferJob *mJob;
+    QPointer<KIO::TransferJob> mJob;    // The job object deletes itself automatically once finished
+                                        // Use a smart pointer to make sure we don't try to do it
+                                        // again.
 };
 
 #endif
