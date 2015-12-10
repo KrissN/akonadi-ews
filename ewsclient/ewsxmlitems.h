@@ -117,6 +117,7 @@ public:
     void setDistinguishedFolderId(EwsDistinguishedId id);
 
     void setId(const EwsFolderId &id);
+    EwsFolderId id() const;
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:

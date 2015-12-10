@@ -268,6 +268,19 @@ void EwsFolderIdsItem::setId(const EwsFolderId &id)
     }
 }
 
+EwsFolderId EwsFolderIdsItem::id() const
+{
+    if (mFolderId) {
+        return EwsFolderId(mFolderId->id(), mFolderId->changeKey());
+    }
+    else if (mDistinguishedFolderId) {
+        return EwsFolderId(mDistinguishedFolderId->id());
+    }
+    else {
+        return EwsFolderId();
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // EWS GetFolder element (write only)
 //
