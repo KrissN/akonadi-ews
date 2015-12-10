@@ -27,11 +27,14 @@ class EwsFolderId
 public:
     enum Type {
         Distinguished,
-        Real
+        Real,
+        Unspecified
     };
     EwsFolderId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
     EwsFolderId(QString id, QString changeKey) : mType(Real), mId(id), mChangeKey(changeKey),
                     mDid(EwsDIdCalendar) {};
+    EwsFolderId(const EwsFolderId &id) { *this = id; };
+    EwsFolderId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
 
     Type type() const { return mType; };
     QString id() const { return mId; };
@@ -44,7 +47,7 @@ public:
         if (mType == Distinguished) {
             mDid = other.mDid;
         }
-        else {
+        else if (mType == Real) {
             mId = other.mId;
             mChangeKey = other.mChangeKey;
         }

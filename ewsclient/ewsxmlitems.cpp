@@ -259,8 +259,12 @@ void EwsFolderIdsItem::setId(const EwsFolderId &id)
     if (id.type() == EwsFolderId::Distinguished) {
         setDistinguishedFolderId(id.distinguishedId());
     }
-    else {
+    else if (id.type() == EwsFolderId::Real) {
         setFolderId(id.id(), id.changeKey());
+    }
+    else {  // Unspecified
+        delete mFolderId;
+        delete mDistinguishedFolderId;
     }
 }
 
