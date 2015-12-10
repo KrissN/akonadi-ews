@@ -24,6 +24,7 @@
 #include <QtCore/QXmlStreamWriter>
 
 #include "ewstypes.h"
+#include "ewsfolderid.h"
 
 class EwsXmlItemBase
 {
@@ -114,6 +115,8 @@ public:
     EwsDistinguishedFolderIdItem* distinguishedFolderId() const { return mDistinguishedFolderId; };
     void setDistinguishedFolderId(EwsDistinguishedFolderIdItem *distinguishedFolderId);
     void setDistinguishedFolderId(EwsDistinguishedId id);
+
+    void setId(const EwsFolderId &id);
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:

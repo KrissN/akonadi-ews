@@ -20,6 +20,7 @@
 #include <QtCore/QString>
 
 #include "ewsxmlitems.h"
+#include "ewsfolderid.h"
 #include "ewsclient_debug.h"
 
 const QString EwsXmlItemBase::soapEnvNsUri = QStringLiteral("http://schemas.xmlsoap.org/soap/envelope/");
@@ -251,6 +252,16 @@ void EwsFolderIdsItem::setDistinguishedFolderId(EwsDistinguishedId id)
     delete mDistinguishedFolderId;
     mFolderId = 0;
     mDistinguishedFolderId= new EwsDistinguishedFolderIdItem(id);
+}
+
+void EwsFolderIdsItem::setId(const EwsFolderId &id)
+{
+    if (id.type() == EwsFolderId::Distinguished) {
+        setDistinguishedFolderId(id.distinguishedId());
+    }
+    else {
+        setFolderId(id.id(), id.changeKey());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
