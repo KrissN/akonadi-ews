@@ -23,6 +23,8 @@
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QXmlStreamWriter>
 
+#include "ewstypes.h"
+
 class EwsXmlItemBase
 {
 public:
@@ -40,21 +42,15 @@ public:
 class EwsBaseShapeItem : public EwsXmlItemBase
 {
 public:
-    enum Shape {
-        IdOnly = 0,
-        Default,
-        AllProperties
-    };
-
-    EwsBaseShapeItem(Shape shape = Default);
+    EwsBaseShapeItem(EwsFolderShape shape = EwsShapeDefault);
     virtual ~EwsBaseShapeItem();
 
-    void setShape(Shape shape) { mShape = shape; };
-    Shape shape() const { return mShape; };
+    void setShape(EwsFolderShape shape) { mShape = shape; };
+    EwsFolderShape shape() const { return mShape; };
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:
-    Shape mShape;
+    EwsFolderShape mShape;
 };
 
 class EwsFolderShapeItem : public EwsXmlItemBase
@@ -65,7 +61,7 @@ public:
 
     EwsBaseShapeItem* baseShape() const { return mBaseShape; };
     void setBaseShape(EwsBaseShapeItem *baseShape);
-    void setBaseShape(EwsBaseShapeItem::Shape shape);
+    void setBaseShape(EwsFolderShape shape);
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:
@@ -94,43 +90,15 @@ private:
 class EwsDistinguishedFolderIdItem : public EwsXmlItemBase
 {
 public:
-    enum DistinguishedId {
-        Calendar = 0,
-        Contacts,
-        DeletedItems,
-        Drafts,
-        Inbox,
-        Journal,
-        Notes,
-        Outbox,
-        SentItems,
-        Tasks,
-        MsgFolderRoot,
-        Root,
-        JunkEmail,
-        SearchFolders,
-        VoiceMail,
-        RecoverableItemsRoot,
-        RecoverableItemsDeletions,
-        RecoverableItemsVersions,
-        RecoverableItemsPurges,
-        ArchiveRoot,
-        ArchiveMsgFolderRoot,
-        ArchiveDeletedItems,
-        ArchiveRecoverableItemsRoot,
-        ArchiveRecoverableItemsDeletions,
-        ArchiveRecoverableItemsVersions,
-        ArchiveRecoverableItemsPurges
-    };
-    EwsDistinguishedFolderIdItem(DistinguishedId id);
+    EwsDistinguishedFolderIdItem(EwsDistinguishedId id);
     virtual ~EwsDistinguishedFolderIdItem();
 
-    DistinguishedId id() const { return mId; };
-    void setId(DistinguishedId id) { mId = id; };
+    EwsDistinguishedId id() const { return mId; };
+    void setId(EwsDistinguishedId id) { mId = id; };
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:
-    DistinguishedId mId;
+    EwsDistinguishedId mId;
 };
 
 class EwsFolderIdsItem : public EwsXmlItemBase
@@ -145,7 +113,7 @@ public:
 
     EwsDistinguishedFolderIdItem* distinguishedFolderId() const { return mDistinguishedFolderId; };
     void setDistinguishedFolderId(EwsDistinguishedFolderIdItem *distinguishedFolderId);
-    void setDistinguishedFolderId(EwsDistinguishedFolderIdItem::DistinguishedId id);
+    void setDistinguishedFolderId(EwsDistinguishedId id);
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:
@@ -174,22 +142,18 @@ private:
 class EwsResponseMessageBase : public EwsXmlItemBase
 {
 public:
-    enum ResponseClass {
-        Success = 0,
-        Warning,
-        Error
-    };
-
     EwsResponseMessageBase();
     virtual ~EwsResponseMessageBase();
 
-    ResponseClass responseClass() const { return mResponseClass; };
+    EwsResponseClass responseClass() const { return mResponseClass; };
 
+    QString responseCode() const { return mResponseCode; };
+    QString responseMessage() const { return mMessageText; };
 protected:
     bool readResponseAttr(const QXmlStreamAttributes &attrs);
     bool readResponseElement(QXmlStreamReader &reader);
 private:
-    ResponseClass mResponseClass;
+    EwsResponseClass mResponseClass;
     QString mResponseCode;
     QString mMessageText;
 };
@@ -197,18 +161,10 @@ private:
 class EwsFolderBase : public EwsXmlItemBase
 {
 public:
-    enum FolderType {
-        Folder,
-        CalendarFolder,
-        ContactsFolser,
-        SearchFolder,
-        TasksFolder
-    };
-
     EwsFolderBase();
     virtual ~EwsFolderBase();
 
-    virtual FolderType type() const = 0;
+    virtual EwsFolderType type() const = 0;
 
     const EwsFolderIdItem* folderId() const { return mFolderId; };
     const EwsFolderIdItem* parentFolderId() const { return mParentFolderId; };
@@ -238,7 +194,7 @@ public:
 
     virtual bool read(QXmlStreamReader &reader);
 
-    virtual FolderType type() const { return Folder; };
+    virtual EwsFolderType type() const { return EwsFolder; };
 
     int unreadCount() const { return mUnreadCount; };
 private:

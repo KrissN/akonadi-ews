@@ -22,8 +22,8 @@ Test::Test(QString url, QObject *parent)
     : QObject(parent), cli(url)
 {
     folderReq = new EwsGetFolderRequest(&cli);
-    folderReq->setDistinguishedFolderId(EwsDistinguishedFolderIdItem::Inbox);
-    folderReq->setFolderShape(EwsBaseShapeItem::Default);
+    folderReq->setDistinguishedFolderId(EwsDIdInbox);
+    folderReq->setFolderShape(EwsShapeDefault);
     connect(folderReq, SIGNAL(finished(EwsRequest*)), SLOT(requestFinished(EwsRequest*)));
     folderReq->send();
 }

@@ -22,6 +22,7 @@
 
 #include "ewsrequest.h"
 #include "ewsxmlitems.h"
+#include "ewstypes.h"
 
 class EwsGetFolderRequest : public EwsRequest
 {
@@ -31,9 +32,9 @@ public:
     virtual ~EwsGetFolderRequest();
 
     void setFolderId(QString id, QString changeKey);
-    void setDistinguishedFolderId(EwsDistinguishedFolderIdItem::DistinguishedId id);
+    void setDistinguishedFolderId(EwsDistinguishedId id);
 
-    void setFolderShape(EwsBaseShapeItem::Shape shape);
+    void setFolderShape(EwsFolderShape shape);
 
     virtual void send();
 protected:

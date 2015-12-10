@@ -50,7 +50,7 @@ bool EwsXmlItemBase::read(QXmlStreamReader &reader)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // EWS BaseShape element (write only)
 //
-EwsBaseShapeItem::EwsBaseShapeItem(Shape shape)
+EwsBaseShapeItem::EwsBaseShapeItem(EwsFolderShape shape)
     : mShape(shape)
 {
 };
@@ -89,7 +89,7 @@ void EwsFolderShapeItem::setBaseShape(EwsBaseShapeItem *baseShape)
     mBaseShape = baseShape;
 }
 
-void EwsFolderShapeItem::setBaseShape(EwsBaseShapeItem::Shape shape)
+void EwsFolderShapeItem::setBaseShape(EwsFolderShape shape)
 {
     delete mBaseShape;
     mBaseShape = new EwsBaseShapeItem(shape);
@@ -151,7 +151,7 @@ bool EwsFolderIdItem::read(QXmlStreamReader &reader)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // EWS DistinguishedFolderId element (write only)
 //
-EwsDistinguishedFolderIdItem::EwsDistinguishedFolderIdItem(DistinguishedId id)
+EwsDistinguishedFolderIdItem::EwsDistinguishedFolderIdItem(EwsDistinguishedId id)
     : mId(id)
 {
 };
@@ -245,7 +245,7 @@ void EwsFolderIdsItem::setDistinguishedFolderId(EwsDistinguishedFolderIdItem *di
     mDistinguishedFolderId = distinguishedFolderId;
 }
 
-void EwsFolderIdsItem::setDistinguishedFolderId(EwsDistinguishedFolderIdItem::DistinguishedId id)
+void EwsFolderIdsItem::setDistinguishedFolderId(EwsDistinguishedId id)
 {
     delete mFolderId;
     delete mDistinguishedFolderId;
@@ -296,7 +296,7 @@ void EwsGetFolderItem::setFolderShape(EwsFolderShapeItem *folderShape)
 // EWS Response Message base class
 //
 EwsResponseMessageBase::EwsResponseMessageBase()
-    : mResponseClass(Success)
+    : mResponseClass(EwsResponseSuccess)
 {
 }
 

@@ -42,7 +42,7 @@ void EwsGetFolderRequest::setFolderId(QString id, QString changeKey)
     mGetFolderItem->folderIds()->setFolderId(id, changeKey);
 }
 
-void EwsGetFolderRequest::setDistinguishedFolderId(EwsDistinguishedFolderIdItem::DistinguishedId id)
+void EwsGetFolderRequest::setDistinguishedFolderId(EwsDistinguishedId id)
 {
     if (!mGetFolderItem->folderIds()) {
         mGetFolderItem->setFolderIds(new EwsFolderIdsItem());
@@ -50,7 +50,7 @@ void EwsGetFolderRequest::setDistinguishedFolderId(EwsDistinguishedFolderIdItem:
     mGetFolderItem->folderIds()->setDistinguishedFolderId(id);
 }
 
-void EwsGetFolderRequest::setFolderShape(EwsBaseShapeItem::Shape shape)
+void EwsGetFolderRequest::setFolderShape(EwsFolderShape shape)
 {
     if (!mGetFolderItem->folderShape()) {
         mGetFolderItem->setFolderShape(new EwsFolderShapeItem());
