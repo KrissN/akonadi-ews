@@ -320,8 +320,10 @@ bool EwsResponseMessageBase::readResponseAttr(const QXmlStreamAttributes &attrs)
 
     int i;
     for (i = 0; i < sizeof(respClasses) / sizeof(respClasses[0]); i++) {
-        if (respClassRef == respClasses[i])
-            mResponseClass = static_cast<ResponseClass>(i);
+        if (respClassRef == respClasses[i]) {
+            mResponseClass = static_cast<EwsResponseClass>(i);
+            break;
+        }
     }
 
     return (i < sizeof(respClasses) / sizeof(respClasses[0]));
