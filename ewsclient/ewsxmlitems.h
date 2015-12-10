@@ -161,11 +161,11 @@ private:
     QString mMessageText;
 };
 
-class EwsFolderBase : public EwsXmlItemBase
+class EwsFolderItemBase : public EwsXmlItemBase
 {
 public:
-    EwsFolderBase();
-    virtual ~EwsFolderBase();
+    EwsFolderItemBase();
+    virtual ~EwsFolderItemBase();
 
     virtual EwsFolderType type() const = 0;
 
@@ -189,7 +189,7 @@ private:
     // mEffectiveRights;
 };
 
-class EwsFolderItem : public EwsFolderBase
+class EwsFolderItem : public EwsFolderItemBase
 {
 public:
     EwsFolderItem();
@@ -213,7 +213,7 @@ public:
 
     virtual bool read(QXmlStreamReader &reader);
 private:
-    QList<EwsFolderBase*> mFolders;
+    QList<EwsFolderItemBase*> mFolders;
 };
 
 class EwsGetFolderResponseMessageItem : public EwsResponseMessageBase

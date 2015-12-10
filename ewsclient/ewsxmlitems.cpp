@@ -406,18 +406,18 @@ bool EwsGetFolderResponseMessageItem::read(QXmlStreamReader &reader)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // EWS Folder base class (read only)
 //
-EwsFolderBase::EwsFolderBase()
+EwsFolderItemBase::EwsFolderItemBase()
     : mFolderId(0), mParentFolderId(0), mTotalCount(0), mChildFolderCount(0)
 {
 }
 
-EwsFolderBase::~EwsFolderBase()
+EwsFolderItemBase::~EwsFolderItemBase()
 {
     delete mFolderId;
     delete mParentFolderId;
 }
 
-bool EwsFolderBase::readFolderElement(QXmlStreamReader &reader)
+bool EwsFolderItemBase::readFolderElement(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsTypeNsUri) {
         qCWarning(EWSCLIENT_LOG) << "Unexpected namespace in folder element:" << reader.namespaceUri();
@@ -523,7 +523,7 @@ EwsFoldersItem::EwsFoldersItem()
 
 EwsFoldersItem::~EwsFoldersItem()
 {
-    foreach (EwsFolderBase *it, mFolders) {
+    foreach (EwsFolderItemBase *it, mFolders) {
         delete it;
     }
 }
