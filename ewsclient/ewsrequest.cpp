@@ -40,7 +40,7 @@ void EwsRequest::doSend()
     qobject_cast<EwsClient*>(parent())->mJobQueue->enqueue(mJob);
 }
 
-void EwsRequest::prepare(const QString &body)
+void EwsRequest::prepare(const QString body)
 {
     mJob = KIO::http_post(qobject_cast<EwsClient*>(parent())->url(), body.toUtf8(),
                           KIO::HideProgressInfo);
@@ -110,9 +110,7 @@ void EwsRequest::requestResult(KJob *job)
     qCDebug(EWSCLIENT_LOG) << "result" << job->error();
 
     if (job->error() != 0) {
-        qCWarning(EWSCLIENT_LOG) << "Failed to process EWS request." << job->errorString();
-        mError = true;
-        mErrorString = job->errorString();
+        setError(QStringLiteral("Failed to process EWS request: ") + job->errorString());
     }
     else {
         QXmlStreamReader reader(mResponseData);
@@ -122,38 +120,30 @@ void EwsRequest::requestResult(KJob *job)
     emit finished(this);
 }
 
-void EwsRequest::readResponse(QXmlStreamReader &reader)
+bool EwsRequest::readResponse(QXmlStreamReader &reader)
 {
     if (!reader.readNextStartElement()) {
-        mError = true;
-        mErrorString = QStringLiteral("Failed to read EWS request XML");
-        qCWarning(EWSCLIENT_LOG) << mErrorString;
-        return;
+        return setError(QStringLiteral("Failed to read EWS request XML"));
     }
 
     if ((reader.name() != QStringLiteral("Envelope")) || (reader.namespaceUri() != EwsXmlItemBase::soapEnvNsUri)) {
-        mError = true;
-        mErrorString = QStringLiteral("Failed to read EWS request - not a SOAP XML");
-        qCWarning(EWSCLIENT_LOG) << mErrorString;
-        return;
+        return setError(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
     }
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != EwsXmlItemBase::soapEnvNsUri) {
-            mError = true;
-            mErrorString = QStringLiteral("Failed to read EWS request - not a SOAP XML");
-            qCWarning(EWSCLIENT_LOG) << mErrorString;
-            return;
+            return setError(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
         }
 
         if (reader.name() == QStringLiteral("Body")) {
             if (!readSoapBody(reader))
-                return;
+                return false;
         }
         else if (reader.name() == QStringLiteral("Header")) {
             reader.skipCurrentElement();
         }
     }
+    return true;
 }
 
 bool EwsRequest::readSoapBody(QXmlStreamReader &reader)
@@ -193,5 +183,13 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 {
     qCDebug(EWSCLIENT_LOG) << "data" << data;
     mResponseData += QString::fromUtf8(data);
+}
+
+bool EwsRequest::setError(const QString msg)
+{
+    mError = true;
+    mErrorString = msg;
+    qCWarning(EWSCLIENT_LOG) << mErrorString;
+    return false;
 }
 

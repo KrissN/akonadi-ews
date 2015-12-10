@@ -43,9 +43,10 @@ signals:
     void finished(EwsRequest *req);
 protected:
     void doSend();
-    void prepare(const QString& body);
+    void prepare(const QString body);
     void prepare(const EwsXmlItemBase *item);
     virtual bool parseResult(QXmlStreamReader &reader) = 0;
+    bool setError(const QString msg);
 
     KIO::MetaData mMd;
     QPointer<KIO::TransferJob> mJob;    // The job object deletes itself automatically once finished
@@ -57,7 +58,7 @@ private slots:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
 private:
-    void readResponse(QXmlStreamReader &reader);
+    bool readResponse(QXmlStreamReader &reader);
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
     QString mResponseData;
