@@ -36,6 +36,11 @@ public:
 
     void setMetaData(const KIO::MetaData &md);
     void addMetaData(QString key, QString value);
+
+    bool isError() const { return mError; };
+    QString errorString() const { return mErrorString; };
+signals:
+    void finished(EwsRequest *req);
 protected:
     void doSend();
     void prepare(const QString& body);
@@ -52,6 +57,7 @@ private slots:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
 private:
+    void readResponse(QXmlStreamReader &reader);
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
     QString mResponseData;

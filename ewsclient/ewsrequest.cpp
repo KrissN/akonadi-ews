@@ -113,11 +113,17 @@ void EwsRequest::requestResult(KJob *job)
         qCWarning(EWSCLIENT_LOG) << "Failed to process EWS request." << job->errorString();
         mError = true;
         mErrorString = job->errorString();
-        return;
+    }
+    else {
+        QXmlStreamReader reader(mResponseData);
+        readResponse(reader);
     }
 
-    QXmlStreamReader reader(mResponseData);
+    emit finished(this);
+}
 
+void EwsRequest::readResponse(QXmlStreamReader &reader)
+{
     if (!reader.readNextStartElement()) {
         mError = true;
         mErrorString = QStringLiteral("Failed to read EWS request XML");
