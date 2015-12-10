@@ -53,6 +53,20 @@ public:
         }
         return *this;
     }
+
+    bool operator==(const EwsFolderId &other) const
+    {
+        if (mType != other.mType)
+            return false;
+
+        if (mType == Distinguished) {
+            return (mDid == other.mDid);
+        }
+        else if (mType == Real) {
+            return (mId == other.mId && mChangeKey == other.mChangeKey);
+        }
+        return true;
+    }
 private:
     Type mType;
     QString mId;
