@@ -34,20 +34,12 @@ EwsGetFolderRequest::~EwsGetFolderRequest()
     delete mGetFolderResponseItem;
 }
 
-void EwsGetFolderRequest::setFolderId(QString id, QString changeKey)
+void EwsGetFolderRequest::setFolderId(const EwsFolderId &id)
 {
     if (!mGetFolderItem->folderIds()) {
         mGetFolderItem->setFolderIds(new EwsFolderIdsItem());
     }
-    mGetFolderItem->folderIds()->setFolderId(id, changeKey);
-}
-
-void EwsGetFolderRequest::setDistinguishedFolderId(EwsDistinguishedId id)
-{
-    if (!mGetFolderItem->folderIds()) {
-        mGetFolderItem->setFolderIds(new EwsFolderIdsItem());
-    }
-    mGetFolderItem->folderIds()->setDistinguishedFolderId(id);
+    mGetFolderItem->folderIds()->setId(id);
 }
 
 void EwsGetFolderRequest::setFolderShape(EwsFolderShape shape)

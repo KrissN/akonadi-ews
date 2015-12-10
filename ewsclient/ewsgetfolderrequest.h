@@ -31,8 +31,7 @@ public:
     EwsGetFolderRequest(EwsClient* parent);
     virtual ~EwsGetFolderRequest();
 
-    void setFolderId(QString id, QString changeKey);
-    void setDistinguishedFolderId(EwsDistinguishedId id);
+    void setFolderId(const EwsFolderId &id);
 
     void setFolderShape(EwsFolderShape shape);
 
