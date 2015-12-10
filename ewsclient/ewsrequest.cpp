@@ -26,7 +26,7 @@
 static const QString ewsReqVersion = QStringLiteral("Exchange2010");
 
 EwsRequest::EwsRequest(EwsClient *parent)
-    : QObject(parent), mJob(0)
+    : QObject(parent), mJob(0), mError(false)
 {
 }
 
