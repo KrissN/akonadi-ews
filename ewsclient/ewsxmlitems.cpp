@@ -122,7 +122,7 @@ EwsFolderIdItem::~EwsFolderIdItem()
 
 void EwsFolderIdItem::write(QXmlStreamWriter &writer) const
 {
-    writer.writeStartElement(ewsTypeNsUri, QStringLiteral("BaseShape"));
+    writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
     writer.writeAttribute(QStringLiteral("Id"), mId);
     writer.writeAttribute(QStringLiteral("ChangeKey"), mChangeKey);
     writer.writeEndElement();
