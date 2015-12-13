@@ -199,8 +199,7 @@ EwsPropertyField::EwsPropertyField(const EwsPropertyField &other)
 {
 }
 
-#ifdef Q_COMPILER_RVALUE_REFS
- EwsPropertyField::EwsPropertyField(EwsPropertyField &&other)
+EwsPropertyField::EwsPropertyField(EwsPropertyField &&other)
     : d(other.d)
 {
 }
@@ -208,16 +207,17 @@ EwsPropertyField::EwsPropertyField(const EwsPropertyField &other)
 EwsPropertyField& EwsPropertyField::operator=(EwsPropertyField &&other)
 {
     d = other.d;
+    return *this;
 }
-#endif
 
 EwsPropertyField::~EwsPropertyField()
 {
-};
+}
 
 EwsPropertyField& EwsPropertyField::operator=(const EwsPropertyField &other)
 {
     d = other.d;
+    return *this;
 }
 
 bool EwsPropertyField::operator==(const EwsPropertyField &other)
@@ -309,5 +309,7 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
         writer.writeAttribute(QStringLiteral("PropertyTag"), propertyTypeNames[d->mType]);
         writer.writeEndElement();
         break;
-     }
+    case EwsPropertyFieldPrivate::UnknownField:
+        break;
+    }
 }

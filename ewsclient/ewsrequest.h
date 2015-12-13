@@ -39,7 +39,7 @@ public:
 
     bool isError() const { return mError; };
     QString errorString() const { return mErrorString; };
-signals:
+Q_SIGNALS:
     void finished(EwsRequest *req);
 protected:
     void doSend();
@@ -56,7 +56,7 @@ protected:
                                         // again.
     bool mError;
     QString mErrorString;
-private slots:
+private Q_SLOTS:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
 private:

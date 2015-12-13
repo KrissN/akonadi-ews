@@ -79,7 +79,7 @@ void EwsRequest::prepare(const QString body)
 {
     mJob = KIO::http_post(qobject_cast<EwsClient*>(parent())->url(), body.toUtf8(),
                           KIO::HideProgressInfo);
-    mJob->addMetaData("content-type", "text/xml");
+    mJob->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
     mJob->addMetaData(mMd);
 
     connect(mJob, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));

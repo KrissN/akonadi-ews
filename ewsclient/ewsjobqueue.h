@@ -32,7 +32,7 @@ public:
     virtual ~EwsJobQueue();
 
     void enqueue(KIO::TransferJob *job);
-private slots:
+private Q_SLOTS:
     void jobFinished(KJob *job);
     void maybeStartNextJob();
 private:

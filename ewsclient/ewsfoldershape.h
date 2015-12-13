@@ -34,17 +34,17 @@ public:
     ~EwsFolderShape() {};
     EwsFolderShape(const EwsFolderShape &other)
         : mBaseShape(other.mBaseShape), mProps(other.mProps) {};
-#ifdef Q_COMPILER_RVALUE_REFS
     EwsFolderShape(EwsFolderShape &&other)
         : mBaseShape(other.mBaseShape), mProps(other.mProps) {};
     EwsFolderShape& operator=(EwsFolderShape &&other) {
         mBaseShape = other.mBaseShape;
         mProps = std::move(other.mProps);
+        return *this;
     }
-#endif
     EwsFolderShape& operator=(const EwsFolderShape &other) {
         mBaseShape = other.mBaseShape;
         mProps = other.mProps;
+        return *this;
     }
 
     void write(QXmlStreamWriter &writer) const;
@@ -59,6 +59,6 @@ inline EwsFolderShape& operator<<(EwsFolderShape &shape, const EwsPropertyField 
 {
     shape.mProps.append(prop);
     return shape;
-};
+}
 
 #endif

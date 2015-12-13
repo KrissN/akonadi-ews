@@ -70,29 +70,29 @@ bool EwsGetFolderRequest::parseResult(QXmlStreamReader &reader)
 {
     if (reader.name() != QStringLiteral("GetFolderResponse")
         || reader.namespaceUri() != EwsXmlItemBase::ewsMsgNsUri) {
-        return setError("Failed to read EWS request - expected GetFolderResponse element.");
+        return setError(QStringLiteral("Failed to read EWS request - expected GetFolderResponse element."));
     }
 
     if (!reader.readNextStartElement()) {
-        return setError("Failed to read EWS request - expected a child element in GetFolderResponse element.");
+        return setError(QStringLiteral("Failed to read EWS request - expected a child element in GetFolderResponse element."));
     }
 
     if (reader.name() != QStringLiteral("ResponseMessages")
         || reader.namespaceUri() != EwsXmlItemBase::ewsMsgNsUri) {
-        return setError("Failed to read EWS request - expected ResponseMessages element.");
+        return setError(QStringLiteral("Failed to read EWS request - expected ResponseMessages element."));
     }
 
     if (!reader.readNextStartElement()) {
-        return setError("Failed to read EWS request - expected a child element in ResponseMessages element.");
+        return setError(QStringLiteral("Failed to read EWS request - expected a child element in ResponseMessages element."));
     }
 
     if (reader.name() != QStringLiteral("GetFolderResponseMessage")
         || reader.namespaceUri() != EwsXmlItemBase::ewsMsgNsUri) {
-        return setError("Failed to read EWS request - expected GetFolderResponseMessage element.");
+        return setError(QStringLiteral("Failed to read EWS request - expected GetFolderResponseMessage element."));
     }
 
     if (!mGetFolderResponseItem->read(reader)) {
-        return setError("Failed to read EWS request");
+        return setError(QStringLiteral("Failed to read EWS request"));
     }
 
 

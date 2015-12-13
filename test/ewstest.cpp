@@ -10,7 +10,7 @@ class Test : public QObject
 public:
     Test(QString url, QObject *parent);
 
-public slots:
+public Q_SLOTS:
     void requestFinished(EwsRequest *req);
 
 private:
@@ -30,7 +30,7 @@ Test::Test(QString url, QObject *parent)
 
 void Test::requestFinished(EwsRequest *req)
 {
-    qDebug() << "Request done" << req->isError();
+    qDebug() << QStringLiteral("Request done") << req->isError();
     if (req->isError()) {
         qDebug() << req->errorString();
     }
@@ -46,7 +46,7 @@ int main(int argc, char ** argv)
 {
     QCoreApplication app(argc, argv);
 
-    Test test(argv[1], &app);
+    Test test(QString::fromUtf8(argv[1]), &app);
 
     app.exec();
 
