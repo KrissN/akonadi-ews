@@ -17,31 +17,32 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETFOLDERREQUEST_H
-#define EWSGETFOLDERREQUEST_H
-
-#include "ewsrequest.h"
-#include "ewsxmlitems.h"
-#include "ewstypes.h"
 #include "ewsfoldershape.h"
 
-class EwsGetFolderRequest : public EwsRequest
-{
-    Q_OBJECT
-public:
-    EwsGetFolderRequest(EwsClient* parent);
-    virtual ~EwsGetFolderRequest();
-
-    void setFolderId(const EwsFolderId &id);
-    void setFolderShape(const EwsFolderShape &shape);
-
-    virtual void send();
-protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
-private:
-    EwsGetFolderResponseMessageItem *mGetFolderResponseItem;
-    EwsFolderId mId;
-    EwsFolderShape mShape;
+static const QString shapeNames[] = {
+    QStringLiteral("IdOnly"),
+    QStringLiteral("Default"),
+    QStringLiteral("AllProperties")
 };
 
-#endif
+void EwsFolderShape::write(QXmlStreamWriter &writer) const
+{
+    writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderShape"));
+
+    // Write the base shape
+    writer.writeTextElement(ewsTypeNsUri, QStringLiteral("BaseShape"), shapeNames[mBaseShape]);
+
+    // Write properties (if any)
+    if (!mProps.isEmpty()) {
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("AdditionalProperties"));
+
+        foreach (const EwsPropertyField &prop, mProps) {
+            prop.write(writer);
+        }
+
+        writer.writeEndElement();
+    }
+
+    writer.writeEndElement();
+}
+

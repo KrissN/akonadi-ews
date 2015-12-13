@@ -23,36 +23,45 @@
 #include "ewsclient_debug.h"
 
 EwsGetFolderRequest::EwsGetFolderRequest(EwsClient* parent)
-    : EwsRequest(parent), mGetFolderItem(new EwsGetFolderItem()),
-      mGetFolderResponseItem(new EwsGetFolderResponseMessageItem())
+    : EwsRequest(parent), mGetFolderResponseItem(new EwsGetFolderResponseMessageItem())
 {
 }
 
 EwsGetFolderRequest::~EwsGetFolderRequest()
 {
-    delete mGetFolderItem;
     delete mGetFolderResponseItem;
 }
 
 void EwsGetFolderRequest::setFolderId(const EwsFolderId &id)
 {
-    if (!mGetFolderItem->folderIds()) {
-        mGetFolderItem->setFolderIds(new EwsFolderIdsItem());
-    }
-    mGetFolderItem->folderIds()->setId(id);
+    mId = id;
 }
 
-void EwsGetFolderRequest::setFolderShape(EwsFolderShape shape)
+void EwsGetFolderRequest::setFolderShape(const EwsFolderShape &shape)
 {
-    if (!mGetFolderItem->folderShape()) {
-        mGetFolderItem->setFolderShape(new EwsFolderShapeItem());
-    }
-    mGetFolderItem->folderShape()->setBaseShape(shape);
+    mShape = shape;
 }
 
 void EwsGetFolderRequest::send()
 {
-    prepare(mGetFolderItem);
+    QString reqString;
+    QXmlStreamWriter writer(&reqString);
+
+    startSoapDocument(writer);
+
+    writer.writeStartElement(ewsMsgNsUri, QStringLiteral("GetFolder"));
+
+    mShape.write(writer);
+
+    mId.writeFolderIds(writer);
+
+    writer.writeEndElement();
+
+    endSoapDocument(writer);
+
+    qCDebug(EWSCLIENT_LOG) << reqString;
+
+    prepare(reqString);
 
     doSend();
 }

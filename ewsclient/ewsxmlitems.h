@@ -43,15 +43,15 @@ public:
 class EwsBaseShapeItem : public EwsXmlItemBase
 {
 public:
-    EwsBaseShapeItem(EwsFolderShape shape = EwsShapeDefault);
+    EwsBaseShapeItem(EwsBaseShape shape = EwsShapeDefault);
     virtual ~EwsBaseShapeItem();
 
-    void setShape(EwsFolderShape shape) { mShape = shape; };
-    EwsFolderShape shape() const { return mShape; };
+    void setShape(EwsBaseShape shape) { mShape = shape; };
+    EwsBaseShape shape() const { return mShape; };
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:
-    EwsFolderShape mShape;
+    EwsBaseShape mShape;
 };
 
 class EwsFolderShapeItem : public EwsXmlItemBase
@@ -62,7 +62,7 @@ public:
 
     EwsBaseShapeItem* baseShape() const { return mBaseShape; };
     void setBaseShape(EwsBaseShapeItem *baseShape);
-    void setBaseShape(EwsFolderShape shape);
+    void setBaseShape(EwsBaseShape shape);
 
     virtual void write(QXmlStreamWriter &writer) const;
 private:

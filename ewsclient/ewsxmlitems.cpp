@@ -51,7 +51,7 @@ bool EwsXmlItemBase::read(QXmlStreamReader &reader)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // EWS BaseShape element (write only)
 //
-EwsBaseShapeItem::EwsBaseShapeItem(EwsFolderShape shape)
+EwsBaseShapeItem::EwsBaseShapeItem(EwsBaseShape shape)
     : mShape(shape)
 {
 };
@@ -90,7 +90,7 @@ void EwsFolderShapeItem::setBaseShape(EwsBaseShapeItem *baseShape)
     mBaseShape = baseShape;
 }
 
-void EwsFolderShapeItem::setBaseShape(EwsFolderShape shape)
+void EwsFolderShapeItem::setBaseShape(EwsBaseShape shape)
 {
     delete mBaseShape;
     mBaseShape = new EwsBaseShapeItem(shape);

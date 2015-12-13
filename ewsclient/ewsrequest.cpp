@@ -40,6 +40,41 @@ void EwsRequest::doSend()
     qobject_cast<EwsClient*>(parent())->mJobQueue->enqueue(mJob);
 }
 
+void EwsRequest::startSoapDocument(QXmlStreamWriter &writer)
+{
+    writer.setCodec("UTF-8");
+
+    writer.writeStartDocument();
+
+    writer.writeNamespace(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("soap"));
+    writer.writeNamespace(EwsXmlItemBase::ewsMsgNsUri, QStringLiteral("m"));
+    writer.writeNamespace(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("t"));
+
+    // SOAP Envelope
+    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Envelope"));
+
+    // SOAP Header
+    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Header"));
+    writer.writeStartElement(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("RequestServerVersion"));
+    writer.writeAttribute(QStringLiteral("Version"), ewsReqVersion);
+    writer.writeEndElement();
+    writer.writeEndElement();
+
+    // SOAP Body
+    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Body"));
+}
+
+void EwsRequest::endSoapDocument(QXmlStreamWriter &writer)
+{
+    // End SOAP Body
+    writer.writeEndElement();
+
+    // End SOAP Envelope
+    writer.writeEndElement();
+
+    writer.writeEndDocument();
+}
+
 void EwsRequest::prepare(const QString body)
 {
     mJob = KIO::http_post(qobject_cast<EwsClient*>(parent())->url(), body.toUtf8(),
@@ -50,7 +85,6 @@ void EwsRequest::prepare(const QString body)
     connect(mJob, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
     connect(mJob, SIGNAL(data(KIO::Job*, const QByteArray&)),
             SLOT(requestData(KIO::Job*, const QByteArray&)));
-
 }
 
 void EwsRequest::prepare(const EwsXmlItemBase *item)

@@ -20,8 +20,27 @@
 #ifndef EWSFOLDERID_H
 #define EWSFOLDERID_H
 
+#include <QtCore/QXmlStreamReader>
+#include <QtCore/QXmlStreamWriter>
+
 #include "ewstypes.h"
 
+/**
+ *  @brief  EWS Folder Id wrapper class
+ *
+ *  This class wraps an EWS folder identifier.
+ *
+ *  In the EWS world a folder id can come in two forms:
+ *   - An "actual" folder id identified by a unique, server-generated string (actually it's a
+ *     base64-encoded internal server structure). Optionally this id is accompanied by a change
+ *     key, which acts as a version number of the folder. Each time something changes with the
+ *     folder (either the folder itself or it's content - not sure if this applies to subfolders)
+ *     the change key is updated. This gives you access to an older version of the folder and
+ *     allows to quickly find out if the folder needs synchronizing.
+ *   - A "distinguished" folder id which is a string identifying a list of known root folders
+ *     such as 'inbox'. This is necessary for the initial query as there is no way to know the
+ *     real folder ids beforehand.
+ */
 class EwsFolderId
 {
 public:
@@ -41,32 +60,10 @@ public:
     QString changeKey() const { return mChangeKey; };
     EwsDistinguishedId distinguishedId() const { return mDid; };
 
-    EwsFolderId& operator=(const EwsFolderId &other)
-    {
-        mType = other.mType;
-        if (mType == Distinguished) {
-            mDid = other.mDid;
-        }
-        else if (mType == Real) {
-            mId = other.mId;
-            mChangeKey = other.mChangeKey;
-        }
-        return *this;
-    }
+    EwsFolderId& operator=(const EwsFolderId &other);
+    bool operator==(const EwsFolderId &other) const;
 
-    bool operator==(const EwsFolderId &other) const
-    {
-        if (mType != other.mType)
-            return false;
-
-        if (mType == Distinguished) {
-            return (mDid == other.mDid);
-        }
-        else if (mType == Real) {
-            return (mId == other.mId && mChangeKey == other.mChangeKey);
-        }
-        return true;
-    }
+    void writeFolderIds(QXmlStreamWriter &writer) const;
 private:
     Type mType;
     QString mId;

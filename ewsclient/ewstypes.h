@@ -20,6 +20,12 @@
 #ifndef EWSTYPES_H
 #define EWSTYPES_H
 
+#include <QtCore/QString>
+
+extern const QString soapEnvNsUri;
+extern const QString ewsMsgNsUri;
+extern const QString ewsTypeNsUri;
+
 typedef enum {
     EwsFolder,
     EwsCalendarFolder,
@@ -67,6 +73,46 @@ typedef enum {
     EwsShapeIdOnly = 0,
     EwsShapeDefault,
     EwsShapeAllProperties
-} EwsFolderShape;
+} EwsBaseShape;
+
+typedef enum {
+    EwsPropSetMeeting = 0,
+    EwsPropSetAppointment,
+    EwsPropSetCommon,
+    EwsPropSetPublicStrings,
+    EwsPropSetAddress,
+    EwsPropSetInternetHeaders,
+    EwsPropSetCalendarAssistant,
+    EwsPropSetUnifiedMessaging
+} EwsDistinguishedPropSetId;
+
+typedef enum {
+    EwsPropTypeApplicationTime,
+    EwsPropTypeApplicationTimeArray,
+    EwsPropTypeBinary,
+    EwsPropTypeBoolean,
+    EwsPropTypeCLSID,
+    EwsPropTypeCLSIDArray,
+    EwsPropTypeCurrency,
+    EwsPropTypeCurrencyArray,
+    EwsPropTypeDouble,
+    EwsPropTypeDoubleArray,
+    EwsPropTypeError,
+    EwsPropTypeFloat,
+    EwsPropTypeFloatArray,
+    EwsPropTypeInteger,
+    EwsPropTypeTntegerArray,
+    EwsPropTypeLong,
+    EwsPropTypeLongArray,
+    EwsPropTypeNull,
+    EwsPropTypeObject,
+    EwsPropTypeObjectArray,
+    EwsPropTypeShort,
+    EwsPropTypeShortArray,
+    EwsPropTypeSystemTime,
+    EwsPropTypeSystemTimeArray,
+    EwsPropTypeString,
+    EwsPropTypeStringArray
+} EwsPropertyType;
 
 #endif

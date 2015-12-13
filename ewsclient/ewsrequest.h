@@ -47,6 +47,8 @@ protected:
     void prepare(const EwsXmlItemBase *item);
     virtual bool parseResult(QXmlStreamReader &reader) = 0;
     bool setError(const QString msg);
+    void startSoapDocument(QXmlStreamWriter &writer);
+    void endSoapDocument(QXmlStreamWriter &writer);
 
     KIO::MetaData mMd;
     QPointer<KIO::TransferJob> mJob;    // The job object deletes itself automatically once finished

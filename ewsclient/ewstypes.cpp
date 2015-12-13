@@ -17,31 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETFOLDERREQUEST_H
-#define EWSGETFOLDERREQUEST_H
-
-#include "ewsrequest.h"
-#include "ewsxmlitems.h"
 #include "ewstypes.h"
-#include "ewsfoldershape.h"
 
-class EwsGetFolderRequest : public EwsRequest
-{
-    Q_OBJECT
-public:
-    EwsGetFolderRequest(EwsClient* parent);
-    virtual ~EwsGetFolderRequest();
-
-    void setFolderId(const EwsFolderId &id);
-    void setFolderShape(const EwsFolderShape &shape);
-
-    virtual void send();
-protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
-private:
-    EwsGetFolderResponseMessageItem *mGetFolderResponseItem;
-    EwsFolderId mId;
-    EwsFolderShape mShape;
-};
-
-#endif
+const QString soapEnvNsUri = QStringLiteral("http://schemas.xmlsoap.org/soap/envelope/");
+const QString ewsMsgNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/services/2006/messages");
+const QString ewsTypeNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/services/2006/types");
