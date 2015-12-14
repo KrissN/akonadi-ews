@@ -62,6 +62,19 @@ EwsFolderId& EwsFolderId::operator=(const EwsFolderId &other)
     return *this;
 }
 
+EwsFolderId& EwsFolderId::operator=(EwsFolderId &&other)
+{
+    mType = other.mType;
+    if (mType == Distinguished) {
+        mDid = other.mDid;
+    }
+    else if (mType == Real) {
+        mId = std::move(other.mId);
+        mChangeKey = std::move(other.mChangeKey);
+    }
+    return *this;
+}
+
 bool EwsFolderId::operator==(const EwsFolderId &other) const
 {
     if (mType != other.mType)

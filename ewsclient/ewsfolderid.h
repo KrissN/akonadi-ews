@@ -53,6 +53,7 @@ public:
     EwsFolderId(QString id, QString changeKey) : mType(Real), mId(id), mChangeKey(changeKey),
                     mDid(EwsDIdCalendar) {};
     EwsFolderId(const EwsFolderId &id) { *this = id; };
+    EwsFolderId(EwsFolderId &&id) { *this = std::move(id); };
     EwsFolderId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
 
     Type type() const { return mType; };
@@ -61,6 +62,7 @@ public:
     EwsDistinguishedId distinguishedId() const { return mDid; };
 
     EwsFolderId& operator=(const EwsFolderId &other);
+    EwsFolderId& operator=(EwsFolderId &&other);
     bool operator==(const EwsFolderId &other) const;
 
     void writeFolderIds(QXmlStreamWriter &writer) const;
