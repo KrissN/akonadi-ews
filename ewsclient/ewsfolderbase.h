@@ -58,8 +58,8 @@ public:
 protected Q_SLOTS:
     void requestFinished();
 protected:
-    EwsFolderBase(EwsFolderBasePrivate *priv, EwsFolderId id, EwsClient *parent);
-    EwsFolderBase(EwsFolderBasePrivate *priv, EwsClient *parent);
+    EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsFolderId id, EwsClient *parent);
+    EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent);
 
     void resetFields();
     bool readBaseFolderElement(QXmlStreamReader &reader);

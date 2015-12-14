@@ -35,7 +35,7 @@ EwsFolderBasePrivate::~EwsFolderBasePrivate()
     delete mGetFolderReq;
 }
 
-EwsFolderBase::EwsFolderBase(EwsFolderBasePrivate *priv, EwsFolderId id, EwsClient *parent)
+EwsFolderBase::EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsFolderId id, EwsClient *parent)
     : QObject(parent), d(priv)
 {
     d->mId = id;
@@ -47,7 +47,7 @@ EwsFolderBase::EwsFolderBase(EwsFolderId id, EwsClient *parent)
     d->mId = id;
 }
 
-EwsFolderBase::EwsFolderBase(EwsFolderBasePrivate *priv, EwsClient *parent)
+EwsFolderBase::EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
     : QObject(parent), d(priv)
 {
 }
@@ -165,7 +165,7 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
 EwsMailFolder* EwsFolderBase::toMailFolder()
 {
     if (d->mType == EwsFolderTypeMail)
-        return new EwsMailFolder(d.data(), qobject_cast<EwsClient*>(parent()));
+        return new EwsMailFolder(d, qobject_cast<EwsClient*>(parent()));
     else
         return 0;
 }

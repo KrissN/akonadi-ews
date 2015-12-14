@@ -36,12 +36,12 @@ EwsMailFolderPrivate::EwsMailFolderPrivate()
 }
 
 EwsMailFolder::EwsMailFolder(EwsFolderId id, EwsClient *parent)
-    : EwsFolderBase(new EwsMailFolderPrivate(), id, parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), id, parent)
 {
 }
 
 EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
-    : EwsFolderBase(new EwsMailFolderPrivate(), parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), parent)
 {
     EwsMailFolderPrivate *d = reinterpret_cast<EwsMailFolderPrivate*>(this->d.data());
 
@@ -72,7 +72,7 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
     d->mValid = true;
 }
 
-EwsMailFolder::EwsMailFolder(EwsFolderBasePrivate *priv, EwsClient *parent)
+EwsMailFolder::EwsMailFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
     : EwsFolderBase(priv, parent)
 {
 }

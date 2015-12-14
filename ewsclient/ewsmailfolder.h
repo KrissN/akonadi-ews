@@ -32,7 +32,7 @@ public:
     EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent);
     virtual ~EwsMailFolder();
 private:
-    EwsMailFolder(EwsFolderBasePrivate *priv, EwsClient *parent);
+    EwsMailFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent);
 
     friend class EwsFolderBase;
 };
