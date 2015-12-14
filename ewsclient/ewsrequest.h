@@ -20,11 +20,16 @@
 #ifndef EWSREQUEST_H
 #define EWSREQUEST_H
 
+#include <functional>
+
 #include <QtCore/QPointer>
+#include <QtCore/QXmlStreamReader>
+#include <QtCore/QXmlStreamWriter>
+
 #include <KIO/TransferJob>
 
 #include "ewsclient.h"
-#include "ewsxmlitems.h"
+#include "ewstypes.h"
 
 class EwsRequest : public QObject
 {
@@ -40,15 +45,16 @@ public:
     bool isError() const { return mError; };
     QString errorString() const { return mErrorString; };
 Q_SIGNALS:
-    void finished(EwsRequest *req);
+    void finished();
 protected:
     void doSend();
     void prepare(const QString body);
-    void prepare(const EwsXmlItemBase *item);
     virtual bool parseResult(QXmlStreamReader &reader) = 0;
     bool setError(const QString msg);
     void startSoapDocument(QXmlStreamWriter &writer);
     void endSoapDocument(QXmlStreamWriter &writer);
+    bool parseResponseMessage(QXmlStreamReader &reader, QString reqName,
+                              std::function<bool(QXmlStreamReader &reader)> contentReader);
 
     KIO::MetaData mMd;
     QPointer<KIO::TransferJob> mJob;    // The job object deletes itself automatically once finished
@@ -56,6 +62,10 @@ protected:
                                         // again.
     bool mError;
     QString mErrorString;
+
+    EwsResponseClass mResponseClass;
+    QString mResponseCode;
+    QString mResponseMessage;
 private Q_SLOTS:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
@@ -63,6 +73,9 @@ private:
     bool readResponse(QXmlStreamReader &reader);
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
+    bool readResponseAttr(const QXmlStreamAttributes &attrs);
+    bool readResponseElement(QXmlStreamReader &reader);
+
     QString mResponseData;
 };
 

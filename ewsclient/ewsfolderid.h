@@ -55,6 +55,7 @@ public:
     EwsFolderId(const EwsFolderId &id) { *this = id; };
     EwsFolderId(EwsFolderId &&id) { *this = std::move(id); };
     EwsFolderId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
+    EwsFolderId(QXmlStreamReader &reader);
 
     Type type() const { return mType; };
     QString id() const { return mId; };

@@ -48,6 +48,24 @@ static const QString distinguishedIdNames[] = {
     QStringLiteral("archiverecoverableitemspurges")
 };
 
+EwsFolderId::EwsFolderId(QXmlStreamReader &reader)
+    : mDid(EwsDIdCalendar)
+{
+    // Don't check for this element's name as a folder id may be contained in several elements
+    // such as "FolderId" or "ParentFolderId".
+    const QXmlStreamAttributes &attrs = reader.attributes();
+
+    QStringRef idRef = attrs.value(QStringLiteral("Id"));
+    QStringRef changeKeyRef = attrs.value(QStringLiteral("ChangeKey"));
+    if (idRef.isNull())
+        return;
+
+    mId = idRef.toString();
+    if (!changeKeyRef.isNull())
+        mChangeKey = changeKeyRef.toString();
+
+    mType = Real;
+}
 
 EwsFolderId& EwsFolderId::operator=(const EwsFolderId &other)
 {

@@ -67,7 +67,7 @@ class EwsPropertyFieldPrivate : public QSharedData
 public:
     EwsPropertyFieldPrivate()
         : mPropType(UnknownField), mIndex(0), mPsIdType(DistinguishedPropSet),
-          mPsId(EwsPropSetMeeting), mIdType(PropName), mId(0), mHasTag(false), mTag(0),
+          mPsDid(EwsPropSetMeeting), mIdType(PropName), mId(0), mHasTag(false), mTag(0),
           mType(EwsPropTypeNull)
     {};
 

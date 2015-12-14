@@ -17,32 +17,44 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETFOLDERREQUEST_H
-#define EWSGETFOLDERREQUEST_H
+#ifndef EWSFOLDERBASE_H
+#define EWSFOLDERBASE_H
 
-#include "ewsrequest.h"
-#include "ewstypes.h"
-#include "ewsfoldershape.h"
-#include "ewsfolder.h"
+#include <QtCore/QObject>
+#include <QtCore/QSharedDataPointer>
 
-class EwsGetFolderRequest : public EwsRequest
+#include "ewsfolderid.h"
+
+class EwsFolderBasePrivate;
+class EwsClient;
+class EwsGetFolderRequest;
+class EwsFolderItemBase;
+
+class EwsFolderBase : public QObject
 {
     Q_OBJECT
 public:
-    EwsGetFolderRequest(EwsClient* parent);
-    virtual ~EwsGetFolderRequest();
+    EwsFolderBase(EwsFolderId id, EwsClient *parent);
+    EwsFolderBase(const EwsFolderBase &other);
+    virtual ~EwsFolderBase();
+    EwsFolderBase& operator=(const EwsFolderBase &other);
 
-    void setFolderId(const EwsFolderId &id);
-    void setFolderShape(const EwsFolderShape &shape);
+    void setShape(EwsBaseShape shape);
 
-    virtual void send();
+    void update();
+
+    bool isValid();
+protected Q_SLOTS:
+    void requestFinished();
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseFoldersResponse(QXmlStreamReader &reader);
-private:
-    EwsFolderId mId;
-    EwsFolderShape mShape;
-    QPointer<EwsFolder> mFolder;
+    EwsFolderBase(EwsFolderBasePrivate *priv, EwsFolderId id, EwsClient *parent);
+    EwsFolderBase(EwsFolderBasePrivate *priv, EwsClient *parent);
+
+    void resetFields();
+    bool readBaseFolderElement(QXmlStreamReader &reader);
+
+    QSharedDataPointer<EwsFolderBasePrivate> d;
 };
 
 #endif
+

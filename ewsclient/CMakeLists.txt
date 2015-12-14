@@ -1,6 +1,8 @@
 
 set(EWSCLIENT_SRCS
   ewsclient.cpp
+  ewsfolder.cpp
+  ewsfolderbase.cpp
   ewsfolderid.cpp
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
@@ -9,7 +11,6 @@ set(EWSCLIENT_SRCS
   ewsrequest.cpp
   ewsrequestwriter.cpp
   ewstypes.cpp
-  ewsxmlitems.cpp
   ewsclient_debug.cpp)
 
 add_library(ewsclient STATIC ${EWSCLIENT_SRCS})

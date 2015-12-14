@@ -17,32 +17,38 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETFOLDERREQUEST_H
-#define EWSGETFOLDERREQUEST_H
+#ifndef EWSFOLDERBASE_P_H
+#define EWSFOLDERBASE_P_H
 
-#include "ewsrequest.h"
-#include "ewstypes.h"
-#include "ewsfoldershape.h"
-#include "ewsfolder.h"
+#include <QtCore/QSharedData>
 
-class EwsGetFolderRequest : public EwsRequest
+#include "ewsfolderid.h"
+
+class EwsFolderBasePrivate : public QSharedData
 {
-    Q_OBJECT
 public:
-    EwsGetFolderRequest(EwsClient* parent);
-    virtual ~EwsGetFolderRequest();
+    EwsFolderBasePrivate();
+    virtual ~EwsFolderBasePrivate();
 
-    void setFolderId(const EwsFolderId &id);
-    void setFolderShape(const EwsFolderShape &shape);
+    EwsGetFolderRequest *mGetFolderReq;
 
-    virtual void send();
-protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseFoldersResponse(QXmlStreamReader &reader);
-private:
+    // When the folder is first constructed it will only contain the id and will therefore be
+    // invalid. Once updated through EWS the remaining data will be populated and the folder will
+    // be valid.
+    bool mValid;
+
+    // Set to 'true' when the folder change key was bumped after the last sync.
+    bool mUpdated;
+
     EwsFolderId mId;
-    EwsFolderShape mShape;
-    QPointer<EwsFolder> mFolder;
+
+    EwsBaseShape mCurrentShape;
+
+    EwsFolderId mParentId;
+    QString mFolderClass;
+    QString mDisplayName;
+    int mTotalCount;
+    int mChildFolderCount;
 };
 
 #endif

@@ -26,7 +26,7 @@
 static const QString ewsReqVersion = QStringLiteral("Exchange2010");
 
 EwsRequest::EwsRequest(EwsClient *parent)
-    : QObject(parent), mJob(0), mError(false)
+    : QObject(parent), mJob(0), mError(false), mResponseClass(EwsResponseError)
 {
 }
 
@@ -46,22 +46,22 @@ void EwsRequest::startSoapDocument(QXmlStreamWriter &writer)
 
     writer.writeStartDocument();
 
-    writer.writeNamespace(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("soap"));
-    writer.writeNamespace(EwsXmlItemBase::ewsMsgNsUri, QStringLiteral("m"));
-    writer.writeNamespace(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("t"));
+    writer.writeNamespace(soapEnvNsUri, QStringLiteral("soap"));
+    writer.writeNamespace(ewsMsgNsUri, QStringLiteral("m"));
+    writer.writeNamespace(ewsTypeNsUri, QStringLiteral("t"));
 
     // SOAP Envelope
-    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Envelope"));
+    writer.writeStartElement(soapEnvNsUri, QStringLiteral("Envelope"));
 
     // SOAP Header
-    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Header"));
-    writer.writeStartElement(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("RequestServerVersion"));
+    writer.writeStartElement(soapEnvNsUri, QStringLiteral("Header"));
+    writer.writeStartElement(ewsTypeNsUri, QStringLiteral("RequestServerVersion"));
     writer.writeAttribute(QStringLiteral("Version"), ewsReqVersion);
     writer.writeEndElement();
     writer.writeEndElement();
 
     // SOAP Body
-    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Body"));
+    writer.writeStartElement(soapEnvNsUri, QStringLiteral("Body"));
 }
 
 void EwsRequest::endSoapDocument(QXmlStreamWriter &writer)
@@ -87,48 +87,6 @@ void EwsRequest::prepare(const QString body)
             SLOT(requestData(KIO::Job*, const QByteArray&)));
 }
 
-void EwsRequest::prepare(const EwsXmlItemBase *item)
-{
-    QString reqString;
-    QXmlStreamWriter writer(&reqString);
-
-    writer.setCodec("UTF-8");
-
-    writer.writeStartDocument();
-
-    writer.writeNamespace(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("soap"));
-    writer.writeNamespace(EwsXmlItemBase::ewsMsgNsUri, QStringLiteral("m"));
-    writer.writeNamespace(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("t"));
-
-    // SOAP Envelope
-    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Envelope"));
-
-    // SOAP Header
-    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Header"));
-    writer.writeStartElement(EwsXmlItemBase::ewsTypeNsUri, QStringLiteral("RequestServerVersion"));
-    writer.writeAttribute(QStringLiteral("Version"), ewsReqVersion);
-    writer.writeEndElement();
-    writer.writeEndElement();
-
-    // SOAP Body
-    writer.writeStartElement(EwsXmlItemBase::soapEnvNsUri, QStringLiteral("Body"));
-
-    // Content
-    item->write(writer);
-
-    // End SOAP Body
-    writer.writeEndElement();
-
-    // End SOAP Envelope
-    writer.writeEndElement();
-
-    writer.writeEndDocument();
-
-    qCDebug(EWSCLIENT_LOG) << reqString;
-
-    prepare(reqString);
-}
-
 void EwsRequest::setMetaData(const KIO::MetaData &md)
 {
     mMd = md;
@@ -151,7 +109,7 @@ void EwsRequest::requestResult(KJob *job)
         readResponse(reader);
     }
 
-    emit finished(this);
+    emit finished();
 }
 
 bool EwsRequest::readResponse(QXmlStreamReader &reader)
@@ -160,12 +118,12 @@ bool EwsRequest::readResponse(QXmlStreamReader &reader)
         return setError(QStringLiteral("Failed to read EWS request XML"));
     }
 
-    if ((reader.name() != QStringLiteral("Envelope")) || (reader.namespaceUri() != EwsXmlItemBase::soapEnvNsUri)) {
+    if ((reader.name() != QStringLiteral("Envelope")) || (reader.namespaceUri() != soapEnvNsUri)) {
         return setError(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
     }
 
     while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() != EwsXmlItemBase::soapEnvNsUri) {
+        if (reader.namespaceUri() != soapEnvNsUri) {
             return setError(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
         }
 
@@ -184,7 +142,7 @@ bool EwsRequest::readSoapBody(QXmlStreamReader &reader)
 {
     while (reader.readNextStartElement()) {
         if ((reader.name() == QStringLiteral("Fault"))
-            && (reader.namespaceUri() == EwsXmlItemBase::soapEnvNsUri)) {
+            && (reader.namespaceUri() == soapEnvNsUri)) {
             return readSoapFault(reader);
         }
 
@@ -215,6 +173,8 @@ bool EwsRequest::readSoapFault(QXmlStreamReader &reader)
 
 void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 {
+    Q_UNUSED(job);
+
     qCDebug(EWSCLIENT_LOG) << "data" << data;
     mResponseData += QString::fromUtf8(data);
 }
@@ -227,3 +187,101 @@ bool EwsRequest::setError(const QString msg)
     return false;
 }
 
+bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
+                          std::function<bool(QXmlStreamReader &reader)> contentReader)
+{
+    if (reader.name() != reqName + QStringLiteral("Response")
+        || reader.namespaceUri() != ewsMsgNsUri) {
+        return setError(QStringLiteral("Failed to read EWS request - expected %1 element.")
+                        .arg(reqName + QStringLiteral("Response")));
+    }
+
+    if (!reader.readNextStartElement()) {
+        return setError(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
+                        .arg(reqName + QStringLiteral("Response")));
+    }
+
+    if (reader.name() != QStringLiteral("ResponseMessages")
+        || reader.namespaceUri() != ewsMsgNsUri) {
+        return setError(QStringLiteral("Failed to read EWS request - expected %1 element.")
+                        .arg(QStringLiteral("ResponseMessages")));
+    }
+
+    if (!reader.readNextStartElement()) {
+        return setError(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
+                        .arg(QStringLiteral("ResponseMessages")));
+    }
+
+    if (reader.name() != reqName + QStringLiteral("ResponseMessage")
+        || reader.namespaceUri() != ewsMsgNsUri) {
+        return setError(QStringLiteral("Failed to read EWS request - expected %1 element.")
+                        .arg(reqName + QStringLiteral("ResponseMessage")));
+    }
+
+    if (!readResponseAttr(reader.attributes()))
+        return false;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
+                            .arg(QStringLiteral("ResponseMessage"))
+                            << reader.namespaceUri();
+            return false;
+        }
+
+        if (!readResponseElement(reader)) {
+            if (!contentReader(reader))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+bool EwsRequest::readResponseAttr(const QXmlStreamAttributes &attrs)
+{
+    static const QString respClasses[] = {
+        QStringLiteral("Success"),
+        QStringLiteral("Warning"),
+        QStringLiteral("Error")
+    };
+
+    QStringRef respClassRef = attrs.value(QStringLiteral("ResponseClass"));
+    if (respClassRef.isNull()) {
+        qCWarning(EWSCLIENT_LOG) << "ResponseClass attribute not found in response element";
+        return false;
+    }
+
+    unsigned i;
+    for (i = 0; i < sizeof(respClasses) / sizeof(respClasses[0]); i++) {
+        if (respClassRef == respClasses[i]) {
+            mResponseClass = static_cast<EwsResponseClass>(i);
+            break;
+        }
+    }
+
+    return (i < sizeof(respClasses) / sizeof(respClasses[0]));
+}
+
+bool EwsRequest::readResponseElement(QXmlStreamReader &reader)
+{
+    if (reader.namespaceUri() != ewsMsgNsUri) {
+        return false;
+    }
+    if (reader.name() == QStringLiteral("ResponseCode")) {
+        mResponseCode = reader.readElementText();
+    }
+    else if (reader.name() == QStringLiteral("MessageText")) {
+        mResponseMessage = reader.readElementText();
+    }
+    else if (reader.name() == QStringLiteral("DescriptiveLinkKey")) {
+        reader.skipCurrentElement();
+    }
+    else if (reader.name() == QStringLiteral("MessageXml")) {
+        reader.skipCurrentElement();
+    }
+    else {
+        return false;
+    }
+    return true;
+}

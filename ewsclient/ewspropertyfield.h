@@ -44,10 +44,8 @@ public:
     EwsPropertyField& operator=(const EwsPropertyField &other);
     bool operator==(const EwsPropertyField &other);
 
-#ifdef Q_COMPILER_RVALUE_REFS
     EwsPropertyField(EwsPropertyField &&other);
     EwsPropertyField& operator=(EwsPropertyField &&other);
-#endif
 
     void write(QXmlStreamWriter &writer) const;
 private:

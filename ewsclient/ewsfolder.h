@@ -17,32 +17,21 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETFOLDERREQUEST_H
-#define EWSGETFOLDERREQUEST_H
+#ifndef EWSFOLDER_H
+#define EWSFOLDER_H
 
-#include "ewsrequest.h"
-#include "ewstypes.h"
-#include "ewsfoldershape.h"
-#include "ewsfolder.h"
+#include "ewsfolderbase.h"
 
-class EwsGetFolderRequest : public EwsRequest
+class EwsFolderPrivate;
+
+class EwsFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsGetFolderRequest(EwsClient* parent);
-    virtual ~EwsGetFolderRequest();
-
-    void setFolderId(const EwsFolderId &id);
-    void setFolderShape(const EwsFolderShape &shape);
-
-    virtual void send();
-protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseFoldersResponse(QXmlStreamReader &reader);
-private:
-    EwsFolderId mId;
-    EwsFolderShape mShape;
-    QPointer<EwsFolder> mFolder;
+    EwsFolder(EwsFolderId id, EwsClient *parent);
+    EwsFolder(QXmlStreamReader &reader, EwsClient *parent);
+    virtual ~EwsFolder();
 };
 
 #endif
+

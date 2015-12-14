@@ -27,11 +27,11 @@ extern const QString ewsMsgNsUri;
 extern const QString ewsTypeNsUri;
 
 typedef enum {
-    EwsFolder,
-    EwsCalendarFolder,
-    EwsContactsFolser,
-    EwsSearchFolder,
-    EwsTasksFolder
+    EwsFolderTypeMail,
+    EwsFolderTypeCalendar,
+    EwsFolderTypeContacts,
+    EwsFolderTypeSearch,
+    EwsFolderTypeTasks
 } EwsFolderType;
 
 typedef enum {
