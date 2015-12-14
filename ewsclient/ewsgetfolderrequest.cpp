@@ -83,7 +83,7 @@ bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
     if (reader.namespaceUri() != ewsTypeNsUri)
         return setError(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
 
-    mFolder = new EwsFolder(reader, qobject_cast<EwsClient*>(parent()));
+    mFolder = new EwsMailFolder(reader, qobject_cast<EwsClient*>(parent()));
     if (!mFolder->isValid())
         return setError(QStringLiteral("Failed to read EWS request - invalid Folder element."));
 

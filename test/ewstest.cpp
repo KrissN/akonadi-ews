@@ -11,7 +11,7 @@ public:
     Test(QString url, QObject *parent);
 
 public Q_SLOTS:
-    void requestFinished(EwsRequest *req);
+    void requestFinished();
 
 private:
     EwsClient cli;
@@ -24,21 +24,25 @@ Test::Test(QString url, QObject *parent)
     folderReq = new EwsGetFolderRequest(&cli);
     folderReq->setFolderId(EwsFolderId(EwsDIdInbox));
     folderReq->setFolderShape(EwsShapeDefault);
-    connect(folderReq, SIGNAL(finished(EwsRequest*)), SLOT(requestFinished(EwsRequest*)));
+    connect(folderReq, &EwsRequest::finished, this, &Test::requestFinished);
     folderReq->send();
 }
 
-void Test::requestFinished(EwsRequest *req)
+void Test::requestFinished()
 {
-    qDebug() << QStringLiteral("Request done") << req->isError();
-    if (req->isError()) {
-        qDebug() << req->errorString();
+    qDebug() << QStringLiteral("Request done") << folderReq->isError();
+    if (folderReq->isError()) {
+        qDebug() << folderReq->errorString();
     }
     else {
-        EwsGetFolderRequest *folderReq = qobject_cast<EwsGetFolderRequest*>(req);
-        if (!folderReq)
-            return;
-
+        EwsFolderBase *folder = folderReq->folder();
+        if (!folder) {
+            qDebug() << QStringLiteral("Null folder");
+        }
+        else {
+            EwsFolderId id = folder->id();
+            qDebug() << id.id() << id.changeKey();
+        }
     }
 }
 

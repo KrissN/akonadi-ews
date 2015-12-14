@@ -23,6 +23,7 @@
 #include <QtCore/QSharedData>
 
 #include "ewsfolderid.h"
+#include "ewsgetfolderrequest.h"
 
 class EwsFolderBasePrivate : public QSharedData
 {
@@ -30,7 +31,9 @@ public:
     EwsFolderBasePrivate();
     virtual ~EwsFolderBasePrivate();
 
-    EwsGetFolderRequest *mGetFolderReq;
+    EwsFolderType mType;
+
+    QPointer<EwsGetFolderRequest> mGetFolderReq;
 
     // When the folder is first constructed it will only contain the id and will therefore be
     // invalid. Once updated through EWS the remaining data will be populated and the folder will

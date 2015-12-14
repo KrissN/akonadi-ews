@@ -31,7 +31,8 @@ typedef enum {
     EwsFolderTypeCalendar,
     EwsFolderTypeContacts,
     EwsFolderTypeSearch,
-    EwsFolderTypeTasks
+    EwsFolderTypeTasks,
+    EwsFolderTypeUnknown,
 } EwsFolderType;
 
 typedef enum {

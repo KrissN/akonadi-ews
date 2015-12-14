@@ -17,20 +17,24 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFOLDER_H
-#define EWSFOLDER_H
+#ifndef EWSMAILFOLDER_H
+#define EWSMAILFOLDER_H
 
 #include "ewsfolderbase.h"
 
-class EwsFolderPrivate;
+class EwsMailFolderPrivate;
 
-class EwsFolder : public EwsFolderBase
+class EwsMailFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsFolder(EwsFolderId id, EwsClient *parent);
-    EwsFolder(QXmlStreamReader &reader, EwsClient *parent);
-    virtual ~EwsFolder();
+    EwsMailFolder(EwsFolderId id, EwsClient *parent);
+    EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent);
+    virtual ~EwsMailFolder();
+private:
+    EwsMailFolder(EwsFolderBasePrivate *priv, EwsClient *parent);
+
+    friend class EwsFolderBase;
 };
 
 #endif

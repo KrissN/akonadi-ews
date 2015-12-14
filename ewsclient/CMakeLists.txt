@@ -1,12 +1,12 @@
 
 set(EWSCLIENT_SRCS
   ewsclient.cpp
-  ewsfolder.cpp
   ewsfolderbase.cpp
   ewsfolderid.cpp
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
   ewsjobqueue.cpp
+  ewsmailfolder.cpp
   ewspropertyfield.cpp
   ewsrequest.cpp
   ewsrequestwriter.cpp

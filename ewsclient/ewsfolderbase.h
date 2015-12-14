@@ -30,6 +30,8 @@ class EwsClient;
 class EwsGetFolderRequest;
 class EwsFolderItemBase;
 
+class EwsMailFolder;
+
 class EwsFolderBase : public QObject
 {
     Q_OBJECT
@@ -41,9 +43,18 @@ public:
 
     void setShape(EwsBaseShape shape);
 
-    void update();
+    bool update();
 
-    bool isValid();
+    bool isValid() const;
+
+    EwsFolderType type() const;
+    EwsFolderId id() const;
+    EwsFolderId parentId() const;
+    QString folderClass() const;
+    QString displayName() const;
+
+    EwsMailFolder* toMailFolder();
+
 protected Q_SLOTS:
     void requestFinished();
 protected:

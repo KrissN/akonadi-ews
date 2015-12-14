@@ -17,33 +17,33 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewsfolder.h"
 #include "ewsfolderbase_p.h"
+#include "ewsmailfolder.h"
 #include "ewsclient_debug.h"
 
-class EwsFolderPrivate : public EwsFolderBasePrivate
+class EwsMailFolderPrivate : public EwsFolderBasePrivate
 {
 public:
-    EwsFolderPrivate();
-    EwsFolderPrivate(const EwsFolderBasePrivate &other);
+    EwsMailFolderPrivate();
+    EwsMailFolderPrivate(const EwsFolderBasePrivate &other);
 
     int mUnreadCount;
 };
 
-EwsFolderPrivate::EwsFolderPrivate()
+EwsMailFolderPrivate::EwsMailFolderPrivate()
     : EwsFolderBasePrivate(), mUnreadCount(-1)
 {
 }
 
-EwsFolder::EwsFolder(EwsFolderId id, EwsClient *parent)
-    : EwsFolderBase(new EwsFolderPrivate(), id, parent)
+EwsMailFolder::EwsMailFolder(EwsFolderId id, EwsClient *parent)
+    : EwsFolderBase(new EwsMailFolderPrivate(), id, parent)
 {
 }
 
-EwsFolder::EwsFolder(QXmlStreamReader &reader, EwsClient *parent)
-    : EwsFolderBase(new EwsFolderPrivate(), parent)
+EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
+    : EwsFolderBase(new EwsMailFolderPrivate(), parent)
 {
-    EwsFolderPrivate *d = reinterpret_cast<EwsFolderPrivate*>(this->d.data());
+    EwsMailFolderPrivate *d = reinterpret_cast<EwsMailFolderPrivate*>(this->d.data());
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
@@ -72,7 +72,12 @@ EwsFolder::EwsFolder(QXmlStreamReader &reader, EwsClient *parent)
     d->mValid = true;
 }
 
-EwsFolder::~EwsFolder()
+EwsMailFolder::EwsMailFolder(EwsFolderBasePrivate *priv, EwsClient *parent)
+    : EwsFolderBase(priv, parent)
+{
+}
+
+EwsMailFolder::~EwsMailFolder()
 {
 }
 

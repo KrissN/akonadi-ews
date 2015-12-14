@@ -20,11 +20,12 @@
 #include "ewsfolderbase.h"
 #include "ewsfolderbase_p.h"
 
+#include "ewsmailfolder.h"
 #include "ewsgetfolderrequest.h"
 #include "ewsclient_debug.h"
 
 EwsFolderBasePrivate::EwsFolderBasePrivate()
-    : mGetFolderReq(0), mValid(false), mUpdated(false), mCurrentShape(EwsShapeDefault),
+    : mType(EwsFolderTypeUnknown), mValid(false), mUpdated(false), mCurrentShape(EwsShapeDefault),
       mTotalCount(-1), mChildFolderCount(-1)
 {
 }
@@ -38,18 +39,12 @@ EwsFolderBase::EwsFolderBase(EwsFolderBasePrivate *priv, EwsFolderId id, EwsClie
     : QObject(parent), d(priv)
 {
     d->mId = id;
-    d->mGetFolderReq = new EwsGetFolderRequest(parent);
-    d->mGetFolderReq->setFolderId(d->mId);
-    d->mGetFolderReq->setFolderShape(d->mCurrentShape);
 }
 
 EwsFolderBase::EwsFolderBase(EwsFolderId id, EwsClient *parent)
     : QObject(parent), d(new EwsFolderBasePrivate())
 {
     d->mId = id;
-    d->mGetFolderReq = new EwsGetFolderRequest(parent);
-    d->mGetFolderReq->setFolderId(d->mId);
-    d->mGetFolderReq->setFolderShape(d->mCurrentShape);
 }
 
 EwsFolderBase::EwsFolderBase(EwsFolderBasePrivate *priv, EwsClient *parent)
@@ -63,12 +58,37 @@ EwsFolderBase::~EwsFolderBase()
 
 void EwsFolderBase::requestFinished()
 {
-
+    qCDebug(EWSCLIENT_LOG) << "Folder update finished!";
 }
 
-bool EwsFolderBase::isValid()
+bool EwsFolderBase::isValid() const
 {
     return d->mValid;
+}
+
+EwsFolderType EwsFolderBase::type() const
+{
+    return d->mType;
+}
+
+EwsFolderId EwsFolderBase::id() const
+{
+    return d->mId;
+}
+
+EwsFolderId EwsFolderBase::parentId() const
+{
+    return d->mParentId;
+}
+
+QString EwsFolderBase::folderClass() const
+{
+    return d->mFolderClass;
+}
+
+QString EwsFolderBase::displayName() const
+{
+    return d->mDisplayName;
 }
 
 bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
@@ -142,3 +162,28 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
     return true;
 }
 
+EwsMailFolder* EwsFolderBase::toMailFolder()
+{
+    if (d->mType == EwsFolderTypeMail)
+        return new EwsMailFolder(d.data(), qobject_cast<EwsClient*>(parent()));
+    else
+        return 0;
+}
+
+bool EwsFolderBase::update()
+{
+    if (d->mGetFolderReq) {
+        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Update already in progress.");
+        return false;
+    }
+
+    d->mGetFolderReq = new EwsGetFolderRequest(qobject_cast<EwsClient*>(parent()));
+    d->mGetFolderReq->setFolderId(d->mId);
+    d->mGetFolderReq->setFolderShape(d->mCurrentShape);
+
+    connect(d->mGetFolderReq.data(), &EwsRequest::finished, this, &EwsFolderBase::requestFinished);
+
+    d->mGetFolderReq->send();
+
+    return true;
+}
