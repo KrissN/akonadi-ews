@@ -38,6 +38,7 @@ class EwsFolderBase : public QObject
 public:
     EwsFolderBase(EwsFolderId id, EwsClient *parent);
     EwsFolderBase(const EwsFolderBase &other);
+    EwsFolderBase(EwsFolderBase &&other);
     virtual ~EwsFolderBase();
     EwsFolderBase& operator=(const EwsFolderBase &other);
 

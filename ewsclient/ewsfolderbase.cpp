@@ -52,6 +52,16 @@ EwsFolderBase::EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsC
 {
 }
 
+EwsFolderBase::EwsFolderBase(const EwsFolderBase &other)
+    : QObject(other.parent()), d(other.d)
+{
+}
+
+EwsFolderBase::EwsFolderBase(EwsFolderBase &&other)
+    : QObject(other.parent()), d(std::move(other.d))
+{
+}
+
 EwsFolderBase::~EwsFolderBase()
 {
 }
