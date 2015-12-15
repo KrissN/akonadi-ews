@@ -116,4 +116,10 @@ typedef enum {
     EwsPropTypeStringArray
 } EwsPropertyType;
 
+typedef enum {
+    EwsTraversalShallow = 0,
+    EwsTraversalDeep,
+    EwsTraversalSoftDeleted
+} EwsTraversalType;
+
 #endif
