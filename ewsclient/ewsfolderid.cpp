@@ -109,8 +109,6 @@ bool EwsFolderId::operator==(const EwsFolderId &other) const
 
 void EwsFolderId::writeFolderIds(QXmlStreamWriter &writer) const
 {
-    writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderIds"));
-
     if (mType == Distinguished) {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("DistinguishedFolderId"));
         writer.writeAttribute(QStringLiteral("Id"), distinguishedIdNames[mDid]);
@@ -124,7 +122,5 @@ void EwsFolderId::writeFolderIds(QXmlStreamWriter &writer) const
         }
         writer.writeEndElement();
     }
-
-    writer.writeEndElement();
 }
 

@@ -52,7 +52,9 @@ void EwsGetFolderRequest::send()
 
     mShape.write(writer);
 
+    writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderIds"));
     mId.writeFolderIds(writer);
+    writer.writeEndElement();
 
     writer.writeEndElement();
 
