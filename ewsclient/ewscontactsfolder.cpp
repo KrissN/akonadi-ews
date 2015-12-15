@@ -18,33 +18,31 @@
 */
 
 #include "ewsfolderbase_p.h"
-#include "ewsmailfolder.h"
+#include "ewscontactsfolder.h"
 #include "ewsclient_debug.h"
 
-class EwsMailFolderPrivate : public EwsFolderBasePrivate
+class EwsContactsFolderPrivate : public EwsFolderBasePrivate
 {
 public:
-    EwsMailFolderPrivate();
-    EwsMailFolderPrivate(const EwsFolderBasePrivate &other);
-
-    int mUnreadCount;
+    EwsContactsFolderPrivate();
+    EwsContactsFolderPrivate(const EwsFolderBasePrivate &other);
 };
 
-EwsMailFolderPrivate::EwsMailFolderPrivate()
-    : EwsFolderBasePrivate(), mUnreadCount(-1)
+EwsContactsFolderPrivate::EwsContactsFolderPrivate()
+    : EwsFolderBasePrivate()
 {
-    mType = EwsFolderTypeMail;
+    mType = EwsFolderTypeContacts;
 }
 
-EwsMailFolder::EwsMailFolder(EwsFolderId id, EwsClient *parent)
-    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), id, parent)
+EwsContactsFolder::EwsContactsFolder(EwsFolderId id, EwsClient *parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsContactsFolderPrivate()), id, parent)
 {
 }
 
-EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
-    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), parent)
+EwsContactsFolder::EwsContactsFolder(QXmlStreamReader &reader, EwsClient *parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsContactsFolderPrivate()), parent)
 {
-    EwsMailFolderPrivate *d = reinterpret_cast<EwsMailFolderPrivate*>(this->d.data());
+    EwsContactsFolderPrivate *d = reinterpret_cast<EwsContactsFolderPrivate*>(this->d.data());
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
@@ -53,16 +51,7 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
             return;
         }
 
-        if (reader.name() == QStringLiteral("UnreadCount")) {
-            bool ok;
-            d->mUnreadCount = reader.readElementText().toInt(&ok);
-            if (reader.error() != QXmlStreamReader::NoError || !ok) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                                .arg(QStringLiteral("UnreadCount"));
-                return;
-            }
-        }
-        else if (reader.name() == QStringLiteral("PermissionSet")) {
+        if (reader.name() == QStringLiteral("PermissionSet")) {
             // Unsupported - ignore
         }
         else if (!readBaseFolderElement(reader)) {
@@ -73,12 +62,12 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
     d->mValid = true;
 }
 
-EwsMailFolder::EwsMailFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
+EwsContactsFolder::EwsContactsFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
     : EwsFolderBase(priv, parent)
 {
 }
 
-EwsMailFolder::~EwsMailFolder()
+EwsContactsFolder::~EwsContactsFolder()
 {
 }
 

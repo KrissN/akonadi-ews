@@ -31,6 +31,10 @@ class EwsGetFolderRequest;
 class EwsFolderItemBase;
 
 class EwsMailFolder;
+class EwsCalendarFolder;
+class EwsContactsFolder;
+class EwsTasksFolder;
+class EwsSearchFolder;
 
 class EwsFolderBase : public QObject
 {
@@ -58,6 +62,10 @@ public:
     unsigned childFolderCount() const;
 
     EwsMailFolder* toMailFolder();
+    EwsCalendarFolder* toCalendarFolder();
+    EwsContactsFolder* toContactsFolder();
+    EwsTasksFolder* toTasksFolder();
+    EwsSearchFolder* toSearchFolder();
 
     const QVector<QPointer<EwsFolderBase>> childFolders() const;
     void addChild(EwsFolderBase *child);

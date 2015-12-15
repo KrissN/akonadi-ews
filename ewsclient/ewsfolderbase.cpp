@@ -21,12 +21,16 @@
 #include "ewsfolderbase_p.h"
 
 #include "ewsmailfolder.h"
+#include "ewscalendarfolder.h"
+#include "ewscontactsfolder.h"
+#include "ewstasksfolder.h"
+#include "ewssearchfolder.h"
 #include "ewsgetfolderrequest.h"
 #include "ewsclient_debug.h"
 
 EwsFolderBasePrivate::EwsFolderBasePrivate()
     : mType(EwsFolderTypeUnknown), mValid(false), mUpdated(false), mCurrentShape(EwsShapeDefault),
-      mTotalCount(-1), mChildFolderCount(-1)
+      mTotalCount(0), mChildFolderCount(0)
 {
 }
 
@@ -186,6 +190,38 @@ EwsMailFolder* EwsFolderBase::toMailFolder()
 {
     if (d->mType == EwsFolderTypeMail)
         return new EwsMailFolder(d, qobject_cast<EwsClient*>(parent()));
+    else
+        return 0;
+}
+
+EwsCalendarFolder* EwsFolderBase::toCalendarFolder()
+{
+    if (d->mType == EwsFolderTypeCalendar)
+        return new EwsCalendarFolder(d, qobject_cast<EwsClient*>(parent()));
+    else
+        return 0;
+}
+
+EwsContactsFolder* EwsFolderBase::toContactsFolder()
+{
+    if (d->mType == EwsFolderTypeContacts)
+        return new EwsContactsFolder(d, qobject_cast<EwsClient*>(parent()));
+    else
+        return 0;
+}
+
+EwsTasksFolder* EwsFolderBase::toTasksFolder()
+{
+    if (d->mType == EwsFolderTypeTasks)
+        return new EwsTasksFolder(d, qobject_cast<EwsClient*>(parent()));
+    else
+        return 0;
+}
+
+EwsSearchFolder* EwsFolderBase::toSearchFolder()
+{
+    if (d->mType == EwsFolderTypeSearch)
+        return new EwsSearchFolder(d, qobject_cast<EwsClient*>(parent()));
     else
         return 0;
 }

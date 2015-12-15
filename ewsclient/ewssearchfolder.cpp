@@ -18,33 +18,33 @@
 */
 
 #include "ewsfolderbase_p.h"
-#include "ewsmailfolder.h"
+#include "ewssearchfolder.h"
 #include "ewsclient_debug.h"
 
-class EwsMailFolderPrivate : public EwsFolderBasePrivate
+class EwsSearchFolderPrivate : public EwsFolderBasePrivate
 {
 public:
-    EwsMailFolderPrivate();
-    EwsMailFolderPrivate(const EwsFolderBasePrivate &other);
+    EwsSearchFolderPrivate();
+    EwsSearchFolderPrivate(const EwsFolderBasePrivate &other);
 
     int mUnreadCount;
 };
 
-EwsMailFolderPrivate::EwsMailFolderPrivate()
-    : EwsFolderBasePrivate(), mUnreadCount(-1)
+EwsSearchFolderPrivate::EwsSearchFolderPrivate()
+    : EwsFolderBasePrivate()
 {
-    mType = EwsFolderTypeMail;
+    mType = EwsFolderTypeSearch;
 }
 
-EwsMailFolder::EwsMailFolder(EwsFolderId id, EwsClient *parent)
-    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), id, parent)
+EwsSearchFolder::EwsSearchFolder(EwsFolderId id, EwsClient *parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsSearchFolderPrivate()), id, parent)
 {
 }
 
-EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
-    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), parent)
+EwsSearchFolder::EwsSearchFolder(QXmlStreamReader &reader, EwsClient *parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsSearchFolderPrivate()), parent)
 {
-    EwsMailFolderPrivate *d = reinterpret_cast<EwsMailFolderPrivate*>(this->d.data());
+    EwsSearchFolderPrivate *d = reinterpret_cast<EwsSearchFolderPrivate*>(this->d.data());
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
@@ -62,7 +62,7 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
                 return;
             }
         }
-        else if (reader.name() == QStringLiteral("PermissionSet")) {
+        else if (reader.name() == QStringLiteral("SearchParameters")) {
             // Unsupported - ignore
         }
         else if (!readBaseFolderElement(reader)) {
@@ -73,12 +73,12 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
     d->mValid = true;
 }
 
-EwsMailFolder::EwsMailFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
+EwsSearchFolder::EwsSearchFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
     : EwsFolderBase(priv, parent)
 {
 }
 
-EwsMailFolder::~EwsMailFolder()
+EwsSearchFolder::~EwsSearchFolder()
 {
 }
 

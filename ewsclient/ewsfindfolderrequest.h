@@ -20,7 +20,7 @@
 #ifndef EWSFINDFOLDERREQUEST_H
 #define EWSFINDFOLDERREQUEST_H
 
-#include "ewsmailfolder.h"
+#include "ewsfolderbase.h"
 #include "ewsrequest.h"
 #include "ewstypes.h"
 #include "ewsfoldershape.h"

@@ -21,6 +21,11 @@
 #include <QtCore/QXmlStreamWriter>
 
 #include "ewsfindfolderrequest.h"
+#include "ewsmailfolder.h"
+#include "ewscalendarfolder.h"
+#include "ewscontactsfolder.h"
+#include "ewstasksfolder.h"
+#include "ewssearchfolder.h"
 #include "ewsclient_debug.h"
 
 static const QString traversalTypeNames[] = {
@@ -162,7 +167,44 @@ EwsFolderBase* EwsFindFolderRequest::readFolder(QXmlStreamReader &reader)
         qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing mail folder");
         folder = new EwsMailFolder(reader, qobject_cast<EwsClient*>(parent()));
         if (!folder->isValid()) {
-            setError(QStringLiteral("Failed to read EWS request - invalid Folder element."));
+            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                     .arg(QStringLiteral("Folder")));
+            return 0;
+        }
+    }
+    else if (reader.name() == QStringLiteral("CalendarFolder")) {
+        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing calendar folder");
+        folder = new EwsCalendarFolder(reader, qobject_cast<EwsClient*>(parent()));
+        if (!folder->isValid()) {
+            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                     .arg(QStringLiteral("CalendarFolder")));
+            return 0;
+        }
+    }
+    else if (reader.name() == QStringLiteral("ContactsFolder")) {
+        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing contacts folder");
+        folder = new EwsContactsFolder(reader, qobject_cast<EwsClient*>(parent()));
+        if (!folder->isValid()) {
+            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                     .arg(QStringLiteral("ContactsFolder")));
+            return 0;
+        }
+    }
+    else if (reader.name() == QStringLiteral("TasksFolder")) {
+        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing tasks folder");
+        folder = new EwsTasksFolder(reader, qobject_cast<EwsClient*>(parent()));
+        if (!folder->isValid()) {
+            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                     .arg(QStringLiteral("TasksFolder")));
+            return 0;
+        }
+    }
+    else if (reader.name() == QStringLiteral("SearchFolder")) {
+        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing search folder");
+        folder = new EwsSearchFolder(reader, qobject_cast<EwsClient*>(parent()));
+        if (!folder->isValid()) {
+            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                     .arg(QStringLiteral("SearchFolder")));
             return 0;
         }
     }

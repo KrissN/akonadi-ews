@@ -18,33 +18,33 @@
 */
 
 #include "ewsfolderbase_p.h"
-#include "ewsmailfolder.h"
+#include "ewstasksfolder.h"
 #include "ewsclient_debug.h"
 
-class EwsMailFolderPrivate : public EwsFolderBasePrivate
+class EwsTasksFolderPrivate : public EwsFolderBasePrivate
 {
 public:
-    EwsMailFolderPrivate();
-    EwsMailFolderPrivate(const EwsFolderBasePrivate &other);
+    EwsTasksFolderPrivate();
+    EwsTasksFolderPrivate(const EwsFolderBasePrivate &other);
 
     int mUnreadCount;
 };
 
-EwsMailFolderPrivate::EwsMailFolderPrivate()
-    : EwsFolderBasePrivate(), mUnreadCount(-1)
+EwsTasksFolderPrivate::EwsTasksFolderPrivate()
+    : EwsFolderBasePrivate()
 {
-    mType = EwsFolderTypeMail;
+    mType = EwsFolderTypeTasks;
 }
 
-EwsMailFolder::EwsMailFolder(EwsFolderId id, EwsClient *parent)
-    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), id, parent)
+EwsTasksFolder::EwsTasksFolder(EwsFolderId id, EwsClient *parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsTasksFolderPrivate()), id, parent)
 {
 }
 
-EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
-    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), parent)
+EwsTasksFolder::EwsTasksFolder(QXmlStreamReader &reader, EwsClient *parent)
+    : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsTasksFolderPrivate()), parent)
 {
-    EwsMailFolderPrivate *d = reinterpret_cast<EwsMailFolderPrivate*>(this->d.data());
+    EwsTasksFolderPrivate *d = reinterpret_cast<EwsTasksFolderPrivate*>(this->d.data());
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
@@ -62,9 +62,6 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
                 return;
             }
         }
-        else if (reader.name() == QStringLiteral("PermissionSet")) {
-            // Unsupported - ignore
-        }
         else if (!readBaseFolderElement(reader)) {
             qCWarning(EWSCLIENT_LOG).noquote() << QStringLiteral("Invalid Folder child: %1").arg(reader.qualifiedName().toString());
             return;
@@ -73,12 +70,12 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
     d->mValid = true;
 }
 
-EwsMailFolder::EwsMailFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
+EwsTasksFolder::EwsTasksFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent)
     : EwsFolderBase(priv, parent)
 {
 }
 
-EwsMailFolder::~EwsMailFolder()
+EwsTasksFolder::~EwsTasksFolder()
 {
 }
 
