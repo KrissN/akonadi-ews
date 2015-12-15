@@ -101,6 +101,16 @@ QString EwsFolderBase::displayName() const
     return d->mDisplayName;
 }
 
+unsigned EwsFolderBase::totalCount() const
+{
+    return d->mTotalCount;
+}
+
+unsigned EwsFolderBase::childFolderCount() const
+{
+    return d->mChildFolderCount;
+}
+
 bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
 {
     if (reader.name() == QStringLiteral("FolderId")) {
@@ -139,7 +149,7 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
     }
     else if (reader.name() == QStringLiteral("TotalCount")) {
         bool ok;
-        d->mTotalCount = reader.readElementText().toInt(&ok);
+        d->mTotalCount = reader.readElementText().toUInt(&ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
                             .arg(QStringLiteral("TotalCount"));
@@ -148,7 +158,7 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
     }
     else if (reader.name() == QStringLiteral("ChildFolderCount")) {
         bool ok;
-        d->mChildFolderCount = reader.readElementText().toInt(&ok);
+        d->mChildFolderCount = reader.readElementText().toUInt(&ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
                             .arg(QStringLiteral("ChildFolderCount"));

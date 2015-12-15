@@ -53,6 +53,8 @@ public:
     EwsFolderId parentId() const;
     QString folderClass() const;
     QString displayName() const;
+    unsigned totalCount() const;
+    unsigned childFolderCount() const;
 
     EwsMailFolder* toMailFolder();
 

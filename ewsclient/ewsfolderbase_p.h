@@ -50,8 +50,8 @@ public:
     EwsFolderId mParentId;
     QString mFolderClass;
     QString mDisplayName;
-    int mTotalCount;
-    int mChildFolderCount;
+    unsigned mTotalCount;
+    unsigned mChildFolderCount;
 };
 
 #endif
