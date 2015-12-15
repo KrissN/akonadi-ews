@@ -31,13 +31,18 @@ class EwsClient : public QObject
 {
     Q_OBJECT
 public:
-    EwsClient(QString url, QObject *parent = 0);
+    EwsClient(QObject *parent = 0);
     ~EwsClient();
+
+    void setUrl(QString url)
+    {
+        mUrl.setUrl(url);
+    }
 
     void setUsername(QString username, QString password)
     {
-        mUsername = username;
-        mPassword = password;
+        mUrl.setUserName(username);
+        mUrl.setPassword(password);
     }
 
     enum RequestedConfiguration 

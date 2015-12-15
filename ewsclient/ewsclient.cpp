@@ -6,8 +6,8 @@
 #include "ewsrequestwriter.h"
 #include "ewsjobqueue.h"
 
-EwsClient::EwsClient(QString url, QObject *parent)
-    : QObject(parent), mUrl(url), mJobQueue(new EwsJobQueue(this))
+EwsClient::EwsClient(QObject *parent)
+    : QObject(parent), mJobQueue(new EwsJobQueue(this))
 {
     
 }
