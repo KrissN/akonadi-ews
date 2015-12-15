@@ -27,11 +27,11 @@ public:
     EwsTasksFolderPrivate();
     EwsTasksFolderPrivate(const EwsFolderBasePrivate &other);
 
-    int mUnreadCount;
+    unsigned mUnreadCount;
 };
 
 EwsTasksFolderPrivate::EwsTasksFolderPrivate()
-    : EwsFolderBasePrivate()
+    : EwsFolderBasePrivate(), mUnreadCount(0)
 {
     mType = EwsFolderTypeTasks;
 }
@@ -55,7 +55,7 @@ EwsTasksFolder::EwsTasksFolder(QXmlStreamReader &reader, EwsClient *parent)
 
         if (reader.name() == QStringLiteral("UnreadCount")) {
             bool ok;
-            d->mUnreadCount = reader.readElementText().toInt(&ok);
+            d->mUnreadCount = reader.readElementText().toUInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
                                 .arg(QStringLiteral("UnreadCount"));

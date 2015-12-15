@@ -27,11 +27,11 @@ public:
     EwsMailFolderPrivate();
     EwsMailFolderPrivate(const EwsFolderBasePrivate &other);
 
-    int mUnreadCount;
+    unsigned mUnreadCount;
 };
 
 EwsMailFolderPrivate::EwsMailFolderPrivate()
-    : EwsFolderBasePrivate(), mUnreadCount(-1)
+    : EwsFolderBasePrivate(), mUnreadCount(0)
 {
     mType = EwsFolderTypeMail;
 }
@@ -55,7 +55,7 @@ EwsMailFolder::EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent)
 
         if (reader.name() == QStringLiteral("UnreadCount")) {
             bool ok;
-            d->mUnreadCount = reader.readElementText().toInt(&ok);
+            d->mUnreadCount = reader.readElementText().toUInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
                                 .arg(QStringLiteral("UnreadCount"));
