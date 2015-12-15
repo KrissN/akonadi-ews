@@ -1,0 +1,7 @@
+File=ewsresource.kcfg
+ClassName=Settings
+Mutators=true
+ItemAccessors=true
+SetUserTexts=true
+Singleton=true
+GlobalEnums=true
