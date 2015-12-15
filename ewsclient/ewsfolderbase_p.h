@@ -52,6 +52,9 @@ public:
     QString mDisplayName;
     unsigned mTotalCount;
     unsigned mChildFolderCount;
+
+    QPointer<EwsFolderBase> mParent;
+    QVector<QPointer<EwsFolderBase>> mChildren;
 };
 
 #endif

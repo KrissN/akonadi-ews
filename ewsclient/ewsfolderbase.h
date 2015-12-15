@@ -41,6 +41,7 @@ public:
     EwsFolderBase(EwsFolderBase &&other);
     virtual ~EwsFolderBase();
     EwsFolderBase& operator=(const EwsFolderBase &other);
+    EwsFolderBase& operator=(EwsFolderBase &&other);
 
     void setShape(EwsBaseShape shape);
 
@@ -58,6 +59,10 @@ public:
 
     EwsMailFolder* toMailFolder();
 
+    const QVector<QPointer<EwsFolderBase>> childFolders() const;
+    void addChild(EwsFolderBase *child);
+    EwsFolderBase* parentFolder() const;
+
 protected Q_SLOTS:
     void requestFinished();
 protected:
@@ -66,6 +71,7 @@ protected:
 
     void resetFields();
     bool readBaseFolderElement(QXmlStreamReader &reader);
+    void setParentFolder(EwsFolderBase *parent);
 
     QSharedDataPointer<EwsFolderBasePrivate> d;
 };

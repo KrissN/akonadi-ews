@@ -207,3 +207,29 @@ bool EwsFolderBase::update()
 
     return true;
 }
+
+const QVector<QPointer<EwsFolderBase>> EwsFolderBase::childFolders() const
+{
+    return d->mChildren;
+}
+
+void EwsFolderBase::addChild(EwsFolderBase *child)
+{
+    if (child->parentFolder() != 0) {
+        qCWarning(EWSCLIENT_LOG).noquote()
+                        << QStringLiteral("Attempt to add child folder which already has a parent (child: %1)").
+                        arg(child->id().id());
+    }
+    d->mChildren.append(child);
+    child->setParentFolder(this);
+}
+
+EwsFolderBase* EwsFolderBase::parentFolder() const
+{
+    return d->mParent.data();
+}
+
+void EwsFolderBase::setParentFolder(EwsFolderBase *parent)
+{
+    d->mParent = parent;
+}
