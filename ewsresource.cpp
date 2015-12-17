@@ -17,18 +17,37 @@
     Boston, MA 02110-1301, USA.
 */
 
+#include <QtCore/QDebug>
+
+#include <KI18n/KLocalizedString>
+#include <AkonadiCore/ChangeRecorder>
+#include <AkonadiCore/CollectionFetchScope>
+#include <KMime/Message>
+
 #include "ewsresource.h"
-#include "ewsfindfolderrequest.h"
 #include "configdialog.h"
 #include "settings.h"
 
-#include <KI18n/KLocalizedString>
+using namespace Akonadi;
+
+static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString);
 
 EwsResource::EwsResource(const QString &id)
     : Akonadi::ResourceBase(id)
 {
-    setName(i18n("Microsoft Exchange"));
+    qDebug() << "EwsResource";
+    //setName(i18n("Microsoft Exchange"));
     mEwsClient.setUrl(Settings::self()->baseUrl());
+
+    mRootCollection.setParentCollection(Collection::root());
+    mRootCollection.setName(name());
+    mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
+    mRootCollection.setRights(Collection::ReadOnly);
+    mRootCollection.setRemoteId("root");
+    mRootCollection.setRemoteRevision("0");
+
+    changeRecorder()->fetchCollection(true);
+    changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
 }
 
 EwsResource::~EwsResource()
@@ -37,16 +56,26 @@ EwsResource::~EwsResource()
 
 void EwsResource::retrieveCollections()
 {
-
+    qDebug() << "retrieveCollections";
+    EwsFindFolderRequest *req = new EwsFindFolderRequest(&mEwsClient);
+    req->setParentFolderId(EwsDIdMsgFolderRoot);
+    EwsFolderShape shape;
+    //shape << propPidTagContainerClass;
+    req->setFolderShape(shape);
+    connect(req, &EwsFindFolderRequest::finished, req, [this, req](){findFoldersRequestFinished(req);});
+    req->send();
 }
 
-void EwsResource::retrieveItems(const Akonadi::Collection &collection)
+void EwsResource::retrieveItems(const Collection &collection)
 {
-
+    qDebug() << "retrieveItems";
+    Item::List items;
+    itemsRetrieved(items);
 }
 
 bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts)
 {
+    qDebug() << "retrieveItem";
     return false;
 }
 
@@ -57,6 +86,65 @@ void EwsResource::configure(WId windowId)
         mEwsClient.setUrl(Settings::self()->baseUrl());
         Settings::self()->save();
     }
+}
+
+void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
+{
+    qDebug() << "findFoldersRequestFinished";
+
+    if (req->isError()) {
+        qWarning() << "ERROR" << req->errorString();
+        cancelTask(req->errorString());
+        return;
+    }
+
+    qDebug() << "Processing folders";
+
+    Collection::List collections;
+
+    collections.append(mRootCollection);
+
+    Q_FOREACH(QPointer<EwsFolderBase> baseFolder, req->folders()) {
+        qDebug() << "Got folder" << baseFolder->displayName();
+        Collection collection = createFolderCollection(baseFolder);
+        collection.setParentCollection(mRootCollection);
+
+        collections.append(collection);
+
+        collections << createChildCollections(baseFolder, collection);
+    }
+
+    qDebug() << collections;
+
+    collectionsRetrieved(collections);
+}
+
+Collection::List EwsResource::createChildCollections(QPointer<EwsFolderBase> folder, Collection collection)
+{
+    Collection::List collections;
+
+    Q_FOREACH(QPointer<EwsFolderBase> child, folder->childFolders()) {
+        Collection col = createFolderCollection(child);
+        col.setParentCollection(collection);
+        collections.append(col);
+
+        collections << createChildCollections(child, col);
+
+    }
+    return collections;
+}
+
+Collection EwsResource::createFolderCollection(QPointer<EwsFolderBase> folder)
+{
+    Collection collection;
+    collection.setName(folder->displayName());
+    QStringList mimeTypes;
+    mimeTypes << Collection::mimeType() << KMime::Message::mimeType(); // TODO: Check actual MIME types
+    collection.setContentMimeTypes(mimeTypes);
+    collection.setRights(Collection::ReadOnly);
+    collection.setRemoteId(folder->id().id());
+    collection.setRemoteRevision(folder->id().changeKey());
+    return collection;
 }
 
 

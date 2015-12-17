@@ -17,6 +17,7 @@ include(KDECMakeSettings)
 find_package(KF5KIO)
 find_package(KF5Akonadi)
 find_package(Xsltproc)
+find_package(KF5Mime)
 
 add_subdirectory(ewsclient)
 
@@ -42,6 +43,7 @@ target_link_libraries(akonadi_ews_resource
     KF5::AkonadiAgentBase
     KF5::AkonadiCore
     KF5::KIOCore
+    KF5::Mime
     ewsclient)
 
 add_subdirectory(test)
