@@ -88,9 +88,10 @@ typedef enum {
 } EwsDistinguishedPropSetId;
 
 typedef enum {
-    EwsPropTypeApplicationTime,
+    EwsPropTypeApplicationTime = 0,
     EwsPropTypeApplicationTimeArray,
     EwsPropTypeBinary,
+    EwsPropTypeBinaryArray,
     EwsPropTypeBoolean,
     EwsPropTypeCLSID,
     EwsPropTypeCLSIDArray,
