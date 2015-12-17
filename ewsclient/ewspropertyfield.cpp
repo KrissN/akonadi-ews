@@ -306,7 +306,7 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
                 writer.writeAttribute(QStringLiteral("PropertyName"), d->mName);
             }
         }
-        writer.writeAttribute(QStringLiteral("PropertyTag"), propertyTypeNames[d->mType]);
+        writer.writeAttribute(QStringLiteral("PropertyType"), propertyTypeNames[d->mType]);
         writer.writeEndElement();
         break;
     case EwsPropertyFieldPrivate::UnknownField:
