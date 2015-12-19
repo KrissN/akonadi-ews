@@ -48,6 +48,7 @@ public:
     EwsPropertyField& operator=(EwsPropertyField &&other);
 
     void write(QXmlStreamWriter &writer) const;
+    bool read(QXmlStreamReader &reader);
 private:
     QSharedDataPointer<EwsPropertyFieldPrivate> d;
 

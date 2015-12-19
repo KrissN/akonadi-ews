@@ -20,6 +20,7 @@
 #include <QtCore/QString>
 
 #include "ewspropertyfield.h"
+#include "ewsclient_debug.h"
 
 static const QString distinguishedPropSetIdNames[] = {
     QStringLiteral("Meeting"),
@@ -361,6 +362,146 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
     case EwsPropertyFieldPrivate::UnknownField:
         break;
     }
+}
+
+bool EwsPropertyField::read(QXmlStreamReader &reader)
+{
+    if (reader.namespaceUri() != ewsTypeNsUri) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - invalid namespace.");
+        return false;
+    }
+
+    QXmlStreamAttributes attrs = reader.attributes();
+    bool ok;
+
+    // First check the property type
+    if (reader.name() == QStringLiteral("FieldURI")) {
+        if (!attrs.hasAttribute(QStringLiteral("FieldURI"))) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - missing %1 attribute.")
+                            .arg(QStringLiteral("FieldURI"));
+            return false;
+        }
+        d->mPropType = EwsPropertyFieldPrivate::Field;
+        d->mUri = attrs.value(QStringLiteral("FieldURI")).toString();
+    }
+    else if (reader.name() == QStringLiteral("IndexedFieldURI")) {
+        if (!attrs.hasAttribute(QStringLiteral("FieldURI"))) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - missing %1 attribute.")
+                            .arg(QStringLiteral("FieldURI"));
+            return false;
+        }
+        if (!attrs.hasAttribute(QStringLiteral("FieldIndex"))) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - missing %1 attribute.")
+                            .arg(QStringLiteral("FieldIndex"));
+            return false;
+        }
+        unsigned index = attrs.value(QStringLiteral("FieldIndex")).toUInt(&ok, 0);
+        if (!ok) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - error reading %1 attribute.")
+                            .arg(QStringLiteral("FieldIndex"));
+            return false;
+        }
+        d->mPropType = EwsPropertyFieldPrivate::IndexedField;
+        d->mUri = attrs.value(QStringLiteral("FieldURI")).toString();
+        d->mIndex = index;
+    }
+    else if (reader.name() == QStringLiteral("ExtendedFieldURI")) {
+        if (!attrs.hasAttribute(QStringLiteral("PropertyType"))) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - missing %1 attribute.")
+                            .arg(QStringLiteral("PropertyType"));
+            return false;
+        }
+        QStringRef propTypeText = attrs.value(QStringLiteral("PropertyType"));
+        unsigned i;
+        EwsPropertyType propType;
+        for (i = 0; i < sizeof(propertyTypeNames) / sizeof(propertyTypeNames[0]); i++) {
+            if (propTypeText == propertyTypeNames[i]) {
+                propType = static_cast<EwsPropertyType>(i);
+                break;
+            }
+        }
+        if (i == sizeof(propertyTypeNames) / sizeof(propertyTypeNames[0])) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - error reading %1 attribute.")
+                            .arg(QStringLiteral("PropertyType"));
+            return false;
+        }
+
+        if (attrs.hasAttribute(QStringLiteral("PropertyTag"))) {
+
+            unsigned tag = attrs.value(QStringLiteral("PropertyTag")).toUInt(&ok, 0);
+            if (!ok) {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - error reading %1 attribute.")
+                                .arg(QStringLiteral("PropertyTag"));
+                return false;
+            }
+            d->mHasTag = true;
+            d->mTag = tag;
+        }
+        else {
+            EwsPropertyFieldPrivate::PropSetIdType psIdType;
+            EwsDistinguishedPropSetId psDid;
+            QString psId;
+
+            EwsPropertyFieldPrivate::PropIdType idType;
+            unsigned id;
+            QString name;
+            if (attrs.hasAttribute(QStringLiteral("PropertyId"))) {
+                id = attrs.value(QStringLiteral("PropertyId")).toUInt(&ok, 0);
+                if (!ok) {
+                    qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - error reading %1 attribute.")
+                                    .arg(QStringLiteral("PropertyId"));
+                    return false;
+                }
+                idType = EwsPropertyFieldPrivate::PropId;
+            }
+            else if (attrs.hasAttribute(QStringLiteral("PropertyName"))) {
+                name = attrs.value(QStringLiteral("PropertyName")).toString();
+                idType = EwsPropertyFieldPrivate::PropName;
+            }
+            else {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - missing one of %1 or %2 attributes.")
+                                .arg(QStringLiteral("PropertyId").arg(QStringLiteral("PropertyName")));
+                return false;
+            }
+
+            if (attrs.hasAttribute(QStringLiteral("DistinguishedPropertySetId"))) {
+                QStringRef didText = attrs.value(QStringLiteral("DistinguishedPropertySetId"));
+                unsigned i;
+                for (i = 0; i < sizeof(distinguishedPropSetIdNames) / sizeof(distinguishedPropSetIdNames[0]); i++) {
+                    if (didText == distinguishedPropSetIdNames[i]) {
+                        psDid = static_cast<EwsDistinguishedPropSetId>(i);
+                        break;
+                    }
+                }
+                if (i == sizeof(distinguishedPropSetIdNames) / sizeof(distinguishedPropSetIdNames[0])) {
+                    qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - error reading %1 attribute.")
+                                    .arg(QStringLiteral("DistinguishedPropertySetId"));
+                    return false;
+                }
+                psIdType = EwsPropertyFieldPrivate::DistinguishedPropSet;
+            }
+            else if (attrs.hasAttribute(QStringLiteral("PropertySetId"))) {
+                psId = attrs.value(QStringLiteral("PropertySetId")).toString();
+                psIdType = EwsPropertyFieldPrivate::RealPropSet;
+            }
+            else {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - missing one of %1 or %2 attributes.")
+                                .arg(QStringLiteral("DistinguishedPropertySetId").arg(QStringLiteral("PropertySetId")));
+                return false;
+            }
+            d->mPsIdType = psIdType;
+            d->mPsDid = psDid;
+            d->mPsId = psId;
+            d->mIdType = idType;
+            d->mId = id;
+            d->mName = name;
+        }
+
+        d->mType = propType;
+        d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+    }
+    d->recalcHash();
+    return true;
 }
 
 uint qHash(const EwsPropertyField &prop, uint seed)
