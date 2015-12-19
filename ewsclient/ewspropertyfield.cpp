@@ -335,7 +335,8 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
     case EwsPropertyFieldPrivate::ExtendedField:
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedFieldURI"));
         if (d->mHasTag) {
-            writer.writeAttribute(QStringLiteral("PropertyTag"), QString::number(d->mTag));
+            writer.writeAttribute(QStringLiteral("PropertyTag"),
+                                  QStringLiteral("0x") + QString::number(d->mTag, 16));
         }
         else {
             if (d->mPsIdType == EwsPropertyFieldPrivate::DistinguishedPropSet) {
@@ -347,7 +348,8 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
             }
 
             if (d->mIdType == EwsPropertyFieldPrivate::PropId) {
-                writer.writeAttribute(QStringLiteral("PropertyId"), QString::number(d->mId));
+                writer.writeAttribute(QStringLiteral("PropertyId"),
+                                      QStringLiteral("0x") + QString::number(d->mId, 16));
             }
             else {
                 writer.writeAttribute(QStringLiteral("PropertyName"), d->mName);
