@@ -313,7 +313,6 @@ bool EwsFolderBase::readExtendedProperty(QXmlStreamReader &reader)
 
 QStringRef EwsFolderBase::folderProperty(const EwsPropertyField &prop) const
 {
-    qDebug() << d->mProperties;
     QHash<EwsPropertyField, QString>::const_iterator it = d->mProperties.find(prop);
     if (it != d->mProperties.cend()) {
         return QStringRef(&it.value());
