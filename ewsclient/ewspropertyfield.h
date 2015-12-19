@@ -50,6 +50,10 @@ public:
     void write(QXmlStreamWriter &writer) const;
 private:
     QSharedDataPointer<EwsPropertyFieldPrivate> d;
+
+    friend uint qHash(const EwsPropertyField &prop, uint seed);
 };
+
+uint qHash(const EwsPropertyField &prop, uint seed);
 
 #endif

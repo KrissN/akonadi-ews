@@ -68,7 +68,7 @@ public:
     EwsPropertyFieldPrivate()
         : mPropType(UnknownField), mIndex(0), mPsIdType(DistinguishedPropSet),
           mPsDid(EwsPropSetMeeting), mIdType(PropName), mId(0), mHasTag(false), mTag(0),
-          mType(EwsPropTypeNull)
+          mType(EwsPropTypeNull), mHash(0)
     {};
 
     enum Type {
@@ -105,7 +105,47 @@ public:
     unsigned mTag;
 
     EwsPropertyType mType;
+
+    uint mHash;  // Precalculated hash for the qHash() function.
+
+    void recalcHash();
 };
+
+void EwsPropertyFieldPrivate::recalcHash()
+{
+    mHash = 0;
+    switch (mPropType) {
+    case Field:
+        mHash = 0x00000000 | (qHash(mUri) & 0x3FFFFFFF);
+        break;
+    case IndexedField:
+        mHash = 0x80000000 | ((qHash(mUri) ^ mIndex) & 0x3FFFFFFF);
+        break;
+    case ExtendedField:
+        if (mHasTag) {
+            mHash = 0x40000000 | mTag;
+        }
+        else {
+            if (mPsIdType == DistinguishedPropSet) {
+                mHash |= mPsDid << 16;
+            }
+            else {
+                mHash |= (qHash(mPsId) & 0x1FFF) << 16;
+            }
+
+            if (mIdType == PropId) {
+                mHash |= mId & 0xFFFF;
+            }
+            else {
+                mHash |= (qHash(mName) & 0xFFFF);
+            }
+            mHash |= 0xC0000000;
+        }
+        break;
+    default:
+        break;
+    }
+}
 
 EwsPropertyField::EwsPropertyField()
     : d(new EwsPropertyFieldPrivate())
@@ -117,6 +157,7 @@ EwsPropertyField::EwsPropertyField(QString uri)
 {
     d->mPropType = EwsPropertyFieldPrivate::Field;
     d->mUri = uri;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(QString uri, unsigned index)
@@ -125,6 +166,7 @@ EwsPropertyField::EwsPropertyField(QString uri, unsigned index)
     d->mPropType = EwsPropertyFieldPrivate::IndexedField;
     d->mUri = uri;
     d->mIndex = index;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, EwsPropertyType type)
@@ -139,6 +181,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, 
     d->mId = id;
 
     d->mType = type;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name, EwsPropertyType type)
@@ -153,6 +196,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name,
     d->mName = name;
 
     d->mType = type;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType type)
@@ -167,6 +211,7 @@ EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType ty
     d->mId = id;
 
     d->mType = type;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(QString psid, QString name, EwsPropertyType type)
@@ -181,6 +226,7 @@ EwsPropertyField::EwsPropertyField(QString psid, QString name, EwsPropertyType t
     d->mName = name;
 
     d->mType = type;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(unsigned tag, EwsPropertyType type)
@@ -192,6 +238,7 @@ EwsPropertyField::EwsPropertyField(unsigned tag, EwsPropertyType type)
     d->mTag = tag;
 
     d->mType = type;
+    d->recalcHash();
 }
 
 EwsPropertyField::EwsPropertyField(const EwsPropertyField &other)
@@ -312,4 +359,9 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
     case EwsPropertyFieldPrivate::UnknownField:
         break;
     }
+}
+
+uint qHash(const EwsPropertyField &prop, uint seed)
+{
+    return prop.d->mHasTag ^ seed;
 }
