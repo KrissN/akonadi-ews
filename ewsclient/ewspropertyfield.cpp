@@ -91,18 +91,18 @@ public:
     Type mPropType;
 
     QString mUri;
-    int mIndex;
+    unsigned mIndex;
 
     PropSetIdType mPsIdType;
     EwsDistinguishedPropSetId mPsDid;
     QString mPsId;
 
     PropIdType mIdType;
-    int mId;
+    unsigned mId;
     QString mName;
 
     bool mHasTag;
-    int mTag;
+    unsigned mTag;
 
     EwsPropertyType mType;
 };
@@ -119,7 +119,7 @@ EwsPropertyField::EwsPropertyField(QString uri)
     d->mUri = uri;
 }
 
-EwsPropertyField::EwsPropertyField(QString uri, int index)
+EwsPropertyField::EwsPropertyField(QString uri, unsigned index)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = EwsPropertyFieldPrivate::IndexedField;
@@ -127,7 +127,7 @@ EwsPropertyField::EwsPropertyField(QString uri, int index)
     d->mIndex = index;
 }
 
-EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, int id, EwsPropertyType type)
+EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
@@ -155,7 +155,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name,
     d->mType = type;
 }
 
-EwsPropertyField::EwsPropertyField(QString psid, int id, EwsPropertyType type)
+EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
@@ -183,7 +183,7 @@ EwsPropertyField::EwsPropertyField(QString psid, QString name, EwsPropertyType t
     d->mType = type;
 }
 
-EwsPropertyField::EwsPropertyField(int tag, EwsPropertyType type)
+EwsPropertyField::EwsPropertyField(unsigned tag, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = EwsPropertyFieldPrivate::ExtendedField;

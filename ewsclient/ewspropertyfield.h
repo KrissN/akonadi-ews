@@ -32,12 +32,12 @@ class EwsPropertyField
 public:
     EwsPropertyField();
     EwsPropertyField(QString uri);  // FieldURI
-    EwsPropertyField(QString uri, int index);   // IndexedFieldURI
-    EwsPropertyField(EwsDistinguishedPropSetId psid, int id, EwsPropertyType type);
+    EwsPropertyField(QString uri, unsigned index);   // IndexedFieldURI
+    EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, EwsPropertyType type);
     EwsPropertyField(EwsDistinguishedPropSetId psid, QString name, EwsPropertyType type);
-    EwsPropertyField(QString psid, int id, EwsPropertyType type);
+    EwsPropertyField(QString psid, unsigned id, EwsPropertyType type);
     EwsPropertyField(QString psid, QString name, EwsPropertyType type);
-    EwsPropertyField(int tag, EwsPropertyType type);
+    EwsPropertyField(unsigned tag, EwsPropertyType type);
     EwsPropertyField(const EwsPropertyField &other);
     ~EwsPropertyField();
 
