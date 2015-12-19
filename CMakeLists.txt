@@ -13,11 +13,14 @@ find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Core)
 include(KDEInstallDirs)
 include(KDEFrameworkCompilerSettings)
 include(KDECMakeSettings)
+include(FeatureSummary)
 
 find_package(KF5KIO)
 find_package(KF5Akonadi)
 find_package(Xsltproc)
 find_package(KF5Mime)
+find_package(KF5CalendarCore)
+find_package(KF5Contacts)
 
 add_subdirectory(ewsclient)
 
@@ -44,6 +47,8 @@ target_link_libraries(akonadi_ews_resource
     KF5::AkonadiCore
     KF5::KIOCore
     KF5::Mime
+    KF5::CalendarCore
+    KF5::Contacts
     ewsclient)
 
 add_subdirectory(test)

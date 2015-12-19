@@ -23,6 +23,10 @@
 #include <AkonadiCore/ChangeRecorder>
 #include <AkonadiCore/CollectionFetchScope>
 #include <KMime/Message>
+#include <KCalCore/Event>
+#include <KCalCore/Todo>
+#include <KContacts/Addressee>
+#include <KContacts/ContactGroup>
 
 #include "ewsresource.h"
 #include "configdialog.h"
@@ -60,7 +64,7 @@ void EwsResource::retrieveCollections()
     EwsFindFolderRequest *req = new EwsFindFolderRequest(&mEwsClient);
     req->setParentFolderId(EwsDIdMsgFolderRoot);
     EwsFolderShape shape;
-    //shape << propPidTagContainerClass;
+    shape << propPidTagContainerClass;
     req->setFolderShape(shape);
     connect(req, &EwsFindFolderRequest::finished, req, [this, req](){findFoldersRequestFinished(req);});
     req->send();
@@ -105,7 +109,6 @@ void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
     collections.append(mRootCollection);
 
     Q_FOREACH(QPointer<EwsFolderBase> baseFolder, req->folders()) {
-        qDebug() << "Got folder" << baseFolder->displayName();
         Collection collection = createFolderCollection(baseFolder);
         collection.setParentCollection(mRootCollection);
 
@@ -139,7 +142,22 @@ Collection EwsResource::createFolderCollection(QPointer<EwsFolderBase> folder)
     Collection collection;
     collection.setName(folder->displayName());
     QStringList mimeTypes;
-    mimeTypes << Collection::mimeType() << KMime::Message::mimeType(); // TODO: Check actual MIME types
+    QString contClass = folder->folderProperty(propPidTagContainerClass).toString();
+    mimeTypes.append(Collection::mimeType());
+    if (contClass == QStringLiteral("IPF.Appointment")) {
+        mimeTypes.append(KCalCore::Event::eventMimeType());
+    }
+    else if (contClass == QStringLiteral("IPF.Contact") ||
+             contClass == QStringLiteral("IPF.Contact.MOC.QuickContacts")) {
+        mimeTypes.append(KContacts::Addressee::mimeType());
+        mimeTypes.append(KContacts::ContactGroup::mimeType());
+    }
+    else if (contClass == QStringLiteral("IPF.Task")) {
+        mimeTypes.append(KCalCore::Todo::todoMimeType());
+    }
+    else if (contClass == QStringLiteral("IPF.Note") || contClass.isEmpty()) {
+        mimeTypes.append(KMime::Message::mimeType());
+    }
     collection.setContentMimeTypes(mimeTypes);
     collection.setRights(Collection::ReadOnly);
     collection.setRemoteId(folder->id().id());
