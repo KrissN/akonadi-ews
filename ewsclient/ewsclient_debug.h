@@ -23,4 +23,9 @@
 #include <QtCore/QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(EWSCLIENT_LOG)
 
+#define qCDebugNC(cat) qCDebug(cat).noquote()
+#define qCInfoNC(cat) qCInfo(cat).noquote()
+#define qCWarningNC(cat) qCWarning(cat).noquote()
+#define qCCriticalNC(cat) qCCritical(cat).noquote()
+
 #endif
