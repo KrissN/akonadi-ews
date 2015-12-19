@@ -117,6 +117,8 @@ unsigned EwsFolderBase::childFolderCount() const
 
 bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
 {
+    d->mProperties.clear();
+
     if (reader.name() == QStringLiteral("FolderId")) {
         d->mId = EwsFolderId(reader);
         if (d->mId.type() == EwsFolderId::Unspecified) {
@@ -170,13 +172,17 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
         }
     }
     else if (reader.name() == QStringLiteral("ExtendedProperty")) {
-        // Unsupported - ignore
+        if (!readExtendedProperty(reader)) {
+            return false;
+        }
     }
     else if (reader.name() == QStringLiteral("ManagedFolderInformation")) {
         // Unsupported - ignore
+        reader.skipCurrentElement();
     }
     else if (reader.name() == QStringLiteral("EffectiveRights")) {
         // Unsupported - ignore
+        reader.skipCurrentElement();
     }
     else {
         qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - unknown element: %1.")
@@ -268,4 +274,51 @@ EwsFolderBase* EwsFolderBase::parentFolder() const
 void EwsFolderBase::setParentFolder(EwsFolderBase *parent)
 {
     d->mParent = parent;
+}
+
+bool EwsFolderBase::readExtendedProperty(QXmlStreamReader &reader)
+{
+    EwsPropertyField prop;
+    QString value;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid namespace");
+            return false;
+        }
+
+        if (reader.name() == QStringLiteral("FieldURI")
+            || reader.name() == QStringLiteral("IndexedFieldURI")
+            || reader.name() == QStringLiteral("ExtendedFieldURI")) {
+            if (!prop.read(reader)) {
+                return false;
+                reader.skipCurrentElement();
+            }
+            reader.skipCurrentElement();
+        }
+        else if (reader.name() == QStringLiteral("Value")) {
+            value = reader.readElementText();
+        }
+        else {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS 1request - unexpected element %1")
+                            .arg(reader.qualifiedName().toString());
+            reader.skipCurrentElement();
+            return false;
+        }
+    }
+    d->mProperties.insert(prop, value);
+
+    return true;
+}
+
+QStringRef EwsFolderBase::folderProperty(const EwsPropertyField &prop) const
+{
+    qDebug() << d->mProperties;
+    QHash<EwsPropertyField, QString>::const_iterator it = d->mProperties.find(prop);
+    if (it != d->mProperties.cend()) {
+        return QStringRef(&it.value());
+    }
+    else {
+        return QStringRef();
+    }
 }

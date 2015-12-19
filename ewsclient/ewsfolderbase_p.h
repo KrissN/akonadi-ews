@@ -55,6 +55,8 @@ public:
 
     QPointer<EwsFolderBase> mParent;
     QVector<QPointer<EwsFolderBase>> mChildren;
+
+    QHash<EwsPropertyField, QString> mProperties;
 };
 
 #endif

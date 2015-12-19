@@ -24,6 +24,7 @@
 #include <QtCore/QSharedDataPointer>
 
 #include "ewsfolderid.h"
+#include "ewspropertyfield.h"
 
 class EwsFolderBasePrivate;
 class EwsClient;
@@ -71,6 +72,8 @@ public:
     void addChild(EwsFolderBase *child);
     EwsFolderBase* parentFolder() const;
 
+    QStringRef folderProperty(const EwsPropertyField &prop) const;
+
 protected Q_SLOTS:
     void requestFinished();
 protected:
@@ -80,6 +83,7 @@ protected:
     void resetFields();
     bool readBaseFolderElement(QXmlStreamReader &reader);
     void setParentFolder(EwsFolderBase *parent);
+    bool readExtendedProperty(QXmlStreamReader &reader);
 
     QSharedDataPointer<EwsFolderBasePrivate> d;
 };
