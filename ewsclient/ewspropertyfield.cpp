@@ -508,3 +508,49 @@ uint qHash(const EwsPropertyField &prop, uint seed)
 {
     return prop.d->mHasTag ^ seed;
 }
+
+QDebug operator<<(QDebug debug, const EwsPropertyField &prop)
+{
+    QDebugStateSaver saver(debug);
+    QDebug d = debug.nospace().noquote();
+    d << QStringLiteral("EwsPropertyField(");
+
+    switch (prop.d->mPropType)
+    {
+    case EwsPropertyFieldPrivate::Field:
+        d << QStringLiteral("FieldUri: ") << prop.d->mUri;
+        break;
+    case EwsPropertyFieldPrivate::IndexedField:
+        d << QStringLiteral("IndexedFieldUri: ") << prop.d->mUri << '@' << prop.d->mIndex;
+        break;
+    case EwsPropertyFieldPrivate::ExtendedField:
+        d << QStringLiteral("ExtendedFieldUri: ");
+        if (prop.d->mHasTag) {
+            d << QStringLiteral("tag: 0x") << QString::number(prop.d->mTag, 16);
+        }
+        else {
+            if (prop.d->mPsIdType == EwsPropertyFieldPrivate::DistinguishedPropSet) {
+                d << QStringLiteral("psdid: ") << distinguishedPropSetIdNames[prop.d->mPsDid];
+            }
+            else {
+                d << QStringLiteral("psid: ") << prop.d->mPsId;
+            }
+            d << QStringLiteral(", ");
+
+            if (prop.d->mIdType == EwsPropertyFieldPrivate::PropId) {
+                d << QStringLiteral("id: 0x") << QString::number(prop.d->mId, 16);
+            }
+            else {
+                d << QStringLiteral("name: ") << prop.d->mName;
+            }
+        }
+        d << QStringLiteral(", type: ") << propertyTypeNames[prop.d->mType];
+        break;
+    case EwsPropertyFieldPrivate::UnknownField:
+        d << QStringLiteral("Unknown");
+        break;
+    }
+    d << ')';
+    return debug;
+}
+

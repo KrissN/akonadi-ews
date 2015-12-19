@@ -53,8 +53,11 @@ private:
     QSharedDataPointer<EwsPropertyFieldPrivate> d;
 
     friend uint qHash(const EwsPropertyField &prop, uint seed);
+    friend QDebug operator<<(QDebug debug, const EwsPropertyField &prop);
 };
 
 uint qHash(const EwsPropertyField &prop, uint seed);
+
+QDebug operator<<(QDebug debug, const EwsPropertyField &prop);
 
 #endif
