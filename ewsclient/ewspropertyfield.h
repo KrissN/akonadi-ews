@@ -42,7 +42,7 @@ public:
     ~EwsPropertyField();
 
     EwsPropertyField& operator=(const EwsPropertyField &other);
-    bool operator==(const EwsPropertyField &other);
+    bool operator==(const EwsPropertyField &other) const;
 
     EwsPropertyField(EwsPropertyField &&other);
     EwsPropertyField& operator=(EwsPropertyField &&other);

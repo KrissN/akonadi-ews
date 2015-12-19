@@ -267,7 +267,7 @@ EwsPropertyField& EwsPropertyField::operator=(const EwsPropertyField &other)
     return *this;
 }
 
-bool EwsPropertyField::operator==(const EwsPropertyField &other)
+bool EwsPropertyField::operator==(const EwsPropertyField &other) const
 {
     if (d == other.d)
         return true;
@@ -286,7 +286,7 @@ bool EwsPropertyField::operator==(const EwsPropertyField &other)
     case EwsPropertyFieldPrivate::IndexedField:
         return (d->mUri == od->mUri) && (d->mIndex == od->mIndex);
     case EwsPropertyFieldPrivate::ExtendedField:
-        if (d->mPropType != od->mPropType)
+        if (d->mType != od->mType)
             return false;
 
         if (d->mHasTag != od->mHasTag)
