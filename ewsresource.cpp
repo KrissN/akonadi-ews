@@ -144,19 +144,24 @@ Collection EwsResource::createFolderCollection(QPointer<EwsFolderBase> folder)
     QStringList mimeTypes;
     QString contClass = folder->folderProperty(propPidTagContainerClass).toString();
     mimeTypes.append(Collection::mimeType());
-    if (contClass == QStringLiteral("IPF.Appointment")) {
+    switch (folder->type()) {
+    case EwsFolderTypeCalendar:
         mimeTypes.append(KCalCore::Event::eventMimeType());
-    }
-    else if (contClass == QStringLiteral("IPF.Contact") ||
-             contClass == QStringLiteral("IPF.Contact.MOC.QuickContacts")) {
+        break;
+    case EwsFolderTypeContacts:
         mimeTypes.append(KContacts::Addressee::mimeType());
         mimeTypes.append(KContacts::ContactGroup::mimeType());
-    }
-    else if (contClass == QStringLiteral("IPF.Task")) {
+        break;
+    case EwsFolderTypeTasks:
         mimeTypes.append(KCalCore::Todo::todoMimeType());
-    }
-    else if (contClass == QStringLiteral("IPF.Note") || contClass.isEmpty()) {
-        mimeTypes.append(KMime::Message::mimeType());
+        break;
+    case EwsFolderTypeMail:
+        if (contClass == QStringLiteral("IPF.Note") || contClass.isEmpty()) {
+            mimeTypes.append(KMime::Message::mimeType());
+        }
+        break;
+    default:
+        break;
     }
     collection.setContentMimeTypes(mimeTypes);
     collection.setRights(Collection::ReadOnly);
