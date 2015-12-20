@@ -28,7 +28,7 @@ class EwsContactsFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsContactsFolder(EwsFolderId id, EwsClient *parent);
+    EwsContactsFolder(EwsId id, EwsClient *parent);
     EwsContactsFolder(QXmlStreamReader &reader, EwsClient *parent);
     virtual ~EwsContactsFolder();
 private:

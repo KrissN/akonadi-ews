@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFOLDERID_H
-#define EWSFOLDERID_H
+#ifndef EWSID_H
+#define EWSID_H
 
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QXmlStreamWriter>
@@ -26,22 +26,22 @@
 #include "ewstypes.h"
 
 /**
- *  @brief  EWS Folder Id wrapper class
+ *  @brief  EWS Id wrapper class
  *
- *  This class wraps an EWS folder identifier.
+ *  This class wraps an EWS folder or item identifier.
  *
- *  In the EWS world a folder id can come in two forms:
- *   - An "actual" folder id identified by a unique, server-generated string (actually it's a
+ *  In the EWS world an id can come in two forms:
+ *   - An "actual" id identified by a unique, server-generated string (actually it's a
  *     base64-encoded internal server structure). Optionally this id is accompanied by a change
- *     key, which acts as a version number of the folder. Each time something changes with the
- *     folder (either the folder itself or it's content - not sure if this applies to subfolders)
- *     the change key is updated. This gives you access to an older version of the folder and
- *     allows to quickly find out if the folder needs synchronizing.
+ *     key, which acts as a version number of the item. Each time something changes with the
+ *     item (either the item itself or folder content - not sure if this applies to subfolders)
+ *     the change key is updated. This gives you access to an older version of the item and
+ *     allows to quickly find out if the item needs synchronizing.
  *   - A "distinguished" folder id which is a string identifying a list of known root folders
  *     such as 'inbox'. This is necessary for the initial query as there is no way to know the
- *     real folder ids beforehand.
+ *     real folder ids beforehand. This applies only to folder identifiers.
  */
-class EwsFolderId
+class EwsId
 {
 public:
     enum Type {
@@ -49,22 +49,22 @@ public:
         Real,
         Unspecified
     };
-    EwsFolderId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
-    EwsFolderId(QString id, QString changeKey) : mType(Real), mId(id), mChangeKey(changeKey),
+    EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
+    EwsId(QString id, QString changeKey) : mType(Real), mId(id), mChangeKey(changeKey),
                     mDid(EwsDIdCalendar) {};
-    EwsFolderId(const EwsFolderId &id) { *this = id; };
-    EwsFolderId(EwsFolderId &&id) { *this = std::move(id); };
-    EwsFolderId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
-    EwsFolderId(QXmlStreamReader &reader);
+    EwsId(const EwsId &id) { *this = id; };
+    EwsId(EwsId &&id) { *this = std::move(id); };
+    EwsId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
+    EwsId(QXmlStreamReader &reader);
 
     Type type() const { return mType; };
     QString id() const { return mId; };
     QString changeKey() const { return mChangeKey; };
     EwsDistinguishedId distinguishedId() const { return mDid; };
 
-    EwsFolderId& operator=(const EwsFolderId &other);
-    EwsFolderId& operator=(EwsFolderId &&other);
-    bool operator==(const EwsFolderId &other) const;
+    EwsId& operator=(const EwsId &other);
+    EwsId& operator=(EwsId &&other);
+    bool operator==(const EwsId &other) const;
 
     void writeFolderIds(QXmlStreamWriter &writer) const;
 private:

@@ -5,9 +5,9 @@ set(EWSCLIENT_SRCS
   ewscontactsfolder.cpp
   ewsfindfolderrequest.cpp
   ewsfolderbase.cpp
-  ewsfolderid.cpp
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
+  ewsid.cpp
   ewsjobqueue.cpp
   ewsmailfolder.cpp
   ewspropertyfield.cpp

@@ -36,7 +36,7 @@ EwsTasksFolderPrivate::EwsTasksFolderPrivate()
     mType = EwsFolderTypeTasks;
 }
 
-EwsTasksFolder::EwsTasksFolder(EwsFolderId id, EwsClient *parent)
+EwsTasksFolder::EwsTasksFolder(EwsId id, EwsClient *parent)
     : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsTasksFolderPrivate()), id, parent)
 {
 }

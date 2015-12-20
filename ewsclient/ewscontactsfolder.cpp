@@ -34,7 +34,7 @@ EwsContactsFolderPrivate::EwsContactsFolderPrivate()
     mType = EwsFolderTypeContacts;
 }
 
-EwsContactsFolder::EwsContactsFolder(EwsFolderId id, EwsClient *parent)
+EwsContactsFolder::EwsContactsFolder(EwsId id, EwsClient *parent)
     : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsContactsFolderPrivate()), id, parent)
 {
 }

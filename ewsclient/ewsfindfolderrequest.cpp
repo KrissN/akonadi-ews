@@ -43,7 +43,7 @@ EwsFindFolderRequest::~EwsFindFolderRequest()
 {
 }
 
-void EwsFindFolderRequest::setParentFolderId(const EwsFolderId &id)
+void EwsFindFolderRequest::setParentFolderId(const EwsId &id)
 {
     mParentId = id;
 }

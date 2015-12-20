@@ -36,7 +36,7 @@ EwsMailFolderPrivate::EwsMailFolderPrivate()
     mType = EwsFolderTypeMail;
 }
 
-EwsMailFolder::EwsMailFolder(EwsFolderId id, EwsClient *parent)
+EwsMailFolder::EwsMailFolder(EwsId id, EwsClient *parent)
     : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsMailFolderPrivate()), id, parent)
 {
 }

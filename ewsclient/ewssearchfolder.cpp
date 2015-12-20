@@ -36,7 +36,7 @@ EwsSearchFolderPrivate::EwsSearchFolderPrivate()
     mType = EwsFolderTypeSearch;
 }
 
-EwsSearchFolder::EwsSearchFolder(EwsFolderId id, EwsClient *parent)
+EwsSearchFolder::EwsSearchFolder(EwsId id, EwsClient *parent)
     : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsSearchFolderPrivate()), id, parent)
 {
 }

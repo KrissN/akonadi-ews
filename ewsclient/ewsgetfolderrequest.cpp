@@ -31,7 +31,7 @@ EwsGetFolderRequest::~EwsGetFolderRequest()
 {
 }
 
-void EwsGetFolderRequest::setFolderId(const EwsFolderId &id)
+void EwsGetFolderRequest::setFolderId(const EwsId &id)
 {
     mId = id;
 }

@@ -32,7 +32,7 @@ public:
     EwsGetFolderRequest(EwsClient* parent);
     virtual ~EwsGetFolderRequest();
 
-    void setFolderId(const EwsFolderId &id);
+    void setFolderId(const EwsId &id);
     void setFolderShape(const EwsFolderShape &shape);
 
     virtual void send();
@@ -42,7 +42,7 @@ protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
-    EwsFolderId mId;
+    EwsId mId;
     EwsFolderShape mShape;
     QPointer<EwsFolderBase> mFolder;
 };

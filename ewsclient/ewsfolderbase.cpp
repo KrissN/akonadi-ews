@@ -39,13 +39,13 @@ EwsFolderBasePrivate::~EwsFolderBasePrivate()
     delete mGetFolderReq;
 }
 
-EwsFolderBase::EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsFolderId id, EwsClient *parent)
+EwsFolderBase::EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsId id, EwsClient *parent)
     : QObject(parent), d(priv)
 {
     d->mId = id;
 }
 
-EwsFolderBase::EwsFolderBase(EwsFolderId id, EwsClient *parent)
+EwsFolderBase::EwsFolderBase(EwsId id, EwsClient *parent)
     : QObject(parent), d(new EwsFolderBasePrivate())
 {
     d->mId = id;
@@ -85,12 +85,12 @@ EwsFolderType EwsFolderBase::type() const
     return d->mType;
 }
 
-EwsFolderId EwsFolderBase::id() const
+EwsId EwsFolderBase::id() const
 {
     return d->mId;
 }
 
-EwsFolderId EwsFolderBase::parentId() const
+EwsId EwsFolderBase::parentId() const
 {
     return d->mParentId;
 }
@@ -120,8 +120,8 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
     d->mProperties.clear();
 
     if (reader.name() == QStringLiteral("FolderId")) {
-        d->mId = EwsFolderId(reader);
-        if (d->mId.type() == EwsFolderId::Unspecified) {
+        d->mId = EwsId(reader);
+        if (d->mId.type() == EwsId::Unspecified) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
                             .arg(QStringLiteral("FolderId"));
             return false;
@@ -129,8 +129,8 @@ bool EwsFolderBase::readBaseFolderElement(QXmlStreamReader &reader)
         reader.skipCurrentElement();
     }
     else if (reader.name() == QStringLiteral("ParentFolderId")) {
-        d->mParentId = EwsFolderId(reader);
-        if (d->mId.type() == EwsFolderId::Unspecified) {
+        d->mParentId = EwsId(reader);
+        if (d->mId.type() == EwsId::Unspecified) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
                             .arg(QStringLiteral("ParentFolderId"));
             return false;

@@ -23,7 +23,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QSharedDataPointer>
 
-#include "ewsfolderid.h"
+#include "ewsid.h"
 #include "ewspropertyfield.h"
 
 class EwsFolderBasePrivate;
@@ -41,7 +41,7 @@ class EwsFolderBase : public QObject
 {
     Q_OBJECT
 public:
-    EwsFolderBase(EwsFolderId id, EwsClient *parent);
+    EwsFolderBase(EwsId id, EwsClient *parent);
     EwsFolderBase(const EwsFolderBase &other);
     EwsFolderBase(EwsFolderBase &&other);
     virtual ~EwsFolderBase();
@@ -55,8 +55,8 @@ public:
     bool isValid() const;
 
     EwsFolderType type() const;
-    EwsFolderId id() const;
-    EwsFolderId parentId() const;
+    EwsId id() const;
+    EwsId parentId() const;
     QString folderClass() const;
     QString displayName() const;
     unsigned totalCount() const;
@@ -77,7 +77,7 @@ public:
 protected Q_SLOTS:
     void requestFinished();
 protected:
-    EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsFolderId id, EwsClient *parent);
+    EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsId id, EwsClient *parent);
     EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent);
 
     void resetFields();

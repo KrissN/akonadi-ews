@@ -28,7 +28,7 @@ class EwsMailFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsMailFolder(EwsFolderId id, EwsClient *parent);
+    EwsMailFolder(EwsId id, EwsClient *parent);
     EwsMailFolder(QXmlStreamReader &reader, EwsClient *parent);
     virtual ~EwsMailFolder();
 private:

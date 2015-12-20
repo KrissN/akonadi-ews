@@ -28,7 +28,7 @@ class EwsTasksFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsTasksFolder(EwsFolderId id, EwsClient *parent);
+    EwsTasksFolder(EwsId id, EwsClient *parent);
     EwsTasksFolder(QXmlStreamReader &reader, EwsClient *parent);
     virtual ~EwsTasksFolder();
 private:

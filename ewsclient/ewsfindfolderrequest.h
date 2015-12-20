@@ -32,7 +32,7 @@ public:
     EwsFindFolderRequest(EwsClient* parent);
     virtual ~EwsFindFolderRequest();
 
-    void setParentFolderId(const EwsFolderId &id);
+    void setParentFolderId(const EwsId &id);
     void setFolderShape(const EwsFolderShape &shape);
     void setTraversal(EwsTraversalType traversal) { mTraversal = traversal; };
 
@@ -45,7 +45,7 @@ protected:
     unsigned readChildFolders(EwsFolderBase *parent, unsigned count, QXmlStreamReader &reader);
     EwsFolderBase* readFolder(QXmlStreamReader &reader);
 private:
-    EwsFolderId mParentId;
+    EwsId mParentId;
     EwsFolderShape mShape;
     EwsTraversalType mTraversal;
     QList<QPointer<EwsFolderBase>> mFolders;

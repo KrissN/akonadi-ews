@@ -28,7 +28,7 @@ class EwsSearchFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsSearchFolder(EwsFolderId id, EwsClient *parent);
+    EwsSearchFolder(EwsId id, EwsClient *parent);
     EwsSearchFolder(QXmlStreamReader &reader, EwsClient *parent);
     virtual ~EwsSearchFolder();
 private:

@@ -17,7 +17,7 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewsfolderid.h"
+#include <ewsid.h>
 
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
@@ -48,7 +48,7 @@ static const QString distinguishedIdNames[] = {
     QStringLiteral("archiverecoverableitemspurges")
 };
 
-EwsFolderId::EwsFolderId(QXmlStreamReader &reader)
+EwsId::EwsId(QXmlStreamReader &reader)
     : mDid(EwsDIdCalendar)
 {
     // Don't check for this element's name as a folder id may be contained in several elements
@@ -67,7 +67,7 @@ EwsFolderId::EwsFolderId(QXmlStreamReader &reader)
     mType = Real;
 }
 
-EwsFolderId& EwsFolderId::operator=(const EwsFolderId &other)
+EwsId& EwsId::operator=(const EwsId &other)
 {
     mType = other.mType;
     if (mType == Distinguished) {
@@ -80,7 +80,7 @@ EwsFolderId& EwsFolderId::operator=(const EwsFolderId &other)
     return *this;
 }
 
-EwsFolderId& EwsFolderId::operator=(EwsFolderId &&other)
+EwsId& EwsId::operator=(EwsId &&other)
 {
     mType = other.mType;
     if (mType == Distinguished) {
@@ -93,7 +93,7 @@ EwsFolderId& EwsFolderId::operator=(EwsFolderId &&other)
     return *this;
 }
 
-bool EwsFolderId::operator==(const EwsFolderId &other) const
+bool EwsId::operator==(const EwsId &other) const
 {
     if (mType != other.mType)
         return false;
@@ -107,7 +107,7 @@ bool EwsFolderId::operator==(const EwsFolderId &other) const
     return true;
 }
 
-void EwsFolderId::writeFolderIds(QXmlStreamWriter &writer) const
+void EwsId::writeFolderIds(QXmlStreamWriter &writer) const
 {
     if (mType == Distinguished) {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("DistinguishedFolderId"));

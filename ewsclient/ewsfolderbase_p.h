@@ -22,7 +22,7 @@
 
 #include <QtCore/QSharedData>
 
-#include "ewsfolderid.h"
+#include "ewsid.h"
 #include "ewsgetfolderrequest.h"
 
 class EwsFolderBasePrivate : public QSharedData
@@ -43,11 +43,11 @@ public:
     // Set to 'true' when the folder change key was bumped after the last sync.
     bool mUpdated;
 
-    EwsFolderId mId;
+    EwsId mId;
 
     EwsBaseShape mCurrentShape;
 
-    EwsFolderId mParentId;
+    EwsId mParentId;
     QString mFolderClass;
     QString mDisplayName;
     unsigned mTotalCount;

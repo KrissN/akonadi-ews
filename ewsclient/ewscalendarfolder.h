@@ -28,7 +28,7 @@ class EwsCalendarFolder : public EwsFolderBase
 {
     Q_OBJECT
 public:
-    EwsCalendarFolder(EwsFolderId id, EwsClient *parent);
+    EwsCalendarFolder(EwsId id, EwsClient *parent);
     EwsCalendarFolder(QXmlStreamReader &reader, EwsClient *parent);
     virtual ~EwsCalendarFolder();
 private:

@@ -34,7 +34,7 @@ EwsCalendarFolderPrivate::EwsCalendarFolderPrivate()
     mType = EwsFolderTypeCalendar;
 }
 
-EwsCalendarFolder::EwsCalendarFolder(EwsFolderId id, EwsClient *parent)
+EwsCalendarFolder::EwsCalendarFolder(EwsId id, EwsClient *parent)
     : EwsFolderBase(QSharedDataPointer<EwsFolderBasePrivate>(new EwsCalendarFolderPrivate()), id, parent)
 {
 }
