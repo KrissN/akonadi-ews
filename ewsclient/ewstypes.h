@@ -123,4 +123,234 @@ typedef enum {
     EwsTraversalSoftDeleted
 } EwsTraversalType;
 
+typedef enum {
+    EwsItemTypeItem,
+    EwsItemTypeMessage,
+    EwsItemTypeCalendarItem,
+    EwsItemTypeContact,
+    EwsItemTypeDistributionList,
+    EwsItemTypeMeetingMessage,
+    EwsItemTypeMeetingRequest,
+    EwsItemTypeMeetingResponse,
+    EwsItemTypeMeetingCancellation,
+    EwsItemTypeTask,
+    EwsItemTypeUnknown
+} EwsItemType;
+
+typedef enum {
+    EwsItemSensitivityNormal,
+    EwsItemSensitivityPersonal,
+    EwsItemSensitivityPrivate,
+    EwsItemSensitivityConfidential
+} EwsItemSensitivity;
+
+/**
+ *  @brief List of fields in EWS Item and its descendants
+ *
+ *  The list is based on the XSD schema and contains duplicates, which were commented out.
+ */
+typedef enum {
+    // Item
+    EwsItemFieldMimeContent,
+    EwsItemFieldItemId,
+    EwsItemFieldParentFolderId,
+    EwsItemFieldItemClass,
+    EwsItemFieldSubject,
+    EwsItemFieldSensitivity,
+    EwsItemFieldBody,
+    EwsItemFieldAttachments,
+    EwsItemFieldDateTimeReceived,
+    EwsItemFieldSize,
+    EwsItemFieldCategories,
+    EwsItemFieldImportance,
+    EwsItemFieldInReplyTo,
+    EwsItemFieldIsSubmitted,
+    EwsItemFieldIsDraft,
+    EwsItemFieldIsFromMe,
+    EwsItemFieldIsResend,
+    EwsItemFieldIsUnmodified,
+    EwsItemFieldInternetMessageHeaders,
+    EwsItemFieldDateTimeSent,
+    EwsItemFieldDateTimeCreated,
+    EwsItemFieldResponseObjects,
+    EwsItemFieldReminderDueBy,
+    EwsItemFieldReminderIsSet,
+    EwsItemFieldReminderMinutesBeforeStart,
+    EwsItemFieldDisplayCc,
+    EwsItemFieldDisplayTo,
+    EwsItemFieldHasAttachments,
+    EwsItemFieldCulture,
+    EwsItemFieldEffectiveRights,
+    EwsItemFieldLastModifiedName,
+    EwsItemFieldLastModifiedTime,
+    // Message
+    EwsItemFieldSender,
+    EwsItemFieldToRecipients,
+    EwsItemFieldCcRecipients,
+    EwsItemFieldBccRecipients,
+    EwsItemFieldIsReadReceiptRequested,
+    EwsItemFieldIsDeliveryReceiptRequested,
+    EwsItemFieldConversationIndex,
+    EwsItemFieldConversationTopic,
+    EwsItemFieldFrom,
+    EwsItemFieldInternetMessageId,
+    EwsItemFieldIsRead,
+    EwsItemFieldIsResponseRequested,
+    EwsItemFieldReferences,
+    EwsItemFieldReplyTo,
+    EwsItemFieldReceivedBy,
+    EwsItemFieldReceivedRepresenting,
+    // Task
+    EwsItemFieldActualWork,
+    EwsItemFieldAssignedTime,
+    EwsItemFieldBillingInformation,
+    EwsItemFieldChangeCount,
+    EwsItemFieldCompanies,
+    EwsItemFieldCompleteDate,
+    EwsItemFieldContacts,
+    EwsItemFieldDelegationState,
+    EwsItemFieldDelegator,
+    EwsItemFieldDueDate,
+    EwsItemFieldIsAssignmentEditable,
+    EwsItemFieldIsComplete,
+    EwsItemFieldIsRecurring,
+    EwsItemFieldIsTeamTask,
+    EwsItemFieldMileage,
+    EwsItemFieldOwner,
+    EwsItemFieldPercentComplete,
+    EwsItemFieldRecurrence,
+    EwsItemFieldStartDate,
+    EwsItemFieldStatus,
+    EwsItemFieldStatusDescription,
+    EwsItemFieldTotalWork,
+    // Calendar
+    EwsItemFieldUID,
+    EwsItemFieldRecurrenceId,
+    EwsItemFieldDateTimeStamp,
+    EwsItemFieldStart,
+    EwsItemFieldEnd,
+    EwsItemFieldOriginalStart,
+    EwsItemFieldIsAllDayEvent,
+    EwsItemFieldLegacyFreeBusyStatus,
+    EwsItemFieldLocation,
+    EwsItemFieldWhen,
+    EwsItemFieldIsMeeting,
+    EwsItemFieldIsCancelled,
+    //EwsItemFieldIsRecurring,              DUPLICATE
+    EwsItemFieldMeetingRequestWasSent,
+    //EwsItemFieldIsResponseRequested,      DUPLICATE
+    EwsItemFieldCalendarItemType,
+    EwsItemFieldMyResponseType,
+    EwsItemFieldOrganizer,
+    EwsItemFieldRequiredAttendees,
+    EwsItemFieldOptionalAttendees,
+    EwsItemFieldResources,
+    EwsItemFieldConflictingMeetingCount,
+    EwsItemFieldAdjacentMeetingCount,
+    EwsItemFieldConflictingMeetings,
+    EwsItemFieldAdjacentMeetings,
+    EwsItemFieldDuration,
+    EwsItemFieldTimeZone,
+    EwsItemFieldAppointmentReplyTime,
+    EwsItemFieldAppointmentSequenceNumber,
+    EwsItemFieldAppointmentState,
+    //EwsItemFieldRecurrence,               DUPLICATE
+    EwsItemFieldFirstOccurrence,
+    EwsItemFieldLastOccurrence,
+    EwsItemFieldModifiedOccurrences,
+    EwsItemFieldDeletedOccurrences,
+    EwsItemFieldMeetingTimeZone,
+    EwsItemFieldConferenceType,
+    EwsItemFieldAllowNewTimeProposal,
+    EwsItemFieldIsOnlineMeeting,
+    EwsItemFieldMeetingWorkspaceUrl,
+    EwsItemFieldNetShowUrl,
+    // MeetingMessage
+    EwsItemFieldAssociatedCalendarItemId,
+    EwsItemFieldIsDelegated,
+    EwsItemFieldIsOutOfDate,
+    EwsItemFieldHasBeenProcessed,
+    EwsItemFieldResponseType,
+    //EwsItemFieldUID,                      DUPLICATE
+    //EwsItemFieldRecurrenceId,             DUPLICATE
+    //EwsItemFieldDateTimeStamp,            DUPLICATE
+    // MeetingRequestMessage
+    EwsItemFieldMeetingRequestType,
+    EwsItemFieldIntendedFreeBusyStatus,
+    //EwsItemFieldStart,                    DUPLICATE
+    //EwsItemFieldEnd,                      DUPLICATE
+    //EwsItemFieldOriginalStart,            DUPLICATE
+    //EwsItemFieldIsAllDayEvent,            DUPLICATE
+    //EwsItemFieldLegacyFreeBusyStatus,     DUPLICATE
+    //EwsItemFieldLocation,                 DUPLICATE
+    //EwsItemFieldWhen,                     DUPLICATE
+    //EwsItemFieldIsMeeting,                DUPLICATE
+    //EwsItemFieldIsCancelled,              DUPLICATE
+    //EwsItemFieldIsRecurring,              DUPLICATE
+    //EwsItemFieldMeetingRequestWasSent,    DUPLICATE
+    //EwsItemFieldCalendarItemType,         DUPLICATE
+    //EwsItemFieldMyResponseType,           DUPLICATE
+    //EwsItemFieldOrganizer,                DUPLICATE
+    //EwsItemFieldRequiredAttendees,        DUPLICATE
+    //EwsItemFieldOptionalAttendees,        DUPLICATE
+    //EwsItemFieldResources,                DUPLICATE
+    //EwsItemFieldConflictingMeetingCount,  DUPLICATE
+    //EwsItemFieldAdjacentMeetingCount,     DUPLICATE
+    //EwsItemFieldConflictingMeetings,      DUPLICATE
+    //EwsItemFieldAdjacentMeetings,         DUPLICATE
+    //EwsItemFieldDuration,                 DUPLICATE
+    //EwsItemFieldTimeZone,                 DUPLICATE
+    //EwsItemFieldAppointmentReplyTime,     DUPLICATE
+    //EwsItemFieldAppointmentSequenceNumber,DUPLICATE
+    //EwsItemFieldAppointmentState,         DUPLICATE
+    //EwsItemFieldRecurrence,               DUPLICATE
+    //EwsItemFieldFirstOccurrence,          DUPLICATE
+    //EwsItemFieldLastOccurrence,           DUPLICATE
+    //EwsItemFieldModifiedOccurrences,      DUPLICATE
+    //EwsItemFieldDeletedOccurrences,       DUPLICATE
+    //EwsItemFieldMeetingTimeZone,          DUPLICATE
+    //EwsItemFieldConferenceType,           DUPLICATE
+    //EwsItemFieldAllowNewTimeProposal,     DUPLICATE
+    //EwsItemFieldIsOnlineMeeting,          DUPLICATE
+    //EwsItemFieldMeetingWorkspaceUrl,      DUPLICATE
+    //EwsItemFieldNetShowUrl,               DUPLICATE
+    // Contact
+    EwsItemFieldFileAs,
+    EwsItemFieldFileAsMapping,
+    EwsItemFieldDisplayName,
+    EwsItemFieldGivenName,
+    EwsItemFieldInitials,
+    EwsItemFieldMiddleName,
+    EwsItemFieldNickname,
+    EwsItemFieldCompleteName,
+    EwsItemFieldCompanyName,
+    EwsItemFieldEmailAddresses,
+    EwsItemFieldPhysicalAddresses,
+    EwsItemFieldPhoneNumbers,
+    EwsItemFieldAssistantName,
+    EwsItemFieldBirthday,
+    EwsItemFieldBusinessHomePage,
+    EwsItemFieldChildren,
+    //EwsItemFieldCompanies,                DUPLICATE
+    EwsItemFieldContactSource,
+    EwsItemFieldDepartment,
+    EwsItemFieldGeneration,
+    EwsItemFieldImAddresses,
+    EwsItemFieldJobTitle,
+    EwsItemFieldManager,
+    //EwsItemFieldMileage,                  DUPLICATE
+    EwsItemFieldOfficeLocation,
+    EwsItemFieldPostalAddressIndex,
+    EwsItemFieldProfession,
+    EwsItemFieldSpouseName,
+    EwsItemFieldSurname,
+    EwsItemFieldWeddingAnniversary,
+    // DistributionList
+    //EwsItemFieldDisplayName,              DUPLICATE
+    //EwsItemFieldFileAs,                   DUPLICATE
+    //EwsItemFieldContactSource,            DUPLICATE
+    // Additional fields not in EWS specification
+    EwsItemFieldBodyIsHtml,
+} EwsItemFields;
+
 #endif

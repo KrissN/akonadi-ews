@@ -21,6 +21,7 @@ find_package(Xsltproc)
 find_package(KF5Mime)
 find_package(KF5CalendarCore)
 find_package(KF5Contacts)
+find_package(KF5Codecs)
 
 add_subdirectory(ewsclient)
 
