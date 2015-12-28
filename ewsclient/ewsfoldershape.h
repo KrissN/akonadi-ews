@@ -50,7 +50,10 @@ public:
     void write(QXmlStreamWriter &writer) const;
 
     friend EwsFolderShape &operator<<(EwsFolderShape &shape, const EwsPropertyField &prop);
-private:
+protected:
+    void writeBaseShape(QXmlStreamWriter &writer) const;
+    void writeProperties(QXmlStreamWriter &writer) const;
+
     EwsBaseShape mBaseShape;
     QVector<EwsPropertyField> mProps;
 };

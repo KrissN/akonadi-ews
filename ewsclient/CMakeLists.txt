@@ -8,6 +8,7 @@ set(EWSCLIENT_SRCS
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
   ewsid.cpp
+  ewsitemshape.cpp
   ewsjobqueue.cpp
   ewsmailfolder.cpp
   ewspropertyfield.cpp

@@ -30,9 +30,21 @@ void EwsFolderShape::write(QXmlStreamWriter &writer) const
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderShape"));
 
     // Write the base shape
-    writer.writeTextElement(ewsTypeNsUri, QStringLiteral("BaseShape"), shapeNames[mBaseShape]);
+    writeBaseShape(writer);
 
     // Write properties (if any)
+    writeProperties(writer);
+
+    writer.writeEndElement();
+}
+
+void EwsFolderShape::writeBaseShape(QXmlStreamWriter &writer) const
+{
+    writer.writeTextElement(ewsTypeNsUri, QStringLiteral("BaseShape"), shapeNames[mBaseShape]);
+}
+
+void EwsFolderShape::writeProperties(QXmlStreamWriter &writer) const
+{
     if (!mProps.isEmpty()) {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("AdditionalProperties"));
 
@@ -42,7 +54,4 @@ void EwsFolderShape::write(QXmlStreamWriter &writer) const
 
         writer.writeEndElement();
     }
-
-    writer.writeEndElement();
 }
-
