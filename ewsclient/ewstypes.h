@@ -120,7 +120,8 @@ typedef enum {
 typedef enum {
     EwsTraversalShallow = 0,
     EwsTraversalDeep,
-    EwsTraversalSoftDeleted
+    EwsTraversalSoftDeleted,
+    EwsTraversalAssociated
 } EwsTraversalType;
 
 typedef enum {

@@ -4,6 +4,7 @@ set(EWSCLIENT_SRCS
   ewsclient.cpp
   ewscontactsfolder.cpp
   ewsfindfolderrequest.cpp
+  ewsfinditemrequest.cpp
   ewsfolderbase.cpp
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
