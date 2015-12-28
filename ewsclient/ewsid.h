@@ -74,4 +74,6 @@ private:
     EwsDistinguishedId mDid;
 };
 
+Q_DECLARE_METATYPE(EwsId)
+
 #endif
