@@ -118,7 +118,7 @@ void EwsId::writeFolderIds(QXmlStreamWriter &writer) const
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
         writer.writeAttribute(QStringLiteral("Id"), mId);
         if (~mChangeKey.isEmpty()) {
-            writer.writeAttribute(QStringLiteral("ChangeKey"), mId);
+            writer.writeAttribute(QStringLiteral("ChangeKey"), mChangeKey);
         }
         writer.writeEndElement();
     }
