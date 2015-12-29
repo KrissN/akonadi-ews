@@ -139,9 +139,6 @@ EwsItemType EwsItem::type() const
 
 bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
 {
-    d->mProperties.clear();
-    d->mFields.clear();
-
     if (reader.name() == QStringLiteral("MimeContent")) {
         d->mFields[EwsItemFieldMimeContent] = KCodecs::base64Decode(reader.readElementText().toLatin1());
         if (reader.error() != QXmlStreamReader::NoError) {

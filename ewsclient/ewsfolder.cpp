@@ -113,9 +113,6 @@ EwsFolderType EwsFolder::type() const
 
 bool EwsFolder::readBaseFolderElement(QXmlStreamReader &reader)
 {
-    d->mProperties.clear();
-    d->mFields.clear();
-
     if (reader.name() == QStringLiteral("FolderId")) {
         EwsId id = EwsId(reader);
         if (id.type() == EwsId::Unspecified) {
