@@ -62,6 +62,9 @@ EwsFolder::EwsFolder(QXmlStreamReader &reader)
     else if (reader.name() == QStringLiteral("CalendarFolder")) {
         d->mType = EwsFolderTypeCalendar;
     }
+    else if (reader.name() == QStringLiteral("ContactsFolder")) {
+        d->mType = EwsFolderTypeContacts;
+    }
     else if (reader.name() == QStringLiteral("TasksFolder")) {
         d->mType = EwsFolderTypeTasks;
     }
