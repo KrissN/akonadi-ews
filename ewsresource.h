@@ -25,6 +25,8 @@
 #include "ewsclient.h"
 #include "ewsfindfolderrequest.h"
 
+class FetchItemState;
+
 class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV2
 {
     Q_OBJECT
@@ -39,9 +41,11 @@ protected Q_SLOTS:
     bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void findFoldersRequestFinished(EwsFindFolderRequest *req);
+    void itemFetchJobFinished(KJob *job);
 private:
     Akonadi::Collection::List createChildCollections(const EwsFolder &folder, Akonadi::Collection collection);
     Akonadi::Collection createFolderCollection(const EwsFolder &folder);
+    void finishItemsFetch(FetchItemState *state);
 
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;

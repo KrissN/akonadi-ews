@@ -29,12 +29,14 @@
 #include <KContacts/ContactGroup>
 
 #include "ewsresource.h"
+#include "ewsfetchitemsjob.h"
 #include "configdialog.h"
 #include "settings.h"
 
 using namespace Akonadi;
 
 static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString);
+static const EwsPropertyField propItemSubject("item:Subject");
 
 EwsResource::EwsResource(const QString &id)
     : Akonadi::ResourceBase(id)
@@ -74,8 +76,10 @@ void EwsResource::retrieveCollections()
 void EwsResource::retrieveItems(const Collection &collection)
 {
     qDebug() << "retrieveItems";
-    Item::List items;
-    itemsRetrieved(items);
+
+    EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient, this);
+    connect(job, SIGNAL(finished(KJob*)), SLOT(itemFetchJobFinished(KJob*)));
+    job->start();
 }
 
 bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts)
@@ -172,5 +176,18 @@ Collection EwsResource::createFolderCollection(const EwsFolder &folder)
     return collection;
 }
 
+void EwsResource::itemFetchJobFinished(KJob *job)
+{
+    EwsFetchItemsJob *fetchJob = qobject_cast<EwsFetchItemsJob*>(job);
+
+    if (!fetchJob || job->error()) {
+        qWarning() << "ERROR" << job->errorString();
+        cancelTask(job->errorString());
+        return;
+    }
+    else {
+        itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
+    }
+}
 
 AKONADI_RESOURCE_MAIN(EwsResource)
