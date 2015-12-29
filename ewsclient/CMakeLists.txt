@@ -1,11 +1,9 @@
 
 set(EWSCLIENT_SRCS
-  ewscalendarfolder.cpp
   ewsclient.cpp
-  ewscontactsfolder.cpp
   ewsfindfolderrequest.cpp
   ewsfinditemrequest.cpp
-  ewsfolderbase.cpp
+  ewsfolder.cpp
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
   ewsid.cpp
@@ -13,12 +11,9 @@ set(EWSCLIENT_SRCS
   ewsitembase.cpp
   ewsitemshape.cpp
   ewsjobqueue.cpp
-  ewsmailfolder.cpp
   ewspropertyfield.cpp
   ewsrequest.cpp
   ewsrequestwriter.cpp
-  ewssearchfolder.cpp
-  ewstasksfolder.cpp
   ewstypes.cpp
   ewsclient_debug.cpp)
 

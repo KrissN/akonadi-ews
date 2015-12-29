@@ -151,6 +151,28 @@ typedef enum {
  *  The list is based on the XSD schema and contains duplicates, which were commented out.
  */
 typedef enum {
+    // Folder
+    EwsFolderFieldFolderId,
+    EwsFolderFieldParentFolderId,
+    EwsFolderFieldFolderClass,
+    EwsFolderFieldDisplayName,
+    EwsFolderFieldTotalCount,
+    EwsFolderFieldChildFolderCount,
+    EwsFolderFieldManagedFolderInformation,
+    EwsFolderFieldEffectiveRights,
+    // Calendar folder
+    EwsFolderFieldPermissionSet,
+    // Contacts folder
+    //EwsFolderFieldPermissionSet,          DUPLICATE
+    // Mail folder
+    EwsFolderFieldUnreadCount,
+    //EwsFolderFieldPermissionSet,          DUPLICATE
+    // Search folder
+    //EwsFolderFieldUnreadCount,            DUPLICATE
+    EwsFolderFieldSearchParameters,
+    // Tasks folder
+    //EwsFolderFieldUnreadCount,            DUPLICATE
+
     // Item
     EwsItemFieldMimeContent,
     EwsItemFieldItemId,

@@ -20,7 +20,7 @@
 #ifndef EWSFINDFOLDERREQUEST_H
 #define EWSFINDFOLDERREQUEST_H
 
-#include "ewsfolderbase.h"
+#include "ewsfolder.h"
 #include "ewsrequest.h"
 #include "ewstypes.h"
 #include "ewsfoldershape.h"
@@ -38,17 +38,17 @@ public:
 
     virtual void send();
 
-    const QList<QPointer<EwsFolderBase>> folders() const { return mFolders; };
+    const QList<EwsFolder> folders() const { return mFolders; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseFoldersResponse(QXmlStreamReader &reader);
-    unsigned readChildFolders(EwsFolderBase *parent, unsigned count, QXmlStreamReader &reader);
-    EwsFolderBase* readFolder(QXmlStreamReader &reader);
+    unsigned readChildFolders(EwsFolder &parent, unsigned count, QXmlStreamReader &reader);
+    EwsFolder* readFolder(QXmlStreamReader &reader);
 private:
     EwsId mParentId;
     EwsFolderShape mShape;
     EwsTraversalType mTraversal;
-    QList<QPointer<EwsFolderBase>> mFolders;
+    QList<EwsFolder> mFolders;
 };
 
 #endif

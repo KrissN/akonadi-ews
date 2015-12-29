@@ -20,7 +20,7 @@
 #ifndef EWSGETFOLDERREQUEST_H
 #define EWSGETFOLDERREQUEST_H
 
-#include "ewsmailfolder.h"
+#include "ewsfolder.h"
 #include "ewsrequest.h"
 #include "ewstypes.h"
 #include "ewsfoldershape.h"
@@ -37,14 +37,14 @@ public:
 
     virtual void send();
 
-    EwsFolderBase *folder() const { return mFolder; };
+    const EwsFolder* folder() const { return mFolder; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
     EwsId mId;
     EwsFolderShape mShape;
-    QPointer<EwsFolderBase> mFolder;
+    EwsFolder *mFolder;
 };
 
 #endif

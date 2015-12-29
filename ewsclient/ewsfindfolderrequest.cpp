@@ -21,11 +21,6 @@
 #include <QtCore/QXmlStreamWriter>
 
 #include "ewsfindfolderrequest.h"
-#include "ewsmailfolder.h"
-#include "ewscalendarfolder.h"
-#include "ewscontactsfolder.h"
-#include "ewstasksfolder.h"
-#include "ewssearchfolder.h"
 #include "ewsclient_debug.h"
 
 static const QString traversalTypeNames[] = {
@@ -120,91 +115,62 @@ bool EwsFindFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
 
     unsigned i = 0;
     for (i = 0; i < totalItems; i++) {
-        EwsFolderBase *folder = readFolder(reader);
+        EwsFolder *folder = readFolder(reader);
         reader.readNextStartElement();
         if (folder) {
-            int childCount = folder->childFolderCount();
-            qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Folder %1 has %2 children").arg(folder->displayName()).arg(childCount);
+            bool ok;
+            int childCount = (*folder)[EwsFolderFieldChildFolderCount].toUInt(&ok);
+            qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Folder %1 has %2 children")
+                            .arg((*folder)[EwsFolderFieldDisplayName].toString()).arg(childCount);
             if (childCount > 0) {
-                unsigned readCount = readChildFolders(folder, childCount, reader);
+                unsigned readCount = readChildFolders(*folder, childCount, reader);
                 if (readCount == 0)
                     return false;
                 i += readCount;
             }
-            mFolders.append(folder);
+            mFolders.append(*folder);
         }
     }
 
     return true;
 }
 
-unsigned EwsFindFolderRequest::readChildFolders(EwsFolderBase *parent, unsigned count, QXmlStreamReader &reader)
+unsigned EwsFindFolderRequest::readChildFolders(EwsFolder &parent, unsigned count, QXmlStreamReader &reader)
 {
-    qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing %1 folder").arg(parent->displayName());
+    qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing %1 folder").arg(parent[EwsFolderFieldDisplayName].toString());
     unsigned readCount = 0;
     for (unsigned i = 0; i < count; i++) {
-        EwsFolderBase *folder = readFolder(reader);
+        EwsFolder *folder = readFolder(reader);
         reader.readNextStartElement();
         if (folder) {
-            int childCount = folder->childFolderCount();
-            if (childCount > 0) {
-                unsigned readCount2 = readChildFolders(folder, childCount, reader);
+            bool ok;
+            int childCount = (*folder)[EwsFolderFieldChildFolderCount].toUInt(&ok);
+            if (ok && childCount > 0) {
+                unsigned readCount2 = readChildFolders(*folder, childCount, reader);
                 if (readCount2 == 0)
                     return false;
                 readCount += readCount2;
             }
-            parent->addChild(folder);
+            parent.addChild(*folder);
         }
         readCount++;
     }
     return readCount;
 }
 
-EwsFolderBase* EwsFindFolderRequest::readFolder(QXmlStreamReader &reader)
+EwsFolder* EwsFindFolderRequest::readFolder(QXmlStreamReader &reader)
 {
-    EwsFolderBase *folder = 0;
-    if (reader.name() == QStringLiteral("Folder")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing mail folder");
-        folder = new EwsMailFolder(reader, qobject_cast<EwsClient*>(parent()));
+    EwsFolder *folder = 0;
+    if (reader.name() == QStringLiteral("Folder") ||
+        reader.name() == QStringLiteral("CalendarFolder") ||
+        reader.name() == QStringLiteral("ContactsFolder") ||
+        reader.name() == QStringLiteral("TasksFolder") ||
+        reader.name() == QStringLiteral("SearchFolder")) {
+        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing folder");
+        folder = new EwsFolder(reader);
         if (!folder->isValid()) {
             setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
                      .arg(QStringLiteral("Folder")));
-            return 0;
-        }
-    }
-    else if (reader.name() == QStringLiteral("CalendarFolder")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing calendar folder");
-        folder = new EwsCalendarFolder(reader, qobject_cast<EwsClient*>(parent()));
-        if (!folder->isValid()) {
-            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                     .arg(QStringLiteral("CalendarFolder")));
-            return 0;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ContactsFolder")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing contacts folder");
-        folder = new EwsContactsFolder(reader, qobject_cast<EwsClient*>(parent()));
-        if (!folder->isValid()) {
-            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                     .arg(QStringLiteral("ContactsFolder")));
-            return 0;
-        }
-    }
-    else if (reader.name() == QStringLiteral("TasksFolder")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing tasks folder");
-        folder = new EwsTasksFolder(reader, qobject_cast<EwsClient*>(parent()));
-        if (!folder->isValid()) {
-            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                     .arg(QStringLiteral("TasksFolder")));
-            return 0;
-        }
-    }
-    else if (reader.name() == QStringLiteral("SearchFolder")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing search folder");
-        folder = new EwsSearchFolder(reader, qobject_cast<EwsClient*>(parent()));
-        if (!folder->isValid()) {
-            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                     .arg(QStringLiteral("SearchFolder")));
             return 0;
         }
     }

@@ -30,6 +30,7 @@ class EwsItemBasePrivate;
 class EwsItemBase
 {
 public:
+    EwsItemBase();
     EwsItemBase(const EwsItemBase &other);
     EwsItemBase(EwsItemBase &&other);
     virtual ~EwsItemBase();

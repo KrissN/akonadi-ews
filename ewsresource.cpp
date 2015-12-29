@@ -108,7 +108,7 @@ void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
 
     collections.append(mRootCollection);
 
-    Q_FOREACH(QPointer<EwsFolderBase> baseFolder, req->folders()) {
+    Q_FOREACH(const EwsFolder &baseFolder, req->folders()) {
         Collection collection = createFolderCollection(baseFolder);
         collection.setParentCollection(mRootCollection);
 
@@ -122,11 +122,11 @@ void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
     collectionsRetrieved(collections);
 }
 
-Collection::List EwsResource::createChildCollections(QPointer<EwsFolderBase> folder, Collection collection)
+Collection::List EwsResource::createChildCollections(const EwsFolder &folder, Collection collection)
 {
     Collection::List collections;
 
-    Q_FOREACH(QPointer<EwsFolderBase> child, folder->childFolders()) {
+    Q_FOREACH(const EwsFolder& child, folder.childFolders()) {
         Collection col = createFolderCollection(child);
         col.setParentCollection(collection);
         collections.append(col);
@@ -137,14 +137,14 @@ Collection::List EwsResource::createChildCollections(QPointer<EwsFolderBase> fol
     return collections;
 }
 
-Collection EwsResource::createFolderCollection(QPointer<EwsFolderBase> folder)
+Collection EwsResource::createFolderCollection(const EwsFolder &folder)
 {
     Collection collection;
-    collection.setName(folder->displayName());
+    collection.setName(folder[EwsFolderFieldDisplayName].toString());
     QStringList mimeTypes;
-    QString contClass = folder->folderProperty(propPidTagContainerClass).toString();
+    QString contClass = folder[propPidTagContainerClass].toString();
     mimeTypes.append(Collection::mimeType());
-    switch (folder->type()) {
+    switch (folder.type()) {
     case EwsFolderTypeCalendar:
         mimeTypes.append(KCalCore::Event::eventMimeType());
         break;
@@ -165,8 +165,9 @@ Collection EwsResource::createFolderCollection(QPointer<EwsFolderBase> folder)
     }
     collection.setContentMimeTypes(mimeTypes);
     collection.setRights(Collection::ReadOnly);
-    collection.setRemoteId(folder->id().id());
-    collection.setRemoteRevision(folder->id().changeKey());
+    EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
+    collection.setRemoteId(id.id());
+    collection.setRemoteRevision(id.changeKey());
     return collection;
 }
 

@@ -23,7 +23,7 @@
 #include "ewsclient_debug.h"
 
 EwsGetFolderRequest::EwsGetFolderRequest(EwsClient* parent)
-    : EwsRequest(parent)
+    : EwsRequest(parent), mFolder(0)
 {
 }
 
@@ -85,7 +85,7 @@ bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
     if (reader.namespaceUri() != ewsTypeNsUri)
         return setError(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
 
-    mFolder = new EwsMailFolder(reader, qobject_cast<EwsClient*>(parent()));
+    mFolder = new EwsFolder(reader);
     if (!mFolder->isValid())
         return setError(QStringLiteral("Failed to read EWS request - invalid Folder element."));
 

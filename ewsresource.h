@@ -40,8 +40,8 @@ protected Q_SLOTS:
 private Q_SLOTS:
     void findFoldersRequestFinished(EwsFindFolderRequest *req);
 private:
-    Akonadi::Collection::List createChildCollections(QPointer<EwsFolderBase> folder, Akonadi::Collection collection);
-    Akonadi::Collection createFolderCollection(QPointer<EwsFolderBase> folder);
+    Akonadi::Collection::List createChildCollections(const EwsFolder &folder, Akonadi::Collection collection);
+    Akonadi::Collection createFolderCollection(const EwsFolder &folder);
 
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;

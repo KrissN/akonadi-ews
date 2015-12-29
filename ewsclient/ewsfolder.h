@@ -17,25 +17,37 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSCALENDARFOLDER_H
-#define EWSCALENDARFOLDER_H
+#ifndef EWSFOLDER_H
+#define EWSFOLDER_H
 
-#include "ewsfolderbase.h"
+#include <QXmlStreamReader>
 
-class EwsCalendarFolderPrivate;
+#include "ewsitembase.h"
+#include "ewstypes.h"
 
-class EwsCalendarFolder : public EwsFolderBase
+class EwsFolderPrivate;
+
+class EwsFolder : public EwsItemBase
 {
-    Q_OBJECT
 public:
-    EwsCalendarFolder(EwsId id, EwsClient *parent);
-    EwsCalendarFolder(QXmlStreamReader &reader, EwsClient *parent);
-    virtual ~EwsCalendarFolder();
-private:
-    EwsCalendarFolder(QSharedDataPointer<EwsFolderBasePrivate> priv, EwsClient *parent);
+    EwsFolder();
+    EwsFolder(QXmlStreamReader &reader);
+    EwsFolder(const EwsFolder &other);
+    EwsFolder(EwsFolder &&other);
+    virtual ~EwsFolder();
 
-    friend class EwsFolderBase;
+    EwsFolder& operator=(const EwsFolder &other);
+    EwsFolder& operator=(EwsFolder &&other);
+
+    EwsFolderType type() const;
+
+    const QVector<EwsFolder> childFolders() const;
+    void addChild(EwsFolder &child);
+    EwsFolder* parentFolder() const;
+    void setParentFolder(EwsFolder *parent);
+
+protected:
+    bool readBaseFolderElement(QXmlStreamReader &reader);
 };
 
 #endif
-

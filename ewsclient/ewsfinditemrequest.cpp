@@ -21,11 +21,6 @@
 #include <QtCore/QXmlStreamWriter>
 
 #include "ewsfinditemrequest.h"
-#include "ewsmailfolder.h"
-#include "ewscalendarfolder.h"
-#include "ewscontactsfolder.h"
-#include "ewstasksfolder.h"
-#include "ewssearchfolder.h"
 #include "ewsclient_debug.h"
 
 static const QString traversalTypeNames[] = {

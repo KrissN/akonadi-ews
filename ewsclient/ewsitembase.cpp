@@ -33,6 +33,11 @@ EwsItemBasePrivate::~EwsItemBasePrivate()
 {
 }
 
+EwsItemBase::EwsItemBase()
+    : d(new EwsItemBasePrivate())
+{
+}
+
 EwsItemBase::EwsItemBase(QSharedDataPointer<EwsItemBasePrivate> priv)
     : d(priv)
 {
