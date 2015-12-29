@@ -17,44 +17,33 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewsjobqueue.h"
-
+#include "ewsjob.h"
 #include "ewsclient_debug.h"
 
-static const int maxConrurrentJobs = 1;
-
-EwsJobQueue::EwsJobQueue(QObject *parent)
-    : QObject(parent)
+EwsJob::EwsJob(QObject *parent)
+    : KCompositeJob(parent)
 {
 }
 
-EwsJobQueue::~EwsJobQueue()
+EwsJob::~EwsJob()
 {
 }
 
-void EwsJobQueue::enqueue(KJob *job)
+bool EwsJob::doKill()
 {
-    qCDebug(EWSCLIENT_LOG) << "Adding job" << job << "to queue.";
-    mJobQueue.enqueue(job);
-    connect(job, SIGNAL(finished(KJob*)), SLOT(jobFinished(KJob*)));
-    maybeStartNextJob();
-}
-
-void EwsJobQueue::jobFinished(KJob *job)
-{
-    qCDebug(EWSCLIENT_LOG) << "Job" << job << "finished.";
-    mActiveJobs--;
-    maybeStartNextJob();
-}
-
-void EwsJobQueue::maybeStartNextJob()
-{
-    QMutexLocker l(&mJobStartMutex);
-    qCDebug(EWSCLIENT_LOG) << mActiveJobs << "active job(s).";
-    if ((mActiveJobs < maxConrurrentJobs) && (!mJobQueue.isEmpty())) {
-        mActiveJobs++;
-        KJob *job = mJobQueue.dequeue();
-        qCDebug(EWSCLIENT_LOG) << "Starting job" << job;
-        job->start();
+    Q_FOREACH(KJob *job, subjobs()) {
+        job->kill(KJob::Quietly);
     }
+    clearSubjobs();
+
+    return true;
 }
+
+bool EwsJob::setErrorMsg(const QString msg)
+{
+    setError(1);
+    setErrorText(msg);
+    qCWarningNC(EWSCLIENT_LOG) << msg;
+    return false;
+}
+

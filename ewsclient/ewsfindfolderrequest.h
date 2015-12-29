@@ -29,14 +29,14 @@ class EwsFindFolderRequest : public EwsRequest
 {
     Q_OBJECT
 public:
-    EwsFindFolderRequest(EwsClient* parent);
+    EwsFindFolderRequest(EwsClient& client, QObject *parent);
     virtual ~EwsFindFolderRequest();
 
     void setParentFolderId(const EwsId &id);
     void setFolderShape(const EwsFolderShape &shape);
     void setTraversal(EwsTraversalType traversal) { mTraversal = traversal; };
 
-    virtual void send();
+    virtual void start();
 
     const QList<EwsFolder> folders() const { return mFolders; };
 protected:

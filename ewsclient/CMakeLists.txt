@@ -10,6 +10,7 @@ set(EWSCLIENT_SRCS
   ewsitem.cpp
   ewsitembase.cpp
   ewsitemshape.cpp
+  ewsjob.cpp
   ewsjobqueue.cpp
   ewspropertyfield.cpp
   ewsrequest.cpp

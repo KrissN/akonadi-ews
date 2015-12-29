@@ -61,13 +61,14 @@ EwsResource::~EwsResource()
 void EwsResource::retrieveCollections()
 {
     qDebug() << "retrieveCollections";
-    EwsFindFolderRequest *req = new EwsFindFolderRequest(&mEwsClient);
+    EwsFindFolderRequest *req = new EwsFindFolderRequest(mEwsClient, this);
     req->setParentFolderId(EwsDIdMsgFolderRoot);
     EwsFolderShape shape;
     shape << propPidTagContainerClass;
     req->setFolderShape(shape);
-    connect(req, &EwsFindFolderRequest::finished, req, [this, req](){findFoldersRequestFinished(req);});
-    req->send();
+    connect(req, &EwsFindFolderRequest::finished, req,
+            [this](KJob *job){findFoldersRequestFinished(qobject_cast<EwsFindFolderRequest*>(job));});
+    req->start();
 }
 
 void EwsResource::retrieveItems(const Collection &collection)
@@ -96,7 +97,7 @@ void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
 {
     qDebug() << "findFoldersRequestFinished";
 
-    if (req->isError()) {
+    if (req->error()) {
         qWarning() << "ERROR" << req->errorString();
         cancelTask(req->errorString());
         return;

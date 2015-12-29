@@ -22,7 +22,7 @@
 
 #include <QtCore/QQueue>
 #include <QtCore/QMutex>
-#include <KIO/TransferJob>
+#include <KCoreAddons/KJob>
 
 class EwsJobQueue : public QObject
 {
@@ -31,13 +31,13 @@ public:
     EwsJobQueue(QObject *parent);
     virtual ~EwsJobQueue();
 
-    void enqueue(KIO::TransferJob *job);
+    void enqueue(KJob *job);
 private Q_SLOTS:
     void jobFinished(KJob *job);
     void maybeStartNextJob();
 private:
 
-    QQueue<KIO::TransferJob*> mJobQueue;
+    QQueue<KJob*> mJobQueue;
     QAtomicInteger<unsigned int> mActiveJobs;
     QMutex mJobStartMutex;
 };

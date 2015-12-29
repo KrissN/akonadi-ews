@@ -30,8 +30,8 @@ static const QString traversalTypeNames[] = {
     QStringLiteral("Associated")
 };
 
-EwsFindItemRequest::EwsFindItemRequest(EwsClient* parent)
-    : EwsRequest(parent), mTraversal(EwsTraversalShallow), mPageSize(0), mPage(0)
+EwsFindItemRequest::EwsFindItemRequest(EwsClient& client, QObject *parent)
+    : EwsRequest(client, parent), mTraversal(EwsTraversalShallow), mPageSize(0), mPage(0)
 {
 }
 
@@ -49,7 +49,7 @@ void EwsFindItemRequest::setItemShape(const EwsItemShape &shape)
     mShape = shape;
 }
 
-void EwsFindItemRequest::send()
+void EwsFindItemRequest::start()
 {
     QString reqString;
     QXmlStreamWriter writer(&reqString);
@@ -85,34 +85,34 @@ bool EwsFindItemRequest::parseResult(QXmlStreamReader &reader)
 bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("RootFolder"))
-        return setError(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
                         .arg(QStringLiteral("RootFolder")).arg(reader.qualifiedName().toString()));
 
     if (!reader.attributes().hasAttribute(QStringLiteral("TotalItemsInView"))
         || !reader.attributes().hasAttribute(QStringLiteral("TotalItemsInView"))) {
-        return setError(QStringLiteral("Failed to read EWS request - missing attributes of %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - missing attributes of %1 element.")
                                 .arg(QStringLiteral("RootFolder")));
     }
     bool ok;
     unsigned totalItems = reader.attributes().value(QStringLiteral("TotalItemsInView")).toUInt(&ok);
     if (!ok)
-        return setError(QStringLiteral("Failed to read EWS request - failed to read %1 attribute.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - failed to read %1 attribute.")
                                         .arg(QStringLiteral("TotalItemsInView")));
 
     if (!reader.readNextStartElement())
-        return setError(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
                         .arg(QStringLiteral("RootFolder")));
 
     if (reader.namespaceUri() != ewsTypeNsUri || reader.name() != QStringLiteral("Items"))
-        return setError(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
                         .arg(QStringLiteral("Items")).arg(reader.qualifiedName().toString()));
 
     if (!reader.readNextStartElement())
-        return setError(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
                         .arg(QStringLiteral("Items")));
 
     if (reader.namespaceUri() != ewsTypeNsUri)
-        return setError(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
 
     unsigned i = 0;
     for (i = 0; i < totalItems; i++) {
@@ -142,7 +142,7 @@ EwsItem* EwsFindItemRequest::readItem(QXmlStreamReader &reader)
         qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing %1").arg(reader.name().toString());
         item = new EwsItem(reader);
         if (!item->isValid()) {
-            setError(QStringLiteral("Failed to read EWS request - invalid %1 element.")
+            setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
                      .arg(reader.name().toString()));
             return 0;
         }

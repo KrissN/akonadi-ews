@@ -29,40 +29,29 @@
 #include <KIO/TransferJob>
 
 #include "ewsclient.h"
+#include "ewsjob.h"
 #include "ewstypes.h"
 
-class EwsRequest : public QObject
+class EwsRequest : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsRequest(EwsClient* parent);
+    EwsRequest(EwsClient& client, QObject *parent);
     virtual ~EwsRequest();
-    virtual void send() = 0;
 
     void setMetaData(const KIO::MetaData &md);
     void addMetaData(QString key, QString value);
 
-    bool isError() const { return mError; };
-    QString errorString() const { return mErrorString; };
-Q_SIGNALS:
-    void finished();
 protected:
     void doSend();
     void prepare(const QString body);
     virtual bool parseResult(QXmlStreamReader &reader) = 0;
-    bool setError(const QString msg);
     void startSoapDocument(QXmlStreamWriter &writer);
     void endSoapDocument(QXmlStreamWriter &writer);
     bool parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                               std::function<bool(QXmlStreamReader &reader)> contentReader);
 
     KIO::MetaData mMd;
-    QPointer<KIO::TransferJob> mJob;    // The job object deletes itself automatically once finished
-                                        // Use a smart pointer to make sure we don't try to do it
-                                        // again.
-    bool mError;
-    QString mErrorString;
-
     EwsResponseClass mResponseClass;
     QString mResponseCode;
     QString mResponseMessage;
@@ -77,6 +66,7 @@ private:
     bool readResponseElement(QXmlStreamReader &reader);
 
     QString mResponseData;
+    EwsClient &mClient;
 };
 
 #endif

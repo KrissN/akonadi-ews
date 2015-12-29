@@ -29,7 +29,7 @@ class EwsFindItemRequest : public EwsRequest
 {
     Q_OBJECT
 public:
-    EwsFindItemRequest(EwsClient* parent);
+    EwsFindItemRequest(EwsClient& client, QObject *parent);
     virtual ~EwsFindItemRequest();
 
     void setFolderId(const EwsId &id);
@@ -37,11 +37,11 @@ public:
     void setTraversal(EwsTraversalType traversal) { mTraversal = traversal; };
     void setPagination(unsigned pageSize, unsigned page);
 
-    virtual void send();
+    virtual void start() Q_DECL_OVERRIDE;
 
     const QList<EwsItem> items() const { return mItems; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseItemsResponse(QXmlStreamReader &reader);
     EwsItem* readItem(QXmlStreamReader &reader);
 private:

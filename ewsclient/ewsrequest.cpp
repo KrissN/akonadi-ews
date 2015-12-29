@@ -25,19 +25,20 @@
 
 static const QString ewsReqVersion = QStringLiteral("Exchange2010");
 
-EwsRequest::EwsRequest(EwsClient *parent)
-    : QObject(parent), mJob(0), mError(false), mResponseClass(EwsResponseError)
+EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
+    : EwsJob(parent), mResponseClass(EwsResponseError), mClient(client)
 {
 }
 
 EwsRequest::~EwsRequest()
 {
-    delete mJob;
 }
 
 void EwsRequest::doSend()
 {
-    qobject_cast<EwsClient*>(parent())->mJobQueue->enqueue(mJob);
+    Q_FOREACH(KJob *job, subjobs()) {
+        mClient.mJobQueue->enqueue(job);
+    }
 }
 
 void EwsRequest::startSoapDocument(QXmlStreamWriter &writer)
@@ -77,14 +78,16 @@ void EwsRequest::endSoapDocument(QXmlStreamWriter &writer)
 
 void EwsRequest::prepare(const QString body)
 {
-    mJob = KIO::http_post(qobject_cast<EwsClient*>(parent())->url(), body.toUtf8(),
+    KIO::TransferJob *job = KIO::http_post(mClient.url(), body.toUtf8(),
                           KIO::HideProgressInfo);
-    mJob->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
-    mJob->addMetaData(mMd);
+    job->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
+    job->addMetaData(mMd);
 
-    connect(mJob, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
-    connect(mJob, SIGNAL(data(KIO::Job*, const QByteArray&)),
+    connect(job, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
+    connect(job, SIGNAL(data(KIO::Job*, const QByteArray&)),
             SLOT(requestData(KIO::Job*, const QByteArray&)));
+
+    addSubjob(job);
 }
 
 void EwsRequest::setMetaData(const KIO::MetaData &md)
@@ -102,29 +105,29 @@ void EwsRequest::requestResult(KJob *job)
     qCDebug(EWSCLIENT_LOG) << "result" << job->error();
 
     if (job->error() != 0) {
-        setError(QStringLiteral("Failed to process EWS request: ") + job->errorString());
+        setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString());
     }
     else {
         QXmlStreamReader reader(mResponseData);
         readResponse(reader);
     }
 
-    emit finished();
+    emitResult();
 }
 
 bool EwsRequest::readResponse(QXmlStreamReader &reader)
 {
     if (!reader.readNextStartElement()) {
-        return setError(QStringLiteral("Failed to read EWS request XML"));
+        return setErrorMsg(QStringLiteral("Failed to read EWS request XML"));
     }
 
     if ((reader.name() != QStringLiteral("Envelope")) || (reader.namespaceUri() != soapEnvNsUri)) {
-        return setError(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
     }
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != soapEnvNsUri) {
-            return setError(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
+            return setErrorMsg(QStringLiteral("Failed to read EWS request - not a SOAP XML"));
         }
 
         if (reader.name() == QStringLiteral("Body")) {
@@ -165,8 +168,7 @@ bool EwsRequest::readSoapFault(QXmlStreamReader &reader)
         }
     }
 
-    mError = true;
-    mErrorString = faultCode + QStringLiteral(": ") + faultString;
+    setErrorMsg(faultCode + QStringLiteral(": ") + faultString);
 
     return false;
 }
@@ -179,42 +181,34 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
     mResponseData += QString::fromUtf8(data);
 }
 
-bool EwsRequest::setError(const QString msg)
-{
-    mError = true;
-    mErrorString = msg;
-    qCWarning(EWSCLIENT_LOG) << mErrorString;
-    return false;
-}
-
 bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                           std::function<bool(QXmlStreamReader &reader)> contentReader)
 {
     if (reader.name() != reqName + QStringLiteral("Response")
         || reader.namespaceUri() != ewsMsgNsUri) {
-        return setError(QStringLiteral("Failed to read EWS request - expected %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")
                         .arg(reqName + QStringLiteral("Response")));
     }
 
     if (!reader.readNextStartElement()) {
-        return setError(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
                         .arg(reqName + QStringLiteral("Response")));
     }
 
     if (reader.name() != QStringLiteral("ResponseMessages")
         || reader.namespaceUri() != ewsMsgNsUri) {
-        return setError(QStringLiteral("Failed to read EWS request - expected %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")
                         .arg(QStringLiteral("ResponseMessages")));
     }
 
     if (!reader.readNextStartElement()) {
-        return setError(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
                         .arg(QStringLiteral("ResponseMessages")));
     }
 
     if (reader.name() != reqName + QStringLiteral("ResponseMessage")
         || reader.namespaceUri() != ewsMsgNsUri) {
-        return setError(QStringLiteral("Failed to read EWS request - expected %1 element.")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")
                         .arg(reqName + QStringLiteral("ResponseMessage")));
     }
 
@@ -285,3 +279,4 @@ bool EwsRequest::readResponseElement(QXmlStreamReader &reader)
     }
     return true;
 }
+

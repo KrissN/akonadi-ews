@@ -17,34 +17,20 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETFOLDERREQUEST_H
-#define EWSGETFOLDERREQUEST_H
+#ifndef EWSJOB_H
+#define EWSJOB_H
 
-#include "ewsfolder.h"
-#include "ewsrequest.h"
-#include "ewstypes.h"
-#include "ewsfoldershape.h"
+#include <KCoreAddons/KCompositeJob>
 
-class EwsGetFolderRequest : public EwsRequest
+class EwsJob : public KCompositeJob
 {
     Q_OBJECT
 public:
-    EwsGetFolderRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsGetFolderRequest();
-
-    void setFolderId(const EwsId &id);
-    void setFolderShape(const EwsFolderShape &shape);
-
-    virtual void start();
-
-    const EwsFolder* folder() const { return mFolder; };
+    EwsJob(QObject *parent);
+    virtual ~EwsJob();
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseFoldersResponse(QXmlStreamReader &reader);
-private:
-    EwsId mId;
-    EwsFolderShape mShape;
-    EwsFolder *mFolder;
+    virtual bool doKill() Q_DECL_OVERRIDE;
+    bool setErrorMsg(const QString msg);
 };
 
 #endif
