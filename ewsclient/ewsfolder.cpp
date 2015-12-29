@@ -30,6 +30,10 @@ class EwsFolderPrivate : public EwsItemBasePrivate
 public:
     EwsFolderPrivate();
     EwsFolderPrivate(const EwsItemBasePrivate &other);
+    virtual EwsItemBasePrivate *clone() const Q_DECL_OVERRIDE
+    {
+        return new EwsFolderPrivate(*this);
+    }
 
     EwsFolderType mType;
     EwsFolder *mParent;
@@ -42,7 +46,7 @@ EwsFolderPrivate::EwsFolderPrivate()
 }
 
 EwsFolder::EwsFolder()
-    : EwsItemBase()
+    : EwsItemBase(QSharedDataPointer<EwsItemBasePrivate>(new EwsFolderPrivate()))
 {
 }
 

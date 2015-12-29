@@ -30,6 +30,8 @@ public:
     EwsItemBasePrivate();
     virtual ~EwsItemBasePrivate();
 
+    virtual EwsItemBasePrivate *clone() const = 0;
+
     template <typename T> static T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
     {
         unsigned i;
@@ -54,4 +56,9 @@ public:
     QHash<EwsPropertyField, QString> mProperties;
 };
 
+template <>
+Q_INLINE_TEMPLATE EwsItemBasePrivate *QSharedDataPointer<EwsItemBasePrivate>::clone()
+{
+    return d->clone();
+}
 #endif

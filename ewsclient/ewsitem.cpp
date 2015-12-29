@@ -38,6 +38,11 @@ class EwsItemPrivate : public EwsItemBasePrivate
 public:
     EwsItemPrivate();
     EwsItemPrivate(const EwsItemBasePrivate &other);
+    virtual EwsItemBasePrivate *clone() const Q_DECL_OVERRIDE
+    {
+        return new EwsItemPrivate(*this);
+    }
+
 
     EwsItemType mType;
 };
@@ -112,6 +117,18 @@ EwsItem::EwsItem(EwsItem &&other)
 
 EwsItem::~EwsItem()
 {
+}
+
+EwsItem& EwsItem::operator=(const EwsItem &other)
+{
+    d = other.d;
+    return *this;
+}
+
+EwsItem& EwsItem::operator=(EwsItem &&other)
+{
+    d = std::move(other.d);
+    return *this;
 }
 
 EwsItemType EwsItem::type() const
