@@ -49,6 +49,7 @@ add_definitions(-DTRANSLATION_DOMAIN=\"akonadi_ews_resource\")
 
 set(ewsresource_SRCS
     configdialog.cpp
+    ewsfetchitemsjob.cpp
     ewsresource.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
