@@ -132,6 +132,12 @@ bool EwsFindFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
         }
     }
 
+    // Finish the Folders element
+    reader.skipCurrentElement();
+
+    // Finish the RootFolder element
+    reader.skipCurrentElement();
+
     return true;
 }
 

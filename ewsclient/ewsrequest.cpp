@@ -201,31 +201,29 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                         .arg(QStringLiteral("ResponseMessages")));
     }
 
-    if (!reader.readNextStartElement()) {
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
-                        .arg(QStringLiteral("ResponseMessages")));
-    }
-
-    if (reader.name() != reqName + QStringLiteral("ResponseMessage")
-        || reader.namespaceUri() != ewsMsgNsUri) {
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")
-                        .arg(reqName + QStringLiteral("ResponseMessage")));
-    }
-
-    if (!readResponseAttr(reader.attributes()))
-        return false;
-
     while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
-                            .arg(QStringLiteral("ResponseMessage"))
-                            << reader.namespaceUri();
-            return false;
+        qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("  Got %1 element").arg(reader.name().toString());
+        if (reader.name() != reqName + QStringLiteral("ResponseMessage")
+            || reader.namespaceUri() != ewsMsgNsUri) {
+            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")
+                            .arg(reqName + QStringLiteral("ResponseMessage")));
         }
 
-        if (!readResponseElement(reader)) {
-            if (!contentReader(reader))
+        if (!readResponseAttr(reader.attributes()))
+            return false;
+
+        while (reader.readNextStartElement()) {
+            if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
+                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
+                                .arg(QStringLiteral("ResponseMessage"))
+                                << reader.namespaceUri();
                 return false;
+            }
+
+            if (!readResponseElement(reader)) {
+                if (!contentReader(reader))
+                    return false;
+            }
         }
     }
 

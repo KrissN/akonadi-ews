@@ -89,5 +89,8 @@ bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
     if (!mFolder->isValid())
         return setErrorMsg(QStringLiteral("Failed to read EWS request - invalid Folder element."));
 
+    // Finish the Folders element
+    reader.skipCurrentElement();
+
     return true;
 }

@@ -123,6 +123,12 @@ bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader)
         }
     }
 
+    // Finish the Items element
+    reader.skipCurrentElement();
+
+    // Finish the RootFolder element
+    reader.skipCurrentElement();
+
     return true;
 }
 
