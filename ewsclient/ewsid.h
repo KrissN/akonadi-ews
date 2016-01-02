@@ -67,6 +67,7 @@ public:
     bool operator==(const EwsId &other) const;
 
     void writeFolderIds(QXmlStreamWriter &writer) const;
+    void writeItemIds(QXmlStreamWriter &writer) const;
 private:
     Type mType;
     QString mId;

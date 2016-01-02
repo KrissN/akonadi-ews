@@ -17,7 +17,10 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <ewsid.h>
+#include "ewsid.h"
+
+#include <QtCore/QString>
+
 
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
@@ -117,10 +120,23 @@ void EwsId::writeFolderIds(QXmlStreamWriter &writer) const
     else if (mType == Real) {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
         writer.writeAttribute(QStringLiteral("Id"), mId);
-        if (~mChangeKey.isEmpty()) {
+        if (!mChangeKey.isEmpty()) {
             writer.writeAttribute(QStringLiteral("ChangeKey"), mChangeKey);
         }
         writer.writeEndElement();
     }
 }
+
+void EwsId::writeItemIds(QXmlStreamWriter &writer) const
+{
+    if (mType == Real) {
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ItemId"));
+        writer.writeAttribute(QStringLiteral("Id"), mId);
+        if (!mChangeKey.isEmpty()) {
+            writer.writeAttribute(QStringLiteral("ChangeKey"), mChangeKey);
+        }
+        writer.writeEndElement();
+    }
+}
+
 
