@@ -23,6 +23,7 @@ set(EWSCLIENT_SRCS
   ewsfolder.cpp
   ewsfoldershape.cpp
   ewsgetfolderrequest.cpp
+  ewsgetitemrequest.cpp
   ewsid.cpp
   ewsitem.cpp
   ewsitembase.cpp
