@@ -76,7 +76,7 @@ bool EwsGetItemRequest::parseResult(QXmlStreamReader &reader)
 bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Folders element (got %1).")
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")
                         .arg(reader.qualifiedName().toString()));
 
     if (!reader.readNextStartElement())
