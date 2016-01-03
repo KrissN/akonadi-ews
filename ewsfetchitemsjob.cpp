@@ -272,6 +272,11 @@ void EwsFetchItemsJob::mailItemFetchDone(KJob *job)
         Q_FOREACH(const EwsItem &ewsItem, itemReq->items()) {
             Item item = *it;
 
+            if (!ewsItem.isValid()) {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
+                continue;
+            }
+
             KMime::Message::Ptr msg(new KMime::Message);
 
             // Rebuild the message headers
