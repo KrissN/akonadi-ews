@@ -376,4 +376,10 @@ typedef enum {
     EwsItemFieldBodyIsHtml,
 } EwsItemFields;
 
+typedef enum {
+    EwsItemImportanceLow,
+    EwsItemImportanceNormal,
+    EwsItemImportanceHigh
+} EwsItemImportance;
+
 #endif

@@ -31,6 +31,8 @@ class EwsItem : public EwsItemBase
 {
 public:
     typedef QList<EwsItem> List;
+    typedef QMultiMap<QString, QString> HeaderMap;
+
     EwsItem(QXmlStreamReader &reader);
     EwsItem(const EwsItem &other);
     EwsItem(EwsItem &&other);
@@ -42,6 +44,11 @@ public:
     EwsItemType type() const;
 protected:
     bool readBaseItemElement(QXmlStreamReader &reader);
+    bool readMessageHeaders(QXmlStreamReader &reader);
+    bool readRecipients(QXmlStreamReader &reader, EwsItemFields field);
+    bool readBoolean(QXmlStreamReader &reader, EwsItemFields field);
 };
+
+Q_DECLARE_METATYPE(EwsItem::HeaderMap)
 
 #endif
