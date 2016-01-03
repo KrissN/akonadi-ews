@@ -44,6 +44,8 @@ public:
 private Q_SLOTS:
     void localItemFetchDone(KJob *job);
     void remoteItemFetchDone(KJob *job);
+    void mailItemFetchDone(KJob *job);
+    void otherItemFetchDone(KJob *job);
 private:
     void compareItemLists();
 
@@ -51,7 +53,7 @@ private:
     EwsClient& mClient;
     Akonadi::Item::List mLocalItems;
     QList<EwsItem> mRemoteItems;
-    int mJobsFinished;
+    int mPendingJobs;
 
     Akonadi::Item::List mChangedItems;
     Akonadi::Item::List mDeletedItems;
