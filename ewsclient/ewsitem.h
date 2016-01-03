@@ -33,6 +33,7 @@ public:
     typedef QList<EwsItem> List;
     typedef QMultiMap<QString, QString> HeaderMap;
 
+    EwsItem();
     EwsItem(QXmlStreamReader &reader);
     EwsItem(const EwsItem &other);
     EwsItem(EwsItem &&other);

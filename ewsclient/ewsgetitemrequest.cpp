@@ -76,24 +76,33 @@ bool EwsGetItemRequest::parseResult(QXmlStreamReader &reader)
 
 bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
 {
-    if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")
-                        .arg(reader.qualifiedName().toString()));
+    if (responseClass == EwsResponseSuccess) {
+        if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
+            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")
+                            .arg(reader.qualifiedName().toString()));
 
-    if (!reader.readNextStartElement())
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in Items element."));
+        if (!reader.readNextStartElement())
+            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in Items element."));
 
-    if (reader.namespaceUri() != ewsTypeNsUri)
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
+        if (reader.namespaceUri() != ewsTypeNsUri)
+            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
 
-    EwsItem item(reader);
-    if (!item.isValid()) {
-        return setErrorMsg(QStringLiteral("Failed to read EWS request - invalid Item element."));
+        EwsItem item(reader);
+        if (!item.isValid()) {
+            return setErrorMsg(QStringLiteral("Failed to read EWS request - invalid Item element."));
+        }
+        mItems.append(item);
+
+        // Finish the Items element.
+        reader.skipCurrentElement();
     }
-    mItems.append(item);
-
-    // Finish the Items element.
-    reader.skipCurrentElement();
-
+    else {
+        // An error occurred for one of the items. Don't cause the whole request to fail, but rather
+        // insert an empty item to indicate that something went wrong.
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1.").arg(mItems.size());
+        EwsItem item;
+        mItems.append(item);
+        reader.skipCurrentElement();
+    }
     return true;
 }

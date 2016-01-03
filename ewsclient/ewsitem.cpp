@@ -59,6 +59,11 @@ EwsItemPrivate::EwsItemPrivate()
 {
 }
 
+EwsItem::EwsItem()
+    : EwsItemBase(QSharedDataPointer<EwsItemBasePrivate>(new EwsItemPrivate()))
+{
+}
+
 EwsItem::EwsItem(QXmlStreamReader &reader)
     : EwsItemBase(QSharedDataPointer<EwsItemBasePrivate>(new EwsItemPrivate()))
 {
