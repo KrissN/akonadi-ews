@@ -29,7 +29,6 @@ set(EWSCLIENT_SRCS
   ewsitembase.cpp
   ewsitemshape.cpp
   ewsjob.cpp
-  ewsjobqueue.cpp
   ewsmailbox.cpp
   ewspropertyfield.cpp
   ewsrequest.cpp

@@ -4,10 +4,9 @@
 #include "ewsclient.h"
 
 #include "ewsrequestwriter.h"
-#include "ewsjobqueue.h"
 
 EwsClient::EwsClient(QObject *parent)
-    : QObject(parent), mJobQueue(new EwsJobQueue(this))
+    : QObject(parent)
 {
     
 }

@@ -20,7 +20,6 @@
 #include "ewsrequest.h"
 
 #include "ewsclient.h"
-#include "ewsjobqueue.h"
 #include "ewsclient_debug.h"
 
 static const QString ewsReqVersion = QStringLiteral("Exchange2010");
@@ -37,7 +36,7 @@ EwsRequest::~EwsRequest()
 void EwsRequest::doSend()
 {
     Q_FOREACH(KJob *job, subjobs()) {
-        mClient.mJobQueue->enqueue(job);
+        job->start();
     }
 }
 
@@ -177,7 +176,7 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 {
     Q_UNUSED(job);
 
-    qCDebug(EWSCLIENT_LOG) << "data" << data;
+    qCDebug(EWSCLIENT_LOG) << "data" << job << data;
     mResponseData += QString::fromUtf8(data);
 }
 

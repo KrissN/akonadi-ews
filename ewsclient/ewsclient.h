@@ -25,8 +25,6 @@
 #include <QtCore/QPointer>
 #include <QtCore/QUrl>
 
-class EwsJobQueue;
-
 class EwsClient : public QObject
 {
     Q_OBJECT
@@ -65,8 +63,6 @@ private:
     QUrl mUrl;
     QString mUsername;
     QString mPassword;
-
-    QPointer<EwsJobQueue> mJobQueue;
 
     friend class EwsRequest;
 };
