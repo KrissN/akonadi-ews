@@ -42,7 +42,7 @@ public:
     const EwsItem::List items() const { return mItems; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseItemsResponse(QXmlStreamReader &reader);
+    bool parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass);
 private:
     EwsId::List mIds;
     EwsItemShape mShape;

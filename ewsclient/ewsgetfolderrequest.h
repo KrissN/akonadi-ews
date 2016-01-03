@@ -40,7 +40,7 @@ public:
     const EwsFolder* folder() const { return mFolder; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseFoldersResponse(QXmlStreamReader &reader);
+    bool parseFoldersResponse(QXmlStreamReader &reader, EwsResponseClass responseClass);
 private:
     EwsId mId;
     EwsFolderShape mShape;

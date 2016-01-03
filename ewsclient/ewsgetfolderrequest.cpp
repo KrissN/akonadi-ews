@@ -70,11 +70,14 @@ void EwsGetFolderRequest::start()
 bool EwsGetFolderRequest::parseResult(QXmlStreamReader &reader)
 {
     return parseResponseMessage(reader, QStringLiteral("GetFolder"),
-                                [this](QXmlStreamReader &reader){return parseFoldersResponse(reader);});
+                                [this](QXmlStreamReader &reader, EwsResponseClass responseClass)
+                                {return parseFoldersResponse(reader, responseClass);});
 }
 
-bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
+bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
 {
+    Q_UNUSED(responseClass);    // TODO: Handle errors
+
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Folders"))
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Folders element (got %1).")
                         .arg(reader.qualifiedName().toString()));

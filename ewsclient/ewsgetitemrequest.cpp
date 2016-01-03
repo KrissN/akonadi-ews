@@ -70,10 +70,11 @@ void EwsGetItemRequest::start()
 bool EwsGetItemRequest::parseResult(QXmlStreamReader &reader)
 {
     return parseResponseMessage(reader, QStringLiteral("GetItem"),
-                                [this](QXmlStreamReader &reader){return parseItemsResponse(reader);});
+                                [this](QXmlStreamReader &reader, EwsResponseClass responseClass)
+                                {return parseItemsResponse(reader, responseClass);});
 }
 
-bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
+bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
 {
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")

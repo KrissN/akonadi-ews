@@ -25,7 +25,7 @@
 static const QString ewsReqVersion = QStringLiteral("Exchange2010");
 
 EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
-    : EwsJob(parent), mResponseClass(EwsResponseError), mClient(client)
+    : EwsJob(parent), mClient(client)
 {
 }
 
@@ -181,7 +181,7 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 }
 
 bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
-                          std::function<bool(QXmlStreamReader &reader)> contentReader)
+                          std::function<bool(QXmlStreamReader &reader, EwsResponseClass responseClass)> contentReader)
 {
     if (reader.name() != reqName + QStringLiteral("Response")
         || reader.namespaceUri() != ewsMsgNsUri) {
@@ -208,7 +208,9 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                             .arg(reqName + QStringLiteral("ResponseMessage")));
         }
 
-        if (!readResponseAttr(reader.attributes()))
+        EwsResponseClass responseClass;
+
+        if (!readResponseAttr(reader.attributes(), responseClass))
             return false;
 
         while (reader.readNextStartElement()) {
@@ -219,8 +221,9 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                 return false;
             }
 
+
             if (!readResponseElement(reader)) {
-                if (!contentReader(reader))
+                if (!contentReader(reader, responseClass))
                     return false;
             }
         }
@@ -229,7 +232,7 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
     return true;
 }
 
-bool EwsRequest::readResponseAttr(const QXmlStreamAttributes &attrs)
+bool EwsRequest::readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass)
 {
     static const QString respClasses[] = {
         QStringLiteral("Success"),
@@ -246,7 +249,7 @@ bool EwsRequest::readResponseAttr(const QXmlStreamAttributes &attrs)
     unsigned i;
     for (i = 0; i < sizeof(respClasses) / sizeof(respClasses[0]); i++) {
         if (respClassRef == respClasses[i]) {
-            mResponseClass = static_cast<EwsResponseClass>(i);
+            responseClass = static_cast<EwsResponseClass>(i);
             break;
         }
     }

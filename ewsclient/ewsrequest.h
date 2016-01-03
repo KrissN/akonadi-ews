@@ -49,10 +49,10 @@ protected:
     void startSoapDocument(QXmlStreamWriter &writer);
     void endSoapDocument(QXmlStreamWriter &writer);
     bool parseResponseMessage(QXmlStreamReader &reader, QString reqName,
-                              std::function<bool(QXmlStreamReader &reader)> contentReader);
+                              std::function<bool(QXmlStreamReader &reader,
+                                  EwsResponseClass responseClass)> contentReader);
 
     KIO::MetaData mMd;
-    EwsResponseClass mResponseClass;
     QString mResponseCode;
     QString mResponseMessage;
 private Q_SLOTS:
@@ -62,7 +62,7 @@ private:
     bool readResponse(QXmlStreamReader &reader);
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
-    bool readResponseAttr(const QXmlStreamAttributes &attrs);
+    bool readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass);
     bool readResponseElement(QXmlStreamReader &reader);
 
     QString mResponseData;

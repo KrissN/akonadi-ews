@@ -79,11 +79,14 @@ void EwsFindItemRequest::start()
 bool EwsFindItemRequest::parseResult(QXmlStreamReader &reader)
 {
     return parseResponseMessage(reader, QStringLiteral("FindItem"),
-                                [this](QXmlStreamReader &reader){return parseItemsResponse(reader);});
+                                [this](QXmlStreamReader &reader, EwsResponseClass responseClass)
+                                {return parseItemsResponse(reader, responseClass);});
 }
 
-bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader)
+bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
 {
+    Q_UNUSED(responseClass);    // TODO: Handle errors
+
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("RootFolder"))
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
                         .arg(QStringLiteral("RootFolder")).arg(reader.qualifiedName().toString()));

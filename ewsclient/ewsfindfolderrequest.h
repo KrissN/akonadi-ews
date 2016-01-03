@@ -41,7 +41,7 @@ public:
     const QList<EwsFolder> folders() const { return mFolders; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
-    bool parseFoldersResponse(QXmlStreamReader &reader);
+    bool parseFoldersResponse(QXmlStreamReader &reader, EwsResponseClass responseClass);
     unsigned readChildFolders(EwsFolder &parent, unsigned count, QXmlStreamReader &reader);
     EwsFolder* readFolder(QXmlStreamReader &reader);
 private:
