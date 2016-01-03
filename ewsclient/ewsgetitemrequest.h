@@ -34,19 +34,19 @@ public:
     EwsGetItemRequest(EwsClient &client, QObject *parent);
     virtual ~EwsGetItemRequest();
 
-    void setItemIds(const QList<EwsId> &ids);
+    void setItemIds(const EwsId::List &ids);
     void setItemShape(const EwsItemShape &shape);
 
     virtual void start();
 
-    const QList<EwsItem> items() const { return mItems; };
+    const EwsItem::List items() const { return mItems; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
-    QList<EwsId> mIds;
+    EwsId::List mIds;
     EwsItemShape mShape;
-    QList<EwsItem> mItems;
+    EwsItem::List mItems;
 };
 
 #endif

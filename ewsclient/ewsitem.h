@@ -20,7 +20,8 @@
 #ifndef EWSITEM_H
 #define EWSITEM_H
 
-#include <QXmlStreamReader>
+#include <QtCore/QXmlStreamReader>
+#include <QtCore/QList>
 
 #include "ewsitembase.h"
 
@@ -29,6 +30,7 @@ class EwsItemPrivate;
 class EwsItem : public EwsItemBase
 {
 public:
+    typedef QList<EwsItem> List;
     EwsItem(QXmlStreamReader &reader);
     EwsItem(const EwsItem &other);
     EwsItem(EwsItem &&other);

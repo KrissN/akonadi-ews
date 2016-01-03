@@ -49,6 +49,9 @@ public:
         Real,
         Unspecified
     };
+
+    typedef QList<EwsId> List;
+
     EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
     EwsId(QString id, QString changeKey) : mType(Real), mId(id), mChangeKey(changeKey),
                     mDid(EwsDIdCalendar) {};
@@ -76,5 +79,6 @@ private:
 };
 
 Q_DECLARE_METATYPE(EwsId)
+Q_DECLARE_METATYPE(EwsId::List)
 
 #endif

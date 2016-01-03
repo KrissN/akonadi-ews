@@ -29,7 +29,7 @@ EwsGetItemRequest::~EwsGetItemRequest()
 {
 }
 
-void EwsGetItemRequest::setItemIds(const QList<EwsId> &ids)
+void EwsGetItemRequest::setItemIds(const EwsId::List &ids)
 {
     mIds = ids;
 }
