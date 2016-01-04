@@ -30,6 +30,8 @@
 
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
+#include "ewsfindfolderrequest.h"
+#include "ewsgetitemrequest.h"
 #include "configdialog.h"
 #include "settings.h"
 
@@ -85,7 +87,18 @@ void EwsResource::retrieveItems(const Collection &collection)
 bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts)
 {
     qDebug() << "retrieveItem";
-    return false;
+    EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
+    EwsId::List ids;
+    ids << EwsId(item.remoteId(), item.remoteRevision());
+    req->setItemIds(ids);
+    EwsItemShape shape(EwsShapeIdOnly);
+    shape << EwsPropertyField("item:MimeContent");
+    req->setItemShape(shape);
+    req->setProperty("item", QVariant::fromValue<Item>(item));
+    connect(req, &EwsGetItemRequest::result, req,
+            [this](KJob *job){getItemRequestFinished(qobject_cast<EwsGetItemRequest*>(job));});
+    req->start();
+    return true;
 }
 
 void EwsResource::configure(WId windowId)
@@ -187,6 +200,61 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     }
     else {
         itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
+    }
+}
+
+void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
+{
+    qDebug() << "getItemRequestFinished";
+
+    if (req->error()) {
+        qWarning() << "ERROR" << req->errorString();
+        cancelTask(req->errorString());
+        return;
+    }
+
+    Item item = req->property("item").value<Item>();
+    EwsItem ewsItem = req->items()[0];
+    QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
+    if (mimeContent.isEmpty()) {
+        qWarning() << QStringLiteral("MIME content is empty!");
+        cancelTask(QStringLiteral("MIME content is empty!"));
+        return;
+    }
+
+    mimeContent.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+
+    if (ewsItem.isValid()) {
+        switch (ewsItem.type()) {
+        case EwsItemTypeMessage:
+        case EwsItemTypeMeetingMessage:
+        case EwsItemTypeMeetingRequest:
+        case EwsItemTypeMeetingResponse:
+        case EwsItemTypeMeetingCancellation:
+        {
+            KMime::Message::Ptr msg(new KMime::Message);
+            msg->setContent(mimeContent.toLatin1());
+            msg->parse();
+            qDebug() << msg->head();
+            qDebug() << msg->body();
+            item.setPayload<KMime::Message::Ptr>(msg);
+            qDebug() << item.availablePayloadParts();
+            break;
+        }
+        case EwsItemTypeContact:
+
+            break;
+        case EwsItemTypeCalendarItem:
+
+            break;
+        case EwsItemTypeTask:
+
+            break;
+        default:
+            // No idea what kind of item it is - skip it.
+            break;
+        }
+        itemRetrieved(item);
     }
 }
 
