@@ -191,7 +191,7 @@ void EwsFetchItemsJob::compareItemLists()
     for (QHash<QString, EwsItem>::const_iterator it = remoteIds.cbegin();
         it != remoteIds.cend(); it++) {
         QString mimeType;
-        bool email;
+        bool email = false;
         switch (it->type()) {
         case EwsItemTypeMessage:
         case EwsItemTypeMeetingMessage:
@@ -233,7 +233,7 @@ void EwsFetchItemsJob::compareItemLists()
         qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Fetching %1 mail items").arg(toFetchMailIds.size());
         int i;
         for (i = 0; i < toFetchMailIds.size(); i += fetchBatchSize) {
-            EwsId::List batchList = toFetchMailIds.mid(i, i + fetchBatchSize);
+            EwsId::List batchList = toFetchMailIds.mid(i, fetchBatchSize);
             EwsGetItemRequest *itemReq = new EwsGetItemRequest(mClient, this);
             itemReq->setItemIds(batchList);
             EwsItemShape shape(EwsShapeIdOnly);
@@ -248,7 +248,7 @@ void EwsFetchItemsJob::compareItemLists()
             shape << EwsPropertyField("item:HasAttachments");
             itemReq->setItemShape(shape);
             itemReq->setProperty("itemList",
-                QVariant::fromValue<Item::List>(toFetchMailItems.mid(i, i + fetchBatchSize)));
+                QVariant::fromValue<Item::List>(toFetchMailItems.mid(i, fetchBatchSize)));
             connect(itemReq, SIGNAL(result(KJob*)), SLOT(mailItemFetchDone(KJob*)));
             mPendingJobs++;
             addSubjob(itemReq);
@@ -258,15 +258,15 @@ void EwsFetchItemsJob::compareItemLists()
     if (!toFetchOtherIds.isEmpty()) {
         qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Fetching %1 non-mail items").arg(toFetchOtherIds.size());
         int i;
-        for (i = 0; i < toFetchMailIds.size(); i += fetchBatchSize) {
-            EwsId::List batchList = toFetchOtherIds.mid(i, i + fetchBatchSize);
+        for (i = 0; i < toFetchOtherIds.size(); i += fetchBatchSize) {
+            EwsId::List batchList = toFetchOtherIds.mid(i, fetchBatchSize);
             EwsGetItemRequest *itemReq = new EwsGetItemRequest(mClient, this);
             itemReq->setItemIds(batchList);
             EwsItemShape shape(EwsShapeIdOnly);
             shape << EwsPropertyField("item:MimeContent");
             itemReq->setItemShape(shape);
             itemReq->setProperty("itemList",
-                QVariant::fromValue<Item::List>(toFetchOtherItems.mid(i, i + fetchBatchSize)));
+                QVariant::fromValue<Item::List>(toFetchOtherItems.mid(i, fetchBatchSize)));
             connect(itemReq, SIGNAL(result(KJob*)), SLOT(otherItemFetchDone(KJob*)));
             mPendingJobs++;
             addSubjob(itemReq);
