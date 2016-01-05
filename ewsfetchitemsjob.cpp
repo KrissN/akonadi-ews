@@ -37,7 +37,8 @@
 
 using namespace Akonadi;
 
-static Q_CONSTEXPR int fetchBatchSize = 20;
+static Q_CONSTEXPR int listBatchSize = 100;
+static Q_CONSTEXPR int fetchBatchSize = 10;
 
 /**
  * The fetch items job is processed in two stages.
@@ -72,6 +73,17 @@ void EwsFetchItemsJob::start()
     findItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
     EwsItemShape shape(EwsShapeIdOnly);
     findItemsReq->setItemShape(shape);
+    /* Use paged listing instead of querying the full list at once. This not only prevents long
+     * single requests going through the network but is necessary to properly retrieve calendar
+     * items.
+     *
+     * According to EWS documentation listing calendar items behaves differently for recurring items
+     * depending on the usage of paging. Without paging the listing will return all occurrences of
+     * recurring items, while a paged view will only return recurring masters and exceptions.
+     *
+     * https://msdn.microsoft.com/EN-US/library/office/dn727655(v=exchg.150).aspx
+     */
+    findItemsReq->setPagination(EwsBasePointBeginning, 0, listBatchSize);
     connect(findItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
     addSubjob(findItemsReq);
 
@@ -118,10 +130,24 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
     }
 
     if (!itemReq->error()) {
-        mRemoteItems = itemReq->items();
-        mPendingJobs--;
-        if (mPendingJobs == 0) {
-            compareItemLists();
+        mRemoteItems += itemReq->items();
+
+        if (!itemReq->includesLastItem()) {
+            // More items to come - start a request for the next batch.
+            EwsFindItemRequest *findItemsReq = new EwsFindItemRequest(mClient, this);
+            findItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+            EwsItemShape shape(EwsShapeIdOnly);
+            findItemsReq->setItemShape(shape);
+            findItemsReq->setPagination(EwsBasePointBeginning, itemReq->nextOffset(), listBatchSize);
+            connect(findItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
+            addSubjob(findItemsReq);
+            findItemsReq->start();
+        }
+        else {
+            mPendingJobs--;
+            if (mPendingJobs == 0) {
+                compareItemLists();
+            }
         }
     }
 }
