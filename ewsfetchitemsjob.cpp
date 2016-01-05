@@ -23,8 +23,12 @@
 #include <KMime/HeaderParsing>
 #include <KCalCore/Event>
 #include <KCalCore/Todo>
+#include <KCalCore/ICalFormat>
+#include <KCalCore/MemoryCalendar>
+#include <KCalCore/ICalTimeZones>
 #include <KContacts/Addressee>
 #include <KContacts/ContactGroup>
+#include <KContacts/VCardConverter>
 #include <AkonadiCore/ItemFetchJob>
 #include <AkonadiCore/ItemFetchScope>
 #include <Akonadi/KMime/MessageFlags>
@@ -407,16 +411,69 @@ void EwsFetchItemsJob::mailItemFetchDone(KJob *job)
 void EwsFetchItemsJob::otherItemFetchDone(KJob *job)
 {
     EwsGetItemRequest *itemReq = qobject_cast<EwsGetItemRequest*>(job);
+    KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar("Europe/Poland"));
 
-    if (!itemReq) {
+    if (Q_UNLIKELY(!itemReq)) {
         setErrorMsg(QStringLiteral("Invalid get item request pointer."));
         doKill();
         emitResult();
     }
 
-    if (!itemReq->error()) {
+    if (Q_LIKELY(!itemReq->error())) {
 
-        // TODO: Implement
+        Item::List items = itemReq->property("itemList").value<Item::List>();
+        Item::List::iterator it = items.begin();
+        Q_ASSERT(items.size() == itemReq->items().size());
+
+        Q_FOREACH(const EwsItem &ewsItem, itemReq->items()) {
+            Item item = *it;
+
+            if (!ewsItem.isValid()) {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
+                continue;
+            }
+
+            switch (ewsItem.type()) {
+            case EwsItemTypeMessage:
+            case EwsItemTypeMeetingMessage:
+            case EwsItemTypeMeetingRequest:
+            case EwsItemTypeMeetingResponse:
+            case EwsItemTypeMeetingCancellation:
+            {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected e-mail message");
+                break;
+            }
+            case EwsItemTypeContact:
+            {
+                KContacts::VCardConverter converter;
+                KContacts::Addressee contact = converter.parseVCard(ewsItem[EwsItemFieldMimeContent].toString().toLatin1());
+                item.setPayload<KContacts::Addressee>(contact);
+                mChangedItems.append(item);
+                break;
+            }
+            case EwsItemTypeCalendarItem:
+            case EwsItemTypeTask:
+            {
+                QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
+                mimeContent.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+                KCalCore::ICalFormat format;
+                KCalCore::Incidence::Ptr event(format.fromString(mimeContent));
+                format.fromString(memcal, mimeContent);
+                KCalCore::ICalTimeZones::ZoneMap zonemap = memcal->timeZones()->zones();
+                KCalCore::ICalTimeZones::ZoneMap::const_iterator it;
+                for (it = zonemap.cbegin(); it != zonemap.cend(); it++) {
+                    qDebug() << "Zone" << it.key() << it.value().name();
+                }
+                qDebug() << event->summary();
+                item.setPayload<KCalCore::Incidence::Ptr>(event);
+                mChangedItems.append(item);
+                break;
+            }
+            default:
+                // No idea what kind of item it is - skip it.
+                break;
+            }
+        }
 
         mPendingJobs--;
         if (mPendingJobs == 0) {
