@@ -59,7 +59,7 @@ static Q_CONSTEXPR int fetchBatchSize = 10;
  */
 
 EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client, QObject *parent)
-    : EwsJob(parent), mCollection(collection), mClient(client), mPendingJobs(0)
+    : EwsJob(parent), mCollection(collection), mClient(client), mPendingJobs(0), mTotalItems(0)
 {
     qCDebugNC(EWSCLIENT_LOG) << mCollection.name();
 
@@ -161,6 +161,9 @@ void EwsFetchItemsJob::compareItemLists()
     /* Begin stage 2 - determine list of new/changed items and fetch details about them. */
     QHash<QString, EwsItem> remoteIds;
 
+    Q_EMIT status(1, QStringLiteral("Retrieving items"));
+    Q_EMIT percent(0);
+
     Q_FOREACH(const EwsItem &item, mRemoteItems) {
         EwsId id = item[EwsItemFieldItemId].value<EwsId>();
         remoteIds.insert(id.id(), item);
@@ -232,6 +235,8 @@ void EwsFetchItemsJob::compareItemLists()
             toFetchOtherItems.append(item);
         }
     }
+
+    mTotalItems = toFetchMailIds.size() + toFetchOtherIds.size();
 
     if (!toFetchMailIds.isEmpty()) {
         qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Fetching %1 mail items").arg(toFetchMailIds.size());
@@ -406,6 +411,7 @@ void EwsFetchItemsJob::mailItemFetchDone(KJob *job)
         }
     }
 
+    Q_EMIT percent((mChangedItems.size() * 100) / mTotalItems);
 }
 
 void EwsFetchItemsJob::otherItemFetchDone(KJob *job)
@@ -481,4 +487,5 @@ void EwsFetchItemsJob::otherItemFetchDone(KJob *job)
         }
     }
 
+    Q_EMIT percent((mChangedItems.size() * 100) / mTotalItems);
 }

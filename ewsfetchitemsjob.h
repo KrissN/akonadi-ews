@@ -46,6 +46,9 @@ private Q_SLOTS:
     void remoteItemFetchDone(KJob *job);
     void mailItemFetchDone(KJob *job);
     void otherItemFetchDone(KJob *job);
+Q_SIGNALS:
+    void status(int status, const QString &message = QString());
+    void percent(int progress);
 private:
     void compareItemLists();
 
@@ -54,6 +57,8 @@ private:
     Akonadi::Item::List mLocalItems;
     QList<EwsItem> mRemoteItems;
     int mPendingJobs;
+
+    unsigned mTotalItems;
 
     Akonadi::Item::List mChangedItems;
     Akonadi::Item::List mDeletedItems;

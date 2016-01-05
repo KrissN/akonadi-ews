@@ -56,6 +56,8 @@ EwsResource::EwsResource(const QString &id)
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
+
+    Q_EMIT status(0);
 }
 
 EwsResource::~EwsResource()
@@ -77,10 +79,13 @@ void EwsResource::retrieveCollections()
 
 void EwsResource::retrieveItems(const Collection &collection)
 {
+    Q_EMIT status(1, QStringLiteral("Retrieving item list"));
     qDebug() << "retrieveItems";
 
     EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient, this);
     connect(job, SIGNAL(finished(KJob*)), SLOT(itemFetchJobFinished(KJob*)));
+    connect(job, SIGNAL(status(int,const QString&)), SIGNAL(status(int,const QString&)));
+    connect(job, SIGNAL(percent(int)), SIGNAL(percent(int)));
     job->start();
 }
 
@@ -201,6 +206,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     else {
         itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
     }
+    Q_EMIT status(0);
 }
 
 void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
@@ -242,11 +248,8 @@ void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
             break;
         }
         case EwsItemTypeContact:
-
             break;
         case EwsItemTypeCalendarItem:
-
-            break;
         case EwsItemTypeTask:
 
             break;
