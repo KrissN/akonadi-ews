@@ -35,9 +35,29 @@ public:
     void setFolderId(const EwsId &id);
     void setItemShape(const EwsItemShape &shape);
     void setTraversal(EwsTraversalType traversal) { mTraversal = traversal; };
-    void setPagination(unsigned pageSize, unsigned page);
+    void setPagination(EwsIndexedViewBasePoint basePoint, unsigned offset, int maxItems = -1)
+    {
+        mFractional = false;
+        mMaxItems = maxItems;
+        mPageBasePoint = basePoint;
+        mPageOffset = offset;
+        mPagination = true;
+    }
+    void setFractional(unsigned numerator, unsigned denominator, int maxItems = -1)
+    {
+        mPagination = false;
+        mMaxItems = maxItems;
+        mFracNumerator = numerator;
+        mFracDenominator = denominator;
+        mFractional = true;
+    }
 
     virtual void start() Q_DECL_OVERRIDE;
+
+    bool includesLastItem() const { return mIncludesLastItem; };
+    int nextOffset() const { return mNextOffset; };
+    int nextNumerator() const { return mNextNumerator; };
+    int nextDenominator() const { return mNextDenominator; };
 
     const QList<EwsItem> items() const { return mItems; };
 protected:
@@ -48,9 +68,19 @@ private:
     EwsId mFolderId;
     EwsItemShape mShape;
     EwsTraversalType mTraversal;
-    unsigned mPageSize;
-    unsigned mPage;
+    bool mPagination;
+    EwsIndexedViewBasePoint mPageBasePoint;
+    unsigned mPageOffset;
+    bool mFractional;
+    int mMaxItems;
+    unsigned mFracNumerator;
+    unsigned mFracDenominator;
     QList<EwsItem> mItems;
+    unsigned mTotalItems;
+    int mNextOffset;
+    int mNextNumerator;
+    int mNextDenominator;
+    bool mIncludesLastItem;
 };
 
 #endif
