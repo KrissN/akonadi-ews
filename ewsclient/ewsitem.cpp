@@ -40,6 +40,14 @@ static const QString messageImportanceNames[] = {
 };
 Q_CONSTEXPR unsigned messageImportanceNameCount = sizeof(messageImportanceNames) / sizeof(messageImportanceNames[0]);
 
+static const QString calendarItemTypeNames[] = {
+    QStringLiteral("Single"),
+    QStringLiteral("Occurrence"),
+    QStringLiteral("Exception"),
+    QStringLiteral("RecurringMaster")
+};
+Q_CONSTEXPR unsigned calendarItemTypeNameCount = sizeof(calendarItemTypeNames) / sizeof(calendarItemTypeNames[0]);
+
 class EwsItemPrivate : public EwsItemBasePrivate
 {
 public:
@@ -311,6 +319,30 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     }
     else if (reader.name() == QStringLiteral("HasAttachments")) {
         if (!readBoolean(reader, EwsItemFieldHasAttachments)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("IsFromMe")) {
+        if (!readBoolean(reader, EwsItemFieldIsFromMe)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("CalendarItemType")) {
+        bool ok;
+        d->mFields[EwsItemFieldCalendarItemType] =
+                        EwsItemBasePrivate::decodeEnumString<EwsCalendarItemType>(reader.readElementText(),
+                            calendarItemTypeNames, calendarItemTypeNameCount, &ok);
+        if (reader.error() != QXmlStreamReader::NoError || !ok) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("CalendarItemType"));
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("UID")) {
+        d->mFields[EwsItemFieldUID] = reader.readElementText();
+        if (reader.error() != QXmlStreamReader::NoError) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("UID"));
             return false;
         }
     }

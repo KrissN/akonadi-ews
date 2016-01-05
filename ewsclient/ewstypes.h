@@ -382,4 +382,16 @@ typedef enum {
     EwsItemImportanceHigh
 } EwsItemImportance;
 
+typedef enum {
+    EwsBasePointBeginning,
+    EwsBasePointEnd
+} EwsIndexedViewBasePoint;
+
+typedef enum {
+    EwsCalendarItemSingle = 0,
+    EwsCalendarItemOccurrence,
+    EwsCalendarItemException,
+    EwsCalendarItemRecurringMaster
+} EwsCalendarItemType;
+
 #endif
