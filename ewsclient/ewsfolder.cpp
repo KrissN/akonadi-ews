@@ -20,6 +20,7 @@
 #include "ewsfolder.h"
 
 #include "ewsitembase_p.h"
+#include "ewseffectiverights.h"
 #include "ewsclient_debug.h"
 
 #define D_PTR EwsFolderPrivate *d = reinterpret_cast<EwsFolderPrivate*>(this->d.data());
@@ -94,6 +95,7 @@ EwsFolder::EwsFolder(QXmlStreamReader &reader)
 EwsFolder::EwsFolder(const EwsFolder &other)
     : EwsItemBase(other.d)
 {
+    qRegisterMetaType<EwsEffectiveRights>();
 }
 
 EwsFolder::EwsFolder(EwsFolder &&other)
@@ -186,8 +188,12 @@ bool EwsFolder::readBaseFolderElement(QXmlStreamReader &reader)
         reader.skipCurrentElement();
     }
     else if (reader.name() == QStringLiteral("EffectiveRights")) {
-        // Unsupported - ignore
-        reader.skipCurrentElement();
+        EwsEffectiveRights rights(reader);
+        if (!rights.isValid()) {
+            reader.skipCurrentElement();
+            return false;
+        }
+        d->mFields[EwsFolderFieldEffectiveRights] = QVariant::fromValue<EwsEffectiveRights>(rights);
     }
     else if (reader.name() == QStringLiteral("PermissionSet")) {
         // Unsupported - ignore
