@@ -91,6 +91,8 @@ void EwsResource::retrieveItems(const Collection &collection)
 
 bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts)
 {
+    Q_UNUSED(parts)
+
     qDebug() << "retrieveItem";
     EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
     EwsId::List ids;
