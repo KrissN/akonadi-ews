@@ -394,4 +394,18 @@ typedef enum {
     EwsCalendarItemRecurringMaster
 } EwsCalendarItemType;
 
+template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
+{
+    unsigned i;
+    T enumVal;
+    for (i = 0; i < count; i++) {
+        if (str == table[i]) {
+            enumVal = static_cast<T>(i);
+            break;
+        }
+    }
+    *ok = (i < count);
+    return enumVal;
+}
+
 #endif

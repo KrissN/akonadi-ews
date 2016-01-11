@@ -211,7 +211,7 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     else if (reader.name() == QStringLiteral("Sensitivity")) {
         bool ok;
         d->mFields[EwsItemFieldSensitivity] =
-                        EwsItemBasePrivate::decodeEnumString<EwsItemSensitivity>(reader.readElementText(),
+                        decodeEnumString<EwsItemSensitivity>(reader.readElementText(),
                             messageSensitivityNames, messageSensitivityNameCount, &ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
@@ -267,7 +267,7 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     else if (reader.name() == QStringLiteral("Importance")) {
         bool ok;
         d->mFields[EwsItemFieldImportance] =
-                        EwsItemBasePrivate::decodeEnumString<EwsItemImportance>(reader.readElementText(),
+                        decodeEnumString<EwsItemImportance>(reader.readElementText(),
                             messageImportanceNames, messageImportanceNameCount, &ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
@@ -330,7 +330,7 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     else if (reader.name() == QStringLiteral("CalendarItemType")) {
         bool ok;
         d->mFields[EwsItemFieldCalendarItemType] =
-                        EwsItemBasePrivate::decodeEnumString<EwsCalendarItemType>(reader.readElementText(),
+                        decodeEnumString<EwsCalendarItemType>(reader.readElementText(),
                             calendarItemTypeNames, calendarItemTypeNameCount, &ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")

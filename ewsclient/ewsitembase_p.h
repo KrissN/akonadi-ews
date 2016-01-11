@@ -32,20 +32,6 @@ public:
 
     virtual EwsItemBasePrivate *clone() const = 0;
 
-    template <typename T> static T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
-    {
-        unsigned i;
-        T enumVal;
-        for (i = 0; i < count; i++) {
-            if (str == table[i]) {
-                enumVal = static_cast<T>(i);
-                break;
-            }
-        }
-        *ok = (i < count);
-        return enumVal;
-    }
-
     // When the item, is first constructed it will only contain the id and will therefore be
     // invalid. Once updated through EWS the remaining data will be populated and the item will
     // be valid.
