@@ -31,6 +31,7 @@
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
 #include "ewsfindfolderrequest.h"
+#include "ewseffectiverights.h"
 #include "ewsgetitemrequest.h"
 #include "configdialog.h"
 #include "settings.h"
@@ -71,6 +72,7 @@ void EwsResource::retrieveCollections()
     req->setParentFolderId(EwsDIdMsgFolderRoot);
     EwsFolderShape shape;
     shape << propPidTagContainerClass;
+    shape << EwsPropertyField("folder:EffectiveRights");
     req->setFolderShape(shape);
     connect(req, &EwsFindFolderRequest::finished, req,
             [this](KJob *job){findFoldersRequestFinished(qobject_cast<EwsFindFolderRequest*>(job));});
@@ -189,7 +191,21 @@ Collection EwsResource::createFolderCollection(const EwsFolder &folder)
         break;
     }
     collection.setContentMimeTypes(mimeTypes);
-    collection.setRights(Collection::ReadOnly);
+    Collection::Rights colRights;
+    EwsEffectiveRights ewsRights = folder[EwsFolderFieldEffectiveRights].value<EwsEffectiveRights>();
+    if (ewsRights.canDelete()) {
+        colRights |= Collection::CanDeleteCollection | Collection::CanDeleteItem;
+    }
+    if (ewsRights.canModify()) {
+        colRights |= Collection::CanChangeCollection | Collection::CanChangeItem;
+    }
+    if (ewsRights.canCreateContents()) {
+        colRights |= Collection::CanCreateItem;
+    }
+    if (ewsRights.canCreateHierarchy()) {
+        colRights |= Collection::CanCreateCollection;
+    }
+    collection.setRights(colRights);
     EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
     collection.setRemoteId(id.id());
     collection.setRemoteRevision(id.changeKey());
