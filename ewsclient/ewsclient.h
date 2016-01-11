@@ -50,16 +50,12 @@ public:
         ProtectionRules
     };
 
-    void getServiceConfiguration(QVector<RequestedConfiguration> conf);
-
     QUrl url() const
     {
         return mUrl;
     }
 
 private:
-    void sendRequest(QString body);
-
     QUrl mUrl;
     QString mUsername;
     QString mPassword;
