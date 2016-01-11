@@ -58,6 +58,10 @@ public:
         return new EwsItemPrivate(*this);
     }
 
+    bool readMessageHeaders(QXmlStreamReader &reader);
+    bool readMailbox(QXmlStreamReader &reader, EwsItemFields field);
+    bool readRecipients(QXmlStreamReader &reader, EwsItemFields field);
+    bool readBoolean(QXmlStreamReader &reader, EwsItemFields field);
 
     EwsItemType mType;
 };
@@ -163,6 +167,8 @@ EwsItemType EwsItem::type() const
 
 bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
 {
+    EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
+
     if (reader.name() == QStringLiteral("MimeContent")) {
         d->mFields[EwsItemFieldMimeContent] = KCodecs::base64Decode(reader.readElementText().toLatin1());
         if (reader.error() != QXmlStreamReader::NoError) {
@@ -255,7 +261,7 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
         }
     }
     else if (reader.name() == QStringLiteral("InternetMessageHeaders")) {
-        if (!readMessageHeaders(reader)) {
+        if (!d->readMessageHeaders(reader)) {
             return false;
         }
     }
@@ -276,54 +282,37 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
         }
     }
     else if (reader.name() == QStringLiteral("From")) {
-        if (!reader.readNextStartElement()) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - expected Mailbox element inside %1 element.")
-                                        .arg(QStringLiteral("From"));
+        if (!d->readMailbox(reader, EwsItemFieldFrom)) {
             return false;
         }
-
-        if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
-            return false;
-        }
-        EwsMailbox mbox(reader);
-        if (!mbox.isValid()) {
-            return false;
-        }
-
-        d->mFields[EwsItemFieldFrom] = QVariant::fromValue<EwsMailbox>(mbox);
-
-        // Leave the From element
-        reader.skipCurrentElement();
     }
     else if (reader.name() == QStringLiteral("ToRecipients")) {
-        if (!readRecipients(reader, EwsItemFieldToRecipients)) {
+        if (!d->readRecipients(reader, EwsItemFieldToRecipients)) {
             return false;
         }
     }
     else if (reader.name() == QStringLiteral("CcRecipients")) {
-        if (!readRecipients(reader, EwsItemFieldCcRecipients)) {
+        if (!d->readRecipients(reader, EwsItemFieldCcRecipients)) {
             return false;
         }
     }
     else if (reader.name() == QStringLiteral("BccRecipients")) {
-        if (!readRecipients(reader, EwsItemFieldBccRecipients)) {
+        if (!d->readRecipients(reader, EwsItemFieldBccRecipients)) {
             return false;
         }
     }
     else if (reader.name() == QStringLiteral("IsRead")) {
-        if (!readBoolean(reader, EwsItemFieldIsRead)) {
+        if (!d->readBoolean(reader, EwsItemFieldIsRead)) {
             return false;
         }
     }
     else if (reader.name() == QStringLiteral("HasAttachments")) {
-        if (!readBoolean(reader, EwsItemFieldHasAttachments)) {
+        if (!d->readBoolean(reader, EwsItemFieldHasAttachments)) {
             return false;
         }
     }
     else if (reader.name() == QStringLiteral("IsFromMe")) {
-        if (!readBoolean(reader, EwsItemFieldIsFromMe)) {
+        if (!d->readBoolean(reader, EwsItemFieldIsFromMe)) {
             return false;
         }
     }
@@ -379,12 +368,12 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     return true;
 }
 
-bool EwsItem::readMessageHeaders(QXmlStreamReader &reader)
+bool EwsItemPrivate::readMessageHeaders(QXmlStreamReader &reader)
 {
-    HeaderMap map;
+    EwsItem::HeaderMap map;
 
-    if (d->mFields.contains(EwsItemFieldInternetMessageHeaders)) {
-        map = d->mFields[EwsItemFieldInternetMessageHeaders].value<EwsItem::HeaderMap>();
+    if (mFields.contains(EwsItemFieldInternetMessageHeaders)) {
+        map = mFields[EwsItemFieldInternetMessageHeaders].value<EwsItem::HeaderMap>();
     }
 
     while (reader.readNextStartElement()) {
@@ -414,12 +403,12 @@ bool EwsItem::readMessageHeaders(QXmlStreamReader &reader)
         }
     }
 
-    d->mFields[EwsItemFieldInternetMessageHeaders] = QVariant::fromValue<EwsItem::HeaderMap>(map);
+    mFields[EwsItemFieldInternetMessageHeaders] = QVariant::fromValue<EwsItem::HeaderMap>(map);
 
     return true;
 }
 
-bool EwsItem::readRecipients(QXmlStreamReader &reader, EwsItemFields field)
+bool EwsItemPrivate::readRecipients(QXmlStreamReader &reader, EwsItemFields field)
 {
     EwsMailbox::List mboxList;
 
@@ -436,17 +425,38 @@ bool EwsItem::readRecipients(QXmlStreamReader &reader, EwsItemFields field)
         mboxList.append(mbox);
     }
 
-    d->mFields[field] = QVariant::fromValue<EwsMailbox::List>(mboxList);
-
-    // Leave the recipient element
-    //reader.skipCurrentElement();
-
-    qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("readRecipients: at element %1").arg(reader.qualifiedName().toString());
+    mFields[field] = QVariant::fromValue<EwsMailbox::List>(mboxList);
 
     return true;
 }
 
-bool EwsItem::readBoolean(QXmlStreamReader &reader, EwsItemFields field)
+bool EwsItemPrivate::readMailbox(QXmlStreamReader &reader, EwsItemFields field)
+{
+    if (!reader.readNextStartElement()) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Expected mailbox in %1 element:").arg(reader.name().toString());
+        return false;
+    }
+
+    if (reader.namespaceUri() != ewsTypeNsUri) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
+                            << reader.namespaceUri();
+        return false;
+    }
+
+    EwsMailbox mbox(reader);
+    if (!mbox.isValid()) {
+        return false;
+    }
+
+    mFields[field] = QVariant::fromValue<EwsMailbox>(mbox);
+
+    // Leave the element
+    reader.skipCurrentElement();
+
+    return true;
+}
+
+bool EwsItemPrivate::readBoolean(QXmlStreamReader &reader, EwsItemFields field)
 {
     QString elmText = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
@@ -468,7 +478,8 @@ bool EwsItem::readBoolean(QXmlStreamReader &reader, EwsItemFields field)
         return false;
     }
 
-    d->mFields[field] = val;
+    mFields[field] = val;
 
     return true;
 }
+
