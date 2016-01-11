@@ -44,8 +44,7 @@ public:
 private Q_SLOTS:
     void localItemFetchDone(KJob *job);
     void remoteItemFetchDone(KJob *job);
-    void mailItemFetchDone(KJob *job);
-    void otherItemFetchDone(KJob *job);
+    void itemDetailFetchDone(KJob *job);
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);

@@ -41,6 +41,7 @@ find_package(KF5Mime)
 find_package(KF5CalendarCore)
 find_package(KF5Contacts)
 find_package(KF5Codecs)
+find_package(KF5KDELibs4Support)
 
 add_subdirectory(ewsclient)
 
@@ -51,6 +52,9 @@ add_definitions(-DTRANSLATION_DOMAIN=\"akonadi_ews_resource\")
 set(ewsresource_SRCS
     configdialog.cpp
     ewsfetchitemsjob.cpp
+    ewsfetchitemdetailjob.cpp
+    ewsfetchmaildetailjob.cpp
+    ewsfetchcalendardetailjob.cpp
     ewsresource.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
@@ -71,6 +75,7 @@ target_link_libraries(akonadi_ews_resource
     KF5::Mime
     KF5::CalendarCore
     KF5::Contacts
+    KF5::KDELibs4Support
     ewsclient)
 
 add_subdirectory(test)
