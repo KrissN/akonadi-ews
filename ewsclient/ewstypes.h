@@ -125,7 +125,7 @@ typedef enum {
 } EwsTraversalType;
 
 typedef enum {
-    EwsItemTypeItem,
+    EwsItemTypeItem = 0,
     EwsItemTypeMessage,
     EwsItemTypeCalendarItem,
     EwsItemTypeContact,
@@ -274,6 +274,8 @@ typedef enum {
     EwsItemFieldAdjacentMeetings,
     EwsItemFieldDuration,
     EwsItemFieldTimeZone,
+    EwsItemFieldStartTimeZone,
+    EwsItemFieldEndTimeZone,
     EwsItemFieldAppointmentReplyTime,
     EwsItemFieldAppointmentSequenceNumber,
     EwsItemFieldAppointmentState,
@@ -393,6 +395,23 @@ typedef enum {
     EwsCalendarItemException,
     EwsCalendarItemRecurringMaster
 } EwsCalendarItemType;
+
+typedef enum {
+    EwsEventResponseUnknown = 0,
+    EwsEventResponseOrganizer,
+    EwsEventResponseTentative,
+    EwsEventResponseAccept,
+    EwsEventResponseDecline,
+    EwsEventResponseNotReceived
+} EwsEventResponseType;
+
+typedef enum {
+    EwsLfbStatusFree = 0,
+    EwsLfbStatusTentative,
+    EwsLfbStatusBusy,
+    EwsLfbOutOfOffice,
+    EwsLfbNoData
+} EwsLegacyFreeBusyStatus;
 
 template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
 {

@@ -23,6 +23,9 @@
 
 #include "ewsitembase_p.h"
 #include "ewsmailbox.h"
+#include "ewsattendee.h"
+#include "ewsrecurrence.h"
+#include "ewsoccurrence.h"
 #include "ewsclient_debug.h"
 
 static const QString messageSensitivityNames[] = {
@@ -48,6 +51,26 @@ static const QString calendarItemTypeNames[] = {
 };
 Q_CONSTEXPR unsigned calendarItemTypeNameCount = sizeof(calendarItemTypeNames) / sizeof(calendarItemTypeNames[0]);
 
+static const QString legacyFreeBusyStatusNames[] = {
+    QStringLiteral("Free"),
+    QStringLiteral("Tentative"),
+    QStringLiteral("Busy"),
+    QStringLiteral("OOF"),
+    QStringLiteral("NoData")
+};
+Q_CONSTEXPR unsigned legacyFreeBusyStatusNameCount = sizeof(legacyFreeBusyStatusNames) / sizeof(legacyFreeBusyStatusNames[0]);
+
+// TODO: Duplicated in ewsattendee.cpp - to be merged somehow
+static const QString responseTypeNames[] = {
+    QStringLiteral("Unknown"),
+    QStringLiteral("Organizer"),
+    QStringLiteral("Tentative"),
+    QStringLiteral("Accept"),
+    QStringLiteral("Decline"),
+    QStringLiteral("NoResponseReceived")
+};
+Q_CONSTEXPR unsigned responseTypeNameCount = sizeof(responseTypeNames) / sizeof(responseTypeNames[0]);
+
 class EwsItemPrivate : public EwsItemBasePrivate
 {
 public:
@@ -62,6 +85,8 @@ public:
     bool readMailbox(QXmlStreamReader &reader, EwsItemFields field);
     bool readRecipients(QXmlStreamReader &reader, EwsItemFields field);
     bool readBoolean(QXmlStreamReader &reader, EwsItemFields field);
+    bool readAttendees(QXmlStreamReader &reader, EwsItemFields field);
+    bool readOccurrences(QXmlStreamReader &reader, EwsItemFields field);
 
     EwsItemType mType;
 };
@@ -82,6 +107,11 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
     qRegisterMetaType<EwsItem::HeaderMap>();
     qRegisterMetaType<EwsMailbox>();
     qRegisterMetaType<EwsMailbox::List>();
+    qRegisterMetaType<EwsAttendee>();
+    qRegisterMetaType<EwsAttendee::List>();
+    qRegisterMetaType<EwsRecurrence>();
+    qRegisterMetaType<EwsOccurrence>();
+    qRegisterMetaType<EwsOccurrence::List>();
 
     EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
 
@@ -335,6 +365,136 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
             return false;
         }
     }
+    else if (reader.name() == QStringLiteral("Culture")) {
+        d->mFields[EwsItemFieldCulture] = reader.readElementText();
+        if (reader.error() != QXmlStreamReader::NoError) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("Culture"));
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("StartTimeZone")) {
+        QStringRef idRef = reader.attributes().value(QStringLiteral("Id"));
+        if (!idRef.isNull()) {
+            d->mFields[EwsItemFieldStartTimeZone] = idRef.toString();
+        }
+        reader.skipCurrentElement();
+    }
+    else if (reader.name() == QStringLiteral("Organizer")) {
+        if (!d->readMailbox(reader, EwsItemFieldOrganizer)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("RequiredAttendees")) {
+        if (!d->readAttendees(reader, EwsItemFieldRequiredAttendees)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("OptionalAttendees")) {
+        if (!d->readAttendees(reader, EwsItemFieldOptionalAttendees)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("Resources")) {
+        if (!d->readAttendees(reader, EwsItemFieldResources)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("Start")) {
+        QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
+        if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("Start"));
+            return false;
+        }
+        d->mFields[EwsItemFieldStart] = QVariant::fromValue<QDateTime>(dt);
+    }
+    else if (reader.name() == QStringLiteral("End")) {
+        QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
+        if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("End"));
+            return false;
+        }
+        d->mFields[EwsItemFieldEnd] = QVariant::fromValue<QDateTime>(dt);
+    }
+    else if (reader.name() == QStringLiteral("RecurrenceId")) {
+        QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
+        if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("RecurrenceId"));
+            return false;
+        }
+        d->mFields[EwsItemFieldRecurrenceId] = QVariant::fromValue<QDateTime>(dt);
+    }
+    else if (reader.name() == QStringLiteral("IsAllDayEvent")) {
+        if (!d->readBoolean(reader, EwsItemFieldIsAllDayEvent)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("LegacyFreeBusyStatus")) {
+        bool ok;
+        d->mFields[EwsItemFieldLegacyFreeBusyStatus] =
+                        decodeEnumString<EwsLegacyFreeBusyStatus>(reader.readElementText(),
+                            legacyFreeBusyStatusNames, legacyFreeBusyStatusNameCount, &ok);
+        if (reader.error() != QXmlStreamReader::NoError || !ok) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("LegacyFreeBusyStatus"));
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("MyResponseType")) {
+        bool ok;
+        d->mFields[EwsItemFieldMyResponseType] =
+                        decodeEnumString<EwsEventResponseType>(reader.readElementText(),
+                            responseTypeNames, responseTypeNameCount, &ok);
+        if (reader.error() != QXmlStreamReader::NoError || !ok) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("MyResponseType"));
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("AppointmentSequenceNumber")) {
+        bool ok;
+        d->mFields[EwsItemFieldAppointmentSequenceNumber] = reader.readElementText().toUInt(&ok);
+        if (reader.error() != QXmlStreamReader::NoError || !ok) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("AppointmentSequenceNumber"));
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("Recurrence")) {
+        EwsRecurrence recurrence(reader);
+        d->mFields[EwsItemFieldRecurrence] = QVariant::fromValue<EwsRecurrence>(recurrence);
+    }
+    else if (reader.name() == QStringLiteral("FirstOccurrence")) {
+        EwsOccurrence occ(reader);
+        if (!occ.isValid()) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("FirstOccurrence"));
+            return false;
+        }
+        d->mFields[EwsItemFieldFirstOccurrence] = QVariant::fromValue<EwsOccurrence>(occ);
+    }
+    else if (reader.name() == QStringLiteral("LastOccurrence")) {
+        EwsOccurrence occ(reader);
+        if (!occ.isValid()) {
+            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                            .arg(QStringLiteral("LastOccurrence"));
+            return false;
+        }
+        d->mFields[EwsItemFieldLastOccurrence] = QVariant::fromValue<EwsOccurrence>(occ);
+    }
+    else if (reader.name() == QStringLiteral("ModifiedOccurrences")) {
+        if (!d->readOccurrences(reader, EwsItemFieldModifiedOccurrences)) {
+            return false;
+        }
+    }
+    else if (reader.name() == QStringLiteral("DeletedOccurrences")) {
+        if (!d->readOccurrences(reader, EwsItemFieldDeletedOccurrences)) {
+            return false;
+        }
+    }
     else if (reader.name() == QStringLiteral("Attachments") ||
              reader.name() == QStringLiteral("DateTimeReceived") ||
              reader.name() == QStringLiteral("Categories") ||
@@ -352,7 +512,6 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
              reader.name() == QStringLiteral("ReminderMinutesBeforeStart") ||
              reader.name() == QStringLiteral("DisplayCc") ||
              reader.name() == QStringLiteral("DisplayTo") ||
-             reader.name() == QStringLiteral("Culture") ||
              reader.name() == QStringLiteral("EffectiveRights") ||
              reader.name() == QStringLiteral("LastModifiedName") ||
              reader.name() == QStringLiteral("LastModifiedTime")) {
@@ -479,6 +638,51 @@ bool EwsItemPrivate::readBoolean(QXmlStreamReader &reader, EwsItemFields field)
     }
 
     mFields[field] = val;
+
+    return true;
+}
+
+bool EwsItemPrivate::readAttendees(QXmlStreamReader &reader, EwsItemFields field)
+{
+    EwsAttendee::List attList;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+        EwsAttendee att(reader);
+        if (!att.isValid()) {
+            return false;
+        }
+        attList.append(att);
+    }
+
+    mFields[field] = QVariant::fromValue<EwsAttendee::List>(attList);
+
+    return true;
+}
+
+bool EwsItemPrivate::readOccurrences(QXmlStreamReader &reader, EwsItemFields field)
+{
+    EwsOccurrence::List occList;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
+                            .arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+        EwsOccurrence occ(reader);
+        if (!occ.isValid()) {
+            return false;
+        }
+        occList.append(occ);
+    }
+
+    mFields[field] = QVariant::fromValue<EwsOccurrence::List>(occList);
 
     return true;
 }

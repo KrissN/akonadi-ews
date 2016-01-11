@@ -17,6 +17,7 @@
 #  Boston, MA 02110-1301, USA.
 
 set(EWSCLIENT_SRCS
+  ewsattendee.cpp
   ewsclient.cpp
   ewsfindfolderrequest.cpp
   ewsfinditemrequest.cpp
@@ -30,11 +31,21 @@ set(EWSCLIENT_SRCS
   ewsitemshape.cpp
   ewsjob.cpp
   ewsmailbox.cpp
+  ewsoccurrence.cpp
   ewspropertyfield.cpp
+  ewsrecurrence.cpp
   ewsrequest.cpp
   ewsrequestwriter.cpp
   ewstypes.cpp
   ewsclient_debug.cpp)
 
 add_library(ewsclient STATIC ${EWSCLIENT_SRCS})
-target_link_libraries(ewsclient Qt5::Network KF5::KIOCore KF5::KIOFileWidgets KF5::KIOWidgets KF5::KIONTLM KF5::Codecs KF5::Mime)
+target_link_libraries(ewsclient 
+  Qt5::Network
+  KF5::KIOCore
+  KF5::KIOFileWidgets
+  KF5::KIOWidgets
+  KF5::KIONTLM
+  KF5::Codecs
+  KF5::Mime
+  KF5::CalendarCore)
