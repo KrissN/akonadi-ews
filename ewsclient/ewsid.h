@@ -20,11 +20,14 @@
 #ifndef EWSID_H
 #define EWSID_H
 
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
+#include <QtCore/QMetaType>
+#include <QtCore/QList>
+#include <QtCore/QString>
 
 #include "ewstypes.h"
 
+class QXmlStreamWriter;
+class QXmlStreamReader;
 /**
  *  @brief  EWS Id wrapper class
  *

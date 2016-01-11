@@ -20,7 +20,8 @@
 #include "ewsid.h"
 
 #include <QtCore/QString>
-
+#include <QtCore/QXmlStreamReader>
+#include <QtCore/QXmlStreamWriter>
 
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
