@@ -47,7 +47,6 @@ protected:
     EwsItemBase(QSharedDataPointer<EwsItemBasePrivate> priv);
 
     void resetFields();
-    bool readExtendedProperty(QXmlStreamReader &reader);
 
     QSharedDataPointer<EwsItemBasePrivate> d;
 };

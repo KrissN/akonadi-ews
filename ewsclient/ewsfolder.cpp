@@ -20,6 +20,7 @@
 #include "ewsfolder.h"
 
 #include "ewsitembase_p.h"
+#include "ewsxmlreader.h"
 #include "ewseffectiverights.h"
 #include "ewsclient_debug.h"
 
@@ -29,6 +30,8 @@
 class EwsFolderPrivate : public EwsItemBasePrivate
 {
 public:
+    typedef EwsXmlReader<EwsItemFields> Reader;
+
     EwsFolderPrivate();
     EwsFolderPrivate(const EwsItemBasePrivate &other);
     virtual EwsItemBasePrivate *clone() const Q_DECL_OVERRIDE
@@ -36,14 +39,49 @@ public:
         return new EwsFolderPrivate(*this);
     }
 
+    static bool effectiveRightsReader(QXmlStreamReader &reader, QVariant &val);
+
     EwsFolderType mType;
     EwsFolder *mParent;
     QVector<EwsFolder> mChildren;
+    static const Reader mStaticEwsReader;
+    Reader mEwsReader;
 };
 
+typedef EwsXmlReader<EwsItemFields> ItemFieldsReader;
+
+static const QVector<EwsFolderPrivate::Reader::Item> ewsFolderItems = {
+    {EwsFolderFieldFolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},
+    {EwsFolderFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader},
+    {EwsFolderFieldFolderClass, QStringLiteral("FolderClass"), &ewsXmlTextReader},
+    {EwsFolderFieldDisplayName, QStringLiteral("DisplayName"), &ewsXmlTextReader},
+    {EwsFolderFieldTotalCount, QStringLiteral("TotalCount"), &ewsXmlUIntReader},
+    {EwsFolderFieldChildFolderCount, QStringLiteral("ChildFolderCount"), &ewsXmlUIntReader},
+    {EwsFolderFieldUnreadCount, QStringLiteral("UnreadCount"), &ewsXmlUIntReader},
+    {EwsFolderFieldEffectiveRights, QStringLiteral("EffectiveRights"),
+        &EwsFolderPrivate::effectiveRightsReader},
+    {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
+        &EwsItemBasePrivate::extendedPropertyReader},
+    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("ManagedFolderInformation")},
+    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("SearchParameters")},
+};
+
+const EwsFolderPrivate::Reader EwsFolderPrivate::mStaticEwsReader(ewsFolderItems);
+
 EwsFolderPrivate::EwsFolderPrivate()
-    : EwsItemBasePrivate(), mType(EwsFolderTypeUnknown), mParent(0)
+    : EwsItemBasePrivate(), mType(EwsFolderTypeUnknown), mParent(0), mEwsReader(mStaticEwsReader)
 {
+}
+
+bool EwsFolderPrivate::effectiveRightsReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsEffectiveRights rights(reader);
+    if (!rights.isValid()) {
+        reader.skipCurrentElement();
+        return false;
+    }
+    val = QVariant::fromValue<EwsEffectiveRights>(rights);
+    return true;
 }
 
 EwsFolder::EwsFolder()
@@ -115,99 +153,15 @@ EwsFolderType EwsFolder::type() const
 
 bool EwsFolder::readBaseFolderElement(QXmlStreamReader &reader)
 {
-    if (reader.name() == QStringLiteral("FolderId")) {
-        EwsId id = EwsId(reader);
-        if (id.type() == EwsId::Unspecified) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("FolderId"));
-            return false;
-        }
-        d->mFields[EwsFolderFieldFolderId] = QVariant::fromValue(id);
-        reader.skipCurrentElement();
-    }
-    else if (reader.name() == QStringLiteral("ParentFolderId")) {
-        EwsId id = EwsId(reader);
-        if (id.type() == EwsId::Unspecified) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("ParentFolderId"));
-            return false;
-        }
-        reader.skipCurrentElement();
-        d->mFields[EwsFolderFieldParentFolderId] = QVariant::fromValue(id);
-    }
-    else if (reader.name() == QStringLiteral("FolderClass")) {
-        d->mFields[EwsFolderFieldFolderClass] = reader.readElementText();
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("FolderClass"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("DisplayName")) {
-        d->mFields[EwsFolderFieldDisplayName] = reader.readElementText();
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("DisplayName"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("TotalCount")) {
-        bool ok;
-        d->mFields[EwsFolderFieldTotalCount] = reader.readElementText().toUInt(&ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("TotalCount"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ChildFolderCount")) {
-        bool ok;
-        d->mFields[EwsFolderFieldChildFolderCount] = reader.readElementText().toUInt(&ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("ChildFolderCount"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("UnreadCount")) {
-        bool ok;
-        d->mFields[EwsFolderFieldUnreadCount] = reader.readElementText().toUInt(&ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("UnreadCount"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ExtendedProperty")) {
-        if (!readExtendedProperty(reader)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ManagedFolderInformation")) {
-        // Unsupported - ignore
-        reader.skipCurrentElement();
-    }
-    else if (reader.name() == QStringLiteral("EffectiveRights")) {
-        EwsEffectiveRights rights(reader);
-        if (!rights.isValid()) {
-            reader.skipCurrentElement();
-            return false;
-        }
-        d->mFields[EwsFolderFieldEffectiveRights] = QVariant::fromValue<EwsEffectiveRights>(rights);
-    }
-    else if (reader.name() == QStringLiteral("PermissionSet")) {
-        // Unsupported - ignore
-        reader.skipCurrentElement();
-    }
-    else if (reader.name() == QStringLiteral("SearchParameters")) {
-        // Unsupported - ignore
-        reader.skipCurrentElement();
-    }
-    else {
-        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - unknown element: %1.")
-                        .arg(reader.name().toString());
+    D_PTR
+
+    if (!d->mEwsReader.readItem(reader, "Folder")) {
         return false;
     }
+
+    d->mFields = d->mEwsReader.values();
+    d->mProperties = d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
+
     return true;
 }
 

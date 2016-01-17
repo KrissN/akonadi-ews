@@ -25,6 +25,7 @@
 EwsItemBasePrivate::EwsItemBasePrivate()
     : mValid(false)
 {
+    qRegisterMetaType<EwsItemBasePrivate::PropertyHash>();
 }
 
 EwsItemBasePrivate::~EwsItemBasePrivate()
@@ -55,14 +56,18 @@ bool EwsItemBase::isValid() const
     return d->mValid;
 }
 
-bool EwsItemBase::readExtendedProperty(QXmlStreamReader &reader)
+bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVariant &val)
 {
     EwsPropertyField prop;
     QString value;
+    PropertyHash propHash = val.value<PropertyHash>();
+    QString elmName = reader.name().toString();
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid namespace");
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid namespace.")
+                            .arg(elmName);
+            reader.skipCurrentElement();
             return false;
         }
 
@@ -79,13 +84,15 @@ bool EwsItemBase::readExtendedProperty(QXmlStreamReader &reader)
             value = reader.readElementText();
         }
         else {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS 1request - unexpected element %1")
-                            .arg(reader.qualifiedName().toString());
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - unexpected child element %2")
+                            .arg(elmName).arg(reader.qualifiedName().toString());
             reader.skipCurrentElement();
             return false;
         }
     }
-    d->mProperties.insert(prop, value);
+    propHash.insert(prop, value);
+
+    val = QVariant::fromValue<PropertyHash>(propHash);
 
     return true;
 }

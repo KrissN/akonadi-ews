@@ -27,10 +27,14 @@
 class EwsItemBasePrivate : public QSharedData
 {
 public:
+    typedef QHash<EwsPropertyField, QString> PropertyHash;
+
     EwsItemBasePrivate();
     virtual ~EwsItemBasePrivate();
 
     virtual EwsItemBasePrivate *clone() const = 0;
+
+    static bool extendedPropertyReader(QXmlStreamReader &reader, QVariant &val);
 
     // When the item, is first constructed it will only contain the id and will therefore be
     // invalid. Once updated through EWS the remaining data will be populated and the item will
@@ -39,7 +43,7 @@ public:
 
     QHash<EwsItemFields, QVariant> mFields;
 
-    QHash<EwsPropertyField, QString> mProperties;
+    PropertyHash mProperties;
 };
 
 template <>
@@ -47,4 +51,7 @@ Q_INLINE_TEMPLATE EwsItemBasePrivate *QSharedDataPointer<EwsItemBasePrivate>::cl
 {
     return d->clone();
 }
+
+Q_DECLARE_METATYPE(EwsItemBasePrivate::PropertyHash)
+
 #endif

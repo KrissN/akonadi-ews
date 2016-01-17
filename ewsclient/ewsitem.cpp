@@ -17,6 +17,7 @@
     Boston, MA 02110-1301, USA.
 */
 
+#include <ewsxmlreader.h>
 #include "ewsitem.h"
 
 #include <KCodecs/KCodecs>
@@ -26,54 +27,14 @@
 #include "ewsattendee.h"
 #include "ewsrecurrence.h"
 #include "ewsoccurrence.h"
+#include "ewsxmlreader.h"
 #include "ewsclient_debug.h"
-
-static const QString messageSensitivityNames[] = {
-    QStringLiteral("Normal"),
-    QStringLiteral("Personal"),
-    QStringLiteral("Private"),
-    QStringLiteral("Confidential")
-};
-Q_CONSTEXPR unsigned messageSensitivityNameCount = sizeof(messageSensitivityNames) / sizeof(messageSensitivityNames[0]);
-
-static const QString messageImportanceNames[] = {
-    QStringLiteral("Low"),
-    QStringLiteral("Normal"),
-    QStringLiteral("High")
-};
-Q_CONSTEXPR unsigned messageImportanceNameCount = sizeof(messageImportanceNames) / sizeof(messageImportanceNames[0]);
-
-static const QString calendarItemTypeNames[] = {
-    QStringLiteral("Single"),
-    QStringLiteral("Occurrence"),
-    QStringLiteral("Exception"),
-    QStringLiteral("RecurringMaster")
-};
-Q_CONSTEXPR unsigned calendarItemTypeNameCount = sizeof(calendarItemTypeNames) / sizeof(calendarItemTypeNames[0]);
-
-static const QString legacyFreeBusyStatusNames[] = {
-    QStringLiteral("Free"),
-    QStringLiteral("Tentative"),
-    QStringLiteral("Busy"),
-    QStringLiteral("OOF"),
-    QStringLiteral("NoData")
-};
-Q_CONSTEXPR unsigned legacyFreeBusyStatusNameCount = sizeof(legacyFreeBusyStatusNames) / sizeof(legacyFreeBusyStatusNames[0]);
-
-// TODO: Duplicated in ewsattendee.cpp - to be merged somehow
-static const QString responseTypeNames[] = {
-    QStringLiteral("Unknown"),
-    QStringLiteral("Organizer"),
-    QStringLiteral("Tentative"),
-    QStringLiteral("Accept"),
-    QStringLiteral("Decline"),
-    QStringLiteral("NoResponseReceived")
-};
-Q_CONSTEXPR unsigned responseTypeNameCount = sizeof(responseTypeNames) / sizeof(responseTypeNames[0]);
 
 class EwsItemPrivate : public EwsItemBasePrivate
 {
 public:
+    typedef EwsXmlReader<EwsItemFields> Reader;
+
     EwsItemPrivate();
     EwsItemPrivate(const EwsItemBasePrivate &other);
     virtual EwsItemBasePrivate *clone() const Q_DECL_OVERRIDE
@@ -81,19 +42,274 @@ public:
         return new EwsItemPrivate(*this);
     }
 
-    bool readMessageHeaders(QXmlStreamReader &reader);
-    bool readMailbox(QXmlStreamReader &reader, EwsItemFields field);
-    bool readRecipients(QXmlStreamReader &reader, EwsItemFields field);
-    bool readBoolean(QXmlStreamReader &reader, EwsItemFields field);
-    bool readAttendees(QXmlStreamReader &reader, EwsItemFields field);
-    bool readOccurrences(QXmlStreamReader &reader, EwsItemFields field);
+    static bool bodyReader(QXmlStreamReader &reader, QVariant &val);
+    static bool messageHeadersReader(QXmlStreamReader &reader, QVariant &val);
+    static bool mailboxReader(QXmlStreamReader &reader, QVariant &val);
+    static bool recipientsReader(QXmlStreamReader &reader, QVariant &val);
+    static bool timezoneReader(QXmlStreamReader &reader, QVariant &val);
+    static bool attendeesReader(QXmlStreamReader &reader, QVariant &val);
+    static bool occurrenceReader(QXmlStreamReader &reader, QVariant &val);
+    static bool occurrencesReader(QXmlStreamReader &reader, QVariant &val);
+    static bool recurrenceReader(QXmlStreamReader &reader, QVariant &val);
 
     EwsItemType mType;
+    static const Reader mStaticEwsReader;
+    Reader mEwsReader;
 };
 
+static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
+    {EwsItemFieldMimeContent, QStringLiteral("MimeContent"), &ewsXmlBase64Reader},
+    {EwsItemFieldItemId, QStringLiteral("ItemId"), &ewsXmlIdReader},
+    {EwsItemFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader},
+    {EwsItemFieldItemClass, QStringLiteral("ItemClass"), &ewsXmlTextReader},
+    {EwsItemFieldSubject, QStringLiteral("Subject"), &ewsXmlTextReader},
+    {EwsItemFieldSensitivity, QStringLiteral("Sensitivity"), &ewsXmlSensitivityReader},
+    {EwsItemFieldBody, QStringLiteral("Body"), &EwsItemPrivate::bodyReader},
+    {EwsItemFieldSize, QStringLiteral("Size"), &ewsXmlUIntReader},
+    {EwsItemFieldInternetMessageHeaders, QStringLiteral("InternetMessageHeaders"),
+        &EwsItemPrivate::messageHeadersReader},
+    {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
+        &EwsItemBasePrivate::extendedPropertyReader},
+    {EwsItemFieldImportance, QStringLiteral("Importance"), &ewsXmlImportanceReader},
+    {EwsItemFieldFrom, QStringLiteral("From"), &EwsItemPrivate::mailboxReader},
+    {EwsItemFieldToRecipients, QStringLiteral("ToRecipients"), &EwsItemPrivate::recipientsReader},
+    {EwsItemFieldCcRecipients, QStringLiteral("CcRecipients"), &EwsItemPrivate::recipientsReader},
+    {EwsItemFieldBccRecipients, QStringLiteral("BccRecipients"), &EwsItemPrivate::recipientsReader},
+    {EwsItemFieldIsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader},
+    {EwsItemFieldHasAttachments, QStringLiteral("HasAttachments"), &ewsXmlBoolReader},
+    {EwsItemFieldIsFromMe, QStringLiteral("IsFromMe"), &ewsXmlBoolReader},
+    {EwsItemFieldCalendarItemType, QStringLiteral("CalendarItemType"),
+        &ewsXmlCalendarItemTypeReader},
+    {EwsItemFieldUID, QStringLiteral("UID"), &ewsXmlTextReader},
+    {EwsItemFieldCulture, QStringLiteral("Culture"), &ewsXmlTextReader},
+    {EwsItemFieldStartTimeZone, QStringLiteral("StartTimeZone"), &EwsItemPrivate::timezoneReader},
+    {EwsItemFieldOrganizer, QStringLiteral("Organizer"), &EwsItemPrivate::mailboxReader},
+    {EwsItemFieldRequiredAttendees, QStringLiteral("RequiredAttendees"),
+        &EwsItemPrivate::attendeesReader},
+    {EwsItemFieldOptionalAttendees, QStringLiteral("OptionalAttendees"),
+        &EwsItemPrivate::attendeesReader},
+    {EwsItemFieldResources, QStringLiteral("Resources"), &EwsItemPrivate::attendeesReader},
+    {EwsItemFieldStart, QStringLiteral("Start"), &ewsXmlDateTimeReader},
+    {EwsItemFieldEnd, QStringLiteral("End"), &ewsXmlDateTimeReader},
+    {EwsItemFieldRecurrenceId, QStringLiteral("RecurrenceId"), &ewsXmlDateTimeReader},
+    {EwsItemFieldIsAllDayEvent, QStringLiteral("IsAllDayEvent"), &ewsXmlBoolReader},
+    {EwsItemFieldLegacyFreeBusyStatus, QStringLiteral("LegacyFreeBusyStatus"),
+        &ewsXmlLegacyFreeBusyStatusReader},
+    {EwsItemFieldMyResponseType, QStringLiteral("MyResponseType"), &ewsXmlResponseTypeReader},
+    {EwsItemFieldAppointmentSequenceNumber, QStringLiteral("AppointmentSequenceNumber"),
+        &ewsXmlUIntReader},
+    {EwsItemFieldRecurrence, QStringLiteral("Recurrence"), &EwsItemPrivate::recurrenceReader},
+    {EwsItemFieldFirstOccurrence, QStringLiteral("FirstOccurrence"),
+        &EwsItemPrivate::occurrenceReader},
+    {EwsItemFieldLastOccurrence, QStringLiteral("LastOccurrence"),
+        &EwsItemPrivate::occurrenceReader},
+    {EwsItemFieldModifiedOccurrences, QStringLiteral("ModifiedOccurrences"),
+        &EwsItemPrivate::occurrencesReader},
+    {EwsItemFieldDeletedOccurrences, QStringLiteral("DeletedOccurrences"),
+        &EwsItemPrivate::occurrencesReader},
+};
+
+const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsReader(ewsItemItems);
+
 EwsItemPrivate::EwsItemPrivate()
-    : EwsItemBasePrivate(), mType(EwsItemTypeUnknown)
+    : EwsItemBasePrivate(), mType(EwsItemTypeUnknown), mEwsReader(mStaticEwsReader)
 {
+}
+
+bool EwsItemPrivate::bodyReader(QXmlStreamReader &reader, QVariant &val)
+{
+    QVariantList vl;
+    QStringRef bodyType = reader.attributes().value(QStringLiteral("BodyType"));
+    if (bodyType.isNull()) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - missing %2 attribute")
+                        .arg(QStringLiteral("Body")).arg(QStringLiteral("BodyType"));
+        return false;
+    }
+    bool isHtml;
+    if (bodyType == QStringLiteral("HTML")) {
+        isHtml = true;
+    }
+    else if (bodyType == QStringLiteral("Text")) {
+        isHtml = false;
+    }
+    else {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read Body element- unknown body type");
+        return false;
+    }
+    vl.append(reader.readElementText());
+    if (reader.error() != QXmlStreamReader::NoError) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+                        .arg(QStringLiteral("Body"));
+        return false;
+    }
+    vl.append(isHtml);
+    val = vl;
+    return true;
+}
+
+bool EwsItemPrivate::messageHeadersReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsItem::HeaderMap map = val.value<EwsItem::HeaderMap>();
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in InternetMessageHeaders element:")
+                            << reader.namespaceUri();
+            return false;
+        }
+
+        if (reader.name() == QStringLiteral("InternetMessageHeader")) {
+            QStringRef nameRef = reader.attributes().value(QStringLiteral("HeaderName"));
+            if (nameRef.isNull()) {
+                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Missing HeaderName attribute in InternetMessageHeader element.");
+                return false;
+            }
+            QString name = nameRef.toString();
+            QString value = reader.readElementText();
+            map.insert(name, value);
+            if (reader.error() != QXmlStreamReader::NoError) {
+                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                                                        .arg(QStringLiteral("InternetMessageHeader"));
+                return false;
+            }
+            if (name.compare("Message-ID", Qt::CaseInsensitive) == 0) {
+                qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("MessageID: %1").arg(value);
+            }
+        }
+    }
+
+    val = QVariant::fromValue<EwsItem::HeaderMap>(map);
+
+    return true;
+}
+
+bool EwsItemPrivate::recipientsReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsMailbox::List mboxList;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+        EwsMailbox mbox(reader);
+        if (!mbox.isValid()) {
+            return false;
+        }
+        mboxList.append(mbox);
+    }
+
+    val = QVariant::fromValue<EwsMailbox::List>(mboxList);
+
+    return true;
+}
+
+bool EwsItemPrivate::mailboxReader(QXmlStreamReader &reader, QVariant &val)
+{
+    if (!reader.readNextStartElement()) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Expected mailbox in %1 element:").arg(reader.name().toString());
+        return false;
+    }
+
+    if (reader.namespaceUri() != ewsTypeNsUri) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
+                            << reader.namespaceUri();
+        reader.skipCurrentElement();
+        return false;
+    }
+
+    EwsMailbox mbox(reader);
+    if (!mbox.isValid()) {
+        reader.skipCurrentElement();
+        return false;
+    }
+
+    val = QVariant::fromValue<EwsMailbox>(mbox);
+
+    // Leave the element
+    reader.skipCurrentElement();
+
+    return true;
+}
+
+bool EwsItemPrivate::timezoneReader(QXmlStreamReader &reader, QVariant &val)
+{
+    // TODO: This only reads the timezone identifier.
+    QStringRef idRef = reader.attributes().value(QStringLiteral("Id"));
+    if (idRef.isNull()) {
+        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading %1 element - missing %2 attribute")
+                        .arg(reader.name().toString()).arg(QStringLiteral("Id"));
+        reader.skipCurrentElement();
+        return false;
+    }
+    else {
+        reader.skipCurrentElement();
+        val = idRef.toString();
+        return true;
+    }
+}
+
+bool EwsItemPrivate::attendeesReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsAttendee::List attList;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+        EwsAttendee att(reader);
+        if (!att.isValid()) {
+            return false;
+        }
+        attList.append(att);
+    }
+
+    val = QVariant::fromValue<EwsAttendee::List>(attList);
+
+    return true;
+}
+
+bool EwsItemPrivate::occurrenceReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsOccurrence occ(reader);
+    if (!occ.isValid()) {
+        return false;
+    }
+    val = QVariant::fromValue<EwsOccurrence>(occ);
+    return true;
+}
+
+bool EwsItemPrivate::occurrencesReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsOccurrence::List occList;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
+                            .arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+        EwsOccurrence occ(reader);
+        if (!occ.isValid()) {
+            return false;
+        }
+        occList.append(occ);
+    }
+
+    val = QVariant::fromValue<EwsOccurrence::List>(occList);
+
+    return true;
+}
+
+bool EwsItemPrivate::recurrenceReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsRecurrence recurrence(reader);
+    val = QVariant::fromValue<EwsRecurrence>(recurrence);
+    return true;
 }
 
 EwsItem::EwsItem()
@@ -199,491 +415,21 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
 {
     EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
 
-    if (reader.name() == QStringLiteral("MimeContent")) {
-        d->mFields[EwsItemFieldMimeContent] = KCodecs::base64Decode(reader.readElementText().toLatin1());
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("MimeContent"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ItemId")) {
-        EwsId id = EwsId(reader);
-        if (id.type() == EwsId::Unspecified) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("ItemId"));
-            return false;
-        }
-        d->mFields[EwsItemFieldItemId] = QVariant::fromValue(id);
-        reader.skipCurrentElement();
-    }
-    else if (reader.name() == QStringLiteral("ParentFolderId")) {
-        EwsId id = EwsId(reader);
-        if (id.type() == EwsId::Unspecified) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("ParentFolderId"));
-            return false;
-        }
-        d->mFields[EwsItemFieldParentFolderId] = QVariant::fromValue(id);
-        reader.skipCurrentElement();
-    }
-    else if (reader.name() == QStringLiteral("ItemClass")) {
-        d->mFields[EwsItemFieldItemClass]= reader.readElementText();
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("ItemClass"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Subject")) {
-        d->mFields[EwsItemFieldSubject] = reader.readElementText();
-        qCDebug(EWSCLIENT_LOG) << QStringLiteral("Subject: %1").arg(d->mFields[EwsItemFieldSubject].toString());
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Subject"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Sensitivity")) {
-        bool ok;
-        d->mFields[EwsItemFieldSensitivity] =
-                        decodeEnumString<EwsItemSensitivity>(reader.readElementText(),
-                            messageSensitivityNames, messageSensitivityNameCount, &ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Sensitivity"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Body")) {
-        QStringRef bodyType = reader.attributes().value(QStringLiteral("BodyType"));
-        if (bodyType.isNull()) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - missing %1 attribute")
-                            .arg(QStringLiteral("BodyType"));
-            return false;
-        }
-        bool isHtml;
-        if (bodyType == QStringLiteral("HTML")) {
-            isHtml = true;
-        }
-        else if (bodyType == QStringLiteral("Text")) {
-            isHtml = false;
-        }
-        else {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - unknown body type");
-            return false;
-        }
-        d->mFields[EwsItemFieldBody] = reader.readElementText();
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Body"));
-            return false;
-        }
-        d->mFields[EwsItemFieldBodyIsHtml] = isHtml;
-    }
-    else if (reader.name() == QStringLiteral("Size")) {
-        bool ok;
-        d->mFields[EwsItemFieldSubject] = reader.readElementText().toUInt(&ok, -1);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Size"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("InternetMessageHeaders")) {
-        if (!d->readMessageHeaders(reader)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ExtendedProperty")) {
-        if (!readExtendedProperty(reader)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Importance")) {
-        bool ok;
-        d->mFields[EwsItemFieldImportance] =
-                        decodeEnumString<EwsItemImportance>(reader.readElementText(),
-                            messageImportanceNames, messageImportanceNameCount, &ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Importance"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("From")) {
-        if (!d->readMailbox(reader, EwsItemFieldFrom)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("ToRecipients")) {
-        if (!d->readRecipients(reader, EwsItemFieldToRecipients)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("CcRecipients")) {
-        if (!d->readRecipients(reader, EwsItemFieldCcRecipients)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("BccRecipients")) {
-        if (!d->readRecipients(reader, EwsItemFieldBccRecipients)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("IsRead")) {
-        if (!d->readBoolean(reader, EwsItemFieldIsRead)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("HasAttachments")) {
-        if (!d->readBoolean(reader, EwsItemFieldHasAttachments)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("IsFromMe")) {
-        if (!d->readBoolean(reader, EwsItemFieldIsFromMe)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("CalendarItemType")) {
-        bool ok;
-        d->mFields[EwsItemFieldCalendarItemType] =
-                        decodeEnumString<EwsCalendarItemType>(reader.readElementText(),
-                            calendarItemTypeNames, calendarItemTypeNameCount, &ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("CalendarItemType"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("UID")) {
-        d->mFields[EwsItemFieldUID] = reader.readElementText();
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("UID"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Culture")) {
-        d->mFields[EwsItemFieldCulture] = reader.readElementText();
-        if (reader.error() != QXmlStreamReader::NoError) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Culture"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("StartTimeZone")) {
-        QStringRef idRef = reader.attributes().value(QStringLiteral("Id"));
-        if (!idRef.isNull()) {
-            d->mFields[EwsItemFieldStartTimeZone] = idRef.toString();
-        }
-        reader.skipCurrentElement();
-    }
-    else if (reader.name() == QStringLiteral("Organizer")) {
-        if (!d->readMailbox(reader, EwsItemFieldOrganizer)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("RequiredAttendees")) {
-        if (!d->readAttendees(reader, EwsItemFieldRequiredAttendees)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("OptionalAttendees")) {
-        if (!d->readAttendees(reader, EwsItemFieldOptionalAttendees)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Resources")) {
-        if (!d->readAttendees(reader, EwsItemFieldResources)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Start")) {
-        QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
-        if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("Start"));
-            return false;
-        }
-        d->mFields[EwsItemFieldStart] = QVariant::fromValue<QDateTime>(dt);
-    }
-    else if (reader.name() == QStringLiteral("End")) {
-        QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
-        if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("End"));
-            return false;
-        }
-        d->mFields[EwsItemFieldEnd] = QVariant::fromValue<QDateTime>(dt);
-    }
-    else if (reader.name() == QStringLiteral("RecurrenceId")) {
-        QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
-        if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("RecurrenceId"));
-            return false;
-        }
-        d->mFields[EwsItemFieldRecurrenceId] = QVariant::fromValue<QDateTime>(dt);
-    }
-    else if (reader.name() == QStringLiteral("IsAllDayEvent")) {
-        if (!d->readBoolean(reader, EwsItemFieldIsAllDayEvent)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("LegacyFreeBusyStatus")) {
-        bool ok;
-        d->mFields[EwsItemFieldLegacyFreeBusyStatus] =
-                        decodeEnumString<EwsLegacyFreeBusyStatus>(reader.readElementText(),
-                            legacyFreeBusyStatusNames, legacyFreeBusyStatusNameCount, &ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("LegacyFreeBusyStatus"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("MyResponseType")) {
-        bool ok;
-        d->mFields[EwsItemFieldMyResponseType] =
-                        decodeEnumString<EwsEventResponseType>(reader.readElementText(),
-                            responseTypeNames, responseTypeNameCount, &ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("MyResponseType"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("AppointmentSequenceNumber")) {
-        bool ok;
-        d->mFields[EwsItemFieldAppointmentSequenceNumber] = reader.readElementText().toUInt(&ok);
-        if (reader.error() != QXmlStreamReader::NoError || !ok) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("AppointmentSequenceNumber"));
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Recurrence")) {
-        EwsRecurrence recurrence(reader);
-        d->mFields[EwsItemFieldRecurrence] = QVariant::fromValue<EwsRecurrence>(recurrence);
-    }
-    else if (reader.name() == QStringLiteral("FirstOccurrence")) {
-        EwsOccurrence occ(reader);
-        if (!occ.isValid()) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("FirstOccurrence"));
-            return false;
-        }
-        d->mFields[EwsItemFieldFirstOccurrence] = QVariant::fromValue<EwsOccurrence>(occ);
-    }
-    else if (reader.name() == QStringLiteral("LastOccurrence")) {
-        EwsOccurrence occ(reader);
-        if (!occ.isValid()) {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                            .arg(QStringLiteral("LastOccurrence"));
-            return false;
-        }
-        d->mFields[EwsItemFieldLastOccurrence] = QVariant::fromValue<EwsOccurrence>(occ);
-    }
-    else if (reader.name() == QStringLiteral("ModifiedOccurrences")) {
-        if (!d->readOccurrences(reader, EwsItemFieldModifiedOccurrences)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("DeletedOccurrences")) {
-        if (!d->readOccurrences(reader, EwsItemFieldDeletedOccurrences)) {
-            return false;
-        }
-    }
-    else if (reader.name() == QStringLiteral("Attachments") ||
-             reader.name() == QStringLiteral("DateTimeReceived") ||
-             reader.name() == QStringLiteral("Categories") ||
-             reader.name() == QStringLiteral("InReplyTo") ||
-             reader.name() == QStringLiteral("IsSubmitted") ||
-             reader.name() == QStringLiteral("IsDraft") ||
-             reader.name() == QStringLiteral("IsFromMe") ||
-             reader.name() == QStringLiteral("IsResend") ||
-             reader.name() == QStringLiteral("IsUnmodified") ||
-             reader.name() == QStringLiteral("DateTimeSent") ||
-             reader.name() == QStringLiteral("DateTimeCreated") ||
-             reader.name() == QStringLiteral("ResponseObjects") ||
-             reader.name() == QStringLiteral("ReminderDueBy") ||
-             reader.name() == QStringLiteral("ReminderIsSet") ||
-             reader.name() == QStringLiteral("ReminderMinutesBeforeStart") ||
-             reader.name() == QStringLiteral("DisplayCc") ||
-             reader.name() == QStringLiteral("DisplayTo") ||
-             reader.name() == QStringLiteral("EffectiveRights") ||
-             reader.name() == QStringLiteral("LastModifiedName") ||
-             reader.name() == QStringLiteral("LastModifiedTime")) {
-        // Unsupported - ignore
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unsupported Item property %1").arg(reader.name().toString());
-        reader.skipCurrentElement();
-    }
-    else {
-        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - unknown element: %1.")
-                        .arg(reader.name().toString());
-        return false;
-    }
-    return true;
-}
-
-bool EwsItemPrivate::readMessageHeaders(QXmlStreamReader &reader)
-{
-    EwsItem::HeaderMap map;
-
-    if (mFields.contains(EwsItemFieldInternetMessageHeaders)) {
-        map = mFields[EwsItemFieldInternetMessageHeaders].value<EwsItem::HeaderMap>();
-    }
-
-    while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in InternetMessageHeaders element:")
-                            << reader.namespaceUri();
-            return false;
-        }
-
-        if (reader.name() == QStringLiteral("InternetMessageHeader")) {
-            QStringRef nameRef = reader.attributes().value(QStringLiteral("HeaderName"));
-            if (nameRef.isNull()) {
-                qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Missing HeaderName attribute in InternetMessageHeader element.");
-                return false;
-            }
-            QString name = nameRef.toString();
-            QString value = reader.readElementText();
-            map.insert(name, value);
-            if (reader.error() != QXmlStreamReader::NoError) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                                                        .arg(QStringLiteral("InternetMessageHeader"));
-                return false;
-            }
-            if (name.compare("Message-ID", Qt::CaseInsensitive) == 0) {
-                qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("MessageID: %1").arg(value);
-            }
-        }
-    }
-
-    mFields[EwsItemFieldInternetMessageHeaders] = QVariant::fromValue<EwsItem::HeaderMap>(map);
-
-    return true;
-}
-
-bool EwsItemPrivate::readRecipients(QXmlStreamReader &reader, EwsItemFields field)
-{
-    EwsMailbox::List mboxList;
-
-    while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
-            return false;
-        }
-        EwsMailbox mbox(reader);
-        if (!mbox.isValid()) {
-            return false;
-        }
-        mboxList.append(mbox);
-    }
-
-    mFields[field] = QVariant::fromValue<EwsMailbox::List>(mboxList);
-
-    return true;
-}
-
-bool EwsItemPrivate::readMailbox(QXmlStreamReader &reader, EwsItemFields field)
-{
-    if (!reader.readNextStartElement()) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Expected mailbox in %1 element:").arg(reader.name().toString());
+    if (!d->mEwsReader.readItem(reader, "Item")) {
         return false;
     }
 
-    if (reader.namespaceUri() != ewsTypeNsUri) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
-        return false;
+    d->mFields = d->mEwsReader.values();
+    d->mProperties = d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
+
+    // The body item is special as it hold two values in one. Need to separate them into their
+    // proper places.
+    if (d->mFields.contains(EwsItemFieldBody)) {
+        QVariantList vl = d->mFields[EwsItemFieldBody].value<QVariantList>();
+        QVariantList::const_iterator it = vl.cbegin();
+        d->mFields[EwsItemFieldBody] = *it++;
+        d->mFields[EwsItemFieldBodyIsHtml] = *it;
     }
-
-    EwsMailbox mbox(reader);
-    if (!mbox.isValid()) {
-        return false;
-    }
-
-    mFields[field] = QVariant::fromValue<EwsMailbox>(mbox);
-
-    // Leave the element
-    reader.skipCurrentElement();
-
-    return true;
-}
-
-bool EwsItemPrivate::readBoolean(QXmlStreamReader &reader, EwsItemFields field)
-{
-    QString elmText = reader.readElementText();
-    if (reader.error() != QXmlStreamReader::NoError) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading %1 element")
-                        .arg(reader.name().toString());
-        return false;
-    }
-    bool val = false;
-    if (elmText == QStringLiteral("true")) {
-        val = true;
-    }
-    else if (elmText == QStringLiteral("false")) {
-        val = false;
-    }
-    else {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected invalid boolean value in %1 element:")
-                        .arg(reader.name().toString())
-                        << elmText;
-        return false;
-    }
-
-    mFields[field] = val;
-
-    return true;
-}
-
-bool EwsItemPrivate::readAttendees(QXmlStreamReader &reader, EwsItemFields field)
-{
-    EwsAttendee::List attList;
-
-    while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
-            return false;
-        }
-        EwsAttendee att(reader);
-        if (!att.isValid()) {
-            return false;
-        }
-        attList.append(att);
-    }
-
-    mFields[field] = QVariant::fromValue<EwsAttendee::List>(attList);
-
-    return true;
-}
-
-bool EwsItemPrivate::readOccurrences(QXmlStreamReader &reader, EwsItemFields field)
-{
-    EwsOccurrence::List occList;
-
-    while (reader.readNextStartElement()) {
-        if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
-                            .arg(reader.name().toString())
-                            << reader.namespaceUri();
-            return false;
-        }
-        EwsOccurrence occ(reader);
-        if (!occ.isValid()) {
-            return false;
-        }
-        occList.append(occ);
-    }
-
-    mFields[field] = QVariant::fromValue<EwsOccurrence::List>(occList);
-
     return true;
 }
 

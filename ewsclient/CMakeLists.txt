@@ -38,6 +38,7 @@ set(EWSCLIENT_SRCS
   ewsrequest.cpp
   ewsrequestwriter.cpp
   ewstypes.cpp
+  ewsxmlreader.cpp
   ewsclient_debug.cpp)
 
 add_library(ewsclient STATIC ${EWSCLIENT_SRCS})

@@ -376,6 +376,7 @@ typedef enum {
     //EwsItemFieldContactSource,            DUPLICATE
     // Additional fields not in EWS specification
     EwsItemFieldBodyIsHtml,
+    EwsItemFieldExtendedProperties,
 } EwsItemFields;
 
 typedef enum {
