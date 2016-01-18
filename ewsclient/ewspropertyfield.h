@@ -49,6 +49,8 @@ public:
 
     void write(QXmlStreamWriter &writer) const;
     bool read(QXmlStreamReader &reader);
+
+    bool writeValue(QXmlStreamWriter &writer, const QString &value) const;
 private:
     QSharedDataPointer<EwsPropertyFieldPrivate> d;
 

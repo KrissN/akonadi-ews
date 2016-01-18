@@ -328,11 +328,14 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
         writer.writeEndElement();
         break;
     case EwsPropertyFieldPrivate::IndexedField:
+    {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("IndexedFieldURI"));
         writer.writeAttribute(QStringLiteral("FieldURI"), d->mUri);
-        writer.writeAttribute(QStringLiteral("FieldIndex"), QString::number(d->mIndex));
+        QStringList tokens = d->mUri.split(':');
+        writer.writeAttribute(QStringLiteral("FieldIndex"), tokens[1] + QString::number(d->mIndex));
         writer.writeEndElement();
         break;
+    }
     case EwsPropertyFieldPrivate::ExtendedField:
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedFieldURI"));
         if (d->mHasTag) {
@@ -349,8 +352,7 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
             }
 
             if (d->mIdType == EwsPropertyFieldPrivate::PropId) {
-                writer.writeAttribute(QStringLiteral("PropertyId"),
-                                      QStringLiteral("0x") + QString::number(d->mId, 16));
+                writer.writeAttribute(QStringLiteral("PropertyId"), QString::number(d->mId));
             }
             else {
                 writer.writeAttribute(QStringLiteral("PropertyName"), d->mName);
@@ -395,14 +397,22 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
                             .arg(QStringLiteral("FieldIndex"));
             return false;
         }
-        unsigned index = attrs.value(QStringLiteral("FieldIndex")).toUInt(&ok, 0);
+        QString uri = attrs.value(QStringLiteral("FieldURI")).toString();
+        QStringList tokens = uri.split(':');
+        QString indexStr = attrs.value(QStringLiteral("FieldIndex")).toString();
+        if (!indexStr.startsWith(tokens[1])) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - malformed %1 attribute.")
+                                        .arg(QStringLiteral("FieldIndex"));
+            return false;
+        }
+        unsigned index = indexStr.mid(tokens[1].size()).toUInt(&ok, 0);
         if (!ok) {
             qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading property field - error reading %1 attribute.")
                             .arg(QStringLiteral("FieldIndex"));
             return false;
         }
         d->mPropType = EwsPropertyFieldPrivate::IndexedField;
-        d->mUri = attrs.value(QStringLiteral("FieldURI")).toString();
+        d->mUri = uri;
         d->mIndex = index;
     }
     else if (reader.name() == QStringLiteral("ExtendedFieldURI")) {
@@ -552,5 +562,45 @@ QDebug operator<<(QDebug debug, const EwsPropertyField &prop)
     }
     d << ')';
     return debug;
+}
+
+bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QString &value) const
+{
+    switch (d->mPropType)
+    {
+    case EwsPropertyFieldPrivate::Field:
+    {
+        QStringList tokens = d->mUri.split(':');
+        if (tokens.size() != 2) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Invalid field URI: %1").arg(d->mUri);
+            return false;
+        }
+        writer.writeTextElement(ewsTypeNsUri, tokens[1], value);
+        break;
+    }
+    case EwsPropertyFieldPrivate::IndexedField:
+    {
+        QStringList tokens = d->mUri.split(':');
+        if (tokens.size() != 2) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Invalid field URI: %1").arg(d->mUri);
+            return false;
+        }
+        writer.writeStartElement(ewsTypeNsUri, tokens[1] + QStringLiteral("es"));
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Entry"));
+        writer.writeAttribute(QStringLiteral("Key"), tokens[1] + QString::number(d->mIndex));
+        writer.writeCharacters(value);
+        writer.writeEndElement();
+        writer.writeEndElement();
+        break;
+    }
+    case EwsPropertyFieldPrivate::ExtendedField:
+        write(writer);
+        writer.writeTextElement(ewsTypeNsUri, QStringLiteral("Value"), value);
+        break;
+    default:
+        return false;
+    }
+
+    return true;
 }
 
