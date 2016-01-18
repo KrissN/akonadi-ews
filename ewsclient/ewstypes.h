@@ -416,6 +416,27 @@ typedef enum {
     EwsLfbNoData
 } EwsLegacyFreeBusyStatus;
 
+typedef enum {
+    EwsDispSaveOnly = 0,
+    EwsDispSendOnly,
+    EwsDispSendAndSaveCopy,
+} EwsMessageDisposition;
+
+typedef enum {
+    EwsResolNeverOverwrite = 0,
+    EwsResolAutoResolve,
+    EwsResolAlwaysOverwrite,
+} EwsConflictResolution;
+
+typedef enum {
+    EwsMeetingDispSendToNone = 0,
+    EwsMeetingDispSendOnlyToAll,
+    EwsMeetingDispSendOnlyToChanged,
+    EwsMeetingDispSendToAllAndSaveCopy,
+    EwsMeetingDispSendToChangedAndSaveCopy,
+    EwsMeetingDispUnspecified
+} EwsMeetingDisposition;
+
 template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
 {
     unsigned i;
