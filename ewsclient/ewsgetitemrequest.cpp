@@ -20,15 +20,6 @@
 #include "ewsgetitemrequest.h"
 #include "ewsclient_debug.h"
 
-class EwsGetItemResponse : public EwsRequest::Response
-{
-public:
-    EwsGetItemResponse(QXmlStreamReader &reader);
-    bool parseItems(QXmlStreamReader &reader);
-
-    EwsItem::List mItems;
-};
-
 EwsGetItemRequest::EwsGetItemRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent)
 {
@@ -84,17 +75,17 @@ bool EwsGetItemRequest::parseResult(QXmlStreamReader &reader)
 
 bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
 {
-    EwsGetItemResponse *resp = new EwsGetItemResponse(reader);
-    if (resp->responseClass() == EwsResponseUnknown) {
+    Response resp(reader);
+    if (resp.responseClass() == EwsResponseUnknown) {
         return false;
     }
 
-    mItems += resp->mItems;
+    mResponses.append(resp);
 
     return true;
 }
 
-EwsGetItemResponse::EwsGetItemResponse(QXmlStreamReader &reader)
+EwsGetItemRequest::Response::Response(QXmlStreamReader &reader)
     : EwsRequest::Response(reader)
 {
     while (reader.readNextStartElement()) {
@@ -115,13 +106,11 @@ EwsGetItemResponse::EwsGetItemResponse(QXmlStreamReader &reader)
         }
     }
     if (mClass != EwsResponseSuccess) {
-        EwsItem item;
-        mItems.append(item);
         reader.skipCurrentElement();
     }
 }
 
-bool EwsGetItemResponse::parseItems(QXmlStreamReader &reader)
+bool EwsGetItemRequest::Response::parseItems(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")
@@ -137,7 +126,7 @@ bool EwsGetItemResponse::parseItems(QXmlStreamReader &reader)
     if (!item.isValid()) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - invalid Item element."));
     }
-    mItems.append(item);
+    mItem = item;
 
     // Finish the Items element.
     reader.skipCurrentElement();

@@ -31,6 +31,16 @@ class EwsGetItemRequest : public EwsRequest
 {
     Q_OBJECT
 public:
+    class Response : public EwsRequest::Response
+    {
+    public:
+        Response(QXmlStreamReader &reader);
+        bool parseItems(QXmlStreamReader &reader);
+        const EwsItem &item() const { return mItem; };
+    private:
+        EwsItem mItem;
+    };
+
     EwsGetItemRequest(EwsClient &client, QObject *parent);
     virtual ~EwsGetItemRequest();
 
@@ -39,14 +49,14 @@ public:
 
     virtual void start();
 
-    const EwsItem::List items() const { return mItems; };
+    const QList<Response> &responses() const { return mResponses; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsId::List mIds;
     EwsItemShape mShape;
-    EwsItem::List mItems;
+    QList<Response> mResponses;
 };
 
 #endif

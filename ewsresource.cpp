@@ -238,7 +238,13 @@ void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
     }
 
     Item item = req->property("item").value<Item>();
-    EwsItem ewsItem = req->items()[0];
+    const EwsGetItemRequest::Response &resp = req->responses()[0];
+    if (!resp.isSuccess()) {
+        qWarning() << QStringLiteral("Item fetch failed!");
+        cancelTask(QStringLiteral("Item fetch failed!"));
+        return;
+    }
+    const EwsItem &ewsItem = resp.item();
     QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
     if (mimeContent.isEmpty()) {
         qWarning() << QStringLiteral("MIME content is empty!");

@@ -80,23 +80,24 @@ EwsFetchCalendarDetailJob::~EwsFetchCalendarDetailJob()
 {
 }
 
-void EwsFetchCalendarDetailJob::processItems(const EwsItem::List &items)
+void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Response> &responses)
 {
     Item::List::iterator it = mChangedItems.begin();
     KCalCore::ICalFormat format;
 
     EwsId::List addItems;
 
-    Q_FOREACH(const EwsItem &ewsItem, items) {
+    Q_FOREACH(const EwsGetItemRequest::Response &resp, responses) {
         Item &item = *it;
 
         qDebug() << item.remoteId();
 
-        if (!ewsItem.isValid()) {
+        if (!resp.isSuccess()) {
             qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
             continue;
         }
 
+        const EwsItem &ewsItem = resp.item();
         QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
         KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar("GMT"));
         format.fromString(memcal, mimeContent);
@@ -187,7 +188,13 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
     }
 
     KCalCore::ICalFormat format;
-    Q_FOREACH(const EwsItem& ewsItem, req->items()) {
+    Q_FOREACH(const EwsGetItemRequest::Response& resp, req->responses()) {
+        if (!resp.isSuccess()) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item.");
+            continue;
+        }
+        const EwsItem &ewsItem = resp.item();
+
         Item item(KCalCore::Event::eventMimeType());
         item.setParentCollection(mCollection);
         EwsId id = ewsItem[EwsItemFieldItemId].value<EwsId>();
@@ -244,10 +251,6 @@ EwsFetchItemDetailJob *EwsFetchCalendarDetailJob::factory(EwsClient &client, QOb
     return KTimeZone();
 }*/
 
-#if 1
-/* This function is a lousy workaround for Exchange returning Windows timezone names instead of
- * IANA ones.
- */
 /* This function is a lousy workaround for Exchange returning Windows timezone names instead of
  * IANA ones.
  */
@@ -298,6 +301,5 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
 
     currentTime = resultDt;
 }
-#endif
 
 EWS_DECLARE_FETCH_ITEM_DETAIL_JOB(EwsFetchCalendarDetailJob, EwsItemTypeCalendarItem)

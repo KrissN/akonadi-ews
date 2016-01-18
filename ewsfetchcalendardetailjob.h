@@ -32,7 +32,7 @@ public:
     virtual ~EwsFetchCalendarDetailJob();
     static EwsFetchItemDetailJob *factory(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
 protected:
-    virtual void processItems(const EwsItem::List &items) Q_DECL_OVERRIDE;
+    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) Q_DECL_OVERRIDE;
     void convertTimezone(KDateTime &currentTime, QString msTimezone, QString culture);
 private Q_SLOTS:
     void exceptionItemsFetched(KJob *job);

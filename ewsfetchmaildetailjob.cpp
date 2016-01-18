@@ -51,18 +51,19 @@ EwsFetchMailDetailJob::~EwsFetchMailDetailJob()
 {
 }
 
-void EwsFetchMailDetailJob::processItems(const EwsItem::List &items)
+void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response> &responses)
 {
     Item::List::iterator it = mChangedItems.begin();
 
-    Q_FOREACH(const EwsItem &ewsItem, items) {
+    Q_FOREACH(const EwsGetItemRequest::Response &resp, responses) {
         Item &item = *it;
 
-        if (!ewsItem.isValid()) {
+        if (!resp.isSuccess()) {
             qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
             continue;
         }
 
+        const EwsItem &ewsItem = resp.item();
         KMime::Message::Ptr msg(new KMime::Message);
 
         // Rebuild the message headers

@@ -29,8 +29,7 @@
 #include "ewsclient.h"
 #include "ewsid.h"
 #include "ewsitem.h"
-
-class EwsGetItemRequest;
+#include "ewsgetitemrequest.h"
 
 class EwsFetchItemDetailJob : public KCompositeJob
 {
@@ -53,7 +52,7 @@ public:
     static EwsFetchItemDetailJob *createFetchItemDetailJob(EwsItemType type, EwsClient &client, QObject *parent,
                                                            const Akonadi::Collection &collection);
 protected:
-    virtual void processItems(const EwsItem::List &items) = 0;
+    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) = 0;
 
     QPointer<EwsGetItemRequest> mRequest;
     Akonadi::Item::List mChangedItems;

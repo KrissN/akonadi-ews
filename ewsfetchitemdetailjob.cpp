@@ -55,9 +55,9 @@ void EwsFetchItemDetailJob::setItemLists(Akonadi::Item::List changedItems,
 void EwsFetchItemDetailJob::itemDetailFetched(KJob *job)
 {
     if (!job->error() && job == mRequest) {
-        Q_ASSERT(mChangedItems.size() == mRequest->items().size());
+        Q_ASSERT(mChangedItems.size() == mRequest->responses().size());
 
-        processItems(mRequest->items());
+        processItems(mRequest->responses());
     }
 }
 
