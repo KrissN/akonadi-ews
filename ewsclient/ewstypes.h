@@ -38,7 +38,9 @@ typedef enum {
 typedef enum {
     EwsResponseSuccess = 0,
     EwsResponseWarning,
-    EwsResponseError
+    EwsResponseError,
+    EwsResponseParseError,  // Internal - never returned by an Exchange server
+    EwsResponseUnknown      // Internal - never returned by an Exchange server
 } EwsResponseClass;
 
 typedef enum {

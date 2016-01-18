@@ -62,8 +62,7 @@ public:
     const QList<EwsItem> items() const { return mItems; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
-    bool parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass);
-    EwsItem* readItem(QXmlStreamReader &reader);
+    bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsId mFolderId;
     EwsItemShape mShape;

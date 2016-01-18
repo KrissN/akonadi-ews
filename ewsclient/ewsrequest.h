@@ -25,6 +25,7 @@
 #include <QtCore/QPointer>
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QXmlStreamWriter>
+#include <QtCore/QSharedPointer>
 
 #include <KIO/TransferJob>
 
@@ -36,6 +37,23 @@ class EwsRequest : public EwsJob
 {
     Q_OBJECT
 public:
+    class Response
+    {
+    public:
+        EwsResponseClass responseClass() const { return mClass; };
+        bool isSuccess() const { return mClass == EwsResponseSuccess; };
+        QString responseCode() const { return mCode; };
+        QString responseMessage() const { return mMessage; };
+    protected:
+        Response(QXmlStreamReader &reader);
+        bool readResponseElement(QXmlStreamReader &reader);
+        bool setErrorMsg(const QString msg);
+
+        EwsResponseClass mClass;
+        QString mCode;
+        QString mMessage;
+    };
+
     EwsRequest(EwsClient& client, QObject *parent);
     virtual ~EwsRequest();
 
@@ -43,18 +61,17 @@ public:
     void addMetaData(QString key, QString value);
 
 protected:
+    typedef std::function<bool(QXmlStreamReader &reader)> ContentReaderFn;
+
     void doSend();
     void prepare(const QString body);
     virtual bool parseResult(QXmlStreamReader &reader) = 0;
     void startSoapDocument(QXmlStreamWriter &writer);
     void endSoapDocument(QXmlStreamWriter &writer);
     bool parseResponseMessage(QXmlStreamReader &reader, QString reqName,
-                              std::function<bool(QXmlStreamReader &reader,
-                                  EwsResponseClass responseClass)> contentReader);
+                              ContentReaderFn contentReader);
 
     KIO::MetaData mMd;
-    QString mResponseCode;
-    QString mResponseMessage;
 private Q_SLOTS:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
@@ -63,7 +80,6 @@ private:
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
     bool readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass);
-    bool readResponseElement(QXmlStreamReader &reader);
 
     QString mResponseData;
     EwsClient &mClient;

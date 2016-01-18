@@ -20,6 +20,15 @@
 #include "ewsgetitemrequest.h"
 #include "ewsclient_debug.h"
 
+class EwsGetItemResponse : public EwsRequest::Response
+{
+public:
+    EwsGetItemResponse(QXmlStreamReader &reader);
+    bool parseItems(QXmlStreamReader &reader);
+
+    EwsItem::List mItems;
+};
+
 EwsGetItemRequest::EwsGetItemRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent)
 {
@@ -70,39 +79,67 @@ void EwsGetItemRequest::start()
 bool EwsGetItemRequest::parseResult(QXmlStreamReader &reader)
 {
     return parseResponseMessage(reader, QStringLiteral("GetItem"),
-                                [this](QXmlStreamReader &reader, EwsResponseClass responseClass)
-                                {return parseItemsResponse(reader, responseClass);});
+                                [this](QXmlStreamReader &reader) {return parseItemsResponse(reader);});
 }
 
-bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
+bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
 {
-    if (responseClass == EwsResponseSuccess) {
-        if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
-            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")
-                            .arg(reader.qualifiedName().toString()));
-
-        if (!reader.readNextStartElement())
-            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in Items element."));
-
-        if (reader.namespaceUri() != ewsTypeNsUri)
-            return setErrorMsg(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
-
-        EwsItem item(reader);
-        if (!item.isValid()) {
-            return setErrorMsg(QStringLiteral("Failed to read EWS request - invalid Item element."));
-        }
-        mItems.append(item);
-
-        // Finish the Items element.
-        reader.skipCurrentElement();
+    EwsGetItemResponse *resp = new EwsGetItemResponse(reader);
+    if (resp->responseClass() == EwsResponseUnknown) {
+        return false;
     }
-    else {
-        // An error occurred for one of the items. Don't cause the whole request to fail, but rather
-        // insert an empty item to indicate that something went wrong.
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1.").arg(mItems.size());
+
+    mItems += resp->mItems;
+
+    return true;
+}
+
+EwsGetItemResponse::EwsGetItemResponse(QXmlStreamReader &reader)
+    : EwsRequest::Response(reader)
+{
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
+            setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
+                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+            return;
+        }
+
+        if (reader.name() == QStringLiteral("Items")) {
+            if (!parseItems(reader)) {
+                return;
+            }
+        }
+        else if (!readResponseElement(reader)) {
+            setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
+            return;
+        }
+    }
+    if (mClass != EwsResponseSuccess) {
         EwsItem item;
         mItems.append(item);
         reader.skipCurrentElement();
     }
+}
+
+bool EwsGetItemResponse::parseItems(QXmlStreamReader &reader)
+{
+    if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Items"))
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Items element (got %1).")
+                        .arg(reader.qualifiedName().toString()));
+
+    if (!reader.readNextStartElement())
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in Items element."));
+
+    if (reader.namespaceUri() != ewsTypeNsUri)
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - expected child element from types namespace."));
+
+    EwsItem item(reader);
+    if (!item.isValid()) {
+        return setErrorMsg(QStringLiteral("Failed to read EWS request - invalid Item element."));
+    }
+    mItems.append(item);
+
+    // Finish the Items element.
+    reader.skipCurrentElement();
     return true;
 }

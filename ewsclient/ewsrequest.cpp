@@ -22,6 +22,8 @@
 #include "ewsclient.h"
 #include "ewsclient_debug.h"
 
+#include <QtCore/QTemporaryFile>
+
 static const QString ewsReqVersion = QStringLiteral("Exchange2010");
 
 EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
@@ -102,6 +104,12 @@ void EwsRequest::addMetaData(QString key, QString value)
 void EwsRequest::requestResult(KJob *job)
 {
     qCDebug(EWSCLIENT_LOG) << "result" << job->error();
+    QTemporaryFile dumpFile("/tmp/ews_xmldump_XXXXXX.xml");
+    dumpFile.open();
+    dumpFile.setAutoRemove(false);
+    dumpFile.write(mResponseData.toUtf8());
+    qCDebug(EWSCLIENT_LOG) << "request dumped to" << dumpFile.fileName();
+    dumpFile.close();
 
     if (job->error() != 0) {
         setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString());
@@ -181,7 +189,7 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 }
 
 bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
-                          std::function<bool(QXmlStreamReader &reader, EwsResponseClass responseClass)> contentReader)
+                          ContentReaderFn contentReader)
 {
     if (reader.name() != reqName + QStringLiteral("Response")
         || reader.namespaceUri() != ewsMsgNsUri) {
@@ -208,31 +216,15 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                             .arg(reqName + QStringLiteral("ResponseMessage")));
         }
 
-        EwsResponseClass responseClass;
-
-        if (!readResponseAttr(reader.attributes(), responseClass))
+        if (!contentReader(reader)) {
             return false;
-
-        while (reader.readNextStartElement()) {
-            if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
-                                .arg(QStringLiteral("ResponseMessage"))
-                                << reader.namespaceUri();
-                return false;
-            }
-
-
-            if (!readResponseElement(reader)) {
-                if (!contentReader(reader, responseClass))
-                    return false;
-            }
         }
     }
 
     return true;
 }
 
-bool EwsRequest::readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass)
+EwsRequest::Response::Response(QXmlStreamReader &reader)
 {
     static const QString respClasses[] = {
         QStringLiteral("Success"),
@@ -240,33 +232,32 @@ bool EwsRequest::readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponse
         QStringLiteral("Error")
     };
 
-    QStringRef respClassRef = attrs.value(QStringLiteral("ResponseClass"));
+    QStringRef respClassRef = reader.attributes().value(QStringLiteral("ResponseClass"));
     if (respClassRef.isNull()) {
+        mClass = EwsResponseParseError;
         qCWarning(EWSCLIENT_LOG) << "ResponseClass attribute not found in response element";
-        return false;
+        return;
     }
 
     unsigned i;
     for (i = 0; i < sizeof(respClasses) / sizeof(respClasses[0]); i++) {
         if (respClassRef == respClasses[i]) {
-            responseClass = static_cast<EwsResponseClass>(i);
+            mClass = static_cast<EwsResponseClass>(i);
             break;
         }
     }
-
-    return (i < sizeof(respClasses) / sizeof(respClasses[0]));
 }
 
-bool EwsRequest::readResponseElement(QXmlStreamReader &reader)
+bool EwsRequest::Response::readResponseElement(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri) {
         return false;
     }
     if (reader.name() == QStringLiteral("ResponseCode")) {
-        mResponseCode = reader.readElementText();
+        mCode = reader.readElementText();
     }
     else if (reader.name() == QStringLiteral("MessageText")) {
-        mResponseMessage = reader.readElementText();
+        mMessage = reader.readElementText();
     }
     else if (reader.name() == QStringLiteral("DescriptiveLinkKey")) {
         reader.skipCurrentElement();
@@ -278,5 +269,14 @@ bool EwsRequest::readResponseElement(QXmlStreamReader &reader)
         return false;
     }
     return true;
+}
+
+bool EwsRequest::Response::setErrorMsg(const QString msg)
+{
+    mClass = EwsResponseParseError;
+    mCode = QStringLiteral("ResponseParseError");
+    mMessage = msg;
+    qCWarningNC(EWSCLIENT_LOG) << msg;
+    return false;
 }
 

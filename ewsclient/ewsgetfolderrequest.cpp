@@ -22,6 +22,15 @@
 #include "ewsgetfolderrequest.h"
 #include "ewsclient_debug.h"
 
+class EwsGetFolderResponse : public EwsRequest::Response
+{
+public:
+    EwsGetFolderResponse(QXmlStreamReader &reader);
+    bool parseFolders(QXmlStreamReader &reader);
+
+    EwsFolder *mFolder;
+};
+
 EwsGetFolderRequest::EwsGetFolderRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent), mFolder(0)
 {
@@ -70,14 +79,45 @@ void EwsGetFolderRequest::start()
 bool EwsGetFolderRequest::parseResult(QXmlStreamReader &reader)
 {
     return parseResponseMessage(reader, QStringLiteral("GetFolder"),
-                                [this](QXmlStreamReader &reader, EwsResponseClass responseClass)
-                                {return parseFoldersResponse(reader, responseClass);});
+                                [this](QXmlStreamReader &reader) {return parseFoldersResponse(reader);});
 }
 
-bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
+bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
 {
-    Q_UNUSED(responseClass);    // TODO: Handle errors
+    EwsGetFolderResponse *resp = new EwsGetFolderResponse(reader);
+    if (resp->responseClass() == EwsResponseUnknown) {
+        return false;
+    }
 
+    mFolder = resp->mFolder;
+
+    return true;
+}
+
+EwsGetFolderResponse::EwsGetFolderResponse(QXmlStreamReader &reader)
+    : EwsRequest::Response(reader)
+{
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
+            setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
+                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+            return;
+        }
+
+        if (reader.name() == QStringLiteral("Folders")) {
+            if (!parseFolders(reader)) {
+                return;
+            }
+        }
+        else if (!readResponseElement(reader)) {
+            setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
+            return;
+        }
+    }
+}
+
+bool EwsGetFolderResponse::parseFolders(QXmlStreamReader &reader)
+{
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Folders"))
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Folders element (got %1).")
                         .arg(reader.qualifiedName().toString()));

@@ -30,6 +30,21 @@ static const QString traversalTypeNames[] = {
     QStringLiteral("Associated")
 };
 
+class EwsFindItemResponse : public EwsRequest::Response
+{
+public:
+    EwsFindItemResponse(QXmlStreamReader &reader);
+    bool parseRootFolder(QXmlStreamReader &reader);
+    EwsItem* readItem(QXmlStreamReader &reader);
+
+    QList<EwsItem> mItems;
+    unsigned mTotalItems;
+    int mNextOffset;
+    int mNextNumerator;
+    int mNextDenominator;
+    bool mIncludesLastItem;
+};
+
 EwsFindItemRequest::EwsFindItemRequest(EwsClient& client, QObject *parent)
     : EwsRequest(client, parent), mTraversal(EwsTraversalShallow), mPagination(false),
       mPageBasePoint(EwsBasePointBeginning), mPageOffset(0), mFractional(false), mMaxItems(-1),
@@ -102,14 +117,50 @@ void EwsFindItemRequest::start()
 bool EwsFindItemRequest::parseResult(QXmlStreamReader &reader)
 {
     return parseResponseMessage(reader, QStringLiteral("FindItem"),
-                                [this](QXmlStreamReader &reader, EwsResponseClass responseClass)
-                                {return parseItemsResponse(reader, responseClass);});
+                                [this](QXmlStreamReader &reader) {return parseItemsResponse(reader);});
 }
 
-bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader, EwsResponseClass responseClass)
+bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader)
 {
-    Q_UNUSED(responseClass);    // TODO: Handle errors
+    EwsFindItemResponse *resp = new EwsFindItemResponse(reader);
+    if (resp->responseClass() == EwsResponseUnknown) {
+        return false;
+    }
 
+    mItems = resp->mItems;
+    mTotalItems = resp->mTotalItems;
+    mNextOffset = resp->mNextOffset;
+    mNextNumerator = resp->mNextNumerator;
+    mNextDenominator = resp->mNextDenominator;
+    mIncludesLastItem = resp->mIncludesLastItem;
+
+    return true;
+}
+
+EwsFindItemResponse::EwsFindItemResponse(QXmlStreamReader &reader)
+    : EwsRequest::Response(reader)
+{
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
+            setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
+                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+            return;
+        }
+
+        if (reader.name() == QStringLiteral("RootFolder")) {
+            if (!parseRootFolder(reader)) {
+                return;
+            }
+        }
+        else if (!readResponseElement(reader)) {
+            setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
+            return;
+        }
+    }
+}
+
+bool EwsFindItemResponse::parseRootFolder(QXmlStreamReader &reader)
+{
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("RootFolder"))
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
                         .arg(QStringLiteral("RootFolder")).arg(reader.qualifiedName().toString()));
@@ -185,7 +236,7 @@ bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader, EwsRespons
     return true;
 }
 
-EwsItem* EwsFindItemRequest::readItem(QXmlStreamReader &reader)
+EwsItem* EwsFindItemResponse::readItem(QXmlStreamReader &reader)
 {
     EwsItem *item = 0;
     if (reader.name() == QStringLiteral("Item") ||
