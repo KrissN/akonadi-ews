@@ -51,6 +51,7 @@ public:
     static bool occurrenceReader(QXmlStreamReader &reader, QVariant &val);
     static bool occurrencesReader(QXmlStreamReader &reader, QVariant &val);
     static bool recurrenceReader(QXmlStreamReader &reader, QVariant &val);
+    static bool categoriesReader(QXmlStreamReader &reader, QVariant &val);
 
     EwsItemType mType;
     static const Reader mStaticEwsReader;
@@ -107,6 +108,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
         &EwsItemPrivate::occurrencesReader},
     {EwsItemFieldDeletedOccurrences, QStringLiteral("DeletedOccurrences"),
         &EwsItemPrivate::occurrencesReader},
+    {EwsItemFieldCategories, QStringLiteral("Categories"), &EwsItemPrivate::categoriesReader},
 };
 
 const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsReader(ewsItemItems);
@@ -301,6 +303,33 @@ bool EwsItemPrivate::occurrencesReader(QXmlStreamReader &reader, QVariant &val)
     }
 
     val = QVariant::fromValue<EwsOccurrence::List>(occList);
+
+    return true;
+}
+
+bool EwsItemPrivate::categoriesReader(QXmlStreamReader &reader, QVariant &val)
+{
+    QStringList categories;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
+                            .arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+
+        if (reader.name() == QStringLiteral("Value")) {
+            categories.append(reader.readElementText());
+            if (reader.error() !=  QXmlStreamReader::NoError) {
+                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
+                                                        .arg(QStringLiteral("Categories/Value"));
+                return false;
+            }
+        }
+    }
+
+    val = categories;
 
     return true;
 }
