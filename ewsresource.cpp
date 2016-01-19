@@ -41,6 +41,7 @@
 using namespace Akonadi;
 
 static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString);
+static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
 static const EwsPropertyField propItemSubject("item:Subject");
 
 EwsResource::EwsResource(const QString &id)
@@ -315,6 +316,14 @@ void EwsResource::mailItemChanged(const Item &item, const QSet<QByteArray> &part
         EwsUpdateItemRequest::Update *upd =
                         new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("message:IsRead")),
                                                             isRead ? QStringLiteral("true") : QStringLiteral("false"));
+        ic.addUpdate(upd);
+        bool isFlagged = item.flags().contains(MessageFlags::Flagged);
+        if (isFlagged) {
+            upd = new EwsUpdateItemRequest::SetUpdate(propPidFlagStatus, QStringLiteral("2"));
+        }
+        else {
+            upd = new EwsUpdateItemRequest::DeleteUpdate(propPidFlagStatus);
+        }
         ic.addUpdate(upd);
         req->addItemChange(ic);
         doSubmit = true;
