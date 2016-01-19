@@ -319,7 +319,7 @@ bool EwsItemPrivate::categoriesReader(QXmlStreamReader &reader, QVariant &val)
             return false;
         }
 
-        if (reader.name() == QStringLiteral("Value")) {
+        if (reader.name() == QStringLiteral("String")) {
             categories.append(reader.readElementText());
             if (reader.error() !=  QXmlStreamReader::NoError) {
                 qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
