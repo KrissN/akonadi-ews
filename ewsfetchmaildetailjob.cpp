@@ -30,6 +30,7 @@
 
 using namespace Akonadi;
 
+static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
 EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection)
     : EwsFetchItemDetailJob(client, parent, collection)
 {
@@ -43,6 +44,7 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("message:BccRecipients");
     shape << EwsPropertyField("message:IsRead");
     shape << EwsPropertyField("item:HasAttachments");
+    shape << propPidFlagStatus;
     mRequest->setItemShape(shape);
 }
 
@@ -160,6 +162,14 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             else {
                 item.clearFlag(MessageFlags::Sent);
             }
+        }
+
+        QStringRef flagProp = ewsItem[propPidFlagStatus];
+        if (!v.isNull() && (v.toUInt() == 2)) {
+            item.setFlag(MessageFlags::Flagged);
+        }
+        else {
+            item.clearFlag(MessageFlags::Flagged);
         }
 
         it++;
