@@ -597,9 +597,11 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
         break;
     }
     case EwsPropertyFieldPrivate::ExtendedField:
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
         write(writer);
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Value"));
         d->writeValue(writer, value);
+        writer.writeEndElement();
         writer.writeEndElement();
         break;
     default:
