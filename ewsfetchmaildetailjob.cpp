@@ -31,6 +31,7 @@
 using namespace Akonadi;
 
 static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
+
 EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection)
     : EwsFetchItemDetailJob(client, parent, collection)
 {

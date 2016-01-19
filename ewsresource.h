@@ -29,12 +29,14 @@ class EwsGetItemRequest;
 class EwsFindFolderRequest;
 class EwsFolder;
 
-class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV2
+class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV3
 {
     Q_OBJECT
 public:
     explicit EwsResource(const QString &id);
     ~EwsResource();
+
+    virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) Q_DECL_OVERRIDE;
 public Q_SLOTS:
     void configure(WId windowId) Q_DECL_OVERRIDE;
 protected Q_SLOTS:
@@ -45,10 +47,13 @@ private Q_SLOTS:
     void findFoldersRequestFinished(EwsFindFolderRequest *req);
     void itemFetchJobFinished(KJob *job);
     void getItemRequestFinished(EwsGetItemRequest *req);
+    void itemChangeRequestFinished(KJob *job);
 private:
     Akonadi::Collection::List createChildCollections(const EwsFolder &folder, Akonadi::Collection collection);
     Akonadi::Collection createFolderCollection(const EwsFolder &folder);
     void finishItemsFetch(FetchItemState *state);
+
+    void mailItemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers);
 
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;

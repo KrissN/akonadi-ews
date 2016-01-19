@@ -22,6 +22,7 @@
 #include <KI18n/KLocalizedString>
 #include <AkonadiCore/ChangeRecorder>
 #include <AkonadiCore/CollectionFetchScope>
+#include <Akonadi/KMime/MessageFlags>
 #include <KMime/Message>
 #include <KCalCore/Event>
 #include <KCalCore/Todo>
@@ -33,6 +34,7 @@
 #include "ewsfindfolderrequest.h"
 #include "ewseffectiverights.h"
 #include "ewsgetitemrequest.h"
+#include "ewsupdateitemrequest.h"
 #include "configdialog.h"
 #include "settings.h"
 
@@ -57,6 +59,9 @@ EwsResource::EwsResource(const QString &id)
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
+    changeRecorder()->itemFetchScope().fetchFullPayload(true);
+    changeRecorder()->itemFetchScope().setAncestorRetrieval(ItemFetchScope::Parent);
+    changeRecorder()->itemFetchScope().setFetchModificationTime(false);
 
     Q_EMIT status(0);
 }
@@ -283,6 +288,75 @@ void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
         }
         itemRetrieved(item);
     }
+}
+
+void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers)
+{
+    qDebug() << "itemChanged" << item.remoteId() << partIdentifiers << item.hasPayload<KCalCore::Event::Ptr>();
+
+    if (item.mimeType() == KMime::Message::mimeType()) {
+        mailItemChanged(item, partIdentifiers);
+    }
+    else {
+        cancelTask("Item type not supported for changing");
+    }
+}
+
+void EwsResource::mailItemChanged(const Item &item, const QSet<QByteArray> &partIdentifiers)
+{
+    bool doSubmit = false;
+    EwsUpdateItemRequest *req = new EwsUpdateItemRequest(mEwsClient, this);
+    EwsId itemId(item.remoteId(), item.remoteRevision());
+
+    if (partIdentifiers.contains("FLAGS")) {
+        EwsUpdateItemRequest::ItemChange ic(itemId, EwsItemTypeMessage);
+        qDebug() << "Item flags" << item.flags();
+        bool isRead = item.flags().contains(MessageFlags::Seen);
+        EwsUpdateItemRequest::Update *upd =
+                        new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("message:IsRead")),
+                                                            isRead ? QStringLiteral("true") : QStringLiteral("false"));
+        ic.addUpdate(upd);
+        req->addItemChange(ic);
+        doSubmit = true;
+    }
+
+    if (doSubmit) {
+        req->setProperty("item", QVariant::fromValue<Item>(item));
+        connect(req, SIGNAL(result(KJob*)), SLOT(itemChangeRequestFinished(KJob*)));
+        req->start();
+    }
+    else {
+        delete req;
+        qDebug() << "Nothing to do for parts" << partIdentifiers;
+        changeCommitted(item);
+    }
+}
+
+void EwsResource::itemChangeRequestFinished(KJob *job)
+{
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsUpdateItemRequest *req = qobject_cast<EwsUpdateItemRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+
+    EwsUpdateItemRequest::Response resp = req->responses().first();
+    if (!resp.isSuccess()) {
+        cancelTask(QStringLiteral("Item update failed: ") + resp.responseMessage());
+        return;
+    }
+
+    Item item = job->property("item").value<Item>();
+    if (item.isValid()) {
+        item.setRemoteRevision(resp.itemId().changeKey());
+    }
+
+    changeCommitted(item);
 }
 
 AKONADI_RESOURCE_MAIN(EwsResource)
