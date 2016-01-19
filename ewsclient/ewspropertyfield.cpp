@@ -110,6 +110,7 @@ public:
     uint mHash;  // Precalculated hash for the qHash() function.
 
     void recalcHash();
+    void writeValue(QXmlStreamWriter &writer, const QVariant &value) const;
 };
 
 void EwsPropertyFieldPrivate::recalcHash()
@@ -564,7 +565,7 @@ QDebug operator<<(QDebug debug, const EwsPropertyField &prop)
     return debug;
 }
 
-bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QString &value) const
+bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &value) const
 {
     switch (d->mPropType)
     {
@@ -575,7 +576,9 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QString &value
             qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Invalid field URI: %1").arg(d->mUri);
             return false;
         }
-        writer.writeTextElement(ewsTypeNsUri, tokens[1], value);
+        writer.writeStartElement(ewsTypeNsUri, tokens[1]);
+        d->writeValue(writer, value);
+        writer.writeEndElement();
         break;
     }
     case EwsPropertyFieldPrivate::IndexedField:
@@ -588,14 +591,16 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QString &value
         writer.writeStartElement(ewsTypeNsUri, tokens[1] + QStringLiteral("es"));
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Entry"));
         writer.writeAttribute(QStringLiteral("Key"), tokens[1] + QString::number(d->mIndex));
-        writer.writeCharacters(value);
+        d->writeValue(writer, value);
         writer.writeEndElement();
         writer.writeEndElement();
         break;
     }
     case EwsPropertyFieldPrivate::ExtendedField:
         write(writer);
-        writer.writeTextElement(ewsTypeNsUri, QStringLiteral("Value"), value);
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Value"));
+        d->writeValue(writer, value);
+        writer.writeEndElement();
         break;
     default:
         return false;
@@ -604,3 +609,21 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QString &value
     return true;
 }
 
+void EwsPropertyFieldPrivate::writeValue(QXmlStreamWriter &writer, const QVariant &value) const
+{
+    switch (value.type()) {
+    case QVariant::StringList:
+    {
+        QStringList list = value.toStringList();
+        Q_FOREACH(const QString &str, list) {
+            writer.writeTextElement(ewsTypeNsUri, QStringLiteral("String"), str);
+        }
+        break;
+    }
+    case QVariant::String:
+        writer.writeCharacters(value.toString());
+        break;
+    default:
+        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Unknown variant type to write: %1").arg(value.typeName());
+    }
+}

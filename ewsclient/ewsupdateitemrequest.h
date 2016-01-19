@@ -48,30 +48,30 @@ public:
             Unknown
         };
 
-        Update(EwsPropertyField field, QString val, Type type)
+        Update(EwsPropertyField field, QVariant val, Type type)
             : mField(field), mValue(val), mType(type) {};
 
         EwsPropertyField mField;
-        QString mValue;
+        QVariant mValue;
         Type mType;
     };
 
     class AppendUpdate : public Update
     {
     public:
-        AppendUpdate(EwsPropertyField field, QString val) : Update(field, val, Append) {};
+        AppendUpdate(EwsPropertyField field, QVariant val) : Update(field, val, Append) {};
     };
 
     class SetUpdate : public Update
     {
     public:
-        SetUpdate(EwsPropertyField field, QString val) : Update(field, val, Set) {};
+        SetUpdate(EwsPropertyField field, QVariant val) : Update(field, val, Set) {};
     };
 
     class DeleteUpdate : public Update
     {
     public:
-        DeleteUpdate(EwsPropertyField field) : Update(field, QString(), Delete) {};
+        DeleteUpdate(EwsPropertyField field) : Update(field, QVariant(), Delete) {};
     };
 
     class ItemChange
@@ -110,6 +110,9 @@ public:
 
     class Response : public EwsRequest::Response
     {
+    public:
+        const EwsId &itemId() const { return mId; };
+        unsigned conflictCount() const { return mConflictCount; };
     protected:
         Response(QXmlStreamReader &reader);
 
