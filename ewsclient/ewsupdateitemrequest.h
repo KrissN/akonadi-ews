@@ -88,26 +88,6 @@ public:
         QList<QSharedPointer<const Update>> mUpdates;
     };
 
-    class ItemResponse
-    {
-    public:
-        EwsResponseClass responseClass() const { return mClass; };
-        bool isSuccess() const { return mClass == EwsResponseSuccess; };
-        QString responseCode() const { return mCode; };
-        QString responseMessage() const { return mMsg; };
-        const EwsId &itemId() const { return mId; };
-        unsigned conflictCount() const { return mConflictCount; };
-    private:
-        ItemResponse(EwsResponseClass cls, QString code, QString msg);
-        ItemResponse(QXmlStreamReader &reader);
-
-        EwsResponseClass mClass;
-        QString mCode;
-        QString mMsg;
-        unsigned mConflictCount;
-        EwsId mId;
-    };
-
     class Response : public EwsRequest::Response
     {
     public:

@@ -145,20 +145,13 @@ EwsUpdateItemRequest::Response::Response(QXmlStreamReader &reader)
         }
 
         if (reader.name() == QStringLiteral("Items")) {
-            if (!reader.readNextStartElement()) {
-                setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element inside %1 element.")
-                                .arg(QStringLiteral("Items")));
-                return;
+            if (reader.readNextStartElement()) {
+                EwsItem item(reader);
+                if (!item.isValid()) {
+                    return;
+                }
+                mId = item[EwsItemFieldItemId].value<EwsId>();
             }
-
-            EwsItem item(reader);
-            if (!item.isValid()) {
-                return;
-            }
-            mId = item[EwsItemFieldItemId].value<EwsId>();
-
-            // Finish the Item element.
-            reader.skipCurrentElement();
 
             // Finish the Items element.
             reader.skipCurrentElement();
@@ -170,9 +163,9 @@ EwsUpdateItemRequest::Response::Response(QXmlStreamReader &reader)
                 return;
             }
 
-            if (reader.name() != QStringLiteral("Value")) {
+            if (reader.name() != QStringLiteral("Count")) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - expected a %1 element inside %2 element.")
-                    .arg(QStringLiteral("Value")).arg(QStringLiteral("ConflictResults")));
+                    .arg(QStringLiteral("Count")).arg(QStringLiteral("ConflictResults")));
                 return;
             }
 
@@ -237,16 +230,3 @@ bool EwsUpdateItemRequest::ItemChange::write(QXmlStreamWriter &writer) const
 
     return retVal;
 }
-
-EwsUpdateItemRequest::ItemResponse::ItemResponse(EwsResponseClass cls, QString code, QString msg)
-    : mClass(cls), mCode(code), mMsg(msg), mConflictCount(0)
-{
-}
-EwsUpdateItemRequest::ItemResponse::ItemResponse(QXmlStreamReader &reader)
-    : mClass(EwsResponseSuccess)
-{
-    while (reader.readNextStartElement()) {
-
-    }
-}
-
