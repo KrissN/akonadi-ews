@@ -74,12 +74,16 @@ public:
 
     void writeFolderIds(QXmlStreamWriter &writer) const;
     void writeItemIds(QXmlStreamWriter &writer) const;
+
+    friend QDebug operator<<(QDebug debug, const EwsId &id);
 private:
     Type mType;
     QString mId;
     QString mChangeKey;
     EwsDistinguishedId mDid;
 };
+
+QDebug operator<<(QDebug debug, const EwsId &id);
 
 Q_DECLARE_METATYPE(EwsId)
 Q_DECLARE_METATYPE(EwsId::List)

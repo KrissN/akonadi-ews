@@ -22,6 +22,7 @@
 #include <QtCore/QString>
 #include <QtCore/QXmlStreamReader>
 #include <QtCore/QXmlStreamWriter>
+#include <QtCore/QDebug>
 
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
@@ -140,4 +141,24 @@ void EwsId::writeItemIds(QXmlStreamWriter &writer) const
     }
 }
 
+QDebug operator<<(QDebug debug, const EwsId &id)
+{
+    QDebugStateSaver saver(debug);
+    QDebug d = debug.nospace().noquote();
+    d << QStringLiteral("EwsId(");
+
+    switch (id.mType)
+    {
+    case EwsId::Distinguished:
+        d << QStringLiteral("Distinguished: ") << distinguishedIdNames[id.mDid];
+        break;
+    case EwsId::Real:
+        d << id.mId << QStringLiteral(", changeKey: ") << id.mChangeKey;
+        break;
+    default:
+        break;
+    }
+    d << ')';
+    return debug;
+}
 
