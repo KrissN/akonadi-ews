@@ -65,7 +65,7 @@ bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVaria
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid namespace.")
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid namespace.")
                             .arg(elmName);
             reader.skipCurrentElement();
             return false;
@@ -84,7 +84,7 @@ bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVaria
             value = reader.readElementText();
         }
         else {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - unexpected child element %2")
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unexpected child element %2")
                             .arg(elmName).arg(reader.qualifiedName().toString());
             reader.skipCurrentElement();
             return false;

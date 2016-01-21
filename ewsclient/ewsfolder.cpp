@@ -111,18 +111,18 @@ EwsFolder::EwsFolder(QXmlStreamReader &reader)
         d->mType = EwsFolderTypeSearch;
     }
     else {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unknown folder type %1").arg(reader.name().toString());
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Unknown folder type %1").arg(reader.name().toString());
     }
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << "Unexpected namespace in folder element:"
+            qCWarningNC(EWSRES_LOG) << "Unexpected namespace in folder element:"
                             << reader.namespaceUri();
             return;
         }
 
         if (!readBaseFolderElement(reader)) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Invalid folder child: %1").arg(reader.qualifiedName().toString());
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid folder child: %1").arg(reader.qualifiedName().toString());
             return;
         }
     }
@@ -176,7 +176,7 @@ void EwsFolder::addChild(EwsFolder &child)
     D_PTR
 
     if (child.parentFolder() != 0) {
-        qCWarning(EWSCLIENT_LOG).noquote()
+        qCWarning(EWSRES_LOG).noquote()
                         << QStringLiteral("Attempt to add child folder which already has a parent (child: %1)").
                         arg(child[EwsFolderFieldFolderId].value<EwsId>().id());
     }

@@ -64,7 +64,7 @@ EwsAttendee::EwsAttendee(QXmlStreamReader &reader)
 {
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
                             << reader.namespaceUri();
             return;
         }
@@ -72,7 +72,7 @@ EwsAttendee::EwsAttendee(QXmlStreamReader &reader)
         if (reader.name() == QStringLiteral("Mailbox")) {
             d->mMailbox = EwsMailbox(reader);
             if (!d->mMailbox.isValid()) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid attendee %1 element.")
+                qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid attendee %1 element.")
                                 .arg(reader.name().toString());
                 return;
             }
@@ -82,7 +82,7 @@ EwsAttendee::EwsAttendee(QXmlStreamReader &reader)
             d->mResponse = decodeEnumString<EwsEventResponseType>(reader.readElementText(),
                                 responseTypeNames, responseTypeNameCount, &ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid attendee %1 element.")
+                qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid attendee %1 element.")
                                 .arg(reader.name().toString());
                 return;
             }

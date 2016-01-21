@@ -18,4 +18,6 @@
 */
 
 #include "ewsclient_debug.h"
-Q_LOGGING_CATEGORY(EWSCLIENT_LOG, "log_ewsclient")
+Q_LOGGING_CATEGORY(EWSRES_LOG, "log_ews_resource")
+
+Q_LOGGING_CATEGORY(EWSRES_PROTO_LOG, "log_ews_resource_proto", QtWarningMsg)

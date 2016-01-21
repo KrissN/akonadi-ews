@@ -63,7 +63,7 @@ bool EwsEffectiveRightsPrivate::readRight(QXmlStreamReader &reader, Right right)
     QString elm = reader.name().toString();
     QString text = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
-        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
+        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
                         .arg(QStringLiteral("EffectiveRights")).arg(elm);
         return false;
     }
@@ -75,7 +75,7 @@ bool EwsEffectiveRightsPrivate::readRight(QXmlStreamReader &reader, Right right)
         mRights.clearBit(right);
     }
     else {
-        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element value: %3.")
+        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element value: %3.")
                         .arg(QStringLiteral("EffectiveRights")).arg(elm).arg(text);
         return false;
     }
@@ -93,7 +93,7 @@ EwsEffectiveRights::EwsEffectiveRights(QXmlStreamReader &reader)
 {
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
                             << reader.namespaceUri();
             return;
         }
@@ -134,7 +134,7 @@ EwsEffectiveRights::EwsEffectiveRights(QXmlStreamReader &reader)
             }
         }
         else {
-            qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
+            qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
                             .arg(QStringLiteral("EffectiveRights")).arg(reader.name().toString());
             return;
         }

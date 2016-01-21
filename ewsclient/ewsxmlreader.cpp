@@ -67,7 +67,7 @@ bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val)
 {
     QString elmText = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Error reading %1 element")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading %1 element")
                         .arg(reader.name().toString());
         reader.skipCurrentElement();
         return false;
@@ -79,7 +79,7 @@ bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val)
         val = false;
     }
     else {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected invalid boolean value in %1 element:")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected invalid boolean value in %1 element:")
                         .arg(reader.name().toString())
                         << elmText;
         return false;
@@ -93,7 +93,7 @@ bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
     QString elmName = reader.name().toString();
     val = KCodecs::base64Decode(reader.readElementText().toLatin1());
     if (reader.error() != QXmlStreamReader::NoError) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
         reader.skipCurrentElement();
         return false;
@@ -107,7 +107,7 @@ bool ewsXmlIdReader(QXmlStreamReader &reader, QVariant &val)
     QString elmName = reader.name().toString();
     EwsId id = EwsId(reader);
     if (id.type() == EwsId::Unspecified) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
         reader.skipCurrentElement();
         return false;
@@ -122,7 +122,7 @@ bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val)
     QString elmName = reader.name().toString();
     val = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
         reader.skipCurrentElement();
         return false;
@@ -136,7 +136,7 @@ bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val)
     bool ok;
     val = reader.readElementText().toUInt(&ok);
     if (reader.error() != QXmlStreamReader::NoError || !ok) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
         return false;
     }
@@ -148,7 +148,7 @@ bool ewsXmlDateTimeReader(QXmlStreamReader &reader, QVariant &val)
     QString elmName = reader.name().toString();
     QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
     if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
         return false;
     }
@@ -161,7 +161,7 @@ bool ewsXmlEnumReader(QXmlStreamReader &reader, QVariant &val, QVector<QString> 
     QString elmName = reader.name().toString();
     QString text = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
         reader.skipCurrentElement();
         return false;
@@ -176,7 +176,7 @@ bool ewsXmlEnumReader(QXmlStreamReader &reader, QVariant &val, QVector<QString> 
     }
 
     if (it == items.cend()) {
-        qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - unknown value %2.")
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown value %2.")
                         .arg(elmName).arg(text);
         return false;
     }

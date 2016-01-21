@@ -107,7 +107,7 @@ void EwsFindItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSCLIENT_LOG) << reqString;
+    qCDebug(EWSRES_LOG) << reqString;
 
     prepare(reqString);
 
@@ -249,7 +249,7 @@ EwsItem* EwsFindItemResponse::readItem(QXmlStreamReader &reader)
         reader.name() == QStringLiteral("MeetingResponse") ||
         reader.name() == QStringLiteral("MeetingCancellation") ||
         reader.name() == QStringLiteral("Task")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing %1").arg(reader.name().toString());
+        qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Processing %1").arg(reader.name().toString());
         item = new EwsItem(reader);
         if (!item->isValid()) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
@@ -258,7 +258,7 @@ EwsItem* EwsFindItemResponse::readItem(QXmlStreamReader &reader)
         }
     }
     else {
-        qCWarning(EWSCLIENT_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
+        qCWarning(EWSRES_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
         reader.skipCurrentElement();
     }
 

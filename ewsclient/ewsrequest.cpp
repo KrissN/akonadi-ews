@@ -103,13 +103,15 @@ void EwsRequest::addMetaData(QString key, QString value)
 
 void EwsRequest::requestResult(KJob *job)
 {
-    qCDebug(EWSCLIENT_LOG) << "result" << job->error();
-    QTemporaryFile dumpFile("/tmp/ews_xmldump_XXXXXX.xml");
-    dumpFile.open();
-    dumpFile.setAutoRemove(false);
-    dumpFile.write(mResponseData.toUtf8());
-    qCDebug(EWSCLIENT_LOG) << "request dumped to" << dumpFile.fileName();
-    dumpFile.close();
+    qCDebug(EWSRES_LOG) << "result" << job->error();
+    if (EWSRES_PROTO_LOG().isDebugEnabled()) {
+        QTemporaryFile dumpFile("/tmp/ews_xmldump_XXXXXX.xml");
+        dumpFile.open();
+        dumpFile.setAutoRemove(false);
+        dumpFile.write(mResponseData.toUtf8());
+        qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
+        dumpFile.close();
+    }
 
     if (job->error() != 0) {
         setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString());
@@ -184,7 +186,7 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 {
     Q_UNUSED(job);
 
-    qCDebug(EWSCLIENT_LOG) << "data" << job << data;
+    qCDebug(EWSRES_PROTO_LOG) << "data" << job << data;
     mResponseData += QString::fromUtf8(data);
 }
 
@@ -209,7 +211,7 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
     }
 
     while (reader.readNextStartElement()) {
-        qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("  Got %1 element").arg(reader.name().toString());
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("  Got %1 element").arg(reader.name().toString());
         if (reader.name() != reqName + QStringLiteral("ResponseMessage")
             || reader.namespaceUri() != ewsMsgNsUri) {
             return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")
@@ -235,7 +237,7 @@ EwsRequest::Response::Response(QXmlStreamReader &reader)
     QStringRef respClassRef = reader.attributes().value(QStringLiteral("ResponseClass"));
     if (respClassRef.isNull()) {
         mClass = EwsResponseParseError;
-        qCWarning(EWSCLIENT_LOG) << "ResponseClass attribute not found in response element";
+        qCWarning(EWSRES_LOG) << "ResponseClass attribute not found in response element";
         return;
     }
 
@@ -276,7 +278,7 @@ bool EwsRequest::Response::setErrorMsg(const QString msg)
     mClass = EwsResponseParseError;
     mCode = QStringLiteral("ResponseParseError");
     mMessage = msg;
-    qCWarningNC(EWSCLIENT_LOG) << msg;
+    qCWarningNC(EWSRES_LOG) << msg;
     return false;
 }
 

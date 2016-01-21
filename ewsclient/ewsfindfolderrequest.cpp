@@ -79,7 +79,7 @@ void EwsFindFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSCLIENT_LOG) << reqString;
+    qCDebug(EWSRES_LOG) << reqString;
 
     prepare(reqString);
 
@@ -170,7 +170,7 @@ bool EwsFindFolderResponse::parseRootFolder(QXmlStreamReader &reader)
         if (folder) {
             bool ok;
             int childCount = (*folder)[EwsFolderFieldChildFolderCount].toUInt(&ok);
-            qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Folder %1 has %2 children")
+            qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Folder %1 has %2 children")
                             .arg((*folder)[EwsFolderFieldDisplayName].toString()).arg(childCount);
             if (childCount > 0) {
                 unsigned readCount = readChildFolders(*folder, childCount, reader);
@@ -199,7 +199,7 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
         reader.name() == QStringLiteral("ContactsFolder") ||
         reader.name() == QStringLiteral("TasksFolder") ||
         reader.name() == QStringLiteral("SearchFolder")) {
-        qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing folder");
+        qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Processing folder");
         folder = new EwsFolder(reader);
         if (!folder->isValid()) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
@@ -208,7 +208,7 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
         }
     }
     else {
-        qCWarning(EWSCLIENT_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
+        qCWarning(EWSRES_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
         reader.skipCurrentElement();
     }
 
@@ -217,7 +217,7 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
 
 unsigned EwsFindFolderResponse::readChildFolders(EwsFolder &parent, unsigned count, QXmlStreamReader &reader)
 {
-    qCDebug(EWSCLIENT_LOG).noquote() << QStringLiteral("Processing %1 folder").arg(parent[EwsFolderFieldDisplayName].toString());
+    qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Processing %1 folder").arg(parent[EwsFolderFieldDisplayName].toString());
     unsigned readCount = 0;
     for (unsigned i = 0; i < count; i++) {
         EwsFolder *folder = readFolder(reader);

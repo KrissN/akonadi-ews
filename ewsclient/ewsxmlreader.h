@@ -59,7 +59,7 @@ public:
         typename QHash<QString, Item>::iterator it = mItemHash.find(reader.name().toString());
         if (it != mItemHash.end()) {
             if (it->key == Ignore) {
-                qCInfoNC(EWSCLIENT_LOG) << QStringLiteral("Unsupported %1 child element %2 - ignoring.")
+                qCInfoNC(EWSRES_LOG) << QStringLiteral("Unsupported %1 child element %2 - ignoring.")
                                 .arg(parentElm).arg(reader.name().toString());
                 reader.skipCurrentElement();
                 return true;
@@ -73,7 +73,7 @@ public:
                 return false;
             }
         }
-        qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
+        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
                         .arg(parentElm).arg(reader.name().toString());
 
         return false;

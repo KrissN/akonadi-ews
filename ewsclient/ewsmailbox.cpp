@@ -51,7 +51,7 @@ EwsMailbox::EwsMailbox(QXmlStreamReader &reader)
 {
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
                             << reader.namespaceUri();
             return;
         }
@@ -59,14 +59,14 @@ EwsMailbox::EwsMailbox(QXmlStreamReader &reader)
         if (reader.name() == QStringLiteral("Name")) {
             d->mName = reader.readElementText();
             if (reader.error() != QXmlStreamReader::NoError) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid mailbox Name element.");
+                qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid mailbox Name element.");
                 return;
             }
         }
         else if (reader.name() == QStringLiteral("EmailAddress")) {
             d->mEmail = reader.readElementText();
             if (reader.error() != QXmlStreamReader::NoError) {
-                qCWarning(EWSCLIENT_LOG) << QStringLiteral("Failed to read EWS request - invalid mailbox EmailAddress element.");
+                qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid mailbox EmailAddress element.");
                 return;
             }
         }
@@ -79,8 +79,8 @@ EwsMailbox::EwsMailbox(QXmlStreamReader &reader)
         }
     }
 
-    qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Mailbox: %1").arg(d->mEmail);
-    qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Mailbox: at element %1").arg(reader.qualifiedName().toString());
+    qCDebugNC(EWSRES_LOG) << QStringLiteral("Mailbox: %1").arg(d->mEmail);
+    qCDebugNC(EWSRES_LOG) << QStringLiteral("Mailbox: at element %1").arg(reader.qualifiedName().toString());
 
     d->mValid = true;
 }

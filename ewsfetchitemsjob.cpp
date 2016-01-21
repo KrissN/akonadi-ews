@@ -56,7 +56,7 @@ static Q_CONSTEXPR int fetchBatchSize = 10;
 EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client, QObject *parent)
     : EwsJob(parent), mCollection(collection), mClient(client), mPendingJobs(0), mTotalItems(0)
 {
-    qCDebugNC(EWSCLIENT_LOG) << mCollection.name();
+    qCDebugNC(EWSRES_LOG) << mCollection.name();
 
     qRegisterMetaType<EwsId::List>();
 }
@@ -179,9 +179,9 @@ void EwsFetchItemsJob::compareItemLists()
         QHash<QString, EwsItem>::iterator it = remoteIds.find(item.remoteId());
         if (it != remoteIds.end()) {
             EwsId id = it.value()[EwsItemFieldItemId].value<EwsId>();
-            qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Found match with existing item.") << id.id();
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Found match with existing item.") << id.id();
             if (id.changeKey() != item.remoteRevision()) {
-                qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Found changed item.") << id.id();
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Found changed item.") << id.id();
                 item.clearPayload();
                 item.setRemoteRevision(id.changeKey());
                 EwsItemType type = it->type();
@@ -206,7 +206,7 @@ void EwsFetchItemsJob::compareItemLists()
             remoteIds.erase(it);
         }
         else {
-            qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Existing item not found - deleting.") << item.remoteId();
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Existing item not found - deleting.") << item.remoteId();
             mDeletedItems.append(item);
         }
     }
@@ -248,7 +248,7 @@ void EwsFetchItemsJob::compareItemLists()
     }
 
     for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); iType++) {
-        qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Unchanged %1, changed %2, deleted %3, new %4")
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("Unchanged %1, changed %2, deleted %3, new %4")
                         .arg(unchanged).arg(toFetchItems[iType].size())
                         .arg(mDeletedItems.size()).arg(remoteIds.size());
     }

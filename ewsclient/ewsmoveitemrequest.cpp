@@ -52,7 +52,7 @@ void EwsMoveItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSCLIENT_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     prepare(reqString);
 

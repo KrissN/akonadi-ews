@@ -93,7 +93,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         qDebug() << item.remoteId();
 
         if (!resp.isSuccess()) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
             continue;
         }
 
@@ -101,11 +101,11 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
         KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar("GMT"));
         format.fromString(memcal, mimeContent);
-        qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Found %1 events").arg(memcal->events().count());
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("Found %1 events").arg(memcal->events().count());
         KCalCore::Incidence::Ptr incidence;
         if (memcal->events().count() > 1) {
             Q_FOREACH(KCalCore::Event::Ptr event, memcal->events()) {
-                qCDebugNC(EWSCLIENT_LOG) << QString::number(event->recurrence()->recurrenceType(), 16) << event->recurrenceId().dateTime() << event->recurrenceId().isValid();
+                qCDebugNC(EWSRES_LOG) << QString::number(event->recurrence()->recurrenceType(), 16) << event->recurrenceId().dateTime() << event->recurrenceId().isValid();
                 if (!event->recurrenceId().isValid()) {
                     incidence = event;
                 }
@@ -190,7 +190,7 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
     KCalCore::ICalFormat format;
     Q_FOREACH(const EwsGetItemRequest::Response& resp, req->responses()) {
         if (!resp.isSuccess()) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item.");
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch item.");
             continue;
         }
         const EwsItem &ewsItem = resp.item();
@@ -272,9 +272,9 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
             if (msTimezone.isEmpty()) {
                 msTimezone = currentTime.timeZone().name();
             }
-            qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Time zone '%1' not found on IANA list. Trying to convert with country '%2'")
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Time zone '%1' not found on IANA list. Trying to convert with country '%2'")
                             .arg(currentTime.timeZone().name()).arg(QLocale::countryToString(locale.country()));
-            qCDebugNC(EWSCLIENT_LOG) << "MSTZ: " << msTimezone;
+            qCDebugNC(EWSRES_LOG) << "MSTZ: " << msTimezone;
             ianaTz = QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1(), locale.country());
             if (ianaTz.isEmpty()) {
                 // Give it one more try with the default country.
@@ -285,17 +285,17 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
                     if (ianaTz.isEmpty()) {
                         // Give it one more try with the default country.
                         ianaTz = QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1());
-                        qCWarningNC(EWSCLIENT_LOG)
+                        qCWarningNC(EWSRES_LOG)
                             << QStringLiteral("Failed to convert time zone '%1' or '%2' to IANA id").arg(msTimezone).arg(currentTime.timeZone().name());
                     }
                 }
             }
         }
         if (!ianaTz.isEmpty()) {
-            qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Found IANA time zone '%1'").arg(ianaTz);
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Found IANA time zone '%1'").arg(ianaTz);
             KTimeZone newTz = KSystemTimeZones::timeZones()->zone(ianaTz);
             resultDt = KDateTime(currentTime.dateTime(), newTz);
-            qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("New timezone: '%1'").arg(resultDt.timeZone().name());
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("New timezone: '%1'").arg(resultDt.timeZone().name());
         }
     }
 

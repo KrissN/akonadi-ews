@@ -62,7 +62,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         Item &item = *it;
 
         if (!resp.isSuccess()) {
-            qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
             continue;
         }
 
@@ -80,7 +80,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             for (; headIt != origHeaders.cend(); headIt++) {
                 QByteArray key = headIt.key().toLatin1();
                 if (headIt.key().compare("Message-ID", Qt::CaseInsensitive) == 0) {
-                    qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Found header: %1 %2").arg(headIt.key()).arg(headIt.value());
+                    qCDebugNC(EWSRES_LOG) << QStringLiteral("Found header: %1 %2").arg(headIt.key()).arg(headIt.value());
                 }
                 KMime::Headers::Base *header = KMime::Headers::createHeader(key);
                 if (!header) {

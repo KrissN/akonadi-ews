@@ -21,7 +21,9 @@
 #define EWSRESOURCE_DEBUG_H
 
 #include <QtCore/QLoggingCategory>
-Q_DECLARE_LOGGING_CATEGORY(EWSCLIENT_LOG)
+Q_DECLARE_LOGGING_CATEGORY(EWSRES_LOG)
+
+Q_DECLARE_LOGGING_CATEGORY(EWSRES_PROTO_LOG)
 
 #define qCDebugNC(cat) qCDebug(cat).noquote()
 #define qCInfoNC(cat) qCInfo(cat).noquote()

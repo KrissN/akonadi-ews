@@ -43,7 +43,7 @@ bool EwsJob::setErrorMsg(const QString msg)
 {
     setError(1);
     setErrorText(msg);
-    qCWarningNC(EWSCLIENT_LOG) << msg;
+    qCWarningNC(EWSRES_LOG) << msg;
     return false;
 }
 
