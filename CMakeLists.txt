@@ -20,11 +20,13 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(akonadi-ews)
 
+enable_testing()
+
 find_package(ECM 5.16.0 NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
 set(REQUIRED_QT_VERSION 5.4.0)
-find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Core)
+find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Test)
 #set(CMAKE_AUTOMOC ON)
 #set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
