@@ -35,6 +35,7 @@
 #include "ewseffectiverights.h"
 #include "ewsgetitemrequest.h"
 #include "ewsupdateitemrequest.h"
+#include "ewsmoveitemrequest.h"
 #include "configdialog.h"
 #include "settings.h"
 
@@ -42,7 +43,6 @@ using namespace Akonadi;
 
 static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString);
 static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
-static const EwsPropertyField propItemSubject("item:Subject");
 
 EwsResource::EwsResource(const QString &id)
     : Akonadi::ResourceBase(id)
@@ -367,5 +367,61 @@ void EwsResource::itemChangeRequestFinished(KJob *job)
 
     changeCommitted(item);
 }
+
+void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCollection,
+                             const Collection &destinationCollection)
+{
+    Q_UNUSED(sourceCollection);
+
+    EwsId::List ids;
+    Q_FOREACH(const Item &item, items) {
+        EwsId id(item.remoteId(), item.remoteRevision());
+        ids.append(id);
+    }
+
+    EwsMoveItemRequest *req = new EwsMoveItemRequest(mEwsClient, this);
+    req->setItemIds(ids);
+    EwsId destId(destinationCollection.remoteId(), QString());
+    req->setDestinationFolderId(destId);
+    req->setProperty("items", QVariant::fromValue<Item::List>(items));
+    connect(req, SIGNAL(result(KJob*)), SLOT(itemMoveRequestFinished(KJob*)));
+    req->start();
+}
+
+void EwsResource::itemMoveRequestFinished(KJob *job)
+{
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsMoveItemRequest *req = qobject_cast<EwsMoveItemRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+    Item::List items = job->property("items").value<Item::List>();
+
+    if (items.count() != req->responses().count()) {
+        cancelTask(QStringLiteral("Invalid number of responses received from server."));
+        return;
+    }
+
+    Item::List::iterator it = items.begin();
+    Q_FOREACH(const EwsMoveItemRequest::Response &resp, req->responses()) {
+        Item &item = *it;
+        if (resp.isSuccess()) {
+            if (item.isValid()) {
+                item.setRemoteRevision(resp.itemId().changeKey());
+            }
+
+        }
+        qDebug() << "changeCommitted" << item.remoteId();
+        changeCommitted(item);
+        it++;
+    }
+}
+
+
 
 AKONADI_RESOURCE_MAIN(EwsResource)

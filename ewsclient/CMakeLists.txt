@@ -32,6 +32,7 @@ set(EWSCLIENT_SRCS
   ewsitemshape.cpp
   ewsjob.cpp
   ewsmailbox.cpp
+  ewsmoveitemrequest.cpp
   ewsoccurrence.cpp
   ewspropertyfield.cpp
   ewsrecurrence.cpp
