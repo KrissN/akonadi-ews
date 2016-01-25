@@ -3,7 +3,6 @@
 
 #include "ewsclient.h"
 
-#include "ewsrequestwriter.h"
 
 EwsClient::EwsClient(QObject *parent)
     : QObject(parent)
