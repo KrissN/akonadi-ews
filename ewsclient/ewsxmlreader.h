@@ -81,8 +81,14 @@ public:
         return false;
     }
 
-    bool readItems(QXmlStreamReader &reader) {
-
+    bool readItems(QXmlStreamReader &reader)
+    {
+        QString elmName(reader.name().toString());
+        while (reader.readNextStartElement()) {
+            if (!readItem(reader, elmName)) {
+                return false;
+            }
+        }
         return true;
     }
 
