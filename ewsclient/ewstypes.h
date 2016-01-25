@@ -437,6 +437,16 @@ typedef enum {
     EwsMeetingDispUnspecified
 } EwsMeetingDisposition;
 
+typedef enum {
+    EwsCopiedEvent = 0,
+    EwsCreatedEvent,
+    EwsDeletedEvent,
+    EwsModifiedEvent,
+    EwsMovedEvent,
+    EwsNewMailEvent,
+    EwsFreeBusyChangedEvent
+} EwsEventType;
+
 template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
 {
     unsigned i;

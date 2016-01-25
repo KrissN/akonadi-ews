@@ -38,6 +38,7 @@ set(EWSCLIENT_SRCS
   ewsrecurrence.cpp
   ewsrequest.cpp
   ewsserverversion.cpp
+  ewssubscriberequest.cpp
   ewstypes.cpp
   ewsupdateitemrequest.cpp
   ewsxmlreader.cpp
