@@ -36,10 +36,11 @@ public:
 
     struct Item {
         Item() : key(Ignore) {};
-        Item(T k, QString n, ReadFunction fn = ReadFunction())
-            : key(k), elmName(n), readFn(fn) {};
+        Item(T k, QString n, QString ns, ReadFunction fn = ReadFunction())
+            : key(k), elmName(n), ns(ns), readFn(fn) {};
         T key;
         QString elmName;
+        QString ns;
         ReadFunction readFn;
     };
 
@@ -55,9 +56,10 @@ public:
         rebuildItemHash();
     };
 
-    bool readItem(QXmlStreamReader &reader, QString parentElm) {
+    bool readItem(QXmlStreamReader &reader, QString parentElm)
+    {
         typename QHash<QString, Item>::iterator it = mItemHash.find(reader.name().toString());
-        if (it != mItemHash.end()) {
+        if (it != mItemHash.end() && it->ns == reader.namespaceUri()) {
             if (it->key == Ignore) {
                 qCInfoNC(EWSRES_LOG) << QStringLiteral("Unsupported %1 child element %2 - ignoring.")
                                 .arg(parentElm).arg(reader.name().toString());

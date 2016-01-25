@@ -51,19 +51,19 @@ public:
 typedef EwsXmlReader<EwsItemFields> ItemFieldsReader;
 
 static const QVector<EwsFolderPrivate::Reader::Item> ewsFolderItems = {
-    {EwsFolderFieldFolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},
-    {EwsFolderFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader},
-    {EwsFolderFieldFolderClass, QStringLiteral("FolderClass"), &ewsXmlTextReader},
-    {EwsFolderFieldDisplayName, QStringLiteral("DisplayName"), &ewsXmlTextReader},
-    {EwsFolderFieldTotalCount, QStringLiteral("TotalCount"), &ewsXmlUIntReader},
-    {EwsFolderFieldChildFolderCount, QStringLiteral("ChildFolderCount"), &ewsXmlUIntReader},
-    {EwsFolderFieldUnreadCount, QStringLiteral("UnreadCount"), &ewsXmlUIntReader},
-    {EwsFolderFieldEffectiveRights, QStringLiteral("EffectiveRights"),
+    {EwsFolderFieldFolderId, QStringLiteral("FolderId"), ewsTypeNsUri, &ewsXmlIdReader},
+    {EwsFolderFieldParentFolderId, QStringLiteral("ParentFolderId"), ewsTypeNsUri, &ewsXmlIdReader},
+    {EwsFolderFieldFolderClass, QStringLiteral("FolderClass"), ewsTypeNsUri, &ewsXmlTextReader},
+    {EwsFolderFieldDisplayName, QStringLiteral("DisplayName"), ewsTypeNsUri, &ewsXmlTextReader},
+    {EwsFolderFieldTotalCount, QStringLiteral("TotalCount"), ewsTypeNsUri, &ewsXmlUIntReader},
+    {EwsFolderFieldChildFolderCount, QStringLiteral("ChildFolderCount"), ewsTypeNsUri, &ewsXmlUIntReader},
+    {EwsFolderFieldUnreadCount, QStringLiteral("UnreadCount"), ewsTypeNsUri, &ewsXmlUIntReader},
+    {EwsFolderFieldEffectiveRights, QStringLiteral("EffectiveRights"), ewsTypeNsUri,
         &EwsFolderPrivate::effectiveRightsReader},
-    {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
+    {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"), ewsTypeNsUri,
         &EwsItemBasePrivate::extendedPropertyReader},
-    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("ManagedFolderInformation")},
-    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("SearchParameters")},
+    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("ManagedFolderInformation"), ewsTypeNsUri},
+    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("SearchParameters"), ewsTypeNsUri},
 };
 
 const EwsFolderPrivate::Reader EwsFolderPrivate::mStaticEwsReader(ewsFolderItems);
