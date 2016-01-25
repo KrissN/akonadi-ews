@@ -32,6 +32,7 @@
 #include "ewsclient.h"
 #include "ewsjob.h"
 #include "ewstypes.h"
+#include "ewsserverversion.h"
 
 class EwsRequest : public EwsJob
 {
@@ -60,6 +61,9 @@ public:
     void setMetaData(const KIO::MetaData &md);
     void addMetaData(QString key, QString value);
 
+    void setServerVersion(const EwsServerVersion &version);
+    const EwsServerVersion &serverVersion() const { return mServerVersion; };
+
 protected:
     typedef std::function<bool(QXmlStreamReader &reader)> ContentReaderFn;
 
@@ -79,10 +83,12 @@ private:
     bool readResponse(QXmlStreamReader &reader);
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
+    bool readHeader(QXmlStreamReader &reader);
     bool readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass);
 
     QString mResponseData;
     EwsClient &mClient;
+    EwsServerVersion mServerVersion;
 };
 
 #endif

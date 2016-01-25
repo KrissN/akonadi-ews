@@ -25,6 +25,8 @@
 #include <QtCore/QPointer>
 #include <QtCore/QUrl>
 
+#include "ewsserverversion.h"
+
 class EwsClient : public QObject
 {
     Q_OBJECT
@@ -55,10 +57,15 @@ public:
         return mUrl;
     }
 
+    void setServerVersion(const EwsServerVersion &version);
+    const EwsServerVersion &serverVersion() const { return mServerVersion; };
+
 private:
     QUrl mUrl;
     QString mUsername;
     QString mPassword;
+
+    EwsServerVersion mServerVersion;
 
     friend class EwsRequest;
 };

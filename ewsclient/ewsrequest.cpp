@@ -20,14 +20,13 @@
 #include "ewsrequest.h"
 
 #include "ewsclient.h"
+#include "ewsserverversion.h"
 #include "ewsclient_debug.h"
 
 #include <QtCore/QTemporaryFile>
 
-static const QString ewsReqVersion = QStringLiteral("Exchange2010");
-
 EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
-    : EwsJob(parent), mClient(client)
+    : EwsJob(parent), mClient(client), mServerVersion(EwsServerVersion::ewsVersion2007)
 {
 }
 
@@ -57,9 +56,7 @@ void EwsRequest::startSoapDocument(QXmlStreamWriter &writer)
 
     // SOAP Header
     writer.writeStartElement(soapEnvNsUri, QStringLiteral("Header"));
-    writer.writeStartElement(ewsTypeNsUri, QStringLiteral("RequestServerVersion"));
-    writer.writeAttribute(QStringLiteral("Version"), ewsReqVersion);
-    writer.writeEndElement();
+    mServerVersion.writeRequestServerVersion(writer);
     writer.writeEndElement();
 
     // SOAP Body
@@ -144,7 +141,9 @@ bool EwsRequest::readResponse(QXmlStreamReader &reader)
                 return false;
         }
         else if (reader.name() == QStringLiteral("Header")) {
-            reader.skipCurrentElement();
+            if (!readHeader(reader)) {
+                return false;
+            }
         }
     }
     return true;
@@ -226,6 +225,11 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
     return true;
 }
 
+void EwsRequest::setServerVersion(const EwsServerVersion &version)
+{
+    mServerVersion = version;
+}
+
 EwsRequest::Response::Response(QXmlStreamReader &reader)
 {
     static const QString respClasses[] = {
@@ -273,6 +277,26 @@ bool EwsRequest::Response::readResponseElement(QXmlStreamReader &reader)
     return true;
 }
 
+bool EwsRequest::readHeader(QXmlStreamReader &reader)
+{
+    while (reader.readNextStartElement()) {
+        if (reader.name() == QStringLiteral("ServerVersionInfo") && reader.namespaceUri() == ewsTypeNsUri) {
+            EwsServerVersion version(reader);
+            if (!version.isValid()) {
+                return false;
+            }
+            mServerVersion = version;
+            mClient.setServerVersion(version);
+            reader.skipCurrentElement();
+        }
+        else {
+            reader.skipCurrentElement();
+        }
+    }
+
+    return true;
+}
+
 bool EwsRequest::Response::setErrorMsg(const QString msg)
 {
     mClass = EwsResponseParseError;
@@ -281,4 +305,3 @@ bool EwsRequest::Response::setErrorMsg(const QString msg)
     qCWarningNC(EWSRES_LOG) << msg;
     return false;
 }
-
