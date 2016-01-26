@@ -30,6 +30,7 @@ class EwsServerVersion
 public:
     enum ServerFeature {
         StreamingSubscription,
+        FreeBusyChangedEvent,
     };
 
     EwsServerVersion() : mMajor(0), mMinor(0) {};
@@ -78,12 +79,14 @@ public:
 
     bool isValid() const
     {
-        return mMajor == 0;
+        return mMajor != 0;
     };
 
     uint majorVersion() const { return mMajor; };
     uint minorVersion() const { return mMinor; };
     QString name() const { return mName; };
+
+    static const EwsServerVersion& minSupporting(ServerFeature feature);
 
     static const EwsServerVersion ewsVersion2007;
     static const EwsServerVersion ewsVersion2007Sp1;
@@ -95,6 +98,7 @@ public:
     static const EwsServerVersion ewsVersion2010Sp3;
     static const EwsServerVersion ewsVersion2013;
     static const EwsServerVersion ewsVersion2016;
+
 private:
     uint mMajor;
     uint mMinor;

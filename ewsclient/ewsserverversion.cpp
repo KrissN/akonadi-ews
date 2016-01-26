@@ -36,6 +36,8 @@ const EwsServerVersion EwsServerVersion::ewsVersion2010Sp3(14, 3, QStringLiteral
 const EwsServerVersion EwsServerVersion::ewsVersion2013(15, 0, QStringLiteral("Exchange2013"));
 const EwsServerVersion EwsServerVersion::ewsVersion2016(15, 1, QStringLiteral("Exchange2016"));
 
+static const EwsServerVersion ewsNullVersion;
+
 EwsServerVersion::EwsServerVersion(QXmlStreamReader &reader)
     : mMajor(0), mMinor(0)
 {
@@ -47,20 +49,20 @@ EwsServerVersion::EwsServerVersion(QXmlStreamReader &reader)
     QStringRef minorRef = attrs.value(QStringLiteral("MinorVersion"));
     QStringRef nameRef = attrs.value(QStringLiteral("Version"));
 
-    if (majorRef.isNull() || minorRef.isNull() || nameRef.isNull()) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Error reading server version info - missing attribute.");
+    if (majorRef.isNull() || minorRef.isNull()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading server version info - missing attribute.");
         return;
     }
 
     bool ok;
     uint majorVer = majorRef.toUInt(&ok);
     if (!ok) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Error reading server version info - invalid major version number.");
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading server version info - invalid major version number.");
         return;
     }
     uint minorVer = minorRef.toUInt(&ok);
     if (!ok) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Error reading server version info - invalid minor version number.");
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading server version info - invalid minor version number.");
         return;
     }
 
@@ -78,11 +80,23 @@ void EwsServerVersion::writeRequestServerVersion(QXmlStreamWriter &writer) const
 
 bool EwsServerVersion::supports(ServerFeature feature) const
 {
+    const EwsServerVersion &minVer = minSupporting(feature);
+    if (minVer.isValid()) {
+        return *this >= minVer;
+    }
+    else {
+        return false;
+    }
+}
+
+const EwsServerVersion& EwsServerVersion::minSupporting(ServerFeature feature)
+{
     switch (feature) {
     case StreamingSubscription:
-        return *this >= ewsVersion2010Sp1;
+    case FreeBusyChangedEvent:
+        return ewsVersion2010Sp1;
     default:
-        return false;
+        return ewsNullVersion;
     }
 }
 
