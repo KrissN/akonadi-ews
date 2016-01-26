@@ -83,6 +83,8 @@ private:
     EwsDistinguishedId mDid;
 };
 
+uint qHash(const EwsId &id, uint seed);
+
 QDebug operator<<(QDebug debug, const EwsId &id);
 
 Q_DECLARE_METATYPE(EwsId)

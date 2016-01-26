@@ -162,3 +162,7 @@ QDebug operator<<(QDebug debug, const EwsId &id)
     return debug;
 }
 
+uint qHash(const EwsId &id, uint seed)
+{
+    return qHash(id.id(), seed) ^ qHash(id.changeKey(), seed) ^ static_cast<uint>(id.type());
+}
