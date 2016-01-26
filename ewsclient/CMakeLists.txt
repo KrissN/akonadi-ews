@@ -24,6 +24,7 @@ set(EWSCLIENT_SRCS
   ewsfinditemrequest.cpp
   ewsfolder.cpp
   ewsfoldershape.cpp
+  ewsgeteventsrequest.cpp
   ewsgetfolderrequest.cpp
   ewsgetitemrequest.cpp
   ewsid.cpp

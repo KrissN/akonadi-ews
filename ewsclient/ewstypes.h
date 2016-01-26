@@ -444,7 +444,9 @@ typedef enum {
     EwsModifiedEvent,
     EwsMovedEvent,
     EwsNewMailEvent,
-    EwsFreeBusyChangedEvent
+    EwsFreeBusyChangedEvent,
+    EwsStatusEvent,
+    EwsUnknownEvent
 } EwsEventType;
 
 template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
