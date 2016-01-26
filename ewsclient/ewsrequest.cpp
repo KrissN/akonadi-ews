@@ -283,6 +283,7 @@ bool EwsRequest::readHeader(QXmlStreamReader &reader)
         if (reader.name() == QStringLiteral("ServerVersionInfo") && reader.namespaceUri() == ewsTypeNsUri) {
             EwsServerVersion version(reader);
             if (!version.isValid()) {
+                qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - error parsing server version.");
                 return false;
             }
             mServerVersion = version;
