@@ -20,6 +20,7 @@
 #ifndef EWSRESOURCE_H
 #define EWSRESOURCE_H
 
+#include <QtCore/QScopedPointer>
 #include <AkonadiAgentBase/ResourceBase>
 
 #include "ewsclient.h"
@@ -28,6 +29,7 @@ class FetchItemState;
 class EwsGetItemRequest;
 class EwsFindFolderRequest;
 class EwsFolder;
+class EwsSubscriptionManager;
 
 class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV3
 {
@@ -51,6 +53,7 @@ private Q_SLOTS:
     void getItemRequestFinished(EwsGetItemRequest *req);
     void itemChangeRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);
+
 private:
     Akonadi::Collection::List createChildCollections(const EwsFolder &folder, Akonadi::Collection collection);
     Akonadi::Collection createFolderCollection(const EwsFolder &folder);
@@ -60,6 +63,7 @@ private:
 
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;
+    QScopedPointer<EwsSubscriptionManager> mSubManager;
 };
 
 #endif

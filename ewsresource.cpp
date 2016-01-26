@@ -36,6 +36,7 @@
 #include "ewsgetitemrequest.h"
 #include "ewsupdateitemrequest.h"
 #include "ewsmoveitemrequest.h"
+#include "ewssubscriptionmanager.h"
 #include "configdialog.h"
 #include "settings.h"
 
@@ -63,6 +64,8 @@ EwsResource::EwsResource(const QString &id)
     changeRecorder()->itemFetchScope().fetchFullPayload(true);
     changeRecorder()->itemFetchScope().setAncestorRetrieval(ItemFetchScope::Parent);
     changeRecorder()->itemFetchScope().setFetchModificationTime(false);
+
+    mSubManager.reset(new EwsSubscriptionManager(mEwsClient, this));
 
     Q_EMIT status(0);
 }

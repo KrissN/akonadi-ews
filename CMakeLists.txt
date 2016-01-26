@@ -57,7 +57,8 @@ set(ewsresource_SRCS
     ewsfetchitemdetailjob.cpp
     ewsfetchmaildetailjob.cpp
     ewsfetchcalendardetailjob.cpp
-    ewsresource.cpp)
+    ewsresource.cpp
+    ewssubscriptionmanager.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 
