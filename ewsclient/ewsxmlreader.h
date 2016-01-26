@@ -31,6 +31,7 @@ template <typename T> class EwsXmlReader
 {
 public:
     typedef std::function<bool(QXmlStreamReader&,QVariant&)> ReadFunction;
+    typedef std::function<bool(QXmlStreamReader&,const QString&)> UnknownElementFunction;
 
     static Q_CONSTEXPR T Ignore = static_cast<T>(-1);
 
@@ -55,7 +56,8 @@ public:
         rebuildItemHash();
     };
 
-    bool readItem(QXmlStreamReader &reader, QString parentElm, const QString &nsUri)
+    bool readItem(QXmlStreamReader &reader, QString parentElm, const QString &nsUri,
+                  UnknownElementFunction unknownElmFn = &defaultUnknownElmFunction)
     {
         typename QHash<QString, Item>::iterator it = mItemHash.find(reader.name().toString());
         if (it != mItemHash.end() && nsUri == reader.namespaceUri()) {
@@ -74,17 +76,15 @@ public:
                 return false;
             }
         }
-        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                        .arg(parentElm).arg(reader.name().toString());
-
-        return false;
+        return unknownElmFn(reader, parentElm);
     }
 
-    bool readItems(QXmlStreamReader &reader, const QString &nsUri)
+    bool readItems(QXmlStreamReader &reader, const QString &nsUri,
+                   UnknownElementFunction unknownElmFn = &defaultUnknownElmFunction)
     {
         QString elmName(reader.name().toString());
         while (reader.readNextStartElement()) {
-            if (!readItem(reader, elmName, nsUri)) {
+            if (!readItem(reader, elmName, nsUri, unknownElmFn)) {
                 return false;
             }
         }
@@ -96,6 +96,13 @@ public:
     }
 
 private:
+    static bool defaultUnknownElmFunction(QXmlStreamReader &reader, const QString &parentElm)
+    {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
+                                .arg(parentElm).arg(reader.name().toString());
+        return false;
+    }
+
     const QVector<Item> mItems;
     QHash<T, QVariant> mValues;
     QHash<QString, Item> mItemHash;
