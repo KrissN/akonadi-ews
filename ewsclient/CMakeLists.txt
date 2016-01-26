@@ -40,6 +40,7 @@ set(EWSCLIENT_SRCS
   ewsserverversion.cpp
   ewssubscriberequest.cpp
   ewstypes.cpp
+  ewsunsubscriberequest.cpp
   ewsupdateitemrequest.cpp
   ewsxmlreader.cpp
   ewsclient_debug.cpp)
