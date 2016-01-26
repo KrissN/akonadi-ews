@@ -54,7 +54,11 @@ void EwsSubscribeRequest::start()
 
     if (mType == StreamingSubscription
         && !serverVersion().supports(EwsServerVersion::StreamingSubscription)) {
-        setServerVersion(EwsServerVersion::ewsVersion2010Sp1);
+        setServerVersion(EwsServerVersion::minSupporting(EwsServerVersion::StreamingSubscription));
+    }
+    if (mEventTypes.contains(EwsFreeBusyChangedEvent)
+        && !serverVersion().supports(EwsServerVersion::FreeBusyChangedEvent)) {
+        setServerVersion(EwsServerVersion::minSupporting(EwsServerVersion::FreeBusyChangedEvent));
     }
 
     startSoapDocument(writer);
@@ -62,6 +66,10 @@ void EwsSubscribeRequest::start()
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("Subscribe"));
 
     writer.writeStartElement(ewsMsgNsUri, subscribeTypeNames[mType]);
+
+    if (mAllFolders) {
+        writer.writeAttribute(QStringLiteral("SubscribeToAllFolders"), QStringLiteral("true"));
+    }
 
     writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderIds"));
     Q_FOREACH(const EwsId &id, mFolderIds) {
@@ -135,8 +143,8 @@ EwsSubscribeRequest::Response::Response(QXmlStreamReader &reader)
                 return;
             }
         }
-        if (reader.name() == QStringLiteral("Watermark")) {
-            mId = reader.readElementText();
+        else if (reader.name() == QStringLiteral("Watermark")) {
+            mWatermark = reader.readElementText();
 
             if (reader.error() != QXmlStreamReader::NoError) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
