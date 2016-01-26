@@ -23,6 +23,7 @@
 #include <KCodecs/KCodecs>
 
 #include "ewsid.h"
+#include "ewsitem.h"
 
 #include "ewsclient_debug.h"
 
@@ -153,6 +154,20 @@ bool ewsXmlDateTimeReader(QXmlStreamReader &reader, QVariant &val)
         return false;
     }
     val = QVariant::fromValue<QDateTime>(dt);
+    return true;
+}
+
+bool ewsXmlItemReader(QXmlStreamReader &reader, QVariant &val)
+{
+    QString elmName = reader.name().toString();
+    EwsItem item = EwsItem(reader);
+    if (!item.isValid()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+                        .arg(elmName);
+        reader.skipCurrentElement();
+        return false;
+    }
+    val = QVariant::fromValue(item);
     return true;
 }
 
