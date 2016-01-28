@@ -40,6 +40,7 @@ set(EWSCLIENT_SRCS
   ewsrequest.cpp
   ewsserverversion.cpp
   ewssubscriberequest.cpp
+  ewssyncfolderhierarchyrequest.cpp
   ewssyncfolderitemsrequest.cpp
   ewstypes.cpp
   ewsunsubscriberequest.cpp
