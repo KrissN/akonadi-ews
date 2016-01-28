@@ -22,6 +22,7 @@
 #include <KI18n/KLocalizedString>
 #include <AkonadiCore/ChangeRecorder>
 #include <AkonadiCore/CollectionFetchScope>
+#include <AkonadiCore/CollectionFetchJob>
 #include <Akonadi/KMime/MessageFlags>
 #include <KMime/Message>
 #include <KCalCore/Event>
@@ -66,6 +67,10 @@ EwsResource::EwsResource(const QString &id)
     changeRecorder()->itemFetchScope().setFetchModificationTime(false);
 
     mSubManager.reset(new EwsSubscriptionManager(mEwsClient, this));
+    connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
+    connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
+    connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
+    mSubManager->start();
 
     Q_EMIT status(0);
 }
@@ -440,6 +445,47 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
         changeCommitted(item);
         it++;
     }
+}
+
+void EwsResource::foldersModifiedEvent(EwsId::List folders)
+{
+    CollectionFetchJob *job = new CollectionFetchJob(Collection::root(), CollectionFetchJob::Recursive);
+    job->setFetchScope(changeRecorder()->collectionFetchScope());
+    job->fetchScope().setResource(identifier());
+    job->fetchScope().setListFilter(CollectionFetchScope::Sync);
+    job->setProperty("folders", QVariant::fromValue<EwsId::List>(folders));
+    connect(job, SIGNAL(result(KJob*)), SLOT(slotCollectionListDone(KJob*)));
+}
+
+void EwsResource::foldersModifiedCollectionSyncFinished(KJob *job)
+{
+    if (job->error()) {
+        qCDebug(EWSRES_LOG) << QStringLiteral("Failed to fetch collection tree for sync.");
+        return;
+    }
+
+    CollectionFetchJob *fetchJob = qobject_cast<CollectionFetchJob*>(job);
+    EwsId::List folders = fetchJob->property("folders").value<EwsId::List>();
+    QList<QString> folderIds;
+    Q_FOREACH(const EwsId &id, folders) {
+        folderIds.append(id.id());
+    }
+
+    Q_FOREACH(const Collection &col, fetchJob->collections()) {
+        if (folderIds.contains(col.remoteId())) {
+            synchronizeCollection(col.id());
+        }
+    }
+}
+
+void EwsResource::folderTreeModifiedEvent()
+{
+    synchronizeCollectionTree();
+}
+
+void EwsResource::fullSyncRequestedEvent()
+{
+    synchronize();
 }
 
 

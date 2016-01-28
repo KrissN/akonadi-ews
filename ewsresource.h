@@ -24,6 +24,7 @@
 #include <AkonadiAgentBase/ResourceBase>
 
 #include "ewsclient.h"
+#include "ewsid.h"
 
 class FetchItemState;
 class EwsGetItemRequest;
@@ -54,6 +55,10 @@ private Q_SLOTS:
     void itemChangeRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);
 
+    void foldersModifiedEvent(EwsId::List folders);
+    void foldersModifiedCollectionSyncFinished(KJob *job);
+    void folderTreeModifiedEvent();
+    void fullSyncRequestedEvent();
 private:
     Akonadi::Collection::List createChildCollections(const EwsFolder &folder, Akonadi::Collection collection);
     Akonadi::Collection createFolderCollection(const EwsFolder &folder);

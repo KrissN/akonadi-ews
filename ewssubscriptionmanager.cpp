@@ -27,7 +27,17 @@
 static Q_CONSTEXPR uint pollInterval = 10; /* seconds */
 
 EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, QObject *parent)
-    : QObject(parent), mEwsClient(client), mPollTimer(this)
+    : QObject(parent), mEwsClient(client), mPollTimer(this), mFolderTreeChanged(false)
+{
+
+}
+
+EwsSubscriptionManager::~EwsSubscriptionManager()
+{
+    cancelSubscription();
+}
+
+void EwsSubscriptionManager::start()
 {
     // Set-up change notification subscription
     setupSubscription();
@@ -35,11 +45,6 @@ EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, QObject *paren
     mPollTimer.setInterval(pollInterval * 1000);
     mPollTimer.setSingleShot(false);
     connect(&mPollTimer, &QTimer::timeout, this, &EwsSubscriptionManager::pollForEvents);
-}
-
-EwsSubscriptionManager::~EwsSubscriptionManager()
-{
-    cancelSubscription();
 }
 
 void EwsSubscriptionManager::cancelSubscription()
