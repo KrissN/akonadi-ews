@@ -71,7 +71,7 @@ EwsFetchCalendarDetailJob::EwsFetchCalendarDetailJob(EwsClient &client, QObject 
     shape << EwsPropertyField("item:Culture");
     shape << EwsPropertyField("item:MimeContent");
     shape << EwsPropertyField("item:Subject");
-    shape << EwsPropertyField("calendar:StartTimeZone");
+    shape << EwsPropertyField("calendar:TimeZone");
     mRequest->setItemShape(shape);
 }
 
@@ -121,7 +121,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         //KCalCore::Incidence::Ptr incidence(format.fromString(mimeContent));
 
         if (incidence) {
-            QString msTz = ewsItem[EwsItemFieldStartTimeZone].toString();
+            QString msTz = ewsItem[EwsItemFieldTimeZone].toString();
             QString culture = ewsItem[EwsItemFieldCulture].toString();
             KDateTime dt(incidence->dtStart());
             convertTimezone(dt, msTz, culture);
@@ -159,7 +159,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         shape << EwsPropertyField("item:Attachments");
         shape << EwsPropertyField("item:Body");
         shape << EwsPropertyField("item:MimeContent");
-        shape << EwsPropertyField("calendar:StartTimeZone");
+        shape << EwsPropertyField("calendar:TimeZone");
         shape << EwsPropertyField("item:Culture");
         req->setItemShape(shape);
 

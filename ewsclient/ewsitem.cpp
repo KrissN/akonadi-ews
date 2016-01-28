@@ -109,6 +109,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
     {EwsItemFieldDeletedOccurrences, QStringLiteral("DeletedOccurrences"),
         &EwsItemPrivate::occurrencesReader},
     {EwsItemFieldCategories, QStringLiteral("Categories"), &EwsItemPrivate::categoriesReader},
+    {EwsItemFieldTimeZone, QStringLiteral("TimeZone"), &ewsXmlTextReader},
 };
 
 const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsReader(ewsItemItems);
