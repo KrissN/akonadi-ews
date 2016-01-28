@@ -69,6 +69,17 @@ EwsResource::EwsResource(const QString &id)
     changeRecorder()->itemFetchScope().setAncestorRetrieval(ItemFetchScope::Parent);
     changeRecorder()->itemFetchScope().setFetchModificationTime(false);
 
+    // Load the sync state
+    QByteArray data = QByteArray::fromBase64(Settings::self()->syncState().toAscii());
+    if (!data.isEmpty()) {
+        data = qUncompress(data);
+        if (!data.isEmpty()) {
+            QDataStream stream(data);
+            stream >> mSyncState;
+            qDebug() << mSyncState;
+        }
+    }
+
     mSubManager.reset(new EwsSubscriptionManager(mEwsClient, this));
     connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
     connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
@@ -265,6 +276,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
         mSyncState[fetchJob->collection().remoteId()] = fetchJob->syncState();
         itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
     }
+    saveState();
     Q_EMIT status(0);
 }
 
@@ -503,5 +515,13 @@ void EwsResource::clearSyncState()
     mSyncState.clear();
 }
 
+void EwsResource::saveState()
+{
+    QByteArray str;
+    QDataStream dataStream(&str, QIODevice::WriteOnly);
+    dataStream << mSyncState;
+    Settings::self()->setSyncState(qCompress(str, 9).toBase64());
+    Settings::self()->save();
+}
 
 AKONADI_RESOURCE_MAIN(EwsResource)

@@ -21,5 +21,6 @@
       <tooltip>The password that is used to log into the Microsoft Exchange server</tooltip>
       <whatsthis>The password that is used to log into the Microsoft Exchange server</whatsthis>
     </entry>
+    <entry name="SyncState" type="String" />
   </group>
 </kcfg>
