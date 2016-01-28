@@ -24,6 +24,7 @@
 
 #include "ewsid.h"
 #include "ewsitem.h"
+#include "ewsfolder.h"
 
 #include "ewsclient_debug.h"
 
@@ -168,6 +169,20 @@ bool ewsXmlItemReader(QXmlStreamReader &reader, QVariant &val)
         return false;
     }
     val = QVariant::fromValue(item);
+    return true;
+}
+
+bool ewsXmlFolderReader(QXmlStreamReader &reader, QVariant &val)
+{
+    QString elmName = reader.name().toString();
+    EwsFolder folder = EwsFolder(reader);
+    if (!folder.isValid()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
+                        .arg(elmName);
+        reader.skipCurrentElement();
+        return false;
+    }
+    val = QVariant::fromValue(folder);
     return true;
 }
 

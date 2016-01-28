@@ -30,6 +30,8 @@ class EwsFolderPrivate;
 class EwsFolder : public EwsItemBase
 {
 public:
+    typedef QList<EwsFolder> List;
+
     EwsFolder();
     EwsFolder(QXmlStreamReader &reader);
     EwsFolder(const EwsFolder &other);
@@ -49,5 +51,7 @@ public:
 protected:
     bool readBaseFolderElement(QXmlStreamReader &reader);
 };
+
+Q_DECLARE_METATYPE(EwsFolder)
 
 #endif

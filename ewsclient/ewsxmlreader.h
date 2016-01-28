@@ -121,6 +121,7 @@ extern bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlDateTimeReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlItemReader(QXmlStreamReader &reader, QVariant &val);
+extern bool ewsXmlFolderReader(QXmlStreamReader &reader, QVariant &val);
 
 extern bool ewsXmlEnumReader(QXmlStreamReader &reader, QVariant &val, QVector<QString> items);
 extern bool ewsXmlSensitivityReader(QXmlStreamReader &reader, QVariant &val);
