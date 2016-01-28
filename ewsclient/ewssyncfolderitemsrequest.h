@@ -45,6 +45,8 @@ public:
 
         ChangeType type() const { return mType; };
         const EwsId &itemId() const { return mId; };
+        const EwsItem &item() const { return mItem; };
+        bool isRead() const { return mIsRead; };
     protected:
         Change(QXmlStreamReader &reader);
         bool isValid() const { return mType != Unknown; };

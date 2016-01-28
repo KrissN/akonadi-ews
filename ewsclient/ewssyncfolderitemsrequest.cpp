@@ -134,6 +134,7 @@ bool EwsSyncFolderItemsRequest::parseItemsResponse(QXmlStreamReader &reader)
 
     mChanges = resp->mChanges;
     mIncludesLastItem = resp->mIncludesLastItem;
+    mSyncState = resp->mSyncState;
 
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp->isSuccess()) {
@@ -246,6 +247,7 @@ EwsSyncFolderItemsRequest::Change::Change(QXmlStreamReader &reader)
     case Create:
     case Update:
         mItem = values[Item].value<EwsItem>();
+        mId = mItem[EwsItemFieldItemId].value<EwsId>();
         break;
     case ReadFlagChange:
         mIsRead = values[IsRead].toBool();
