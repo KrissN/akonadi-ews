@@ -196,4 +196,16 @@ void EwsFolder::setParentFolder(EwsFolder *parent)
     d->mParent = parent;
 }
 
+EwsFolder& EwsFolder::operator=(const EwsFolder &other)
+{
+    d = other.d;
+    return *this;
+}
+
+EwsFolder& EwsFolder::operator=(EwsFolder &&other)
+{
+    d = std::move(other.d);
+    return *this;
+}
+
 

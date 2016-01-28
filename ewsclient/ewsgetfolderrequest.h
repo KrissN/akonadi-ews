@@ -37,14 +37,14 @@ public:
 
     virtual void start();
 
-    const EwsFolder* folder() const { return mFolder; };
+    const EwsFolder &folder() const { return mFolder; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
     EwsId mId;
     EwsFolderShape mShape;
-    EwsFolder *mFolder;
+    EwsFolder mFolder;
 };
 
 #endif
