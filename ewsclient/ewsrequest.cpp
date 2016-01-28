@@ -26,7 +26,7 @@
 #include <QtCore/QTemporaryFile>
 
 EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
-    : EwsJob(parent), mClient(client), mServerVersion(EwsServerVersion::ewsVersion2007)
+    : EwsJob(parent), mClient(client), mServerVersion(EwsServerVersion::ewsVersion2007Sp1)
 {
 }
 
