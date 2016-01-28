@@ -107,7 +107,10 @@ void EwsFindItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
+
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting FindItems request (folder: ")
+                    << mFolderId << QStringLiteral(")");
 
     prepare(reqString);
 
@@ -133,6 +136,17 @@ bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     mNextNumerator = resp->mNextNumerator;
     mNextDenominator = resp->mNextDenominator;
     mIncludesLastItem = resp->mIncludesLastItem;
+
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp->isSuccess()) {
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got FindItems response (%1 items, last included: %2)")
+                            .arg(mItems.size()).arg(mIncludesLastItem ? QStringLiteral("true") : QStringLiteral("false"));
+        }
+        else {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got FindItems response - %1")
+                            .arg(resp->responseMessage());
+        }
+    }
 
     return true;
 }

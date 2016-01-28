@@ -79,9 +79,6 @@ EwsMailbox::EwsMailbox(QXmlStreamReader &reader)
         }
     }
 
-    qCDebugNC(EWSRES_LOG) << QStringLiteral("Mailbox: %1").arg(d->mEmail);
-    qCDebugNC(EWSRES_LOG) << QStringLiteral("Mailbox: at element %1").arg(reader.qualifiedName().toString());
-
     d->mValid = true;
 }
 

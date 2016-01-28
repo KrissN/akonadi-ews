@@ -21,3 +21,5 @@
 Q_LOGGING_CATEGORY(EWSRES_LOG, "log_ews_resource")
 
 Q_LOGGING_CATEGORY(EWSRES_PROTO_LOG, "log_ews_resource_proto", QtWarningMsg)
+
+Q_LOGGING_CATEGORY(EWSRES_REQUEST_LOG, "log_ews_resource_request", QtWarningMsg)

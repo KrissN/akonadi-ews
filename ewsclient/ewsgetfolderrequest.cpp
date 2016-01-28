@@ -69,7 +69,9 @@ void EwsGetFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
+
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetFolder request (id: %1)").arg(mId.id());
 
     prepare(reqString);
 
@@ -90,6 +92,20 @@ bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
     }
 
     mFolder = resp->mFolder;
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp->isSuccess()) {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetFolder response");
+        }
+        else {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetFolder response - %1")
+                            .arg(resp->responseMessage());
+        }
+    }
+
+    QVariant dn = mFolder[EwsFolderFieldDisplayName];
+    if (!dn.isNull()) {
+        EwsClient::folderHash[mFolder[EwsFolderFieldFolderId].value<EwsId>().id()] = dn.toString();
+    }
 
     return true;
 }

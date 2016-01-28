@@ -69,7 +69,10 @@ void EwsGetEventsRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetEvents request (subId: %1, wmark: %2)")
+                    .arg(mSubscriptionId).arg(mWatermark);
+
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -87,6 +90,22 @@ bool EwsGetEventsRequest::parseNotificationsResponse(QXmlStreamReader &reader)
     Response resp(reader);
     if (resp.responseClass() == EwsResponseUnknown) {
         return false;
+    }
+
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp.isSuccess()) {
+            uint numEv = 0;
+            Q_FOREACH(const Notification &nfy, resp.notifications()) {
+                numEv += nfy.events().size();
+            }
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetEvents response (%1 notifications, %2 events)")
+                            .arg(resp.notifications().size()).arg(numEv);
+        }
+        else {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetEvents response - %1")
+                            .arg(resp.responseMessage());
+            dump();
+        }
     }
 
     mResponses.append(resp);
@@ -188,6 +207,7 @@ EwsGetEventsRequest::Event::Event(QXmlStreamReader &reader)
     static const EventReader staticReader(items);
 
     EventReader ewsreader(staticReader);
+    QString evName = reader.name().toString();
 
     if (reader.name() == QStringLiteral("CopiedEvent")) {
         mType = EwsCopiedEvent;
@@ -241,4 +261,12 @@ EwsGetEventsRequest::Event::Event(QXmlStreamReader &reader)
     mParentFolderId = values[ParentFolderId].value<EwsId>();
     mOldParentFolderId = values[OldParentFolderId].value<EwsId>();
     mUnreadCount = values[UnreadCount].toUInt();
+
+    if (mType == EwsStatusEvent) {
+        qCDebugNC(EWSRES_LOG) << QStringLiteral(" %1").arg(evName);
+    }
+    else {
+        qCDebugNC(EWSRES_LOG) << QStringLiteral(" %1, %2, parent: ").arg(evName).arg(mIsFolder ? 'F' : 'I')
+                        << mParentFolderId << QStringLiteral(", id: ") << mId;
+    }
 }

@@ -100,7 +100,6 @@ void EwsRequest::addMetaData(QString key, QString value)
 
 void EwsRequest::requestResult(KJob *job)
 {
-    qCDebug(EWSRES_LOG) << "result" << job->error();
     if (EWSRES_PROTO_LOG().isDebugEnabled()) {
         QTemporaryFile dumpFile("/tmp/ews_xmldump_XXXXXX.xml");
         dumpFile.open();
@@ -210,7 +209,6 @@ bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
     }
 
     while (reader.readNextStartElement()) {
-        qCDebugNC(EWSRES_LOG) << QStringLiteral("  Got %1 element").arg(reader.name().toString());
         if (reader.name() != reqName + QStringLiteral("ResponseMessage")
             || reader.namespaceUri() != ewsMsgNsUri) {
             return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element.")

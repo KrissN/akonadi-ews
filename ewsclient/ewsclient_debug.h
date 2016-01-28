@@ -25,6 +25,8 @@ Q_DECLARE_LOGGING_CATEGORY(EWSRES_LOG)
 
 Q_DECLARE_LOGGING_CATEGORY(EWSRES_PROTO_LOG)
 
+Q_DECLARE_LOGGING_CATEGORY(EWSRES_REQUEST_LOG)
+
 #define qCDebugNC(cat) qCDebug(cat).noquote()
 #define qCInfoNC(cat) qCInfo(cat).noquote()
 #define qCWarningNC(cat) qCWarning(cat).noquote()

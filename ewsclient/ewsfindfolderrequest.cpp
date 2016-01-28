@@ -79,7 +79,7 @@ void EwsFindFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -100,6 +100,7 @@ bool EwsFindFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
     }
 
     mFolders = resp->mFolders;
+
     return true;
 }
 
@@ -170,8 +171,6 @@ bool EwsFindFolderResponse::parseRootFolder(QXmlStreamReader &reader)
         if (folder) {
             bool ok;
             int childCount = (*folder)[EwsFolderFieldChildFolderCount].toUInt(&ok);
-            qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Folder %1 has %2 children")
-                            .arg((*folder)[EwsFolderFieldDisplayName].toString()).arg(childCount);
             if (childCount > 0) {
                 unsigned readCount = readChildFolders(*folder, childCount, reader);
                 if (readCount == 0)
@@ -199,12 +198,15 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
         reader.name() == QStringLiteral("ContactsFolder") ||
         reader.name() == QStringLiteral("TasksFolder") ||
         reader.name() == QStringLiteral("SearchFolder")) {
-        qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Processing folder");
         folder = new EwsFolder(reader);
         if (!folder->isValid()) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
                      .arg(QStringLiteral("Folder")));
             return 0;
+        }
+        QVariant dn = (*folder)[EwsFolderFieldDisplayName];
+        if (!dn.isNull()) {
+            EwsClient::folderHash[(*folder)[EwsFolderFieldFolderId].value<EwsId>().id()] = dn.toString();
         }
     }
     else {
@@ -217,7 +219,6 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
 
 unsigned EwsFindFolderResponse::readChildFolders(EwsFolder &parent, unsigned count, QXmlStreamReader &reader)
 {
-    qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Processing %1 folder").arg(parent[EwsFolderFieldDisplayName].toString());
     unsigned readCount = 0;
     for (unsigned i = 0; i < count; i++) {
         EwsFolder *folder = readFolder(reader);

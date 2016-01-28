@@ -174,9 +174,6 @@ bool EwsItemPrivate::messageHeadersReader(QXmlStreamReader &reader, QVariant &va
                                                         .arg(QStringLiteral("InternetMessageHeader"));
                 return false;
             }
-            if (name.compare("Message-ID", Qt::CaseInsensitive) == 0) {
-                qCDebugNC(EWSRES_LOG) << QStringLiteral("MessageID: %1").arg(value);
-            }
         }
     }
 

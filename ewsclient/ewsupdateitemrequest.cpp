@@ -106,7 +106,7 @@ void EwsUpdateItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     prepare(reqString);
 

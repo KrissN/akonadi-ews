@@ -105,7 +105,14 @@ void EwsSyncFolderItemsRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
+
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        QString st = mSyncState.isNull() ? QStringLiteral("none") : QString::number(qHash(mSyncState), 36);
+        QString folder;
+        qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
+                        << mFolderId << QStringLiteral(", state: %1").arg(st);
+    }
 
     prepare(reqString);
 
@@ -127,6 +134,18 @@ bool EwsSyncFolderItemsRequest::parseItemsResponse(QXmlStreamReader &reader)
 
     mChanges = resp->mChanges;
     mIncludesLastItem = resp->mIncludesLastItem;
+
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp->isSuccess()) {
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response (%1 changes, last included: %2, state: %3)")
+                            .arg(mChanges.size()).arg(mIncludesLastItem ? QStringLiteral("true") : QStringLiteral("false"))
+                            .arg(qHash(mSyncState), 0, 36);
+        }
+        else {
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response - %1")
+                            .arg(resp->responseMessage());
+        }
+    }
 
     return true;
 }

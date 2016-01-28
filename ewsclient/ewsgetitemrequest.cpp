@@ -60,7 +60,9 @@ void EwsGetItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_LOG) << reqString;
+    qCDebug(EWSRES_PROTO_LOG) << reqString;
+
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetItem request (%1 items)").arg(mIds.size());
 
     prepare(reqString);
 
@@ -78,6 +80,19 @@ bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     Response resp(reader);
     if (resp.responseClass() == EwsResponseUnknown) {
         return false;
+    }
+
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp.isSuccess()) {
+            const EwsItem &item = resp.item();
+            const EwsId &id = item[EwsItemFieldItemId].value<EwsId>();
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetItem response (id: %1, subject: %2)")
+                .arg(id.id()).arg(item[EwsItemFieldSubject].toString());
+        }
+        else {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetItem response - %1")
+                            .arg(resp.responseMessage());
+        }
     }
 
     mResponses.append(resp);

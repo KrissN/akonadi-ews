@@ -111,7 +111,6 @@ private:
         Q_FOREACH(const Item &item, mItems) {
             mItemHash.insert(item.elmName, item);
         }
-        qDebug() << mItemHash.size();
     }
 };
 

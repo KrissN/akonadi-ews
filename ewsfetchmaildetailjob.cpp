@@ -79,9 +79,6 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             EwsItem::HeaderMap::const_iterator headIt = origHeaders.cbegin();
             for (; headIt != origHeaders.cend(); headIt++) {
                 QByteArray key = headIt.key().toLatin1();
-                if (headIt.key().compare("Message-ID", Qt::CaseInsensitive) == 0) {
-                    qCDebugNC(EWSRES_LOG) << QStringLiteral("Found header: %1 %2").arg(headIt.key()).arg(headIt.value());
-                }
                 KMime::Headers::Base *header = KMime::Headers::createHeader(key);
                 if (!header) {
                     header = new KMime::Headers::Generic(headIt.key().toLatin1().constData(), msg.get());
