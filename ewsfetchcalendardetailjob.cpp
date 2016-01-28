@@ -64,7 +64,7 @@ EwsFetchCalendarDetailJob::EwsFetchCalendarDetailJob(EwsClient &client, QObject 
     shape << EwsPropertyField("item:HasAttachments");
     shape << EwsPropertyField("item:Attachments");*/
 
-    shape << EwsPropertyField("item:Attachments");
+//    shape << EwsPropertyField("item:Attachments");
     shape << EwsPropertyField("calendar:ModifiedOccurrences");
     shape << EwsPropertyField("calendar:DeletedOccurrences");
     shape << EwsPropertyField("item:Body");
@@ -156,7 +156,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
     else {
         EwsGetItemRequest *req = new EwsGetItemRequest(mClient, this);
         EwsItemShape shape(EwsShapeIdOnly);
-        shape << EwsPropertyField("item:Attachments");
+//        shape << EwsPropertyField("item:Attachments");
         shape << EwsPropertyField("item:Body");
         shape << EwsPropertyField("item:MimeContent");
         shape << EwsPropertyField("calendar:TimeZone");
