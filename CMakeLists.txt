@@ -63,9 +63,14 @@ set(ewsresource_SRCS
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 
 kconfig_add_kcfg_files(ewsresource_SRCS settings.kcfgc)
-kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.kcfg org.kde.Akonadi.EWS.Settings)
+kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
 qt5_add_dbus_adaptor(ewsresource_SRCS
-  ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.EWS.Settings.xml settings.h Settings
+  ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Settings.xml settings.h Settings
+)
+
+qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.h org.kde.Akonadi.Ews.Resource.xml OPTIONS -a )
+qt5_add_dbus_adaptor(ewsresource_SRCS
+  ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Resource.xml ewsresource.h EwsResource
 )
 
 add_executable(akonadi_ews_resource ${ewsresource_SRCS})

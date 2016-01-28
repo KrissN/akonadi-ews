@@ -40,6 +40,9 @@
 #include "ewssubscriptionmanager.h"
 #include "configdialog.h"
 #include "settings.h"
+#include "ewsclient_debug.h"
+
+#include "resourceadaptor.h"
 
 using namespace Akonadi;
 
@@ -73,10 +76,17 @@ EwsResource::EwsResource(const QString &id)
     mSubManager->start();
 
     Q_EMIT status(0);
+
+    QMetaObject::invokeMethod(this, "delayedInit", Qt::QueuedConnection);
 }
 
 EwsResource::~EwsResource()
 {
+}
+
+void EwsResource::delayedInit()
+{
+    new ResourceAdaptor(this);
 }
 
 void EwsResource::retrieveCollections()
@@ -488,6 +498,10 @@ void EwsResource::fullSyncRequestedEvent()
     synchronize();
 }
 
+void EwsResource::clearSyncState()
+{
+    mSyncState.clear();
+}
 
 
 AKONADI_RESOURCE_MAIN(EwsResource)

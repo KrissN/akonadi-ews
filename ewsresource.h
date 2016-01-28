@@ -35,6 +35,7 @@ class EwsSubscriptionManager;
 class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV3
 {
     Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Resource")
 public:
     explicit EwsResource(const QString &id);
     ~EwsResource();
@@ -44,6 +45,7 @@ public:
                             const Akonadi::Collection &destinationCollection) Q_DECL_OVERRIDE;
 public Q_SLOTS:
     void configure(WId windowId) Q_DECL_OVERRIDE;
+    Q_SCRIPTABLE void clearSyncState();
 protected Q_SLOTS:
     void retrieveCollections() Q_DECL_OVERRIDE;
     void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
@@ -54,7 +56,7 @@ private Q_SLOTS:
     void getItemRequestFinished(EwsGetItemRequest *req);
     void itemChangeRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);
-
+    void delayedInit();
     void foldersModifiedEvent(EwsId::List folders);
     void foldersModifiedCollectionSyncFinished(KJob *job);
     void folderTreeModifiedEvent();
