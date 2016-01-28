@@ -64,6 +64,8 @@ public:
     void setServerVersion(const EwsServerVersion &version);
     const EwsServerVersion &serverVersion() const { return mServerVersion; };
 
+    void dump() const;
+
 protected:
     typedef std::function<bool(QXmlStreamReader &reader)> ContentReaderFn;
 
@@ -86,6 +88,7 @@ private:
     bool readHeader(QXmlStreamReader &reader);
     bool readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass);
 
+    QString mBody;
     QString mResponseData;
     EwsClient &mClient;
     EwsServerVersion mServerVersion;

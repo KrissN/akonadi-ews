@@ -76,6 +76,7 @@ void EwsRequest::endSoapDocument(QXmlStreamWriter &writer)
 
 void EwsRequest::prepare(const QString body)
 {
+    mBody = body;
     KIO::TransferJob *job = KIO::http_post(mClient.url(), body.toUtf8(),
                           KIO::HideProgressInfo);
     job->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
@@ -156,8 +157,10 @@ bool EwsRequest::readSoapBody(QXmlStreamReader &reader)
             return readSoapFault(reader);
         }
 
-        if (!parseResult(reader))
+        if (!parseResult(reader)) {
+            dump();
             return false;
+        }
     }
     return true;
 }
@@ -176,6 +179,8 @@ bool EwsRequest::readSoapFault(QXmlStreamReader &reader)
     }
 
     setErrorMsg(faultCode + QStringLiteral(": ") + faultString);
+
+    dump();
 
     return false;
 }
@@ -303,4 +308,20 @@ bool EwsRequest::Response::setErrorMsg(const QString msg)
     mMessage = msg;
     qCWarningNC(EWSRES_LOG) << msg;
     return false;
+}
+
+void EwsRequest::dump() const
+{
+    QTemporaryFile reqDumpFile("/tmp/ews_xmlreqdump_XXXXXX.xml");
+    reqDumpFile.open();
+    reqDumpFile.setAutoRemove(false);
+    reqDumpFile.write(mBody.toUtf8());
+    reqDumpFile.close();
+    QTemporaryFile resDumpFile("/tmp/ews_xmlresdump_XXXXXX.xml");
+    resDumpFile.open();
+    resDumpFile.setAutoRemove(false);
+    resDumpFile.write(mResponseData.toUtf8());
+    resDumpFile.close();
+    qCDebug(EWSRES_LOG) << "request  dumped to" << reqDumpFile.fileName();
+    qCDebug(EWSRES_LOG) << "response dumped to" << resDumpFile.fileName();
 }
