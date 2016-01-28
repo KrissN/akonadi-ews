@@ -5,6 +5,8 @@
 
 #include "ewsclient_debug.h"
 
+QHash<QString, QString> EwsClient::folderHash;
+
 EwsClient::EwsClient(QObject *parent)
     : QObject(parent)
 {

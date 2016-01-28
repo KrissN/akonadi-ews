@@ -60,6 +60,7 @@ public:
     void setServerVersion(const EwsServerVersion &version);
     const EwsServerVersion &serverVersion() const { return mServerVersion; };
 
+    static QHash<QString, QString> folderHash;
 private:
     QUrl mUrl;
     QString mUsername;

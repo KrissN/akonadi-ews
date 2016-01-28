@@ -24,6 +24,8 @@
 #include <QtCore/QXmlStreamWriter>
 #include <QtCore/QDebug>
 
+#include "ewsclient.h"
+
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
     QStringLiteral("contacts"),
@@ -153,8 +155,14 @@ QDebug operator<<(QDebug debug, const EwsId &id)
         d << QStringLiteral("Distinguished: ") << distinguishedIdNames[id.mDid];
         break;
     case EwsId::Real:
-        d << id.mId << QStringLiteral(", changeKey: ") << id.mChangeKey;
+    {
+        QString name = EwsClient::folderHash.value(id.mId);
+        if (name.isNull()) {
+            name = id.mId;
+        }
+        d << name << QStringLiteral(", changeKey: ") << id.mChangeKey;
         break;
+    }
     default:
         break;
     }
