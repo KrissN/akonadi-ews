@@ -27,8 +27,10 @@
 #include <AkonadiCore/ItemFetchScope>
 #include <KContacts/Addressee>
 #include <KContacts/ContactGroup>
+#include <Akonadi/KMime/MessageFlags>
 
 #include "ewsfinditemrequest.h"
+#include "ewssyncfolderitemsrequest.h"
 #include "ewsclient.h"
 #include "ewsmailbox.h"
 #include "ewsfetchitemdetailjob.h"
@@ -43,21 +45,30 @@ static Q_CONSTEXPR int fetchBatchSize = 10;
  * The fetch items job is processed in two stages.
  *
  * The first stage is to query the list of messages on the remote and local sides. For this purpose
- * an EwsFindItemsRequest is started to retrieve remote items (list of ids only) and an ItemFetchJob
+ * an EwsSyncFolderItemsRequest is started to retrieve remote items (list of ids only) and an ItemFetchJob
  * is started to fetch local items (from cache only). Both of these jobs are started simultaneously.
  *
- * The second stage begins when both item list query jobs have finished. Both item lists are
- * compared to determine lists of new/changed items and deleted items. The list of new/changed items
- * is then used to perform a second remote request in order to retrieve the details of these items.
- * For e-mail items the second fetch only retrieves the item headers. For other items the full
- * MIME content is fetched.
+ * The second stage begins when both item list query jobs have finished. The goal of this stage is
+ * to determine a list of items to fetch more details for. Since the EwsSyncFolderItemsRequest can
+ * retrieve incremental information further processing depends on whether the sync request was a
+ * full sync (no sync state) or an incremental sync.
+ *
+ * In case of a full sync both item lists are compared to determine lists of new/changed items and
+ * deleted items. For an incremental sync there is no need to compare as the lists of
+ * added/changed/deleted items are already given. 'IsRead' flag changes changes are treated
+ * specially - the modification is trivial and is performed straight away without fetching item
+ * details.
+ *
+ * The list of new/changed items is then used to perform a second remote request in order to
+ * retrieve the details of these items. For e-mail items the second fetch only retrieves the
+ * item headers. For other items the full MIME content is fetched.
  */
 
-EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client, QObject *parent)
-    : EwsJob(parent), mCollection(collection), mClient(client), mPendingJobs(0), mTotalItems(0)
+EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client,
+                                   const QString &syncState, QObject *parent)
+    : EwsJob(parent), mCollection(collection), mClient(client), mPendingJobs(0), mTotalItems(0),
+      mSyncState(syncState), mFullSync(syncState.isNull())
 {
-    qCDebugNC(EWSRES_LOG) << mCollection.name();
-
     qRegisterMetaType<EwsId::List>();
 }
 
@@ -68,23 +79,16 @@ EwsFetchItemsJob::~EwsFetchItemsJob()
 void EwsFetchItemsJob::start()
 {
     /* Begin stage 1 - query item list from local and remote side. */
-    EwsFindItemRequest *findItemsReq = new EwsFindItemRequest(mClient, this);
-    findItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+    EwsSyncFolderItemsRequest *syncItemsReq = new EwsSyncFolderItemsRequest(mClient, this);
+    syncItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
     EwsItemShape shape(EwsShapeIdOnly);
-    findItemsReq->setItemShape(shape);
-    /* Use paged listing instead of querying the full list at once. This not only prevents long
-     * single requests going through the network but is necessary to properly retrieve calendar
-     * items.
-     *
-     * According to EWS documentation listing calendar items behaves differently for recurring items
-     * depending on the usage of paging. Without paging the listing will return all occurrences of
-     * recurring items, while a paged view will only return recurring masters and exceptions.
-     *
-     * https://msdn.microsoft.com/EN-US/library/office/dn727655(v=exchg.150).aspx
-     */
-    findItemsReq->setPagination(EwsBasePointBeginning, 0, listBatchSize);
-    connect(findItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
-    addSubjob(findItemsReq);
+    syncItemsReq->setItemShape(shape);
+    if (!mSyncState.isNull()) {
+        syncItemsReq->setSyncState(mSyncState);
+    }
+    syncItemsReq->setMaxChanges(listBatchSize);
+    connect(syncItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
+    addSubjob(syncItemsReq);
 
     ItemFetchJob *itemJob = new ItemFetchJob(mCollection);
     ItemFetchScope itemScope;
@@ -95,7 +99,7 @@ void EwsFetchItemsJob::start()
     addSubjob(itemJob);
 
     mPendingJobs = 2;
-    findItemsReq->start();
+    syncItemsReq->start();
     itemJob->start();
 }
 
@@ -121,7 +125,7 @@ void EwsFetchItemsJob::localItemFetchDone(KJob *job)
 
 void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
 {
-    EwsFindItemRequest *itemReq = qobject_cast<EwsFindItemRequest*>(job);
+    EwsSyncFolderItemsRequest *itemReq = qobject_cast<EwsSyncFolderItemsRequest*>(job);
 
     qDebug() << "remoteItemFetchDone";
     if (!itemReq) {
@@ -132,22 +136,40 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
 
     if (!itemReq->error()) {
         removeSubjob(job);
-        mRemoteItems += itemReq->items();
+        itemReq->dump();
+        Q_FOREACH(const EwsSyncFolderItemsRequest::Change &change, itemReq->changes()) {
+            switch (change.type()) {
+            case EwsSyncFolderItemsRequest::Create:
+                mRemoteAddedItems.append(change.item());
+                break;
+            case EwsSyncFolderItemsRequest::Update:
+                mRemoteChangedItems.append(change.item());
+                break;
+            case EwsSyncFolderItemsRequest::Delete:
+                mRemoteDeletedIds.append(change.itemId());
+                break;
+            case EwsSyncFolderItemsRequest::ReadFlagChange:
+                mRemoteFlagChangedIds.insert(change.itemId(), change.isRead());
+                break;
+            default:
+                break;
+            }
+        }
 
         if (!itemReq->includesLastItem()) {
-            // More items to come - start a request for the next batch.
-            EwsFindItemRequest *findItemsReq = new EwsFindItemRequest(mClient, this);
-            findItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+            EwsSyncFolderItemsRequest *syncItemsReq = new EwsSyncFolderItemsRequest(mClient, this);
+            syncItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
             EwsItemShape shape(EwsShapeIdOnly);
-            findItemsReq->setItemShape(shape);
-            findItemsReq->setPagination(EwsBasePointBeginning, itemReq->nextOffset(), listBatchSize);
-            connect(findItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
-            addSubjob(findItemsReq);
-            findItemsReq->start();
+            syncItemsReq->setItemShape(shape);
+            syncItemsReq->setSyncState(itemReq->syncState());
+            syncItemsReq->setMaxChanges(listBatchSize);
+            connect(syncItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
+            addSubjob(syncItemsReq);
+            syncItemsReq->start();
             qDebug() << "remoteItemFetchDone: started next batch";
         }
         else {
-            qDebug() << "remoteItemFetchDone: done";
+            mSyncState = itemReq->syncState();
             mPendingJobs--;
             if (mPendingJobs == 0) {
                 compareItemLists();
@@ -158,63 +180,25 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
 
 void EwsFetchItemsJob::compareItemLists()
 {
-    qDebug() << "compareItemLists: start";
     /* Begin stage 2 - determine list of new/changed items and fetch details about them. */
-    QHash<QString, EwsItem> remoteIds;
-    bool fetch = false;
+
+    Item::List toFetchItems[EwsItemTypeUnknown + 1];
 
     Q_EMIT status(1, QStringLiteral("Retrieving items"));
     Q_EMIT percent(0);
 
-    Q_FOREACH(const EwsItem &item, mRemoteItems) {
-        EwsId id = item[EwsItemFieldItemId].value<EwsId>();
-        remoteIds.insert(id.id(), item);
+    QHash<QString, Item> itemHash;
+    Q_FOREACH(const Item& item, mLocalItems) {
+        itemHash.insert(item.remoteId(), item);
     }
 
-    Item::List toFetchItems[EwsItemTypeUnknown + 1];
-
-    int unchanged = 0;
-
-    Q_FOREACH(Item item, mLocalItems) {
-        QHash<QString, EwsItem>::iterator it = remoteIds.find(item.remoteId());
-        if (it != remoteIds.end()) {
-            EwsId id = it.value()[EwsItemFieldItemId].value<EwsId>();
-            qCDebugNC(EWSRES_LOG) << QStringLiteral("Found match with existing item.") << id.id();
-            if (id.changeKey() != item.remoteRevision()) {
-                qCDebugNC(EWSRES_LOG) << QStringLiteral("Found changed item.") << id.id();
-                item.clearPayload();
-                item.setRemoteRevision(id.changeKey());
-                EwsItemType type = it->type();
-                switch (type) {
-                case EwsItemTypeMessage:
-                case EwsItemTypeMeetingMessage:
-                case EwsItemTypeMeetingRequest:
-                case EwsItemTypeMeetingResponse:
-                case EwsItemTypeMeetingCancellation:
-                    type = EwsItemTypeMessage;
-                    break;
-                default:
-                    break;
-                }
-                qDebug() << "changed item type" << type;
-                toFetchItems[type].append(item);
-                fetch = true;
-            }
-            else {
-                unchanged++;
-            }
-            remoteIds.erase(it);
-        }
-        else {
-            qCDebugNC(EWSRES_LOG) << QStringLiteral("Existing item not found - deleting.") << item.remoteId();
-            mDeletedItems.append(item);
-        }
-    }
-
-    for (QHash<QString, EwsItem>::const_iterator it = remoteIds.cbegin();
-        it != remoteIds.cend(); it++) {
+    Q_FOREACH(const EwsItem &ewsItem, mRemoteAddedItems) {
+        /* In case of a full sync all existing items appear as added on the remote side. Therefore
+         * look for the item in the local list before creating a new copy. */
+        EwsId id(ewsItem[EwsItemFieldItemId].value<EwsId>());
+        QHash<QString, Item>::iterator it = itemHash.find(id.id());
         QString mimeType;
-        EwsItemType type = it->type();
+        EwsItemType type = ewsItem.type();
         switch (type) {
         case EwsItemTypeMessage:
         case EwsItemTypeMeetingMessage:
@@ -237,23 +221,97 @@ void EwsFetchItemsJob::compareItemLists()
             // No idea what kind of item it is - skip it.
             continue;
         }
-        Item item(mimeType);
-        item.setParentCollection(mCollection);
-        EwsId id = it.value()[EwsItemFieldItemId].value<EwsId>();
-        item.setRemoteId(id.id());
-        item.setRemoteRevision(id.changeKey());
-        qDebug() << "new item type" << type;
-        toFetchItems[type].append(item);
-        fetch = true;
+        if (it == itemHash.end()) {
+            Item item(mimeType);
+            item.setParentCollection(mCollection);
+            EwsId id = ewsItem[EwsItemFieldItemId].value<EwsId>();
+            item.setRemoteId(id.id());
+            item.setRemoteRevision(id.changeKey());
+            toFetchItems[type].append(item);
+        }
+        else {
+            Item &item = *it;
+            item.clearPayload();
+            item.setRemoteRevision(id.changeKey());
+            toFetchItems[type].append(item);
+            itemHash.erase(it);
+        }
     }
 
-    for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); iType++) {
-        qCDebugNC(EWSRES_LOG) << QStringLiteral("Unchanged %1, changed %2, deleted %3, new %4")
-                        .arg(unchanged).arg(toFetchItems[iType].size())
-                        .arg(mDeletedItems.size()).arg(remoteIds.size());
+    if (mFullSync) {
+        /* In case of a full sync all items that are still on the local item list do not exist
+         * remotely and need to be deleted locally. */
+        QHash<QString, Item>::iterator it;
+        for (it = itemHash.begin(); it != itemHash.end(); it++) {
+            mDeletedItems.append(it.value());
+        }
     }
-    qDebug() << "compareItemLists";
+    else {
+        Q_FOREACH(const EwsItem &ewsItem, mRemoteChangedItems) {
+            EwsId id(ewsItem[EwsItemFieldItemId].value<EwsId>());
+            QHash<QString, Item>::iterator it = itemHash.find(id.id());
+            if (it == itemHash.end()) {
+                setErrorMsg(QStringLiteral("Got update for item %1, but item not found in local store.")
+                                .arg(id.id()));
+                emitResult();
+                return;
+            }
+            Item &item = *it;
+            item.clearPayload();
+            item.setRemoteRevision(id.changeKey());
+            EwsItemType type = ewsItem.type();
+            switch (type) {
+            case EwsItemTypeMessage:
+            case EwsItemTypeMeetingMessage:
+            case EwsItemTypeMeetingRequest:
+            case EwsItemTypeMeetingResponse:
+            case EwsItemTypeMeetingCancellation:
+                type = EwsItemTypeMessage;
+                break;
+            default:
+                break;
+            }
+            toFetchItems[type].append(item);
+            itemHash.erase(it);
+        }
 
+        // In case of an incremental sync deleted items will be given explicitly. */
+        Q_FOREACH(const EwsId &id, mRemoteDeletedIds) {
+            QHash<QString, Item>::iterator it = itemHash.find(id.id());
+            if (it == itemHash.end()) {
+                qCDebug(EWSRES_LOG) << QStringLiteral("Got delete for item %1, but item not found in local store.")
+                                .arg(id.id());
+                continue;
+            }
+            mDeletedItems.append(*it);
+        }
+
+        QHash<EwsId, bool>::const_iterator it;
+        for (it = mRemoteFlagChangedIds.cbegin(); it != mRemoteFlagChangedIds.cend(); it++) {
+            QHash<QString, Item>::iterator iit = itemHash.find(it.key().id());
+            if (iit == itemHash.end()) {
+                setErrorMsg(QStringLiteral("Got read flag change for item %1, but item not found in local store.")
+                                .arg(it.key().id()));
+                emitResult();
+                return;
+            }
+            Item &item = *iit;
+            if (it.value()) {
+                item.setFlag(MessageFlags::Seen);
+            }
+            else {
+                item.clearFlag(MessageFlags::Seen);
+            }
+            mChangedItems.append(item);
+            itemHash.erase(iit);
+        }
+    }
+
+    qCDebugNC(EWSRES_LOG) << QStringLiteral("Changed %2, deleted %3, new %4")
+                    .arg(mRemoteChangedItems.size())
+                    .arg(mDeletedItems.size()).arg(mRemoteAddedItems.size());
+
+    bool fetch = false;
     for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); iType++) {
         if (!toFetchItems[iType].isEmpty()) {
             qDebug() << "compareItemLists: fetching" << iType;
@@ -261,16 +319,20 @@ void EwsFetchItemsJob::compareItemLists()
                 EwsFetchItemDetailJob *job =
                     EwsFetchItemDetailJob::createFetchItemDetailJob(static_cast<EwsItemType>(iType),
                                                                     mClient, this, mCollection);
-                if (!job) {
+                // TODO: Temporarily ignore unsupported item types.
+                /*if (!job) {
                     setErrorMsg(QStringLiteral("Unable to initialize fetch for item type %1").arg(iType));
                     emitResult();
                     return;
+                }*/
+                if (job) {
+                    Item::List itemList = toFetchItems[iType].mid(i, fetchBatchSize);
+                    job->setItemLists(itemList, &mDeletedItems);
+                    connect(job, SIGNAL(result(KJob*)), SLOT(itemDetailFetchDone(KJob*)));
+                    addSubjob(job);
+                    qDebug() << "compareItemLists: job created";
+                    fetch = true;
                 }
-                Item::List itemList = toFetchItems[iType].mid(i, fetchBatchSize);
-                job->setItemLists(itemList, &mDeletedItems);
-                connect(job, SIGNAL(result(KJob*)), SLOT(itemDetailFetchDone(KJob*)));
-                addSubjob(job);
-                qDebug() << "compareItemLists: job created";
             }
         }
     }

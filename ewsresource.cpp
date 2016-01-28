@@ -93,7 +93,8 @@ void EwsResource::retrieveItems(const Collection &collection)
     Q_EMIT status(1, QStringLiteral("Retrieving item list"));
     qDebug() << "retrieveItems";
 
-    EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient, this);
+    EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient,
+        mSyncState.value(collection.remoteId()), this);
     connect(job, SIGNAL(finished(KJob*)), SLOT(itemFetchJobFinished(KJob*)));
     connect(job, SIGNAL(status(int,const QString&)), SIGNAL(status(int,const QString&)));
     connect(job, SIGNAL(percent(int)), SIGNAL(percent(int)));
@@ -225,12 +226,28 @@ void EwsResource::itemFetchJobFinished(KJob *job)
 {
     EwsFetchItemsJob *fetchJob = qobject_cast<EwsFetchItemsJob*>(job);
 
-    if (!fetchJob || job->error()) {
-        qWarning() << "ERROR" << job->errorString();
-        cancelTask(job->errorString());
+    if (!fetchJob) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid job object");
+        cancelTask(QStringLiteral("Invalid job object"));
         return;
     }
+    if (job->error()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Item fetch error:") << job->errorString();
+        if (mSyncState.contains(fetchJob->collection().remoteId())) {
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Retrying with empty state.");
+            // Retry with a clear sync state.
+            mSyncState.remove(fetchJob->collection().remoteId());
+            retrieveItems(fetchJob->collection());
+        }
+        else {
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Clean sync failed.");
+            // No more hope
+            cancelTask(job->errorString());
+            return;
+        }
+    }
     else {
+        mSyncState[fetchJob->collection().remoteId()] = fetchJob->syncState();
         itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
     }
     Q_EMIT status(0);

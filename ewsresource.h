@@ -64,6 +64,7 @@ private:
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;
     QScopedPointer<EwsSubscriptionManager> mSubManager;
+    QHash<QString, QString> mSyncState;
 };
 
 #endif

@@ -34,11 +34,14 @@ class EwsFetchItemsJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient& client, QObject *parent);
+    EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient& client,
+                     const QString &syncState, QObject *parent);
     virtual ~EwsFetchItemsJob();
 
     Akonadi::Item::List changedItems() const { return mChangedItems; };
     Akonadi::Item::List deletedItems() const { return mDeletedItems; };
+    const QString &syncState() const { return mSyncState; };
+    const Akonadi::Collection &collection() const { return mCollection; };
 
     virtual void start() Q_DECL_OVERRIDE;
 private Q_SLOTS:
@@ -54,10 +57,14 @@ private:
     const Akonadi::Collection mCollection;
     EwsClient& mClient;
     Akonadi::Item::List mLocalItems;
-    QList<EwsItem> mRemoteItems;
+    EwsItem::List mRemoteAddedItems;
+    EwsItem::List mRemoteChangedItems;
+    EwsId::List mRemoteDeletedIds;
+    QHash<EwsId, bool> mRemoteFlagChangedIds;
     int mPendingJobs;
-
     unsigned mTotalItems;
+    QString mSyncState;
+    bool mFullSync;
 
     Akonadi::Item::List mChangedItems;
     Akonadi::Item::List mDeletedItems;
