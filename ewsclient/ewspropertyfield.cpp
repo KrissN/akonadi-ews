@@ -293,8 +293,8 @@ bool EwsPropertyField::operator==(const EwsPropertyField &other) const
 
         if (d->mHasTag != od->mHasTag)
             return false;
-        else if (d->mHasTag && d->mTag == od->mTag)
-            return true;
+        else if (d->mHasTag)
+            return d->mTag == od->mTag;
 
         if (d->mPsIdType != od->mPsIdType)
             return false;
