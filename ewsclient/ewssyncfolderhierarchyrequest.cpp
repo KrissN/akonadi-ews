@@ -203,7 +203,7 @@ EwsSyncFolderHierarchyRequest::Change::Change(QXmlStreamReader &reader)
         {Folder, QStringLiteral("ContactsFolder"), &ewsXmlFolderReader},
         {Folder, QStringLiteral("SearchFolder"), &ewsXmlFolderReader},
         {Folder, QStringLiteral("TasksFolder"), &ewsXmlFolderReader},
-        {FolderId, QStringLiteral("ItemId"), &ewsXmlIdReader},
+        {FolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},
         {IsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader}
     };
     static const EwsXmlReader<ChangeElementType> staticReader(items);
