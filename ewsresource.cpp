@@ -22,22 +22,20 @@
 #include <KI18n/KLocalizedString>
 #include <AkonadiCore/ChangeRecorder>
 #include <AkonadiCore/CollectionFetchScope>
+#include <AkonadiCore/ItemFetchScope>
 #include <AkonadiCore/CollectionFetchJob>
 #include <Akonadi/KMime/MessageFlags>
 #include <KMime/Message>
 #include <KCalCore/Event>
-#include <KCalCore/Todo>
-#include <KContacts/Addressee>
-#include <KContacts/ContactGroup>
 
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
-#include "ewsfindfolderrequest.h"
-#include "ewseffectiverights.h"
+#include "ewsfetchfoldersjob.h"
 #include "ewsgetitemrequest.h"
 #include "ewsupdateitemrequest.h"
 #include "ewsmoveitemrequest.h"
 #include "ewssubscriptionmanager.h"
+#include "ewsgetfolderrequest.h"
 #include "configdialog.h"
 #include "settings.h"
 #include "ewsclient_debug.h"
@@ -46,7 +44,6 @@
 
 using namespace Akonadi;
 
-static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString);
 static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
 
 EwsResource::EwsResource(const QString &id)
@@ -56,12 +53,13 @@ EwsResource::EwsResource(const QString &id)
     //setName(i18n("Microsoft Exchange"));
     mEwsClient.setUrl(Settings::self()->baseUrl());
 
-    mRootCollection.setParentCollection(Collection::root());
-    mRootCollection.setName(name());
-    mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
-    mRootCollection.setRights(Collection::ReadOnly);
-    mRootCollection.setRemoteId("root");
-    mRootCollection.setRemoteRevision("0");
+    EwsGetFolderRequest *req = new EwsGetFolderRequest(mEwsClient, this);
+    req->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+    EwsFolderShape shape(EwsShapeIdOnly);
+    shape << EwsPropertyField(QStringLiteral("folder:DisplayName"));
+    req->setFolderShape(shape);
+    connect(req, &EwsRequest::result, this, &EwsResource::rootFolderFetchFinished);
+    req->start();
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
@@ -80,12 +78,6 @@ EwsResource::EwsResource(const QString &id)
         }
     }
 
-    mSubManager.reset(new EwsSubscriptionManager(mEwsClient, this));
-    connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
-    connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
-    connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
-    mSubManager->start();
-
     Q_EMIT status(0);
 
     QMetaObject::invokeMethod(this, "delayedInit", Qt::QueuedConnection);
@@ -100,18 +92,50 @@ void EwsResource::delayedInit()
     new ResourceAdaptor(this);
 }
 
+void EwsResource::rootFolderFetchFinished(KJob *job)
+{
+    qDebug() << "rootFolderFetchFinished";
+    EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
+        return;
+    }
+
+    if (req->error()) {
+        qWarning() << "ERROR" << req->errorString();
+        return;
+    }
+
+    EwsId id = req->folder()[EwsFolderFieldFolderId].value<EwsId>();
+    if (id.type() == EwsId::Real) {
+        mRootCollection.setParentCollection(Collection::root());
+        mRootCollection.setName(name());
+        mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
+        mRootCollection.setRights(Collection::ReadOnly);
+        mRootCollection.setRemoteId(id.id());
+        mRootCollection.setRemoteRevision(id.changeKey());
+        qDebug() << "Root folder is " << id;
+
+        mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, this));
+        connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
+        connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
+        connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
+        mSubManager->start();
+    }
+}
+
 void EwsResource::retrieveCollections()
 {
     qDebug() << "retrieveCollections";
-    EwsFindFolderRequest *req = new EwsFindFolderRequest(mEwsClient, this);
-    req->setParentFolderId(EwsDIdMsgFolderRoot);
-    EwsFolderShape shape;
-    shape << propPidTagContainerClass;
-    shape << EwsPropertyField("folder:EffectiveRights");
-    req->setFolderShape(shape);
-    connect(req, &EwsFindFolderRequest::finished, req,
-            [this](KJob *job){findFoldersRequestFinished(qobject_cast<EwsFindFolderRequest*>(job));});
-    req->start();
+    if (mRootCollection.remoteId().isNull()) {
+        cancelTask(QStringLiteral("Root folder id not known."));
+        return;
+    }
+
+    EwsFetchFoldersJob *job = new EwsFetchFoldersJob(mEwsClient, mFolderSyncState,
+        mRootCollection, this);
+    connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::findFoldersRequestFinished);
+    job->start();
 }
 
 void EwsResource::retrieveItems(const Collection &collection)
@@ -155,9 +179,15 @@ void EwsResource::configure(WId windowId)
     }
 }
 
-void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
+void EwsResource::findFoldersRequestFinished(KJob *job)
 {
     qDebug() << "findFoldersRequestFinished";
+    EwsFetchFoldersJob *req = qobject_cast<EwsFetchFoldersJob*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
 
     if (req->error()) {
         qWarning() << "ERROR" << req->errorString();
@@ -165,87 +195,15 @@ void EwsResource::findFoldersRequestFinished(EwsFindFolderRequest *req)
         return;
     }
 
-    qDebug() << "Processing folders";
-
-    Collection::List collections;
-
-    collections.append(mRootCollection);
-
-    Q_FOREACH(const EwsFolder &baseFolder, req->folders()) {
-        Collection collection = createFolderCollection(baseFolder);
-        collection.setParentCollection(mRootCollection);
-
-        collections.append(collection);
-
-        collections << createChildCollections(baseFolder, collection);
+    mFolderSyncState = req->syncState();
+    if (req->fullSync()) {
+        collectionsRetrieved(req->folders());
+        qCDebug(EWSRES_LOG) << req->folders();
     }
-
-    qDebug() << collections;
-
-    collectionsRetrieved(collections);
-}
-
-Collection::List EwsResource::createChildCollections(const EwsFolder &folder, Collection collection)
-{
-    Collection::List collections;
-
-    Q_FOREACH(const EwsFolder& child, folder.childFolders()) {
-        Collection col = createFolderCollection(child);
-        col.setParentCollection(collection);
-        collections.append(col);
-
-        collections << createChildCollections(child, col);
-
+    else {
+        collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
+        qCDebug(EWSRES_LOG) << req->changedFolders() << req->deletedFolders();
     }
-    return collections;
-}
-
-Collection EwsResource::createFolderCollection(const EwsFolder &folder)
-{
-    Collection collection;
-    collection.setName(folder[EwsFolderFieldDisplayName].toString());
-    QStringList mimeTypes;
-    QString contClass = folder[propPidTagContainerClass].toString();
-    mimeTypes.append(Collection::mimeType());
-    switch (folder.type()) {
-    case EwsFolderTypeCalendar:
-        mimeTypes.append(KCalCore::Event::eventMimeType());
-        break;
-    case EwsFolderTypeContacts:
-        mimeTypes.append(KContacts::Addressee::mimeType());
-        mimeTypes.append(KContacts::ContactGroup::mimeType());
-        break;
-    case EwsFolderTypeTasks:
-        mimeTypes.append(KCalCore::Todo::todoMimeType());
-        break;
-    case EwsFolderTypeMail:
-        if (contClass == QStringLiteral("IPF.Note") || contClass.isEmpty()) {
-            mimeTypes.append(KMime::Message::mimeType());
-        }
-        break;
-    default:
-        break;
-    }
-    collection.setContentMimeTypes(mimeTypes);
-    Collection::Rights colRights;
-    EwsEffectiveRights ewsRights = folder[EwsFolderFieldEffectiveRights].value<EwsEffectiveRights>();
-    if (ewsRights.canDelete()) {
-        colRights |= Collection::CanDeleteCollection | Collection::CanDeleteItem;
-    }
-    if (ewsRights.canModify()) {
-        colRights |= Collection::CanChangeCollection | Collection::CanChangeItem;
-    }
-    if (ewsRights.canCreateContents()) {
-        colRights |= Collection::CanCreateItem;
-    }
-    if (ewsRights.canCreateHierarchy()) {
-        colRights |= Collection::CanCreateCollection;
-    }
-    collection.setRights(colRights);
-    EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
-    collection.setRemoteId(id.id());
-    collection.setRemoteRevision(id.changeKey());
-    return collection;
 }
 
 void EwsResource::itemFetchJobFinished(KJob *job)
@@ -471,33 +429,28 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
 
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {
-    CollectionFetchJob *job = new CollectionFetchJob(Collection::root(), CollectionFetchJob::Recursive);
-    job->setFetchScope(changeRecorder()->collectionFetchScope());
-    job->fetchScope().setResource(identifier());
-    job->fetchScope().setListFilter(CollectionFetchScope::Sync);
-    job->setProperty("folders", QVariant::fromValue<EwsId::List>(folders));
-    connect(job, SIGNAL(result(KJob*)), SLOT(slotCollectionListDone(KJob*)));
+    Q_FOREACH(const EwsId &id, folders) {
+        Collection c;
+        c.setRemoteId(id.id());
+        CollectionFetchJob *job = new CollectionFetchJob(c, CollectionFetchJob::Base);
+        job->setFetchScope(changeRecorder()->collectionFetchScope());
+        job->fetchScope().setResource(identifier());
+        job->fetchScope().setListFilter(CollectionFetchScope::Sync);
+        connect(job, SIGNAL(result(KJob*)), SLOT(foldersModifiedCollectionSyncFinished(KJob*)));
+    }
+
 }
 
 void EwsResource::foldersModifiedCollectionSyncFinished(KJob *job)
 {
+    qCDebugNC(EWSRES_LOG) << job->error() << job->errorText();
     if (job->error()) {
         qCDebug(EWSRES_LOG) << QStringLiteral("Failed to fetch collection tree for sync.");
         return;
     }
 
     CollectionFetchJob *fetchJob = qobject_cast<CollectionFetchJob*>(job);
-    EwsId::List folders = fetchJob->property("folders").value<EwsId::List>();
-    QList<QString> folderIds;
-    Q_FOREACH(const EwsId &id, folders) {
-        folderIds.append(id.id());
-    }
-
-    Q_FOREACH(const Collection &col, fetchJob->collections()) {
-        if (folderIds.contains(col.remoteId())) {
-            synchronizeCollection(col.id());
-        }
-    }
+    synchronizeCollection(fetchJob->collections()[0].id());
 }
 
 void EwsResource::folderTreeModifiedEvent()

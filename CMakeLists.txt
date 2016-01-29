@@ -53,6 +53,7 @@ add_definitions(-DTRANSLATION_DOMAIN=\"akonadi_ews_resource\")
 
 set(ewsresource_SRCS
     configdialog.cpp
+    ewsfetchfoldersjob.cpp
     ewsfetchitemsjob.cpp
     ewsfetchitemdetailjob.cpp
     ewsfetchmaildetailjob.cpp

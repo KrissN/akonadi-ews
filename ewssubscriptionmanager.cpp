@@ -21,15 +21,15 @@
 #include "ewssubscriberequest.h"
 #include "ewsunsubscriberequest.h"
 #include "ewsgeteventsrequest.h"
+#include "ewsgetfolderrequest.h"
 #include "ewsclient_debug.h"
 
 // TODO: Allow customisation
 static Q_CONSTEXPR uint pollInterval = 10; /* seconds */
 
-EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, QObject *parent)
-    : QObject(parent), mEwsClient(client), mPollTimer(this), mFolderTreeChanged(false)
+EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent)
+    : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false)
 {
-
 }
 
 EwsSubscriptionManager::~EwsSubscriptionManager()
@@ -122,6 +122,7 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
         Q_FOREACH(const EwsGetEventsRequest::Response &resp, req->responses()) {
             Q_FOREACH(const EwsGetEventsRequest::Notification &nfy, resp.notifications()) {
                 Q_FOREACH(const EwsGetEventsRequest::Event &event, nfy.events()) {
+                    mWatermark = event.watermark();
                     switch (event.type()) {
                     case EwsCopiedEvent:
                     case EwsMovedEvent:
@@ -146,7 +147,6 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
                     default:
                         break;
                     }
-                    mWatermark = event.watermark();
                 }
                 if (nfy.hasMoreEvents()) {
                     moreEvents = true;
@@ -177,4 +177,3 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
         return;
     }
 }
-

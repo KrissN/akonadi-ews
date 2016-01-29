@@ -33,8 +33,9 @@ class EwsSubscriptionManager : public QObject
 {
     Q_OBJECT
 public:
-    EwsSubscriptionManager(EwsClient &client, QObject *parent);
+    EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent);
     virtual ~EwsSubscriptionManager();
+    void start();
 Q_SIGNALS:
     void foldersModified(EwsId::List folders);
     void folderTreeModified();
@@ -52,6 +53,7 @@ private:
     QString mSubId;
     QString mWatermark;
     QTimer mPollTimer;
+    EwsId mMsgRootId;
 
     QSet<EwsId> mUpdatedFolderIds;
     bool mFolderTreeChanged;

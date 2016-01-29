@@ -51,7 +51,7 @@ protected Q_SLOTS:
     void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
     bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
 private Q_SLOTS:
-    void findFoldersRequestFinished(EwsFindFolderRequest *req);
+    void findFoldersRequestFinished(KJob *job);
     void itemFetchJobFinished(KJob *job);
     void getItemRequestFinished(EwsGetItemRequest *req);
     void itemChangeRequestFinished(KJob *job);
@@ -61,9 +61,8 @@ private Q_SLOTS:
     void foldersModifiedCollectionSyncFinished(KJob *job);
     void folderTreeModifiedEvent();
     void fullSyncRequestedEvent();
+    void rootFolderFetchFinished(KJob *job);
 private:
-    Akonadi::Collection::List createChildCollections(const EwsFolder &folder, Akonadi::Collection collection);
-    Akonadi::Collection createFolderCollection(const EwsFolder &folder);
     void finishItemsFetch(FetchItemState *state);
 
     void mailItemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers);
@@ -74,6 +73,7 @@ private:
     Akonadi::Collection mRootCollection;
     QScopedPointer<EwsSubscriptionManager> mSubManager;
     QHash<QString, QString> mSyncState;
+    QString mFolderSyncState;
 };
 
 #endif
