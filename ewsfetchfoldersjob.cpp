@@ -129,8 +129,6 @@ void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)
         return;
     }
 
-    req->dump();
-
     QHash<QString, Collection> map;
     QHash<QString, Collection> dummyMap;
     QMultiHash<QString, Collection> reparentMap;
