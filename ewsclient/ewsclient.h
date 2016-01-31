@@ -39,7 +39,7 @@ public:
         mUrl.setUrl(url);
     }
 
-    void setUsername(QString username, QString password)
+    void setCredentials(QString username, QString password)
     {
         mUrl.setUserName(username);
         mUrl.setPassword(password);

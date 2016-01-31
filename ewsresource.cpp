@@ -53,19 +53,16 @@ EwsResource::EwsResource(const QString &id)
     //setName(i18n("Microsoft Exchange"));
     mEwsClient.setUrl(Settings::self()->baseUrl());
 
-    EwsGetFolderRequest *req = new EwsGetFolderRequest(mEwsClient, this);
-    req->setFolderId(EwsId(EwsDIdMsgFolderRoot));
-    EwsFolderShape shape(EwsShapeIdOnly);
-    shape << EwsPropertyField(QStringLiteral("folder:DisplayName"));
-    req->setFolderShape(shape);
-    connect(req, &EwsRequest::result, this, &EwsResource::rootFolderFetchFinished);
-    req->start();
-
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
     changeRecorder()->itemFetchScope().fetchFullPayload(true);
     changeRecorder()->itemFetchScope().setAncestorRetrieval(ItemFetchScope::Parent);
     changeRecorder()->itemFetchScope().setFetchModificationTime(false);
+
+    mRootCollection.setParentCollection(Collection::root());
+    mRootCollection.setName(name());
+    mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
+    mRootCollection.setRights(Collection::ReadOnly);
 
     // Load the sync state
     QByteArray data = QByteArray::fromBase64(Settings::self()->syncState().toAscii());
@@ -92,6 +89,17 @@ void EwsResource::delayedInit()
     new ResourceAdaptor(this);
 }
 
+void EwsResource::resetUrl()
+{
+    EwsGetFolderRequest *req = new EwsGetFolderRequest(mEwsClient, this);
+    req->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+    EwsFolderShape shape(EwsShapeIdOnly);
+    shape << EwsPropertyField(QStringLiteral("folder:DisplayName"));
+    req->setFolderShape(shape);
+    connect(req, &EwsRequest::result, this, &EwsResource::rootFolderFetchFinished);
+    req->start();
+}
+
 void EwsResource::rootFolderFetchFinished(KJob *job)
 {
     qDebug() << "rootFolderFetchFinished";
@@ -108,10 +116,6 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
 
     EwsId id = req->folder()[EwsFolderFieldFolderId].value<EwsId>();
     if (id.type() == EwsId::Real) {
-        mRootCollection.setParentCollection(Collection::root());
-        mRootCollection.setName(name());
-        mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
-        mRootCollection.setRights(Collection::ReadOnly);
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());
         qDebug() << "Root folder is " << id;
@@ -174,8 +178,11 @@ void EwsResource::configure(WId windowId)
 {
     ConfigDialog dlg(this, windowId);
     if (dlg.exec()) {
-        mEwsClient.setUrl(Settings::self()->baseUrl());
+        mSubManager.reset(Q_NULLPTR);
+        mEwsClient.setUrl(Settings::baseUrl());
+        mEwsClient.setCredentials(Settings::username(), Settings::password());
         Settings::self()->save();
+        resetUrl();
     }
 }
 

@@ -68,6 +68,7 @@ private:
     void mailItemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers);
 
     void saveState();
+    void resetUrl();
 
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;

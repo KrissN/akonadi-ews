@@ -80,6 +80,7 @@ void EwsRequest::prepare(const QString body)
     KIO::TransferJob *job = KIO::http_post(mClient.url(), body.toUtf8(),
                           KIO::HideProgressInfo);
     job->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
+    job->addMetaData(QStringLiteral("no-auth-prompt"), QStringLiteral("true"));
     job->addMetaData(mMd);
 
     connect(job, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
