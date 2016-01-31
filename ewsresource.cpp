@@ -51,7 +51,8 @@ EwsResource::EwsResource(const QString &id)
 {
     qDebug() << "EwsResource";
     //setName(i18n("Microsoft Exchange"));
-    mEwsClient.setUrl(Settings::self()->baseUrl());
+    mEwsClient.setUrl(Settings::baseUrl());
+    mEwsClient.setCredentials(Settings::username(), Settings::password());
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
@@ -63,6 +64,8 @@ EwsResource::EwsResource(const QString &id)
     mRootCollection.setName(name());
     mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
     mRootCollection.setRights(Collection::ReadOnly);
+
+    resetUrl();
 
     // Load the sync state
     QByteArray data = QByteArray::fromBase64(Settings::self()->syncState().toAscii());
