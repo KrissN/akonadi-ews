@@ -24,9 +24,7 @@
 #include <AkonadiCore/CollectionFetchScope>
 #include <AkonadiCore/ItemFetchScope>
 #include <AkonadiCore/CollectionFetchJob>
-#include <Akonadi/KMime/MessageFlags>
 #include <KMime/Message>
-#include <KCalCore/Event>
 
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
@@ -36,6 +34,8 @@
 #include "ewsmoveitemrequest.h"
 #include "ewssubscriptionmanager.h"
 #include "ewsgetfolderrequest.h"
+#include "ewsitemhandler.h"
+#include "ewsmodifyitemjob.h"
 #include "configdialog.h"
 #include "settings.h"
 #include "ewsclient_debug.h"
@@ -43,8 +43,6 @@
 #include "resourceadaptor.h"
 
 using namespace Akonadi;
-
-static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
 
 EwsResource::EwsResource(const QString &id)
     : Akonadi::ResourceBase(id)
@@ -269,93 +267,25 @@ void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
         return;
     }
     const EwsItem &ewsItem = resp.item();
-    QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
-    if (mimeContent.isEmpty()) {
-        qWarning() << QStringLiteral("MIME content is empty!");
-        cancelTask(QStringLiteral("MIME content is empty!"));
+    if (!EwsItemHandler::itemHandler(ewsItem.internalType())->setItemPayload(item, ewsItem)) {
+        cancelTask(QStringLiteral("Failed to fetch item payload."));
         return;
     }
 
-    mimeContent.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
-
-    if (ewsItem.isValid()) {
-        switch (ewsItem.type()) {
-        case EwsItemTypeMessage:
-        case EwsItemTypeMeetingMessage:
-        case EwsItemTypeMeetingRequest:
-        case EwsItemTypeMeetingResponse:
-        case EwsItemTypeMeetingCancellation:
-        {
-            KMime::Message::Ptr msg(new KMime::Message);
-            msg->setContent(mimeContent.toLatin1());
-            msg->parse();
-            qDebug() << msg->head();
-            qDebug() << msg->body();
-            item.setPayload<KMime::Message::Ptr>(msg);
-            qDebug() << item.availablePayloadParts();
-            break;
-        }
-        case EwsItemTypeContact:
-            break;
-        case EwsItemTypeCalendarItem:
-        case EwsItemTypeTask:
-
-            break;
-        default:
-            // No idea what kind of item it is - skip it.
-            break;
-        }
-        itemRetrieved(item);
-    }
+    itemRetrieved(item);
 }
 
 void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers)
 {
-    qDebug() << "itemChanged" << item.remoteId() << partIdentifiers << item.hasPayload<KCalCore::Event::Ptr>();
-
-    if (item.mimeType() == KMime::Message::mimeType()) {
-        mailItemChanged(item, partIdentifiers);
-    }
-    else {
+    EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
+    if (type == EwsItemTypeItem) {
         cancelTask("Item type not supported for changing");
     }
-}
-
-void EwsResource::mailItemChanged(const Item &item, const QSet<QByteArray> &partIdentifiers)
-{
-    bool doSubmit = false;
-    EwsUpdateItemRequest *req = new EwsUpdateItemRequest(mEwsClient, this);
-    EwsId itemId(item.remoteId(), item.remoteRevision());
-
-    if (partIdentifiers.contains("FLAGS")) {
-        EwsUpdateItemRequest::ItemChange ic(itemId, EwsItemTypeMessage);
-        qDebug() << "Item flags" << item.flags();
-        bool isRead = item.flags().contains(MessageFlags::Seen);
-        EwsUpdateItemRequest::Update *upd =
-                        new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("message:IsRead")),
-                                                            isRead ? QStringLiteral("true") : QStringLiteral("false"));
-        ic.addUpdate(upd);
-        bool isFlagged = item.flags().contains(MessageFlags::Flagged);
-        if (isFlagged) {
-            upd = new EwsUpdateItemRequest::SetUpdate(propPidFlagStatus, QStringLiteral("2"));
-        }
-        else {
-            upd = new EwsUpdateItemRequest::DeleteUpdate(propPidFlagStatus);
-        }
-        ic.addUpdate(upd);
-        req->addItemChange(ic);
-        doSubmit = true;
-    }
-
-    if (doSubmit) {
-        req->setProperty("item", QVariant::fromValue<Item>(item));
-        connect(req, SIGNAL(result(KJob*)), SLOT(itemChangeRequestFinished(KJob*)));
-        req->start();
-    }
     else {
-        delete req;
-        qDebug() << "Nothing to do for parts" << partIdentifiers;
-        changeCommitted(item);
+        EwsModifyItemJob *job = EwsItemHandler::itemHandler(type)->modifyItemJob(mEwsClient, item,
+            partIdentifiers, this);
+        connect(job, SIGNAL(result(KJob*)), SLOT(itemChangeRequestFinished(KJob*)));
+        job->start();
     }
 }
 
@@ -366,24 +296,13 @@ void EwsResource::itemChangeRequestFinished(KJob *job)
         return;
     }
 
-    EwsUpdateItemRequest *req = qobject_cast<EwsUpdateItemRequest*>(job);
+    EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
     if (!req) {
         cancelTask(QStringLiteral("Invalid job object"));
         return;
     }
 
-    EwsUpdateItemRequest::Response resp = req->responses().first();
-    if (!resp.isSuccess()) {
-        cancelTask(QStringLiteral("Item update failed: ") + resp.responseMessage());
-        return;
-    }
-
-    Item item = job->property("item").value<Item>();
-    if (item.isValid()) {
-        item.setRemoteRevision(resp.itemId().changeKey());
-    }
-
-    changeCommitted(item);
+    changeCommitted(req->item());
 }
 
 void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCollection,

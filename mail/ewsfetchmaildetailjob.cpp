@@ -31,6 +31,7 @@
 using namespace Akonadi;
 
 static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
+static const EwsPropertyField propPidFlagIconIndex(0x1080, EwsPropTypeInteger);
 
 EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection)
     : EwsFetchItemDetailJob(client, parent, collection)
@@ -45,7 +46,9 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("message:BccRecipients");
     shape << EwsPropertyField("message:IsRead");
     shape << EwsPropertyField("item:HasAttachments");
+    shape << EwsPropertyField("item:Categories");
     shape << propPidFlagStatus;
+    shape << propPidFlagIconIndex;
     mRequest->setItemShape(shape);
 }
 
@@ -177,11 +180,3 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
 
     emitResult();
 }
-
-EwsFetchItemDetailJob *EwsFetchMailDetailJob::factory(EwsClient &client, QObject *parent,
-                                                      const Akonadi::Collection &collection)
-{
-    return new EwsFetchMailDetailJob(client, parent, collection);
-}
-
-EWS_DECLARE_FETCH_ITEM_DETAIL_JOB(EwsFetchMailDetailJob, EwsItemTypeMessage)

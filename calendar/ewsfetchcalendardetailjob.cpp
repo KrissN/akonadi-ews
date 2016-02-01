@@ -236,12 +236,6 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
     emitResult();
 }
 
-EwsFetchItemDetailJob *EwsFetchCalendarDetailJob::factory(EwsClient &client, QObject *parent,
-                                                          const Akonadi::Collection &collection)
-{
-    return new EwsFetchCalendarDetailJob(client, parent, collection);
-}
-
 /*
  *  This method does its best to convert the timezone found in the EWS calendar event to a IANA
  *  timezone. This is a cumbersome process as there is no guarantee that the
@@ -301,5 +295,3 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
 
     currentTime = resultDt;
 }
-
-EWS_DECLARE_FETCH_ITEM_DETAIL_JOB(EwsFetchCalendarDetailJob, EwsItemTypeCalendarItem)

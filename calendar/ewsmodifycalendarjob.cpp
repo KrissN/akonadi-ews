@@ -17,21 +17,21 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFETCHMAILDETAILJOB_H
-#define EWSFETCHMAILDETAILJOB_H
+#include "ewsmodifycalendarjob.h"
 
-#include "ewsfetchitemdetailjob.h"
+#include "ewsclient_debug.h"
 
-class EwsFetchMailDetailJob : public EwsFetchItemDetailJob
+EwsModifyCalendarJob::EwsModifyCalendarJob(EwsClient& client, const Akonadi::Item &item,
+                                           const QSet<QByteArray> &parts, QObject *parent)
+    : EwsModifyItemJob(client, item, parts, parent)
 {
-    Q_OBJECT
-public:
-    EwsFetchMailDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
-    virtual ~EwsFetchMailDetailJob();
-    static EwsFetchItemDetailJob *factory(EwsClient &client, QObject *parent,
-                                          const Akonadi::Collection &collection);
-protected:
-    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) Q_DECL_OVERRIDE;
-};
+}
+EwsModifyCalendarJob::~EwsModifyCalendarJob()
+{
+}
 
-#endif
+void EwsModifyCalendarJob::start()
+{
+    qCWarning(EWSRES_LOG) << QStringLiteral("Calendar item modification not implemented!");
+    emitResult();
+}

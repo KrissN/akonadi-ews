@@ -65,8 +65,6 @@ private Q_SLOTS:
 private:
     void finishItemsFetch(FetchItemState *state);
 
-    void mailItemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers);
-
     void saveState();
     void resetUrl();
 

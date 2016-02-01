@@ -19,20 +19,14 @@
 
 #include "ewsfetchitemsjob.h"
 
-#include <QtCore/QTimeZone>
-#include <KMime/Message>
-#include <KCalCore/Event>
-#include <KCalCore/Todo>
 #include <AkonadiCore/ItemFetchJob>
 #include <AkonadiCore/ItemFetchScope>
-#include <KContacts/Addressee>
-#include <KContacts/ContactGroup>
-#include <Akonadi/KMime/MessageFlags>
 
 #include "ewsfinditemrequest.h"
 #include "ewssyncfolderitemsrequest.h"
 #include "ewsclient.h"
 #include "ewsmailbox.h"
+#include "ewsitemhandler.h"
 #include "ewsfetchitemdetailjob.h"
 #include "ewsclient_debug.h"
 
@@ -197,30 +191,8 @@ void EwsFetchItemsJob::compareItemLists()
          * look for the item in the local list before creating a new copy. */
         EwsId id(ewsItem[EwsItemFieldItemId].value<EwsId>());
         QHash<QString, Item>::iterator it = itemHash.find(id.id());
-        QString mimeType;
-        EwsItemType type = ewsItem.type();
-        switch (type) {
-        case EwsItemTypeMessage:
-        case EwsItemTypeMeetingMessage:
-        case EwsItemTypeMeetingRequest:
-        case EwsItemTypeMeetingResponse:
-        case EwsItemTypeMeetingCancellation:
-            mimeType = KMime::Message::mimeType();
-            type = EwsItemTypeMessage;
-            break;
-        case EwsItemTypeContact:
-            mimeType = KContacts::Addressee::mimeType();
-            break;
-        case EwsItemTypeCalendarItem:
-            mimeType = KCalCore::Event::eventMimeType();
-            break;
-        case EwsItemTypeTask:
-            mimeType = KCalCore::Todo::todoMimeType();
-            break;
-        default:
-            // No idea what kind of item it is - skip it.
-            continue;
-        }
+        EwsItemType type = ewsItem.internalType();
+        QString mimeType = EwsItemHandler::itemHandler(type)->mimeType();
         if (it == itemHash.end()) {
             Item item(mimeType);
             item.setParentCollection(mCollection);
@@ -259,18 +231,7 @@ void EwsFetchItemsJob::compareItemLists()
             Item &item = *it;
             item.clearPayload();
             item.setRemoteRevision(id.changeKey());
-            EwsItemType type = ewsItem.type();
-            switch (type) {
-            case EwsItemTypeMessage:
-            case EwsItemTypeMeetingMessage:
-            case EwsItemTypeMeetingRequest:
-            case EwsItemTypeMeetingResponse:
-            case EwsItemTypeMeetingCancellation:
-                type = EwsItemTypeMessage;
-                break;
-            default:
-                break;
-            }
+            EwsItemType type = ewsItem.internalType();
             toFetchItems[type].append(item);
             itemHash.erase(it);
         }
@@ -287,6 +248,7 @@ void EwsFetchItemsJob::compareItemLists()
         }
 
         QHash<EwsId, bool>::const_iterator it;
+        EwsItemHandler *handler = EwsItemHandler::itemHandler(EwsItemTypeMessage);
         for (it = mRemoteFlagChangedIds.cbegin(); it != mRemoteFlagChangedIds.cend(); it++) {
             QHash<QString, Item>::iterator iit = itemHash.find(it.key().id());
             if (iit == itemHash.end()) {
@@ -296,12 +258,7 @@ void EwsFetchItemsJob::compareItemLists()
                 return;
             }
             Item &item = *iit;
-            if (it.value()) {
-                item.setFlag(MessageFlags::Seen);
-            }
-            else {
-                item.clearFlag(MessageFlags::Seen);
-            }
+            handler->setSeenFlag(item, it.value());
             mChangedItems.append(item);
             itemHash.erase(iit);
         }
@@ -316,16 +273,17 @@ void EwsFetchItemsJob::compareItemLists()
         if (!toFetchItems[iType].isEmpty()) {
             qDebug() << "compareItemLists: fetching" << iType;
             for (int i = 0; i < toFetchItems[iType].size(); i += fetchBatchSize) {
-                EwsFetchItemDetailJob *job =
-                    EwsFetchItemDetailJob::createFetchItemDetailJob(static_cast<EwsItemType>(iType),
-                                                                    mClient, this, mCollection);
-                // TODO: Temporarily ignore unsupported item types.
-                /*if (!job) {
-                    setErrorMsg(QStringLiteral("Unable to initialize fetch for item type %1").arg(iType));
+                EwsItemHandler *handler = EwsItemHandler::itemHandler(static_cast<EwsItemType>(iType));
+                if (!handler) {
+                    // TODO: Temporarily ignore unsupported item types.
+                    qCWarning(EWSRES_LOG) << QStringLiteral("Unable to initialize fetch for item type %1")
+                                    .arg(iType);
+                    /*setErrorMsg(QStringLiteral("Unable to initialize fetch for item type %1").arg(iType));
                     emitResult();
-                    return;
-                }*/
-                if (job) {
+                    return;*/
+                }
+                else {
+                    EwsFetchItemDetailJob *job = handler->fetchItemDetailJob(mClient, this, mCollection);
                     Item::List itemList = toFetchItems[iType].mid(i, fetchBatchSize);
                     job->setItemLists(itemList, &mDeletedItems);
                     connect(job, SIGNAL(result(KJob*)), SLOT(itemDetailFetchDone(KJob*)));

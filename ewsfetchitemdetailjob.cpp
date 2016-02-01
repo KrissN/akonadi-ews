@@ -21,8 +21,6 @@
 
 #include "ewsgetitemrequest.h"
 
-QList<EwsFetchItemDetailJob::JobFactory> EwsFetchItemDetailJob::mJobFactories;
-
 EwsFetchItemDetailJob::EwsFetchItemDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection)
     : KCompositeJob(parent), mDeletedItems(Q_NULLPTR), mClient(client), mCollection(collection)
 {
@@ -65,23 +63,4 @@ void EwsFetchItemDetailJob::start()
 {
     qDebug() << "started";
     mRequest->start();
-}
-
-void EwsFetchItemDetailJob::registerItemDetailFetchJob(EwsItemType type,
-                                                       FetchItemDetailJobFactory factory)
-{
-    mJobFactories.append({type, factory});
-}
-EwsFetchItemDetailJob *EwsFetchItemDetailJob::createFetchItemDetailJob(EwsItemType type,
-                                                                       EwsClient &client,
-                                                                       QObject *parent,
-                                                                       const Akonadi::Collection &collection)
-{
-    Q_FOREACH (const JobFactory& factory, mJobFactories) {
-        if (factory.type == type) {
-            return factory.factory(client, parent, collection);
-        }
-    }
-
-    return Q_NULLPTR;
 }

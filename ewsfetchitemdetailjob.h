@@ -46,11 +46,6 @@ public:
     }
 
     virtual void start() Q_DECL_OVERRIDE;
-
-    typedef std::function<EwsFetchItemDetailJob*(EwsClient&,QObject*,const Akonadi::Collection)> FetchItemDetailJobFactory;
-    static void registerItemDetailFetchJob(EwsItemType type, FetchItemDetailJobFactory factory);
-    static EwsFetchItemDetailJob *createFetchItemDetailJob(EwsItemType type, EwsClient &client, QObject *parent,
-                                                           const Akonadi::Collection &collection);
 protected:
     virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) = 0;
 
@@ -62,21 +57,6 @@ protected:
 private Q_SLOTS:
     void itemDetailFetched(KJob *job);
 private:
-    struct JobFactory {
-        EwsItemType type;
-        FetchItemDetailJobFactory factory;
-    };
-    static QList<JobFactory> mJobFactories;
 };
-
-#define EWS_DECLARE_FETCH_ITEM_DETAIL_JOB(clsname, type) \
-class type ## _registrar { \
-public: \
-    type ## _registrar()  \
-    { \
-        EwsFetchItemDetailJob::registerItemDetailFetchJob(type, &clsname::factory); \
-    } \
-}; \
-const type ## _registrar type ## _registrar_object;
 
 #endif

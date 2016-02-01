@@ -17,25 +17,19 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFETCHCALENDARDETAILJOB_H
-#define EWSFETCHCALENDARDETAILJOB_H
+#ifndef EWSFETCHTASKDETAILJOB_H
+#define EWSFETCHTASKDETAILJOB_H
 
 #include "ewsfetchitemdetailjob.h"
 
-class KDateTime;
-
-class EwsFetchCalendarDetailJob : public EwsFetchItemDetailJob
+class EwsFetchTaskDetailJob : public EwsFetchItemDetailJob
 {
     Q_OBJECT
 public:
-    EwsFetchCalendarDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
-    virtual ~EwsFetchCalendarDetailJob();
-    static EwsFetchItemDetailJob *factory(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
+    EwsFetchTaskDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
+    virtual ~EwsFetchTaskDetailJob();
 protected:
     virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) Q_DECL_OVERRIDE;
-    void convertTimezone(KDateTime &currentTime, QString msTimezone, QString culture);
-private Q_SLOTS:
-    void exceptionItemsFetched(KJob *job);
 };
 
 #endif
