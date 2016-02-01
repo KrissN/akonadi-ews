@@ -21,15 +21,19 @@
 #include "ewssubscriberequest.h"
 #include "ewsunsubscriberequest.h"
 #include "ewsgeteventsrequest.h"
+#include "ewsgetstreamingeventsrequest.h"
 #include "ewsgetfolderrequest.h"
 #include "ewsclient_debug.h"
 
 // TODO: Allow customisation
 static Q_CONSTEXPR uint pollInterval = 10; /* seconds */
 
+static Q_CONSTEXPR uint streamingTimeout = 30; /* minutes */
+
 EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent)
     : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false)
 {
+    mStreamingEvents = mEwsClient.serverVersion().supports(EwsServerVersion::StreamingSubscription);
 }
 
 EwsSubscriptionManager::~EwsSubscriptionManager()
@@ -42,9 +46,12 @@ void EwsSubscriptionManager::start()
     // Set-up change notification subscription
     setupSubscription();
 
-    mPollTimer.setInterval(pollInterval * 1000);
-    mPollTimer.setSingleShot(false);
-    connect(&mPollTimer, &QTimer::timeout, this, &EwsSubscriptionManager::pollForEvents);
+    if (!mStreamingEvents) {
+        mStreamingEvents = false;
+        mPollTimer.setInterval(pollInterval * 1000);
+        mPollTimer.setSingleShot(false);
+        connect(&mPollTimer, &QTimer::timeout, this, &EwsSubscriptionManager::getEvents);
+    }
 }
 
 void EwsSubscriptionManager::cancelSubscription()
@@ -59,7 +66,7 @@ void EwsSubscriptionManager::cancelSubscription()
 void EwsSubscriptionManager::setupSubscription()
 {
     EwsSubscribeRequest *req = new EwsSubscribeRequest(mEwsClient, this);
-    req->setAllFolders(true);
+    //req->setAllFolders(true);
     QList<EwsEventType> events;
     events << EwsNewMailEvent;
     events << EwsMovedEvent;
@@ -68,7 +75,12 @@ void EwsSubscriptionManager::setupSubscription()
     events << EwsDeletedEvent;
     events << EwsCreatedEvent;
     req->setEventTypes(events);
-    req->setType(EwsSubscribeRequest::PullSubscription);
+    if (mStreamingEvents) {
+        req->setType(EwsSubscribeRequest::StreamingSubscription);
+    }
+    else {
+        req->setType(EwsSubscribeRequest::PullSubscription);
+    }
     EwsId::List ids;
     ids << EwsId(EwsDIdInbox);
     req->setFolderIds(ids);
@@ -90,25 +102,41 @@ void EwsSubscriptionManager::subscribeRequestFinished(KJob *job)
         EwsSubscribeRequest *req = qobject_cast<EwsSubscribeRequest*>(job);
         if (req) {
             mSubId = req->response().subscriptionId();
-            mWatermark = req->response().watermark();
-            pollForEvents();
-            mPollTimer.start();
+            if (mStreamingEvents) {
+                getEvents();
+            }
+            else {
+                mWatermark = req->response().watermark();
+                getEvents();
+                mPollTimer.start();
+            }
         }
     }
 }
 
-void EwsSubscriptionManager::pollForEvents()
+void EwsSubscriptionManager::getEvents()
 {
-    EwsGetEventsRequest *req = new EwsGetEventsRequest(mEwsClient, this);
-    req->setSubscriptionId(mSubId);
-    req->setWatermark(mWatermark);
-    connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
-    req->start();
+    if (mStreamingEvents) {
+        EwsGetStreamingEventsRequest *req = new EwsGetStreamingEventsRequest(mEwsClient, this);
+        req->setSubscriptionId(mSubId);
+        req->setTimeout(streamingTimeout);
+        connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
+        connect(req, &EwsGetStreamingEventsRequest::eventsReceived, this,
+                &EwsSubscriptionManager::streamingEventsReceived);
+        req->start();
+    }
+    else {
+        EwsGetEventsRequest *req = new EwsGetEventsRequest(mEwsClient, this);
+        req->setSubscriptionId(mSubId);
+        req->setWatermark(mWatermark);
+        connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
+        req->start();
+    }
 }
 
 void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
 {
-    EwsGetEventsRequest *req = qobject_cast<EwsGetEventsRequest*>(job);
+    EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
     if (!req) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid job object.");
         reset();
@@ -116,64 +144,86 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
     }
 
     if (!job->error()) {
-        qCDebugNC(EWSRES_LOG) << QStringLiteral("Got GetEvents response");
-        bool moreEvents = false;
+        processEvents(req, true);
+        if (mStreamingEvents) {
+            getEvents();
+        }
+    }
+}
 
-        Q_FOREACH(const EwsGetEventsRequest::Response &resp, req->responses()) {
-            Q_FOREACH(const EwsGetEventsRequest::Notification &nfy, resp.notifications()) {
-                Q_FOREACH(const EwsGetEventsRequest::Event &event, nfy.events()) {
-                    mWatermark = event.watermark();
-                    switch (event.type()) {
-                    case EwsCopiedEvent:
-                    case EwsMovedEvent:
-                        if (!event.itemIsFolder()) {
-                            mUpdatedFolderIds.insert(event.oldParentFolderId());
-                        }
-                        /* no break */
-                    case EwsCreatedEvent:
-                    case EwsDeletedEvent:
-                    case EwsModifiedEvent:
-                    case EwsNewMailEvent:
-                        if (event.itemIsFolder()) {
-                            mFolderTreeChanged = true;
-                        }
-                        else {
-                            mUpdatedFolderIds.insert(event.parentFolderId());
-                        }
-                        break;
-                    case EwsStatusEvent:
-                        // Do nothing
-                        break;
-                    default:
-                        break;
+void EwsSubscriptionManager::streamingEventsReceived(KJob *job)
+{
+    EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
+    if (!req) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid job object.");
+        reset();
+        return;
+    }
+
+    if (!job->error()) {
+        processEvents(req, false);
+    }
+}
+
+void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finished)
+{
+    bool moreEvents = false;
+
+    Q_FOREACH(const EwsGetEventsRequest::Response &resp, req->responses()) {
+        Q_FOREACH(const EwsGetEventsRequest::Notification &nfy, resp.notifications()) {
+            Q_FOREACH(const EwsGetEventsRequest::Event &event, nfy.events()) {
+                mWatermark = event.watermark();
+                switch (event.type()) {
+                case EwsCopiedEvent:
+                case EwsMovedEvent:
+                    if (!event.itemIsFolder()) {
+                        mUpdatedFolderIds.insert(event.oldParentFolderId());
                     }
-                }
-                if (nfy.hasMoreEvents()) {
-                    moreEvents = true;
+                    /* no break */
+                case EwsCreatedEvent:
+                case EwsDeletedEvent:
+                case EwsModifiedEvent:
+                case EwsNewMailEvent:
+                    if (event.itemIsFolder()) {
+                        mFolderTreeChanged = true;
+                    }
+                    else {
+                        mUpdatedFolderIds.insert(event.parentFolderId());
+                    }
+                    break;
+                case EwsStatusEvent:
+                    // Do nothing
+                    break;
+                default:
+                    break;
                 }
             }
-        }
-
-        if (moreEvents) {
-            pollForEvents();
-        }
-        else {
-            if (mFolderTreeChanged) {
-                qCDebugNC(EWSRES_LOG) << QStringLiteral("Found modified folder tree");
-                Q_EMIT folderTreeModified();
-                mFolderTreeChanged = false;
+            if (nfy.hasMoreEvents()) {
+                moreEvents = true;
             }
-            if (!mUpdatedFolderIds.isEmpty()) {
-                qCDebugNC(EWSRES_LOG) << QStringLiteral("Found %1 modified folders")
-                                .arg(mUpdatedFolderIds.size());
-                Q_EMIT foldersModified(mUpdatedFolderIds.toList());
-                mUpdatedFolderIds.clear();
+        }
+        if (mStreamingEvents) {
+            EwsGetStreamingEventsRequest *req2 = qobject_cast<EwsGetStreamingEventsRequest*>(req);
+            if (req2) {
+                req2->eventsProcessed(resp);
             }
         }
     }
+
+    if (moreEvents && finished) {
+        getEvents();
+    }
     else {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error processing GetEvents request.");
-        reset();
-        return;
+        if (mFolderTreeChanged) {
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Found modified folder tree");
+            Q_EMIT folderTreeModified();
+            mFolderTreeChanged = false;
+        }
+        if (!mUpdatedFolderIds.isEmpty()) {
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Found %1 modified folders")
+                            .arg(mUpdatedFolderIds.size());
+            Q_EMIT foldersModified(mUpdatedFolderIds.toList());
+            mUpdatedFolderIds.clear();
+        }
     }
 }

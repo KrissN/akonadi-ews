@@ -20,11 +20,13 @@ set(EWSCLIENT_SRCS
   ewsattendee.cpp
   ewsclient.cpp
   ewseffectiverights.cpp
+  ewseventrequestbase.cpp
   ewsfindfolderrequest.cpp
   ewsfinditemrequest.cpp
   ewsfolder.cpp
   ewsfoldershape.cpp
   ewsgeteventsrequest.cpp
+  ewsgetstreamingeventsrequest.cpp
   ewsgetfolderrequest.cpp
   ewsgetitemrequest.cpp
   ewsid.cpp

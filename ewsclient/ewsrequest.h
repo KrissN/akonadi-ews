@@ -76,20 +76,20 @@ protected:
     void endSoapDocument(QXmlStreamWriter &writer);
     bool parseResponseMessage(QXmlStreamReader &reader, QString reqName,
                               ContentReaderFn contentReader);
+    bool readResponse(QXmlStreamReader &reader);
 
     KIO::MetaData mMd;
-private Q_SLOTS:
+    QString mResponseData;
+protected Q_SLOTS:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
 private:
-    bool readResponse(QXmlStreamReader &reader);
     bool readSoapBody(QXmlStreamReader &reader);
     bool readSoapFault(QXmlStreamReader &reader);
     bool readHeader(QXmlStreamReader &reader);
     bool readResponseAttr(const QXmlStreamAttributes &attrs, EwsResponseClass &responseClass);
 
     QString mBody;
-    QString mResponseData;
     EwsClient &mClient;
     EwsServerVersion mServerVersion;
 };

@@ -28,6 +28,7 @@
 
 class EwsClient;
 class KJob;
+class EwsEventRequestBase;
 
 class EwsSubscriptionManager : public QObject
 {
@@ -43,11 +44,13 @@ Q_SIGNALS:
 private Q_SLOTS:
     void subscribeRequestFinished(KJob *job);
     void getEventsRequestFinished(KJob *job);
-    void pollForEvents();
+    void streamingEventsReceived(KJob *job);
+    void getEvents();
 private:
     void cancelSubscription();
     void setupSubscription();
     void reset();
+    void processEvents(EwsEventRequestBase *req, bool finished);
 
     EwsClient &mEwsClient;
     QString mSubId;
@@ -57,6 +60,7 @@ private:
 
     QSet<EwsId> mUpdatedFolderIds;
     bool mFolderTreeChanged;
+    bool mStreamingEvents;
 };
 
 #endif

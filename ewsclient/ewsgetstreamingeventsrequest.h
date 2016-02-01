@@ -17,12 +17,12 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSGETEVENTSREQUEST_H
-#define EWSGETEVENTSREQUEST_H
+#ifndef EWSGETSTREAMINGEVENTSREQUEST_H
+#define EWSGETSTREAMINGEVENTSREQUEST_H
 
 #include <QtCore/QList>
 #include <QtCore/QSharedPointer>
-#include <QtCore/QDateTime>
+#include <QtCore/QTimer>
 
 #include "ewsid.h"
 #include "ewseventrequestbase.h"
@@ -31,19 +31,27 @@
 class QXmlStreamReader;
 class QXmlStreamWriter;
 
-class EwsGetEventsRequest : public EwsEventRequestBase
+class EwsGetStreamingEventsRequest : public EwsEventRequestBase
 {
     Q_OBJECT
 public:
-    EwsGetEventsRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsGetEventsRequest();
+    EwsGetStreamingEventsRequest(EwsClient &client, QObject *parent);
+    virtual ~EwsGetStreamingEventsRequest();
 
-    void setWatermark(const QString &watermark) { mWatermark = watermark; };
+    void setTimeout(uint timeout) { mTimeout = timeout; };
 
     virtual void start();
-
+public Q_SLOTS:
+    void eventsProcessed(const Response &response);
+Q_SIGNALS:
+    void eventsReceived(KJob *job);
+protected Q_SLOTS:
+    void requestResult(KJob *job);
+    void requestData(KIO::Job *job, const QByteArray &data);
+    void requestDataTimeout();
 protected:
-    QString mWatermark;
+    uint mTimeout;
+    QTimer mRespTimer;
 };
 
 #endif
