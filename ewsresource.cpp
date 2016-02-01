@@ -108,11 +108,13 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
     qDebug() << "rootFolderFetchFinished";
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
+        Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
         return;
     }
 
     if (req->error()) {
+        Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
         qWarning() << "ERROR" << req->errorString();
         return;
     }
@@ -122,6 +124,7 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());
         qDebug() << "Root folder is " << id;
+        Q_EMIT status(AgentBase::Running);
 
         mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, this));
         connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
