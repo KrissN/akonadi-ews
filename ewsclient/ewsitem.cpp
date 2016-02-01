@@ -438,6 +438,23 @@ EwsItemType EwsItem::type() const
     return d->mType;
 }
 
+EwsItemType EwsItem::internalType() const
+{
+    const EwsItemPrivate *d = reinterpret_cast<const EwsItemPrivate*>(this->d.data());
+    EwsItemType type = d->mType;
+    switch (type) {
+    case EwsItemTypeMeetingMessage:
+    case EwsItemTypeMeetingRequest:
+    case EwsItemTypeMeetingResponse:
+    case EwsItemTypeMeetingCancellation:
+        type = EwsItemTypeMessage;
+        break;
+    default:
+        break;
+    }
+    return type;
+}
+
 bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
 {
     EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());

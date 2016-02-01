@@ -43,6 +43,7 @@ public:
     EwsItem& operator=(EwsItem &&other);
 
     EwsItemType type() const;
+    EwsItemType internalType() const;
 protected:
     bool readBaseItemElement(QXmlStreamReader &reader);
 };
