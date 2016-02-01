@@ -55,7 +55,7 @@ void EwsUnsubscribeRequest::start()
 
 bool EwsUnsubscribeRequest::parseResult(QXmlStreamReader &reader)
 {
-    return parseResponseMessage(reader, QStringLiteral("Subscribe"),
+    return parseResponseMessage(reader, QStringLiteral("Unsubscribe"),
                                 [this](QXmlStreamReader &reader) {return parseUnsubscribeResponse(reader);});
 }
 
