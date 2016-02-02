@@ -8,18 +8,41 @@
   <group name="General">
     <entry name="BaseUrl" type="String">
       <label>Server URL</label>
-      <tooltip>The URL of the Microsoft Exchange server, should be something like https://myserver.org/</tooltip>
-      <whatsthis>The URL of the Microsoft Exchange server, should be something like https://myserver.org/</whatsthis>
+      <tooltip>The URL of the Microsoft Exchange server, should be something like https://myserver.org/EWS/Exchange.asmx</tooltip>
+      <whatsthis>The URL of the Microsoft Exchange server, should be something like https://myserver.org/EWS/Exchange.asmx</whatsthis>
     </entry>
     <entry name="Username" type="String">
-      <label context="the username to login on server">Username</label>
+      <label context="The username to login into the server">Username</label>
       <tooltip>The username that is used to log into the Microsoft Exchange server</tooltip>
       <whatsthis>The username that is used to log into the Microsoft Exchange server</whatsthis>
+    </entry>
+    <entry name="Domain" type="String">
+      <label>Domain</label>
+      <tooltip>The Active Directory domain the user belongs to</tooltip>
+      <whatsthis>The Active Directory domain the user belongs to</whatsthis>
     </entry>
     <entry name="Password" type="Password">
       <label>Password</label>
       <tooltip>The password that is used to log into the Microsoft Exchange server</tooltip>
       <whatsthis>The password that is used to log into the Microsoft Exchange server</whatsthis>
+    </entry>
+    <entry name="Email" type="String">
+      <label>E-mail</label>
+      <tooltip>The primary e-mail address of this account</tooltip>
+      <whatsthis>The primary e-mail address of this account</whatsthis>
+    </entry>
+    <entry name="AutoDiscovery" type="Bool">
+      <label>Server Autodiscovery</label>
+      <tooltip>Attempt to automatically discover Exchange server address</tooltip>
+      <whatsthis>Attempts to find out the Microsoft Exchange server address relevant to the supplied e-mail address.</whatsthis>
+    </entry>
+    <entry name="PollInterval" type="Double">
+      <label>Poll Interval</label>
+      <tooltip>Sets the interval for checking for new mail</tooltip>
+      <whatsthis>Sets the interval for checking for new mail.</whatsthis>
+    </entry>
+    <entry name="RetrievalMethod" type="Int">
+      <label>Retrieval</label>
     </entry>
     <entry name="SyncState" type="String" />
   </group>

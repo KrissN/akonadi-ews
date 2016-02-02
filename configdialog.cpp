@@ -54,8 +54,21 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, WId wId)
     mAccountName = ui.accountName;
     mAccountName->setText(parentResource->name());
 
+    mPollRadioButton = ui.pollRadioButton;
+    mStreamingRadioButton = ui.streamingRadioButton;
+
     mConfigManager = new KConfigDialogManager(this, Settings::self());
     mConfigManager->updateWidgets();
+    switch (Settings::retrievalMethod()) {
+    case 0:
+        mPollRadioButton->setChecked(true);
+        break;
+    case 1:
+        mStreamingRadioButton->setChecked(true);
+        break;
+    default:
+        break;
+    }
 
     connect(okButton, &QPushButton::clicked, this, &ConfigDialog::save);
 }
@@ -64,6 +77,12 @@ void ConfigDialog::save()
 {
     mParentResource->setName(mAccountName->text());
     mConfigManager->updateSettings();
+    if (mPollRadioButton->isChecked()) {
+        Settings::setRetrievalMethod(0);
+    }
+    else {
+        Settings::setRetrievalMethod(1);
+    }
     Settings::self()->save();
 }
 

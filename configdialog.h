@@ -21,10 +21,11 @@
 #define CONFIGDIALOG_H
 
 #include <QtWidgets/QDialog>
-#include <QtWidgets/QLineEdit>
 
 #include <KConfigWidgets/KConfigDialogManager>
 
+class QLineEdit;
+class QRadioButton;
 class EwsResource;
 
 class ConfigDialog : public QDialog
@@ -38,6 +39,8 @@ private:
     EwsResource *mParentResource;
     KConfigDialogManager *mConfigManager;
     QLineEdit *mAccountName;
+    QRadioButton *mPollRadioButton;
+    QRadioButton *mStreamingRadioButton;
 };
 
 #endif
