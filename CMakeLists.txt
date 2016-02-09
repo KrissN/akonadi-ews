@@ -65,6 +65,7 @@ set(ewsresource_SRCS
     task/ewsmodifytaskjob.cpp
     task/ewstaskhandler.cpp
     configdialog.cpp
+    ewsautodiscoveryjob.cpp
     ewsfetchfoldersjob.cpp
     ewsfetchitemsjob.cpp
     ewsfetchitemdetailjob.cpp
