@@ -180,7 +180,7 @@ bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray>
 
 void EwsResource::configure(WId windowId)
 {
-    ConfigDialog dlg(this, windowId);
+    ConfigDialog dlg(this, mEwsClient, windowId);
     if (dlg.exec()) {
         mSubManager.reset(Q_NULLPTR);
         mEwsClient.setUrl(Settings::baseUrl());

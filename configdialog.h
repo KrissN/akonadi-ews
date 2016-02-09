@@ -24,23 +24,47 @@
 
 #include <KConfigWidgets/KConfigDialogManager>
 
-class QLineEdit;
-class QRadioButton;
+class QDialogButtonBox;
 class EwsResource;
+class EwsClient;
+namespace Ui {
+class SetupServerView;
+}
+class KJob;
+class EwsAutodiscoveryJob;
+class EwsGetFolderRequest;
+class ProgressDialog;
 
 class ConfigDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit ConfigDialog(EwsResource *parentResource, WId windowId);
+    explicit ConfigDialog(EwsResource *parentResource, const EwsClient &client, WId windowId);
+    virtual ~ConfigDialog();
 private Q_SLOTS:
     void save();
+    void autoDiscoveryFinished(KJob *job);
+    void tryConnectFinished(KJob *job);
+    void performAutoDiscovery();
+    void autoDiscoveryCancelled();
+    void tryConnectCancelled();
+    void setAutoDiscoveryNeeded();
+    void dialogAccepted();
+    void enableTryConnect();
+    void tryConnect();
 private:
+    QString fullUsername() const;
+
     EwsResource *mParentResource;
     KConfigDialogManager *mConfigManager;
-    QLineEdit *mAccountName;
-    QRadioButton *mPollRadioButton;
-    QRadioButton *mStreamingRadioButton;
+    Ui::SetupServerView *mUi;
+
+    QDialogButtonBox *mButtonBox;
+    EwsAutodiscoveryJob *mAutoDiscoveryJob;
+    EwsGetFolderRequest *mTryConnectJob;
+    bool mAutoDiscoveryNeeded;
+    bool mTryConnectNeeded;
+    ProgressDialog *mProgressDialog;
 };
 
 #endif

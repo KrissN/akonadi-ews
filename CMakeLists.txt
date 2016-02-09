@@ -72,7 +72,8 @@ set(ewsresource_SRCS
     ewsitemhandler.cpp
     ewsmodifyitemjob.cpp
     ewsresource.cpp
-    ewssubscriptionmanager.cpp)
+    ewssubscriptionmanager.cpp
+    progressdialog.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 

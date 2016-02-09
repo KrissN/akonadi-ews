@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>521</width>
-    <height>438</height>
+    <width>526</width>
+    <height>444</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,20 +76,6 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="KLineEdit" name="kcfg_Username">
-               <property name="whatsThis">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The username used to login to the Exchange server.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; This can be left empty when using Kerberos authentication.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="usernameLabel">
-               <property name="text">
-                <string>Username:</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="domainLabel">
                <property name="text">
@@ -101,6 +87,20 @@
               <widget class="KLineEdit" name="kcfg_Domain">
                <property name="whatsThis">
                 <string>The Active Directory domain the user belongs to.</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="usernameLabel">
+               <property name="text">
+                <string>Username:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="KLineEdit" name="kcfg_Username">
+               <property name="whatsThis">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The username used to login to the Exchange server.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; This can be left empty when using Kerberos authentication.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
              </item>
@@ -156,6 +156,16 @@
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QPushButton" name="tryConnectButton">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="text">
+                   <string>Try connect</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
@@ -165,7 +175,7 @@
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>EWS URL (internal):</string>
+                <string>EWS URL:</string>
                </property>
               </widget>
              </item>
@@ -176,23 +186,6 @@
                </property>
                <property name="whatsThis">
                 <string>The Microsoft Exchange server URL used to send EWS requests.</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="serverUrlExtLabel">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>EWS URL (external):</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="1">
-              <widget class="QLineEdit" name="kcfg_BaseUrlExt">
-               <property name="enabled">
-                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -230,7 +223,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="advancedTab">
       <attribute name="title">
        <string>Advanced</string>
       </attribute>
@@ -329,6 +322,66 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="statusTab">
+      <attribute name="title">
+       <string>Status</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="serverStatusGroupBox">
+         <property name="title">
+          <string>Server Status</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="serverStatusLabel">
+            <property name="text">
+             <string>Status:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="serverStatusText">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="serverVersionLabel">
+            <property name="text">
+             <string>Version:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="serverVersionText">
+            <property name="text">
+             <string>Unknown</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -342,6 +395,18 @@
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>accountName</tabstop>
+  <tabstop>kcfg_Email</tabstop>
+  <tabstop>kcfg_Domain</tabstop>
+  <tabstop>kcfg_Username</tabstop>
+  <tabstop>kcfg_Password</tabstop>
+  <tabstop>kcfg_AutoDiscovery</tabstop>
+  <tabstop>autodiscoverButton</tabstop>
+  <tabstop>tryConnectButton</tabstop>
+  <tabstop>kcfg_BaseUrl</tabstop>
+  <tabstop>pollRadioButton</tabstop>
+  <tabstop>kcfg_PollInterval</tabstop>
+  <tabstop>streamingRadioButton</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -390,38 +455,6 @@
     <hint type="destinationlabel">
      <x>311</x>
      <y>297</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>kcfg_AutoDiscovery</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>serverUrlExtLabel</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>242</x>
-     <y>267</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>88</x>
-     <y>337</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>kcfg_AutoDiscovery</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>kcfg_BaseUrlExt</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>242</x>
-     <y>267</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>333</x>
-     <y>337</y>
     </hint>
    </hints>
   </connection>
