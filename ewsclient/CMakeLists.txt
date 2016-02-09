@@ -37,6 +37,7 @@ set(EWSCLIENT_SRCS
   ewsmailbox.cpp
   ewsmoveitemrequest.cpp
   ewsoccurrence.cpp
+  ewspoxautodiscoverrequest.cpp
   ewspropertyfield.cpp
   ewsrecurrence.cpp
   ewsrequest.cpp
