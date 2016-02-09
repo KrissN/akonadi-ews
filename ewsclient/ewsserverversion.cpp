@@ -25,16 +25,26 @@
 #include "ewstypes.h"
 #include "ewsclient_debug.h"
 
-const EwsServerVersion EwsServerVersion::ewsVersion2007(8, 0, QStringLiteral("Exchange2007"));
-const EwsServerVersion EwsServerVersion::ewsVersion2007Sp1(8, 1, QStringLiteral("Exchange2007_SP1"));
-const EwsServerVersion EwsServerVersion::ewsVersion2007Sp2(8, 2, QStringLiteral("Exchange2007_SP2"));
-const EwsServerVersion EwsServerVersion::ewsVersion2007Sp3(8, 3, QStringLiteral("Exchange2007_SP3"));
-const EwsServerVersion EwsServerVersion::ewsVersion2010(14, 0, QStringLiteral("Exchange2010"));
-const EwsServerVersion EwsServerVersion::ewsVersion2010Sp1(14, 1, QStringLiteral("Exchange2010_SP1"));
-const EwsServerVersion EwsServerVersion::ewsVersion2010Sp2(14, 2, QStringLiteral("Exchange2010_SP2"));
-const EwsServerVersion EwsServerVersion::ewsVersion2010Sp3(14, 3, QStringLiteral("Exchange2010_SP3"));
-const EwsServerVersion EwsServerVersion::ewsVersion2013(15, 0, QStringLiteral("Exchange2013"));
-const EwsServerVersion EwsServerVersion::ewsVersion2016(15, 1, QStringLiteral("Exchange2016"));
+const EwsServerVersion EwsServerVersion::ewsVersion2007(8, 0, QStringLiteral("Exchange2007"),
+                                                        QStringLiteral("Exchange 2007"));
+const EwsServerVersion EwsServerVersion::ewsVersion2007Sp1(8, 1, QStringLiteral("Exchange2007_SP1"),
+                                                           QStringLiteral("Exchange 2007 SP1"));
+const EwsServerVersion EwsServerVersion::ewsVersion2007Sp2(8, 2, QStringLiteral("Exchange2007_SP2"),
+                                                           QStringLiteral("Exchange 2007 SP2"));
+const EwsServerVersion EwsServerVersion::ewsVersion2007Sp3(8, 3, QStringLiteral("Exchange2007_SP3"),
+                                                           QStringLiteral("Exchange 2007 SP3"));
+const EwsServerVersion EwsServerVersion::ewsVersion2010(14, 0, QStringLiteral("Exchange2010"),
+                                                        QStringLiteral("Exchange 2010"));
+const EwsServerVersion EwsServerVersion::ewsVersion2010Sp1(14, 1, QStringLiteral("Exchange2010_SP1"),
+                                                           QStringLiteral("Exchange 2010 SP1"));
+const EwsServerVersion EwsServerVersion::ewsVersion2010Sp2(14, 2, QStringLiteral("Exchange2010_SP2"),
+                                                           QStringLiteral("Exchange 2010 SP2"));
+const EwsServerVersion EwsServerVersion::ewsVersion2010Sp3(14, 3, QStringLiteral("Exchange2010_SP3"),
+                                                           QStringLiteral("Exchange 2010 SP3"));
+const EwsServerVersion EwsServerVersion::ewsVersion2013(15, 0, QStringLiteral("Exchange2013"),
+                                                        QStringLiteral("Exchange 2013"));
+const EwsServerVersion EwsServerVersion::ewsVersion2016(15, 1, QStringLiteral("Exchange2016"),
+                                                        QStringLiteral("Exchange 2016"));
 
 static const EwsServerVersion ewsNullVersion;
 
@@ -47,6 +57,8 @@ EwsServerVersion::EwsServerVersion(QXmlStreamReader &reader)
 
     QStringRef majorRef = attrs.value(QStringLiteral("MajorVersion"));
     QStringRef minorRef = attrs.value(QStringLiteral("MinorVersion"));
+    QStringRef majorBuildRef = attrs.value(QStringLiteral("MajorBuildNumber"));
+    QStringRef minorBuildRef = attrs.value(QStringLiteral("MinorBuildNumber"));
     QStringRef nameRef = attrs.value(QStringLiteral("Version"));
 
     if (majorRef.isNull() || minorRef.isNull()) {
@@ -68,6 +80,8 @@ EwsServerVersion::EwsServerVersion(QXmlStreamReader &reader)
 
     mMajor = majorVer;
     mMinor = minorVer;
+    mMajorBuild = majorBuildRef.toUInt();
+    mMinorBuild = minorBuildRef.toUInt();
     mName = nameRef.toString();
 }
 
@@ -98,6 +112,36 @@ const EwsServerVersion& EwsServerVersion::minSupporting(ServerFeature feature)
     default:
         return ewsNullVersion;
     }
+}
+
+QString EwsServerVersion::toString() const
+{
+    static const QVector<EwsServerVersion> knownVersions = {
+        ewsVersion2007,
+        ewsVersion2007Sp1,
+        ewsVersion2007Sp2,
+        ewsVersion2007Sp3,
+        ewsVersion2010,
+        ewsVersion2010Sp1,
+        ewsVersion2010Sp2,
+        ewsVersion2010Sp3,
+        ewsVersion2013,
+        ewsVersion2016
+    };
+
+    QString version(QStringLiteral("%1.%2").arg(mMajor).arg(mMinor));
+
+    if (mMajorBuild + mMinorBuild > 0) {
+        version.append(QStringLiteral(".%1.%2").arg(mMajorBuild).arg(mMinorBuild));
+    }
+
+    Q_FOREACH (const EwsServerVersion &ver, knownVersions) {
+        if (*this == ver) {
+            version.append(" (" + ver.mFriendlyName + ")");
+        }
+    }
+
+    return version;
 }
 
 QDebug operator<<(QDebug debug, const EwsServerVersion &version)

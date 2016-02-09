@@ -33,18 +33,23 @@ public:
         FreeBusyChangedEvent,
     };
 
-    EwsServerVersion() : mMajor(0), mMinor(0) {};
-    EwsServerVersion(uint major, uint minor, QString name)
-        : mMajor(major), mMinor(minor), mName(name) {};
+    EwsServerVersion() : mMajor(0), mMinor(0), mMajorBuild(0), mMinorBuild(0) {};
+    EwsServerVersion(uint major, uint minor, QString name, QString friendlyName)
+        : mMajor(major), mMinor(minor), mMajorBuild(0), mMinorBuild(0), mName(name),
+          mFriendlyName(friendlyName) {};
     EwsServerVersion(QXmlStreamReader &reader);
     EwsServerVersion(const EwsServerVersion &other)
-        : mMajor(other.mMajor), mMinor(other.mMinor), mName(other.mName) {};
+        : mMajor(other.mMajor), mMinor(other.mMinor), mMajorBuild(other.mMajorBuild),
+          mMinorBuild(other.mMinorBuild), mName(other.mName), mFriendlyName(other.mFriendlyName) {};
 
     EwsServerVersion &operator=(const EwsServerVersion &other)
     {
         mMajor = other.mMajor;
         mMinor = other.mMinor;
+        mMajorBuild = other.mMajorBuild;
+        mMinorBuild = other.mMinorBuild;
         mName = other.mName;
+        mFriendlyName = other.mFriendlyName;
         return *this;
     }
 
@@ -88,6 +93,8 @@ public:
 
     static const EwsServerVersion& minSupporting(ServerFeature feature);
 
+    QString toString() const;
+
     static const EwsServerVersion ewsVersion2007;
     static const EwsServerVersion ewsVersion2007Sp1;
     static const EwsServerVersion ewsVersion2007Sp2;
@@ -102,7 +109,10 @@ public:
 private:
     uint mMajor;
     uint mMinor;
+    uint mMajorBuild;
+    uint mMinorBuild;
     QString mName;
+    QString mFriendlyName;
 };
 
 QDebug operator<<(const QDebug dbg, const EwsServerVersion &version);
