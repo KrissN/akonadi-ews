@@ -84,7 +84,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
                 QByteArray key = headIt.key().toLatin1();
                 KMime::Headers::Base *header = KMime::Headers::createHeader(key);
                 if (!header) {
-                    header = new KMime::Headers::Generic(headIt.key().toLatin1().constData(), msg.get());
+                    header = new KMime::Headers::Generic(headIt.key().toLatin1().constData());
                 }
                 header->fromUnicodeString(headIt.value(), "utf-8");
                 msg->appendHeader(header);
