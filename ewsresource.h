@@ -46,6 +46,7 @@ public:
 public Q_SLOTS:
     void configure(WId windowId) Q_DECL_OVERRIDE;
     Q_SCRIPTABLE void clearSyncState();
+    Q_SCRIPTABLE void clearFolderSyncState(QString folderId);
 protected Q_SLOTS:
     void retrieveCollections() Q_DECL_OVERRIDE;
     void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;

@@ -419,6 +419,11 @@ void EwsResource::clearSyncState()
     mSyncState.clear();
 }
 
+void EwsResource::clearFolderSyncState(QString folderId)
+{
+    mSyncState.remove(folderId);
+}
+
 void EwsResource::saveState()
 {
     QByteArray str;
