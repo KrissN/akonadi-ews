@@ -71,4 +71,4 @@ EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient& client, const Akon
     return new EwsModifyContactJob(client, item, parts, parent);
 }
 
-EWS_DECLARE_ITEM_HANDLER(EwsContactHandler, EwsItemTypeTask)
+EWS_DECLARE_ITEM_HANDLER(EwsContactHandler, EwsItemTypeContact)
