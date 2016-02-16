@@ -23,6 +23,7 @@
 #include <AkonadiCore/ChangeRecorder>
 #include <AkonadiCore/CollectionFetchScope>
 #include <AkonadiCore/ItemFetchScope>
+#include <AkonadiCore/ItemMoveJob>
 #include <AkonadiCore/CollectionFetchJob>
 #include <KMime/Message>
 
@@ -308,8 +309,6 @@ void EwsResource::itemChangeRequestFinished(KJob *job)
 void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCollection,
                              const Collection &destinationCollection)
 {
-    Q_UNUSED(sourceCollection);
-
     EwsId::List ids;
     Q_FOREACH(const Item &item, items) {
         EwsId id(item.remoteId(), item.remoteRevision());
@@ -321,6 +320,8 @@ void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCo
     EwsId destId(destinationCollection.remoteId(), QString());
     req->setDestinationFolderId(destId);
     req->setProperty("items", QVariant::fromValue<Item::List>(items));
+    req->setProperty("sourceCollection", QVariant::fromValue<Collection>(sourceCollection));
+    req->setProperty("destinationCollection", QVariant::fromValue<Collection>(destinationCollection));
     connect(req, SIGNAL(result(KJob*)), SLOT(itemMoveRequestFinished(KJob*)));
     req->start();
 }
@@ -344,19 +345,37 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
         return;
     }
 
+    /* When moving a batch of items it is possible that the operation will fail for some of them.
+     * Unfortunately Akonadi doesn't provide a way to report such partial success/failure. In order
+     * to work around this in case of partial failure the failed items will be moved back to their
+     * original folder thus aborting the move.
+     */
+
+    Item::List movedItems;
+
+    Collection srcCol = req->property("sourceCollection").value<Collection>();
+    //Collection dstCol = req->property("destinationCollection").value<Collection>();
     Item::List::iterator it = items.begin();
     Q_FOREACH(const EwsMoveItemRequest::Response &resp, req->responses()) {
         Item &item = *it;
         if (resp.isSuccess()) {
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Move succeeded for item %1 %2").arg(resp.itemId().id()).arg(item.remoteId());
             if (item.isValid()) {
+                item.setRemoteId(resp.itemId().id());
                 item.setRemoteRevision(resp.itemId().changeKey());
+                movedItems.append(item);
             }
-
         }
-        qDebug() << "changeCommitted" << item.remoteId();
-        changeCommitted(item);
+        else {
+            warning(QStringLiteral("Move failed for item %1").arg(item.remoteId()));
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Move failed for item %1").arg(item.remoteId());
+            ItemMoveJob *moveJob = new ItemMoveJob(item, srcCol);
+            moveJob->start();
+        }
         it++;
     }
+
+    changesCommitted(movedItems);
 }
 
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
