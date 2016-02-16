@@ -240,9 +240,10 @@ void EwsFetchItemsJob::compareItemLists()
         Q_FOREACH(const EwsId &id, mRemoteDeletedIds) {
             QHash<QString, Item>::iterator it = itemHash.find(id.id());
             if (it == itemHash.end()) {
-                qCDebug(EWSRES_LOG) << QStringLiteral("Got delete for item %1, but item not found in local store.")
-                                .arg(id.id());
-                continue;
+                setErrorMsg(QStringLiteral("Got delete for item %1, but item not found in local store.")
+                                .arg(id.id()));
+                emitResult();
+                return;
             }
             mDeletedItems.append(*it);
         }
