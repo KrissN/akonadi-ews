@@ -52,6 +52,9 @@ void EwsMoveItemRequest::start()
 
     endSoapDocument(writer);
 
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting MoveItem request (%1 items, to %2)")
+                    .arg(mIds.size()).arg(mDestFolderId.id());
+
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     prepare(reqString);
@@ -72,6 +75,15 @@ bool EwsMoveItemRequest::parseItemsResponse(QXmlStreamReader &reader)
         return false;
     }
 
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp.isSuccess()) {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got MoveItem response - OK");
+        }
+        else {
+            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got MoveItem response - %1")
+                            .arg(resp.responseMessage());
+        }
+    }
     mResponses.append(resp);
     return true;
 }
