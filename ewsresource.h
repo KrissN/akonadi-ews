@@ -43,6 +43,7 @@ public:
     virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) Q_DECL_OVERRIDE;
     virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
                             const Akonadi::Collection &destinationCollection) Q_DECL_OVERRIDE;
+    virtual void itemsRemoved(const Akonadi::Item::List &items) Q_DECL_OVERRIDE;
 public Q_SLOTS:
     void configure(WId windowId) Q_DECL_OVERRIDE;
     Q_SCRIPTABLE void clearSyncState();
@@ -57,6 +58,7 @@ private Q_SLOTS:
     void getItemRequestFinished(EwsGetItemRequest *req);
     void itemChangeRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);
+    void itemDeleteRequestFinished(KJob *job);
     void delayedInit();
     void foldersModifiedEvent(EwsId::List folders);
     void foldersModifiedCollectionSyncFinished(KJob *job);

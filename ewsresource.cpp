@@ -32,6 +32,7 @@
 #include "ewsgetitemrequest.h"
 #include "ewsupdateitemrequest.h"
 #include "ewsmoveitemrequest.h"
+#include "ewsdeleteitemrequest.h"
 #include "ewssubscriptionmanager.h"
 #include "ewsgetfolderrequest.h"
 #include "ewsitemhandler.h"
@@ -390,8 +391,86 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
     changesCommitted(movedItems);
 }
 
+void EwsResource::itemsRemoved(const Item::List &items)
+{
+    EwsId::List ids;
+
+    Q_FOREACH(const Item &item, items) {
+        EwsId id(item.remoteId(), item.remoteRevision());
+        ids.append(id);
+    }
+
+    EwsDeleteItemRequest *req = new EwsDeleteItemRequest(mEwsClient, this);
+    req->setItemIds(ids);
+    req->setProperty("items", QVariant::fromValue<Item::List>(items));
+    connect(req, &EwsDeleteItemRequest::result, this, &EwsResource::itemDeleteRequestFinished);
+    req->start();
+
+}
+
+void EwsResource::itemDeleteRequestFinished(KJob *job)
+{
+    qDebug() << "itemDeleteRequestFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsDeleteItemRequest *req = qobject_cast<EwsDeleteItemRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+    Item::List items = job->property("items").value<Item::List>();
+
+    if (items.count() != req->responses().count()) {
+        cancelTask(QStringLiteral("Invalid number of responses received from server."));
+        return;
+    }
+
+    /* When removing a batch of items it is possible that the operation will fail for some of them.
+     * Unfortunately Akonadi doesn't provide a way to report such partial success/failure. In order
+     * to work around this in case of partial failure the original folder(s) will be resynchronised.
+     * In order to avoid doing a full sync a hint will be provided in order to indicate the item(s)
+     * to check.
+     */
+
+    EwsId::List foldersToSync;
+
+    Item::List::iterator it = items.begin();
+    Q_FOREACH(const EwsDeleteItemRequest::Response &resp, req->responses()) {
+        Item &item = *it;
+        if (resp.isSuccess()) {
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Delete succeeded for item %1").arg(item.remoteId());
+        }
+        else {
+            warning(QStringLiteral("Delete failed for item %1").arg(item.remoteId()));
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Delere failed for item %1").arg(item.remoteId());
+            EwsId colId = EwsId(item.parentCollection().remoteId(), QString());
+            mItemsToCheck[colId.id()].append(EwsId(item.remoteId(), QString()));
+            if (!foldersToSync.contains(colId)) {
+                foldersToSync.append(colId);
+            }
+        }
+        it++;
+    }
+
+    if (!foldersToSync.isEmpty()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Need to force sync for %1 folders.")
+                        .arg(foldersToSync.size());
+        foldersModifiedEvent(foldersToSync);
+    }
+
+    changeProcessed();
+}
+
+void EwsResource::itemAdded(const Item &item, const Collection &collection)
+{
+}
+
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {
+    QTimer::singleShot(0, &EwsResource::foo);
     Q_FOREACH(const EwsId &id, folders) {
         Collection c;
         c.setRemoteId(id.id());
