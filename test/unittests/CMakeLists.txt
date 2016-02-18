@@ -21,7 +21,13 @@ kde_enable_exceptions()
 add_library(uttesthelpers STATIC faketransferjob.cpp)
 target_link_libraries(uttesthelpers Qt5::Core KF5::KIOCore)
 
-add_executable(ewsmoveitemrequest_ut ewsmoveitemrequest_ut.cpp)
-target_link_libraries(ewsmoveitemrequest_ut Qt5::Test uttesthelpers ewsclient)
+macro(akonadi_ews_add_ut utname)
+  add_executable(${utname} ${utname}.cpp)
+  target_link_libraries(${utname} Qt5::Test uttesthelpers ewsclient)
+  add_test(${utname} ${CMAKE_CURRENT_BINARY_DIR}/${utname})
+endmacro(akonadi_ews_add_ut utname)
 
-add_test(ewsmoveitemrequest_ut ${CMAKE_CURRENT_BINARY_DIR}/ewsmoveitemrequest_ut)
+akonadi_ews_add_ut(ewsmoveitemrequest_ut)
+akonadi_ews_add_ut(ewsdeleteitemrequest_ut)
+
+

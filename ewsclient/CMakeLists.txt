@@ -19,6 +19,7 @@
 set(EWSCLIENT_SRCS
   ewsattendee.cpp
   ewsclient.cpp
+  ewsdeleteitemrequest.cpp
   ewseffectiverights.cpp
   ewseventrequestbase.cpp
   ewsfindfolderrequest.cpp
