@@ -49,7 +49,7 @@ set(EWSCLIENT_SRCS
   ewstypes.cpp
   ewsunsubscriberequest.cpp
   ewsupdateitemrequest.cpp
-  ewsxmlreader.cpp
+  ewsxml.cpp
   ewsclient_debug.cpp)
 
 add_library(ewsclient STATIC ${EWSCLIENT_SRCS})

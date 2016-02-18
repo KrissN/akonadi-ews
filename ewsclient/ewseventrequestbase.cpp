@@ -18,7 +18,7 @@
 */
 
 #include "ewseventrequestbase.h"
-#include "ewsxmlreader.h"
+#include "ewsxml.h"
 #include "ewsclient_debug.h"
 
 enum NotificationElementType {
@@ -27,7 +27,7 @@ enum NotificationElementType {
     MoreEvents,
     Events
 };
-typedef EwsXmlReader<NotificationElementType> NotificationReader;
+typedef EwsXml<NotificationElementType> NotificationReader;
 
 enum EventElementType {
     Watermark,
@@ -40,7 +40,7 @@ enum EventElementType {
     OldParentFolderId,
     UnreadCount
 };
-typedef EwsXmlReader<EventElementType> EventReader;
+typedef EwsXml<EventElementType> EventReader;
 
 EwsEventRequestBase::EwsEventRequestBase(EwsClient &client, const QString &reqName, QObject *parent)
     : EwsRequest(client, parent), mReqName(reqName)

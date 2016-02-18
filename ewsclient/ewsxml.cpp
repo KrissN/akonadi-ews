@@ -17,8 +17,7 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewsxmlreader.h"
-
+#include <ewsxml.h>
 #include <QtCore/QDateTime>
 #include <KCodecs/KCodecs>
 
@@ -90,6 +89,13 @@ bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
+bool ewsXmlBoolWriter(QXmlStreamWriter &writer, QVariant &val)
+{
+    writer.writeCharacters(val.toBool() ? QStringLiteral("true") : QStringLiteral("false"));
+
+    return true;
+}
+
 bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
 {
     QString elmName = reader.name().toString();
@@ -100,6 +106,13 @@ bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
         reader.skipCurrentElement();
         return false;
     }
+
+    return true;
+}
+
+bool ewsXmlBase64Writer(QXmlStreamWriter &writer, QVariant &val)
+{
+    writer.writeCharacters(KCodecs::base64Encode(val.toByteArray()));
 
     return true;
 }
@@ -119,6 +132,18 @@ bool ewsXmlIdReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
+bool ewsXmlIdWriter(QXmlStreamWriter &writer, QVariant &val)
+{
+    EwsId id = val.value<EwsId>();
+    if (id.type() == EwsId::Unspecified) {
+        return false;
+    }
+
+    id.writeFolderIds(writer);
+
+    return true;
+}
+
 bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val)
 {
     QString elmName = reader.name().toString();
@@ -132,6 +157,13 @@ bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
+bool ewsXmlTextWriter(QXmlStreamWriter &writer, QVariant &val)
+{
+    writer.writeCharacters(val.toString());
+
+    return true;
+}
+
 bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val)
 {
     QString elmName = reader.name().toString();
@@ -142,6 +174,13 @@ bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val)
                         .arg(elmName);
         return false;
     }
+    return true;
+}
+
+bool ewsXmlUIntWriter(QXmlStreamWriter &writer, QVariant &val)
+{
+    writer.writeCharacters(QString::number(val.toUInt()));
+
     return true;
 }
 

@@ -20,7 +20,7 @@
 #include "ewsfolder.h"
 
 #include "ewsitembase_p.h"
-#include "ewsxmlreader.h"
+#include "ewsxml.h"
 #include "ewseffectiverights.h"
 #include "ewsclient_debug.h"
 
@@ -30,7 +30,7 @@
 class EwsFolderPrivate : public EwsItemBasePrivate
 {
 public:
-    typedef EwsXmlReader<EwsItemFields> Reader;
+    typedef EwsXml<EwsItemFields> Reader;
 
     EwsFolderPrivate();
     EwsFolderPrivate(const EwsItemBasePrivate &other);
@@ -48,7 +48,7 @@ public:
     Reader mEwsReader;
 };
 
-typedef EwsXmlReader<EwsItemFields> ItemFieldsReader;
+typedef EwsXml<EwsItemFields> ItemFieldsReader;
 
 static const QVector<EwsFolderPrivate::Reader::Item> ewsFolderItems = {
     {EwsFolderFieldFolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},

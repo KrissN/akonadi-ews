@@ -21,7 +21,7 @@
 #include <QtCore/QXmlStreamWriter>
 
 #include "ewssyncfolderitemsrequest.h"
-#include "ewsxmlreader.h"
+#include "ewsxml.h"
 #include "ewsclient_debug.h"
 
 enum SyncResponseElementType {
@@ -158,14 +158,14 @@ EwsSyncFolderItemsRequest::Response::Response(QXmlStreamReader &reader)
         return;
     }
 
-    static const QVector<EwsXmlReader<SyncResponseElementType>::Item> items = {
+    static const QVector<EwsXml<SyncResponseElementType>::Item> items = {
         {SyncState, QStringLiteral("SyncState"), &ewsXmlTextReader},
         {IncludesLastItemInRange, QStringLiteral("IncludesLastItemInRange"), &ewsXmlBoolReader},
         {Changes, QStringLiteral("Changes"), &EwsSyncFolderItemsRequest::Response::changeReader},
     };
-    static const EwsXmlReader<SyncResponseElementType> staticReader(items);
+    static const EwsXml<SyncResponseElementType> staticReader(items);
 
-    EwsXmlReader<SyncResponseElementType> ewsReader(staticReader);
+    EwsXml<SyncResponseElementType> ewsReader(staticReader);
 
     if (!ewsReader.readItems(reader, ewsMsgNsUri,
         [this](QXmlStreamReader &reader, const QString &) {
@@ -207,7 +207,7 @@ bool EwsSyncFolderItemsRequest::Response::changeReader(QXmlStreamReader &reader,
 
 EwsSyncFolderItemsRequest::Change::Change(QXmlStreamReader &reader)
 {
-    static const QVector<EwsXmlReader<ChangeElementType>::Item> items = {
+    static const QVector<EwsXml<ChangeElementType>::Item> items = {
         {Item, QStringLiteral("Item"), &ewsXmlItemReader},
         {Item, QStringLiteral("Message"), &ewsXmlItemReader},
         {Item, QStringLiteral("CalendarItem"), &ewsXmlItemReader},
@@ -221,9 +221,9 @@ EwsSyncFolderItemsRequest::Change::Change(QXmlStreamReader &reader)
         {ItemId, QStringLiteral("ItemId"), &ewsXmlIdReader},
         {IsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader}
     };
-    static const EwsXmlReader<ChangeElementType> staticReader(items);
+    static const EwsXml<ChangeElementType> staticReader(items);
 
-    EwsXmlReader<ChangeElementType> ewsReader(staticReader);
+    EwsXml<ChangeElementType> ewsReader(staticReader);
 
     if (reader.name() == QStringLiteral("Create")) {
         mType = Create;

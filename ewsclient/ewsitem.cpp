@@ -17,7 +17,6 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <ewsxmlreader.h>
 #include "ewsitem.h"
 
 #include <KCodecs/KCodecs>
@@ -27,13 +26,13 @@
 #include "ewsattendee.h"
 #include "ewsrecurrence.h"
 #include "ewsoccurrence.h"
-#include "ewsxmlreader.h"
+#include "ewsxml.h"
 #include "ewsclient_debug.h"
 
 class EwsItemPrivate : public EwsItemBasePrivate
 {
 public:
-    typedef EwsXmlReader<EwsItemFields> Reader;
+    typedef EwsXml<EwsItemFields> Reader;
 
     EwsItemPrivate();
     EwsItemPrivate(const EwsItemBasePrivate &other);

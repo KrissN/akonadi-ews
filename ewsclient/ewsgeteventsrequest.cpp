@@ -18,7 +18,7 @@
 */
 
 #include "ewsgeteventsrequest.h"
-#include "ewsxmlreader.h"
+#include "ewsxml.h"
 #include "ewsclient_debug.h"
 
 EwsGetEventsRequest::EwsGetEventsRequest(EwsClient &client, QObject *parent)

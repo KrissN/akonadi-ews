@@ -21,7 +21,7 @@
 
 #include <QtCore/QTemporaryFile>
 
-#include "ewsxmlreader.h"
+#include "ewsxml.h"
 #include "ewsclient_debug.h"
 
 static Q_CONSTEXPR uint respChunkTimeout = 250; /* ms */
