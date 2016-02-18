@@ -59,9 +59,10 @@ static Q_CONSTEXPR int fetchBatchSize = 10;
  */
 
 EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client,
-                                   const QString &syncState, QObject *parent)
-    : EwsJob(parent), mCollection(collection), mClient(client), mPendingJobs(0), mTotalItems(0),
-      mSyncState(syncState), mFullSync(syncState.isNull())
+                                   const QString &syncState, const EwsId::List &itemsToCheck,
+                                   QObject *parent)
+    : EwsJob(parent), mCollection(collection), mClient(client), mItemsToCheck(itemsToCheck),
+      mPendingJobs(0), mTotalItems(0), mSyncState(syncState), mFullSync(syncState.isNull())
 {
     qRegisterMetaType<EwsId::List>();
 }
@@ -81,7 +82,7 @@ void EwsFetchItemsJob::start()
         syncItemsReq->setSyncState(mSyncState);
     }
     syncItemsReq->setMaxChanges(listBatchSize);
-    connect(syncItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
+    connect(syncItemsReq, &EwsSyncFolderItemsRequest::result, this, &EwsFetchItemsJob::remoteItemFetchDone);
     addSubjob(syncItemsReq);
 
     ItemFetchJob *itemJob = new ItemFetchJob(mCollection);
@@ -89,12 +90,21 @@ void EwsFetchItemsJob::start()
     itemScope.setCacheOnly(true);
     itemScope.fetchFullPayload(false);
     itemJob->setFetchScope(itemScope);
-    connect(itemJob, SIGNAL(result(KJob*)), SLOT(localItemFetchDone(KJob*)));
+    connect(itemJob, &ItemFetchJob::result, this, &EwsFetchItemsJob::localItemFetchDone);
     addSubjob(itemJob);
 
     mPendingJobs = 2;
     syncItemsReq->start();
     itemJob->start();
+
+    if (!mItemsToCheck.isEmpty()) {
+        EwsGetItemRequest *getItemReq = new EwsGetItemRequest(mClient, this);
+        getItemReq->setItemIds(mItemsToCheck);
+        getItemReq->setItemShape(EwsShapeIdOnly);
+        connect(getItemReq, &EwsGetItemRequest::result, this, &EwsFetchItemsJob::checkedItemsFetchFinished);
+        mPendingJobs++;
+        getItemReq->start();
+    }
 }
 
 void EwsFetchItemsJob::localItemFetchDone(KJob *job)
@@ -172,6 +182,41 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
     }
 }
 
+void EwsFetchItemsJob::checkedItemsFetchFinished(KJob *job)
+{
+    EwsGetItemRequest *req = qobject_cast<EwsGetItemRequest*>(job);
+
+    if (!req) {
+        setErrorMsg(QStringLiteral("Invalid item fetch job pointer."));
+        doKill();
+        emitResult();
+    }
+
+    if (!req->error()) {
+        removeSubjob(job);
+
+        Q_ASSERT(mItemsToCheck.size() == req->responses().size());
+
+        EwsId::List::const_iterator it = mItemsToCheck.cbegin();
+        Q_FOREACH(const EwsGetItemRequest::Response &resp, req->responses())
+        {
+            if (resp.isSuccess()) {
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 found - readding");
+                mRemoteAddedItems.append(resp.item());
+            }
+            else {
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 not found - removing");
+                mRemoteDeletedIds.append(*it);
+            }
+            it++;
+        }
+        mPendingJobs--;
+        if (mPendingJobs == 0) {
+            compareItemLists();
+        }
+    }
+}
+
 void EwsFetchItemsJob::compareItemLists()
 {
     /* Begin stage 2 - determine list of new/changed items and fetch details about them. */
@@ -239,13 +284,20 @@ void EwsFetchItemsJob::compareItemLists()
         // In case of an incremental sync deleted items will be given explicitly. */
         Q_FOREACH(const EwsId &id, mRemoteDeletedIds) {
             QHash<QString, Item>::iterator it = itemHash.find(id.id());
+            /* If one or more items marked as deleted are not found it means that the folder is out
+             * of sync. The only way to fix this is to issue a full sync.
+             * The only exception is when an item is checked explicitly. In such case the absence
+             * of this item can be ignored. */
             if (it == itemHash.end()) {
-                setErrorMsg(QStringLiteral("Got delete for item %1, but item not found in local store.")
-                                .arg(id.id()));
-                emitResult();
-                return;
+                if (!mItemsToCheck.contains(id)) {
+                    setErrorMsg(QStringLiteral("Got delete for item %1, but item not found in local store.")
+                                    .arg(id.id()));
+                    emitResult();
+                    return;
+                }
+            } else {
+                mDeletedItems.append(*it);
             }
-            mDeletedItems.append(*it);
         }
 
         QHash<EwsId, bool>::const_iterator it;

@@ -35,7 +35,8 @@ class EwsFetchItemsJob : public EwsJob
     Q_OBJECT
 public:
     EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient& client,
-                     const QString &syncState, QObject *parent);
+                     const QString &syncState, const EwsId::List &itemsToCheck,
+                     QObject *parent);
     virtual ~EwsFetchItemsJob();
 
     Akonadi::Item::List changedItems() const { return mChangedItems; };
@@ -48,6 +49,7 @@ private Q_SLOTS:
     void localItemFetchDone(KJob *job);
     void remoteItemFetchDone(KJob *job);
     void itemDetailFetchDone(KJob *job);
+    void checkedItemsFetchFinished(KJob *job);
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);
@@ -56,6 +58,7 @@ private:
 
     const Akonadi::Collection mCollection;
     EwsClient& mClient;
+    EwsId::List mItemsToCheck;
     Akonadi::Item::List mLocalItems;
     EwsItem::List mRemoteAddedItems;
     EwsItem::List mRemoteChangedItems;

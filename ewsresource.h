@@ -74,6 +74,7 @@ private:
     QScopedPointer<EwsSubscriptionManager> mSubManager;
     QHash<QString, QString> mSyncState;
     QString mFolderSyncState;
+    QHash<QString, EwsId::List> mItemsToCheck;
 };
 
 #endif

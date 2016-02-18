@@ -23,7 +23,6 @@
 #include <AkonadiCore/ChangeRecorder>
 #include <AkonadiCore/CollectionFetchScope>
 #include <AkonadiCore/ItemFetchScope>
-#include <AkonadiCore/ItemMoveJob>
 #include <AkonadiCore/CollectionFetchJob>
 #include <KMime/Message>
 
@@ -152,8 +151,9 @@ void EwsResource::retrieveItems(const Collection &collection)
     Q_EMIT status(1, QStringLiteral("Retrieving item list"));
     qDebug() << "retrieveItems";
 
+    QString rid = collection.remoteId();
     EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient,
-        mSyncState.value(collection.remoteId()), this);
+        mSyncState.value(rid), mItemsToCheck.value(rid), this);
     connect(job, SIGNAL(finished(KJob*)), SLOT(itemFetchJobFinished(KJob*)));
     connect(job, SIGNAL(status(int,const QString&)), SIGNAL(status(int,const QString&)));
     connect(job, SIGNAL(percent(int)), SIGNAL(percent(int)));
@@ -247,6 +247,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
         itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
     }
     saveState();
+    mItemsToCheck.remove(fetchJob->collection().remoteId());
     Q_EMIT status(0);
 }
 
@@ -310,6 +311,7 @@ void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCo
                              const Collection &destinationCollection)
 {
     EwsId::List ids;
+
     Q_FOREACH(const Item &item, items) {
         EwsId id(item.remoteId(), item.remoteRevision());
         ids.append(id);
@@ -347,14 +349,16 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
 
     /* When moving a batch of items it is possible that the operation will fail for some of them.
      * Unfortunately Akonadi doesn't provide a way to report such partial success/failure. In order
-     * to work around this in case of partial failure the failed items will be moved back to their
-     * original folder thus aborting the move.
+     * to work around this in case of partial failure the source and destination folders will be
+     * resynchronised. In order to avoid doing a full sync a hint will be provided in order to
+     * indicate the item(s) to check.
      */
 
     Item::List movedItems;
+    EwsId::List failedIds;
 
     Collection srcCol = req->property("sourceCollection").value<Collection>();
-    //Collection dstCol = req->property("destinationCollection").value<Collection>();
+    Collection dstCol = req->property("destinationCollection").value<Collection>();
     Item::List::iterator it = items.begin();
     Q_FOREACH(const EwsMoveItemRequest::Response &resp, req->responses()) {
         Item &item = *it;
@@ -369,10 +373,18 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
         else {
             warning(QStringLiteral("Move failed for item %1").arg(item.remoteId()));
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Move failed for item %1").arg(item.remoteId());
-            ItemMoveJob *moveJob = new ItemMoveJob(item, srcCol);
-            moveJob->start();
+            failedIds.append(EwsId(item.remoteId(), QString()));
         }
         it++;
+    }
+
+    if (!failedIds.isEmpty()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to move %1 items. Forcing src & dst folder sync.")
+                        .arg(failedIds.size());
+        mItemsToCheck[srcCol.remoteId()] += failedIds;
+        foldersModifiedEvent(EwsId::List({EwsId(srcCol.remoteId(), QString())}));
+        mItemsToCheck[dstCol.remoteId()] += failedIds;
+        foldersModifiedEvent(EwsId::List({EwsId(dstCol.remoteId(), QString())}));
     }
 
     changesCommitted(movedItems);
