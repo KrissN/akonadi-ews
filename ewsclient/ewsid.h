@@ -56,7 +56,7 @@ public:
     typedef QList<EwsId> List;
 
     EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
-    EwsId(QString id, QString changeKey) : mType(Real), mId(id), mChangeKey(changeKey),
+    EwsId(QString id, QString changeKey = QString()) : mType(Real), mId(id), mChangeKey(changeKey),
                     mDid(EwsDIdCalendar) {};
     EwsId(const EwsId &id) { *this = id; };
     EwsId(EwsId &&id) { *this = std::move(id); };
