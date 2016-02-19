@@ -89,7 +89,7 @@ bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
-bool ewsXmlBoolWriter(QXmlStreamWriter &writer, QVariant &val)
+bool ewsXmlBoolWriter(QXmlStreamWriter &writer, const QVariant &val)
 {
     writer.writeCharacters(val.toBool() ? QStringLiteral("true") : QStringLiteral("false"));
 
@@ -110,7 +110,7 @@ bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
-bool ewsXmlBase64Writer(QXmlStreamWriter &writer, QVariant &val)
+bool ewsXmlBase64Writer(QXmlStreamWriter &writer, const QVariant &val)
 {
     writer.writeCharacters(KCodecs::base64Encode(val.toByteArray()));
 
@@ -132,7 +132,7 @@ bool ewsXmlIdReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
-bool ewsXmlIdWriter(QXmlStreamWriter &writer, QVariant &val)
+bool ewsXmlIdWriter(QXmlStreamWriter &writer, const QVariant &val)
 {
     EwsId id = val.value<EwsId>();
     if (id.type() == EwsId::Unspecified) {
@@ -157,7 +157,7 @@ bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
-bool ewsXmlTextWriter(QXmlStreamWriter &writer, QVariant &val)
+bool ewsXmlTextWriter(QXmlStreamWriter &writer, const QVariant &val)
 {
     writer.writeCharacters(val.toString());
 
@@ -177,7 +177,7 @@ bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
-bool ewsXmlUIntWriter(QXmlStreamWriter &writer, QVariant &val)
+bool ewsXmlUIntWriter(QXmlStreamWriter &writer, const QVariant &val)
 {
     writer.writeCharacters(QString::number(val.toUInt()));
 

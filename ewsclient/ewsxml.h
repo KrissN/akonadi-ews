@@ -31,7 +31,7 @@ template <typename T> class EwsXml
 {
 public:
     typedef std::function<bool(QXmlStreamReader&,QVariant&)> ReadFunction;
-    typedef std::function<bool(QXmlStreamWriter&,QVariant&)> WriteFunction;
+    typedef std::function<bool(QXmlStreamWriter&,const QVariant&)> WriteFunction;
     typedef std::function<bool(QXmlStreamReader&,const QString&)> UnknownElementFunction;
 
     typedef QHash<T, QVariant> ValueHash;
@@ -101,13 +101,13 @@ public:
     }
 
     bool writeItems(QXmlStreamWriter &writer, const QString &parentElm, const QString &nsUri,
-                    QList<T> keysToWrite = QList<T>())
+                    const ValueHash &values, const QList<T> &keysToWrite = QList<T>()) const
     {
         bool hasKeysToWrite = !keysToWrite.isEmpty();
         Q_FOREACH(const Item& item, mItems) {
             if (!hasKeysToWrite || keysToWrite.contains(item.key)) {
-                typename ValueHash::const_iterator it = mValues.find(item.key);
-                if (it != mValues.end()) {
+                typename ValueHash::const_iterator it = values.find(item.key);
+                if (it != values.end()) {
                     if (!item.writeFn) {
                         qCWarning(EWSRES_LOG) << QStringLiteral("Failed to write %1 element - no write support for %2 element.")
                                                 .arg(parentElm).arg(item.elmName);
@@ -127,10 +127,6 @@ public:
 
     ValueHash values() const {
         return mValues;
-    }
-
-    void setValues(ValueHash values) {
-        mValues = values;
     }
 
 private:
@@ -153,15 +149,15 @@ private:
 };
 
 extern bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val);
-extern bool ewsXmlBoolWriter(QXmlStreamWriter &writer, QVariant &val);
+extern bool ewsXmlBoolWriter(QXmlStreamWriter &writer, const QVariant &val);
 extern bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val);
-extern bool ewsXmlBase64Writer(QXmlStreamWriter &writer, QVariant &val);
+extern bool ewsXmlBase64Writer(QXmlStreamWriter &writer, const QVariant &val);
 extern bool ewsXmlIdReader(QXmlStreamReader &reader, QVariant &val);
-extern bool ewsXmlIdWriter(QXmlStreamWriter &writer, QVariant &val);
+extern bool ewsXmlIdWriter(QXmlStreamWriter &writer, const QVariant &val);
 extern bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val);
-extern bool ewsXmlTextWriter(QXmlStreamWriter &writer, QVariant &val);
+extern bool ewsXmlTextWriter(QXmlStreamWriter &writer, const QVariant &val);
 extern bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val);
-extern bool ewsXmlUIntWriter(QXmlStreamWriter &writer, QVariant &val);
+extern bool ewsXmlUIntWriter(QXmlStreamWriter &writer, const QVariant &val);
 extern bool ewsXmlDateTimeReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlItemReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlFolderReader(QXmlStreamReader &reader, QVariant &val);
