@@ -33,6 +33,7 @@
 #include "ewsupdateitemrequest.h"
 #include "ewsmoveitemrequest.h"
 #include "ewsdeleteitemrequest.h"
+#include "ewscreatefolderrequest.h"
 #include "ewssubscriptionmanager.h"
 #include "ewsgetfolderrequest.h"
 #include "ewsitemhandler.h"
@@ -468,9 +469,75 @@ void EwsResource::itemAdded(const Item &item, const Collection &collection)
 {
 }
 
+void EwsResource::collectionAdded(const Collection &collection, const Collection &parent)
+{
+    qDebug() << "collectionAdded";
+    EwsFolderType type;
+    QStringList mimeTypes = collection.contentMimeTypes();
+    if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeCalendarItem)->mimeType())) {
+        type = EwsFolderTypeCalendar;
+    }
+    else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeContact)->mimeType())) {
+        type = EwsFolderTypeContacts;
+    }
+    else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeTask)->mimeType())) {
+        type = EwsFolderTypeTasks;
+    }
+    else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeMessage)->mimeType())) {
+        type = EwsFolderTypeMail;
+    }
+    else {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Cannot determine EWS folder type.");
+        cancelTask(i18n("Cannot determine EWS folder type."));
+        return;
+    }
+
+    EwsFolder folder;
+    folder.setType(type);
+    folder.setField(EwsFolderFieldDisplayName, collection.name());
+
+    EwsCreateFolderRequest *req = new EwsCreateFolderRequest(mEwsClient, this);
+    req->setParentFolderId(EwsId(parent.remoteId()));
+    req->setFolders(EwsFolder::List() << folder);
+    req->setProperty("collection", QVariant::fromValue<Collection>(collection));
+    connect(req, &EwsCreateFolderRequest::result, this, &EwsResource::folderCreateRequestFinished);
+    req->start();
+}
+
+void EwsResource::folderCreateRequestFinished(KJob *job)
+{
+    qDebug() << "folderCreateRequestFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsCreateFolderRequest *req = qobject_cast<EwsCreateFolderRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+    Collection col = job->property("collection").value<Collection>();
+
+    EwsCreateFolderRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        const EwsId &id = resp.folderId();
+        col.setRemoteId(id.id());
+        col.setRemoteRevision(id.changeKey());
+        changeCommitted(col);
+    }
+    else {
+        cancelTask(i18n("Failed to create folder"));
+    }
+}
+
+void EwsResource::collectionRemoved(const Collection &collection)
+{
+
+}
+
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {
-    QTimer::singleShot(0, &EwsResource::foo);
     Q_FOREACH(const EwsId &id, folders) {
         Collection c;
         c.setRemoteId(id.id());
