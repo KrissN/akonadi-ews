@@ -19,6 +19,9 @@
 
 #include "ewsfolder.h"
 
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+
 #include "ewsitembase_p.h"
 #include "ewsxml.h"
 #include "ewseffectiverights.h"
@@ -26,6 +29,14 @@
 
 #define D_PTR EwsFolderPrivate *d = reinterpret_cast<EwsFolderPrivate*>(this->d.data());
 #define D_CPTR const EwsFolderPrivate *d = reinterpret_cast<const EwsFolderPrivate*>(this->d.data());
+
+static const QVector<QString> folderTypeNames = {
+    QStringLiteral("Folder"),
+    QStringLiteral("CalendarFolder"),
+    QStringLiteral("ContactsFolder"),
+    QStringLiteral("SearchFolder"),
+    QStringLiteral("TasksFolder")
+};
 
 class EwsFolderPrivate : public EwsItemBasePrivate
 {
@@ -51,19 +62,19 @@ public:
 typedef EwsXml<EwsItemFields> ItemFieldsReader;
 
 static const QVector<EwsFolderPrivate::XmlProc::Item> ewsFolderItems = {
-    {EwsFolderFieldFolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},
+    {EwsFolderFieldFolderId, QStringLiteral("FolderId"), &ewsXmlIdReader, &ewsXmlIdWriter},
     {EwsFolderFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader},
-    {EwsFolderFieldFolderClass, QStringLiteral("FolderClass"), &ewsXmlTextReader},
-    {EwsFolderFieldDisplayName, QStringLiteral("DisplayName"), &ewsXmlTextReader},
-    {EwsFolderFieldTotalCount, QStringLiteral("TotalCount"), &ewsXmlUIntReader},
+    {EwsFolderFieldFolderClass, QStringLiteral("FolderClass"), &ewsXmlTextReader, &ewsXmlTextWriter},
+    {EwsFolderFieldDisplayName, QStringLiteral("DisplayName"), &ewsXmlTextReader, &ewsXmlTextWriter},
+    {EwsFolderFieldTotalCount, QStringLiteral("TotalCount"), &ewsXmlUIntReader, &ewsXmlUIntWriter},
     {EwsFolderFieldChildFolderCount, QStringLiteral("ChildFolderCount"), &ewsXmlUIntReader},
+    {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
+        &EwsItemBasePrivate::extendedPropertyReader, &EwsItemBasePrivate::extendedPropertyWriter},
     {EwsFolderFieldUnreadCount, QStringLiteral("UnreadCount"), &ewsXmlUIntReader},
+    {EwsFolderPrivate::XmlProc::Ignore, QStringLiteral("SearchParameters")},
     {EwsFolderFieldEffectiveRights, QStringLiteral("EffectiveRights"),
         &EwsFolderPrivate::effectiveRightsReader},
-    {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
-        &EwsItemBasePrivate::extendedPropertyReader},
-    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("ManagedFolderInformation")},
-    {EwsFolderPrivate::Reader::Ignore, QStringLiteral("SearchParameters")},
+    {EwsFolderPrivate::XmlProc::Ignore, QStringLiteral("ManagedFolderInformation")},
 };
 
 const EwsFolderPrivate::XmlProc EwsFolderPrivate::mStaticEwsXml(ewsFolderItems);
@@ -95,22 +106,16 @@ EwsFolder::EwsFolder(QXmlStreamReader &reader)
     D_PTR
 
     // Check what item type are we
-    if (reader.name() == QStringLiteral("Folder")) {
-        d->mType = EwsFolderTypeMail;
+    uint i = 0;
+    d->mType = EwsFolderTypeUnknown;
+    Q_FOREACH(const QString &name, folderTypeNames) {
+        if (name == reader.name()) {
+            d->mType = static_cast<EwsFolderType>(i);
+            break;
+        }
+        i++;
     }
-    else if (reader.name() == QStringLiteral("CalendarFolder")) {
-        d->mType = EwsFolderTypeCalendar;
-    }
-    else if (reader.name() == QStringLiteral("ContactsFolder")) {
-        d->mType = EwsFolderTypeContacts;
-    }
-    else if (reader.name() == QStringLiteral("TasksFolder")) {
-        d->mType = EwsFolderTypeTasks;
-    }
-    else if (reader.name() == QStringLiteral("SearchFolder")) {
-        d->mType = EwsFolderTypeSearch;
-    }
-    else {
+    if (d->mType == EwsFolderTypeUnknown) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Unknown folder type %1").arg(reader.name().toString());
     }
 
@@ -149,6 +154,12 @@ EwsFolderType EwsFolder::type() const
 {
     D_CPTR
     return d->mType;
+}
+
+void EwsFolder::setType(EwsFolderType type)
+{
+    D_PTR
+    d->mType = type;
 }
 
 bool EwsFolder::readBaseFolderElement(QXmlStreamReader &reader)
@@ -207,4 +218,16 @@ EwsFolder& EwsFolder::operator=(EwsFolder &&other)
     return *this;
 }
 
+bool EwsFolder::write(QXmlStreamWriter &writer) const
+{
+    D_CPTR
+
+    writer.writeStartElement(ewsTypeNsUri, folderTypeNames[d->mType]);
+
+    bool status = d->mEwsXml.writeItems(writer, folderTypeNames[d->mType], ewsTypeNsUri, d->mFields);
+
+    writer.writeEndElement();
+
+    return status;
+}
 

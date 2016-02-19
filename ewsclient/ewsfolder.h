@@ -20,11 +20,11 @@
 #ifndef EWSFOLDER_H
 #define EWSFOLDER_H
 
-#include <QXmlStreamReader>
-
 #include "ewsitembase.h"
 #include "ewstypes.h"
 
+class QXmlStreamReader;
+class QXmlStreamWriter;
 class EwsFolderPrivate;
 
 class EwsFolder : public EwsItemBase
@@ -42,12 +42,14 @@ public:
     EwsFolder& operator=(EwsFolder &&other);
 
     EwsFolderType type() const;
+    void setType(EwsFolderType type);
 
     const QVector<EwsFolder> childFolders() const;
     void addChild(EwsFolder &child);
     EwsFolder* parentFolder() const;
     void setParentFolder(EwsFolder *parent);
 
+    bool write(QXmlStreamWriter &writer) const;
 protected:
     bool readBaseFolderElement(QXmlStreamReader &reader);
 };

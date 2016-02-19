@@ -97,6 +97,19 @@ bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVaria
     return true;
 }
 
+bool EwsItemBasePrivate::extendedPropertyWriter(QXmlStreamWriter &writer, const QVariant &val)
+{
+    PropertyHash propHash = val.value<PropertyHash>();
+    PropertyHash::const_iterator it;
+    for (it = propHash.cbegin(); it != propHash.cend(); it++) {
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
+        it.key().writeValue(writer, it.value());
+        writer.writeEndElement();
+    }
+
+    return true;
+}
+
 QStringRef EwsItemBase::operator[](const EwsPropertyField &prop) const
 {
     EwsItemBasePrivate::PropertyHash propHash =
@@ -125,4 +138,15 @@ QVariant EwsItemBase::operator[](EwsItemFields f) const
     }
 }
 
+void EwsItemBase::setField(EwsItemFields f, const QVariant& value)
+{
+    d->mFields[f] = value;
+}
 
+void EwsItemBase::setProperty(const EwsPropertyField &prop, const QString &value)
+{
+    EwsItemBasePrivate::PropertyHash propHash =
+        d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
+    propHash[prop] = value;
+    d->mFields[EwsItemFieldExtendedProperties] = QVariant::fromValue<EwsItemBasePrivate::PropertyHash>(propHash);
+}

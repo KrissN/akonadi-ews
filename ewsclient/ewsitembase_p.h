@@ -35,6 +35,7 @@ public:
     virtual EwsItemBasePrivate *clone() const = 0;
 
     static bool extendedPropertyReader(QXmlStreamReader &reader, QVariant &val);
+    static bool extendedPropertyWriter(QXmlStreamWriter &writer, const QVariant &val);
 
     // When the item, is first constructed it will only contain the id and will therefore be
     // invalid. Once updated through EWS the remaining data will be populated and the item will
