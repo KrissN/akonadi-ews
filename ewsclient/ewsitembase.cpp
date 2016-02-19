@@ -99,8 +99,10 @@ bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVaria
 
 QStringRef EwsItemBase::operator[](const EwsPropertyField &prop) const
 {
-    QHash<EwsPropertyField, QString>::const_iterator it = d->mProperties.find(prop);
-    if (it != d->mProperties.cend()) {
+    EwsItemBasePrivate::PropertyHash propHash =
+        d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
+    QHash<EwsPropertyField, QString>::iterator it = propHash.find(prop);
+    if (it != propHash.end()) {
         return QStringRef(&it.value());
     }
     else {

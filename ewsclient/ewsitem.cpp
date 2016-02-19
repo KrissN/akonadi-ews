@@ -463,7 +463,6 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     }
 
     d->mFields = d->mEwsReader.values();
-    d->mProperties = d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
 
     // The body item is special as it hold two values in one. Need to separate them into their
     // proper places.

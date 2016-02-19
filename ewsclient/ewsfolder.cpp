@@ -30,7 +30,7 @@
 class EwsFolderPrivate : public EwsItemBasePrivate
 {
 public:
-    typedef EwsXml<EwsItemFields> Reader;
+    typedef EwsXml<EwsItemFields> XmlProc;
 
     EwsFolderPrivate();
     EwsFolderPrivate(const EwsItemBasePrivate &other);
@@ -44,13 +44,13 @@ public:
     EwsFolderType mType;
     EwsFolder *mParent;
     QVector<EwsFolder> mChildren;
-    static const Reader mStaticEwsReader;
-    Reader mEwsReader;
+    static const XmlProc mStaticEwsXml;
+    XmlProc mEwsXml;
 };
 
 typedef EwsXml<EwsItemFields> ItemFieldsReader;
 
-static const QVector<EwsFolderPrivate::Reader::Item> ewsFolderItems = {
+static const QVector<EwsFolderPrivate::XmlProc::Item> ewsFolderItems = {
     {EwsFolderFieldFolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},
     {EwsFolderFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader},
     {EwsFolderFieldFolderClass, QStringLiteral("FolderClass"), &ewsXmlTextReader},
@@ -66,10 +66,10 @@ static const QVector<EwsFolderPrivate::Reader::Item> ewsFolderItems = {
     {EwsFolderPrivate::Reader::Ignore, QStringLiteral("SearchParameters")},
 };
 
-const EwsFolderPrivate::Reader EwsFolderPrivate::mStaticEwsReader(ewsFolderItems);
+const EwsFolderPrivate::XmlProc EwsFolderPrivate::mStaticEwsXml(ewsFolderItems);
 
 EwsFolderPrivate::EwsFolderPrivate()
-    : EwsItemBasePrivate(), mType(EwsFolderTypeUnknown), mParent(0), mEwsReader(mStaticEwsReader)
+    : EwsItemBasePrivate(), mType(EwsFolderTypeUnknown), mParent(0), mEwsXml(mStaticEwsXml)
 {
 }
 
@@ -155,12 +155,11 @@ bool EwsFolder::readBaseFolderElement(QXmlStreamReader &reader)
 {
     D_PTR
 
-    if (!d->mEwsReader.readItem(reader, "Folder", ewsTypeNsUri)) {
+    if (!d->mEwsXml.readItem(reader, "Folder", ewsTypeNsUri)) {
         return false;
     }
 
-    d->mFields = d->mEwsReader.values();
-    d->mProperties = d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
+    d->mFields = d->mEwsXml.values();
 
     return true;
 }

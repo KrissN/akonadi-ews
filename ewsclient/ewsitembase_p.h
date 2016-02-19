@@ -43,7 +43,6 @@ public:
 
     QHash<EwsItemFields, QVariant> mFields;
 
-    PropertyHash mProperties;
 };
 
 template <>
