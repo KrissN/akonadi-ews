@@ -38,6 +38,7 @@ set(EWSCLIENT_SRCS
   ewsitemshape.cpp
   ewsjob.cpp
   ewsmailbox.cpp
+  ewsmovefolderrequest.cpp
   ewsmoveitemrequest.cpp
   ewsoccurrence.cpp
   ewspoxautodiscoverrequest.cpp
