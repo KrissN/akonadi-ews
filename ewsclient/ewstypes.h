@@ -21,6 +21,7 @@
 #define EWSTYPES_H
 
 #include <QtCore/QString>
+#include <QtCore/QVector>
 
 extern const QString soapEnvNsUri;
 extern const QString ewsMsgNsUri;
@@ -462,5 +463,7 @@ template <typename T> T decodeEnumString(QString str, const QString* table, unsi
     *ok = (i < count);
     return enumVal;
 }
+
+extern const QVector<QString> ewsItemTypeNames;
 
 #endif

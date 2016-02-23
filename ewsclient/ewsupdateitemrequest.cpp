@@ -46,19 +46,6 @@ static const QVector<QString> updateTypeElementNames = {
     QStringLiteral("DeleteItemField")
 };
 
-static const QVector<QString> itemTypeNames = {
-    QStringLiteral("Item"),
-    QStringLiteral("Message"),
-    QStringLiteral("CalendarItem"),
-    QStringLiteral("Contact"),
-    QStringLiteral("DistributionList"),
-    QStringLiteral("MeetingMessage"),
-    QStringLiteral("MeetingRequest"),
-    QStringLiteral("MeetingResponse"),
-    QStringLiteral("MeetingCancellation"),
-    QStringLiteral("Task")
-};
-
 EwsUpdateItemRequest::EwsUpdateItemRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent), mMessageDisp(EwsDispSaveOnly),
       mConflictResol(EwsResolAlwaysOverwrite), mMeetingDisp(EwsMeetingDispUnspecified)
@@ -197,7 +184,7 @@ bool EwsUpdateItemRequest::Update::write(QXmlStreamWriter &writer, EwsItemType i
     mField.write(writer);
 
     if (mType != Delete) {
-        writer.writeStartElement(ewsTypeNsUri, itemTypeNames[itemType]);
+        writer.writeStartElement(ewsTypeNsUri, ewsItemTypeNames[itemType]);
         retVal = mField.writeValue(writer, mValue);
         writer.writeEndElement();
     }

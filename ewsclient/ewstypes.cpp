@@ -22,3 +22,16 @@
 const QString soapEnvNsUri = QStringLiteral("http://schemas.xmlsoap.org/soap/envelope/");
 const QString ewsMsgNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/services/2006/messages");
 const QString ewsTypeNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/services/2006/types");
+
+const QVector<QString> ewsItemTypeNames = {
+    QStringLiteral("Item"),
+    QStringLiteral("Message"),
+    QStringLiteral("CalendarItem"),
+    QStringLiteral("Contact"),
+    QStringLiteral("DistributionList"),
+    QStringLiteral("MeetingMessage"),
+    QStringLiteral("MeetingRequest"),
+    QStringLiteral("MeetingResponse"),
+    QStringLiteral("MeetingCancellation"),
+    QStringLiteral("Task")
+};
