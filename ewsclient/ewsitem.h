@@ -20,11 +20,12 @@
 #ifndef EWSITEM_H
 #define EWSITEM_H
 
-#include <QtCore/QXmlStreamReader>
 #include <QtCore/QList>
 
 #include "ewsitembase.h"
 
+class QXmlStreamReader;
+class QXmlStreamWriter;
 class EwsItemPrivate;
 
 class EwsItem : public EwsItemBase
@@ -43,7 +44,10 @@ public:
     EwsItem& operator=(EwsItem &&other);
 
     EwsItemType type() const;
+    void setType(EwsItemType type);
     EwsItemType internalType() const;
+
+    bool write(QXmlStreamWriter &writer) const;
 protected:
     bool readBaseItemElement(QXmlStreamReader &reader);
 };

@@ -19,6 +19,8 @@
 
 #include "ewsitem.h"
 
+#include <QtCore/QXmlStreamReader>
+#include <QtCore/QXmlStreamWriter>
 #include <KCodecs/KCodecs>
 
 #include "ewsitembase_p.h"
@@ -28,6 +30,9 @@
 #include "ewsoccurrence.h"
 #include "ewsxml.h"
 #include "ewsclient_debug.h"
+
+#define D_PTR EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
+#define D_CPTR const EwsItemPrivate *d = reinterpret_cast<const EwsItemPrivate*>(this->d.data());
 
 class EwsItemPrivate : public EwsItemBasePrivate
 {
@@ -51,33 +56,40 @@ public:
     static bool occurrencesReader(QXmlStreamReader &reader, QVariant &val);
     static bool recurrenceReader(QXmlStreamReader &reader, QVariant &val);
     static bool categoriesReader(QXmlStreamReader &reader, QVariant &val);
+    static bool categoriesWriter(QXmlStreamWriter &writer, const QVariant &val);
 
     EwsItemType mType;
-    static const Reader mStaticEwsReader;
-    Reader mEwsReader;
+    static const Reader mStaticEwsXml;
+    Reader mEwsXml;
 };
 
 static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
-    {EwsItemFieldMimeContent, QStringLiteral("MimeContent"), &ewsXmlBase64Reader},
+    // Item fields
+    {EwsItemFieldMimeContent, QStringLiteral("MimeContent"), &ewsXmlBase64Reader, &ewsXmlBase64Writer},
     {EwsItemFieldItemId, QStringLiteral("ItemId"), &ewsXmlIdReader},
-    {EwsItemFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader},
-    {EwsItemFieldItemClass, QStringLiteral("ItemClass"), &ewsXmlTextReader},
-    {EwsItemFieldSubject, QStringLiteral("Subject"), &ewsXmlTextReader},
+    {EwsItemFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader, &ewsXmlIdWriter},
+    {EwsItemFieldItemClass, QStringLiteral("ItemClass"), &ewsXmlTextReader, &ewsXmlTextWriter},
+    {EwsItemFieldSubject, QStringLiteral("Subject"), &ewsXmlTextReader, &ewsXmlTextWriter},
     {EwsItemFieldSensitivity, QStringLiteral("Sensitivity"), &ewsXmlSensitivityReader},
     {EwsItemFieldBody, QStringLiteral("Body"), &EwsItemPrivate::bodyReader},
     {EwsItemFieldSize, QStringLiteral("Size"), &ewsXmlUIntReader},
+    {EwsItemFieldCategories, QStringLiteral("Categories"), &EwsItemPrivate::categoriesReader,
+        &EwsItemPrivate::categoriesWriter},
+    {EwsItemFieldImportance, QStringLiteral("Importance"), &ewsXmlImportanceReader},
+    {EwsItemFieldIsDraft, QStringLiteral("IsDraft"), &ewsXmlBoolReader, &ewsXmlBoolWriter},
+    {EwsItemFieldIsFromMe, QStringLiteral("IsFromMe"), &ewsXmlBoolReader},
     {EwsItemFieldInternetMessageHeaders, QStringLiteral("InternetMessageHeaders"),
         &EwsItemPrivate::messageHeadersReader},
     {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
         &EwsItemBasePrivate::extendedPropertyReader},
-    {EwsItemFieldImportance, QStringLiteral("Importance"), &ewsXmlImportanceReader},
+    {EwsItemFieldHasAttachments, QStringLiteral("HasAttachments"), &ewsXmlBoolReader},
+    // Message fields
     {EwsItemFieldFrom, QStringLiteral("From"), &EwsItemPrivate::mailboxReader},
     {EwsItemFieldToRecipients, QStringLiteral("ToRecipients"), &EwsItemPrivate::recipientsReader},
     {EwsItemFieldCcRecipients, QStringLiteral("CcRecipients"), &EwsItemPrivate::recipientsReader},
     {EwsItemFieldBccRecipients, QStringLiteral("BccRecipients"), &EwsItemPrivate::recipientsReader},
-    {EwsItemFieldIsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader},
-    {EwsItemFieldHasAttachments, QStringLiteral("HasAttachments"), &ewsXmlBoolReader},
-    {EwsItemFieldIsFromMe, QStringLiteral("IsFromMe"), &ewsXmlBoolReader},
+    {EwsItemFieldIsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader, &ewsXmlBoolWriter},
+    // CalendarItem fields
     {EwsItemFieldCalendarItemType, QStringLiteral("CalendarItemType"),
         &ewsXmlCalendarItemTypeReader},
     {EwsItemFieldUID, QStringLiteral("UID"), &ewsXmlTextReader},
@@ -107,14 +119,13 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
         &EwsItemPrivate::occurrencesReader},
     {EwsItemFieldDeletedOccurrences, QStringLiteral("DeletedOccurrences"),
         &EwsItemPrivate::occurrencesReader},
-    {EwsItemFieldCategories, QStringLiteral("Categories"), &EwsItemPrivate::categoriesReader},
     {EwsItemFieldTimeZone, QStringLiteral("TimeZone"), &ewsXmlTextReader},
 };
 
-const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsReader(ewsItemItems);
+const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsXml(ewsItemItems);
 
 EwsItemPrivate::EwsItemPrivate()
-    : EwsItemBasePrivate(), mType(EwsItemTypeUnknown), mEwsReader(mStaticEwsReader)
+    : EwsItemBasePrivate(), mType(EwsItemTypeUnknown), mEwsXml(mStaticEwsXml)
 {
 }
 
@@ -331,6 +342,17 @@ bool EwsItemPrivate::categoriesReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
+bool EwsItemPrivate::categoriesWriter(QXmlStreamWriter &writer, const QVariant &val)
+{
+    QStringList categories = val.toStringList();
+
+    Q_FOREACH(const QString &cat, categories) {
+        writer.writeTextElement(ewsTypeNsUri, QStringLiteral("String"), cat);
+    }
+
+    return true;
+}
+
 bool EwsItemPrivate::recurrenceReader(QXmlStreamReader &reader, QVariant &val)
 {
     EwsRecurrence recurrence(reader);
@@ -437,9 +459,16 @@ EwsItemType EwsItem::type() const
     return d->mType;
 }
 
+void EwsItem::setType(EwsItemType type)
+{
+    D_PTR
+    d->mType = type;
+}
+
 EwsItemType EwsItem::internalType() const
 {
-    const EwsItemPrivate *d = reinterpret_cast<const EwsItemPrivate*>(this->d.data());
+    D_CPTR
+
     EwsItemType type = d->mType;
     switch (type) {
     case EwsItemTypeMeetingMessage:
@@ -456,13 +485,13 @@ EwsItemType EwsItem::internalType() const
 
 bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
 {
-    EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
+    D_PTR
 
-    if (!d->mEwsReader.readItem(reader, "Item", ewsTypeNsUri)) {
+    if (!d->mEwsXml.readItem(reader, "Item", ewsTypeNsUri)) {
         return false;
     }
 
-    d->mFields = d->mEwsReader.values();
+    d->mFields = d->mEwsXml.values();
 
     // The body item is special as it hold two values in one. Need to separate them into their
     // proper places.
@@ -475,3 +504,15 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
     return true;
 }
 
+bool EwsItem::write(QXmlStreamWriter &writer) const
+{
+    D_CPTR
+
+    writer.writeStartElement(ewsTypeNsUri, ewsItemTypeNames[d->mType]);
+
+    bool status = d->mEwsXml.writeItems(writer, ewsItemTypeNames[d->mType], ewsTypeNsUri, d->mFields);
+
+    writer.writeEndElement();
+
+    return status;
+}
