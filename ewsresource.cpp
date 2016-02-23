@@ -35,6 +35,7 @@
 #include "ewsdeleteitemrequest.h"
 #include "ewscreatefolderrequest.h"
 #include "ewsmovefolderrequest.h"
+#include "ewsupdatefolderrequest.h"
 #include "ewsdeletefolderrequest.h"
 #include "ewssubscriptionmanager.h"
 #include "ewsgetfolderrequest.h"
@@ -579,6 +580,65 @@ void EwsResource::folderMoveRequestFinished(KJob *job)
     }
     else {
         cancelTask(i18n("Failed to move folder"));
+    }
+}
+
+void EwsResource::collectionChanged(const Collection &collection,
+                                    const QSet<QByteArray> &changedAttributes)
+{
+    qDebug() << "collectionChanged" << collection.name() << changedAttributes;
+
+    if (changedAttributes.contains("NAME")) {
+        EwsUpdateFolderRequest *req = new EwsUpdateFolderRequest(mEwsClient, this);
+        EwsUpdateFolderRequest::FolderChange fc(EwsId(collection.remoteId(), collection.remoteRevision()),
+                                                EwsFolderTypeMail);
+        EwsUpdateFolderRequest::Update *upd
+            = new EwsUpdateFolderRequest::SetUpdate(EwsPropertyField(QStringLiteral("folder:DisplayName")),
+                                                    collection.name());
+        fc.addUpdate(upd);
+        req->addFolderChange(fc);
+        req->setProperty("collection", QVariant::fromValue<Collection>(collection));
+        connect(req, &EwsUpdateFolderRequest::finished, this, &EwsResource::folderUpdateRequestFinished);
+        req->start();
+    } else {
+        changeCommitted(collection);
+    }
+}
+
+void EwsResource::collectionChanged(const Akonadi::Collection &collection)
+{
+    Q_UNUSED(collection)
+}
+
+void EwsResource::folderUpdateRequestFinished(KJob *job)
+{
+    qDebug() << "folderUpdateRequestFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsUpdateFolderRequest *req = qobject_cast<EwsUpdateFolderRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+    Collection col = job->property("collection").value<Collection>();
+
+    if (req->responses().count() != 1) {
+        cancelTask(QStringLiteral("Invalid number of responses received from server."));
+        return;
+    }
+
+    EwsUpdateFolderRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        const EwsId &id = resp.folderId();
+        col.setRemoteId(id.id());
+        col.setRemoteRevision(id.changeKey());
+        changeCommitted(col);
+    }
+    else {
+        cancelTask(i18n("Failed to update folder"));
     }
 }
 
