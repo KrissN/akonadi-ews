@@ -34,6 +34,7 @@
 #include "ewsmoveitemrequest.h"
 #include "ewsdeleteitemrequest.h"
 #include "ewscreatefolderrequest.h"
+#include "ewsmovefolderrequest.h"
 #include "ewsdeletefolderrequest.h"
 #include "ewssubscriptionmanager.h"
 #include "ewsgetfolderrequest.h"
@@ -529,6 +530,55 @@ void EwsResource::folderCreateRequestFinished(KJob *job)
     }
     else {
         cancelTask(i18n("Failed to create folder"));
+    }
+}
+
+void EwsResource::collectionMoved(const Collection &collection, const Collection &collectionSource,
+                                 const Collection &collectionDestination)
+{
+    Q_UNUSED(collectionSource)
+
+    EwsId::List ids;
+    ids.append(EwsId(collection.remoteId(), collection.remoteRevision()));
+
+    EwsMoveFolderRequest *req = new EwsMoveFolderRequest(mEwsClient, this);
+    req->setFolderIds(ids);
+    EwsId destId(collectionDestination.remoteId());
+    req->setDestinationFolderId(destId);
+    req->setProperty("collection", QVariant::fromValue<Collection>(collection));
+    connect(req, &EwsMoveFolderRequest::result, this, &EwsResource::folderMoveRequestFinished);
+    req->start();
+}
+
+void EwsResource::folderMoveRequestFinished(KJob *job)
+{
+    qDebug() << "folderMoveRequestFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsMoveFolderRequest *req = qobject_cast<EwsMoveFolderRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+    Collection col = job->property("collection").value<Collection>();
+
+    if (req->responses().count() != 1) {
+        cancelTask(QStringLiteral("Invalid number of responses received from server."));
+        return;
+    }
+
+    EwsMoveFolderRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        const EwsId &id = resp.folderId();
+        col.setRemoteId(id.id());
+        col.setRemoteRevision(id.changeKey());
+        changeCommitted(col);
+    }
+    else {
+        cancelTask(i18n("Failed to move folder"));
     }
 }
 

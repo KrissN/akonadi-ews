@@ -41,6 +41,8 @@ public:
     ~EwsResource();
 
     virtual void collectionAdded(const Akonadi::Collection &collection, const Akonadi::Collection &parent) Q_DECL_OVERRIDE;
+    virtual void collectionMoved(const Akonadi::Collection &collection, const Akonadi::Collection &collectionSource,
+                                 const Akonadi::Collection &collectionDestination) Q_DECL_OVERRIDE;
     virtual void collectionRemoved(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
     virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) Q_DECL_OVERRIDE;
     virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
@@ -62,6 +64,7 @@ private Q_SLOTS:
     void itemMoveRequestFinished(KJob *job);
     void itemDeleteRequestFinished(KJob *job);
     void folderCreateRequestFinished(KJob *job);
+    void folderMoveRequestFinished(KJob *job);
     void folderDeleteRequestFinished(KJob *job);
     void delayedInit();
     void foldersModifiedEvent(EwsId::List folders);
