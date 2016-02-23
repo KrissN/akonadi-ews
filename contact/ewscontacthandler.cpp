@@ -24,6 +24,7 @@
 
 #include "ewsfetchcontactdetailjob.h"
 #include "ewsmodifycontactjob.h"
+#include "ewscreatecontactjob.h"
 
 using namespace Akonadi;
 
@@ -69,6 +70,12 @@ EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient& client, const Akon
                                                    const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyContactJob(client, item, parts, parent);
+}
+
+EwsCreateItemJob *EwsContactHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+                                                   const Akonadi::Collection &collection, QObject *parent)
+{
+    return new EwsCreateContactJob(client, item, collection, parent);
 }
 
 EWS_DECLARE_ITEM_HANDLER(EwsContactHandler, EwsItemTypeContact)

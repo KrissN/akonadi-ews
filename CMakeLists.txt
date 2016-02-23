@@ -53,19 +53,24 @@ add_definitions(-DTRANSLATION_DOMAIN=\"akonadi_ews_resource\")
 
 set(ewsresource_SRCS
     calendar/ewscalendarhandler.cpp
+    calendar/ewscreatecalendarjob.cpp
     calendar/ewsfetchcalendardetailjob.cpp
     calendar/ewsmodifycalendarjob.cpp
     contact/ewscontacthandler.cpp
+    contact/ewscreatecontactjob.cpp
     contact/ewsfetchcontactdetailjob.cpp
     contact/ewsmodifycontactjob.cpp
+    mail/ewscreatemailjob.cpp
     mail/ewsfetchmaildetailjob.cpp
     mail/ewsmailhandler.cpp
     mail/ewsmodifymailjob.cpp
+    task/ewscreatetaskjob.cpp
     task/ewsfetchtaskdetailjob.cpp
     task/ewsmodifytaskjob.cpp
     task/ewstaskhandler.cpp
     configdialog.cpp
     ewsautodiscoveryjob.cpp
+    ewscreateitemjob.cpp
     ewsfetchfoldersjob.cpp
     ewsfetchitemsjob.cpp
     ewsfetchitemdetailjob.cpp

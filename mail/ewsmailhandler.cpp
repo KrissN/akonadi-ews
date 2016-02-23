@@ -25,6 +25,7 @@
 
 #include "ewsfetchmaildetailjob.h"
 #include "ewsmodifymailjob.h"
+#include "ewscreatemailjob.h"
 
 using namespace Akonadi;
 
@@ -83,6 +84,12 @@ EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient& client, const Akonadi
                                                 const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyMailJob(client, item, parts, parent);
+}
+
+EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+                                                const Akonadi::Collection &collection, QObject *parent)
+{
+    return new EwsCreateMailJob(client, item, collection, parent);
 }
 
 

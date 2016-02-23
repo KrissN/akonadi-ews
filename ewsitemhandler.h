@@ -32,6 +32,7 @@ class Item;
 class EwsClient;
 class EwsFetchItemDetailJob;
 class EwsModifyItemJob;
+class EwsCreateItemJob;
 class EwsItem;
 
 class EwsItemHandler
@@ -46,6 +47,8 @@ public:
     virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) = 0;
     virtual EwsModifyItemJob *modifyItemJob(EwsClient& client, const Akonadi::Item &item,
                                             const QSet<QByteArray> &parts, QObject *parent) = 0;
+    virtual EwsCreateItemJob *createItemJob(EwsClient& client, const Akonadi::Item &item,
+                                            const Akonadi::Collection &collection, QObject *parent) = 0;
 
     typedef std::function<EwsItemHandler*()> ItemHandlerFactory;
     static void registerItemHandler(EwsItemType type, ItemHandlerFactory factory);

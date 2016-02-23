@@ -23,6 +23,7 @@
 
 #include "ewsfetchcalendardetailjob.h"
 #include "ewsmodifycalendarjob.h"
+#include "ewscreatecalendarjob.h"
 
 using namespace Akonadi;
 
@@ -68,6 +69,12 @@ EwsModifyItemJob *EwsCalendarHandler::modifyItemJob(EwsClient& client, const Ako
                                                     const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyCalendarJob(client, item, parts, parent);
+}
+
+EwsCreateItemJob *EwsCalendarHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+                                                    const Akonadi::Collection &collection, QObject *parent)
+{
+    return new EwsCreateCalendarJob(client, item, collection, parent);
 }
 
 EWS_DECLARE_ITEM_HANDLER(EwsCalendarHandler, EwsItemTypeCalendarItem)

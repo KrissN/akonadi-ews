@@ -23,6 +23,7 @@
 
 #include "ewsfetchtaskdetailjob.h"
 #include "ewsmodifytaskjob.h"
+#include "ewscreatetaskjob.h"
 
 using namespace Akonadi;
 
@@ -70,5 +71,10 @@ EwsModifyItemJob *EwsTaskHandler::modifyItemJob(EwsClient& client, const Akonadi
     return new EwsModifyTaskJob(client, item, parts, parent);
 }
 
+EwsCreateItemJob *EwsTaskHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+                                                const Akonadi::Collection &collection, QObject *parent)
+{
+    return new EwsCreateTaskJob(client, item, collection, parent);
+}
 
 EWS_DECLARE_ITEM_HANDLER(EwsTaskHandler, EwsItemTypeTask)

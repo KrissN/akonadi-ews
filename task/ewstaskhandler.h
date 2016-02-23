@@ -35,7 +35,8 @@ public:
     virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) Q_DECL_OVERRIDE;
     virtual EwsModifyItemJob *modifyItemJob(EwsClient& client, const Akonadi::Item &item,
                                             const QSet<QByteArray> &parts, QObject *parent) Q_DECL_OVERRIDE;
-
+    virtual EwsCreateItemJob *createItemJob(EwsClient& client, const Akonadi::Item &item,
+                                            const Akonadi::Collection &collection, QObject *parent) Q_DECL_OVERRIDE;
     static EwsItemHandler *factory();
 private:
 };
