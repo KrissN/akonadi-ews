@@ -110,7 +110,7 @@ EwsCreateFolderRequest::Response::Response(QXmlStreamReader &reader)
                 }
                 mId = folder[EwsFolderFieldFolderId].value<EwsId>();
 
-                // Finish the Items element.
+                // Finish the Folders element.
                 reader.skipCurrentElement();
             }
         }
