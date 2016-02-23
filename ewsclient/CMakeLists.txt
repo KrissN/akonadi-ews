@@ -51,6 +51,7 @@ set(EWSCLIENT_SRCS
   ewssyncfolderitemsrequest.cpp
   ewstypes.cpp
   ewsunsubscriberequest.cpp
+  ewsupdatefolderrequest.cpp
   ewsupdateitemrequest.cpp
   ewsxml.cpp
   ewsclient_debug.cpp)
