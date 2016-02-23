@@ -73,4 +73,4 @@ ProgressDialog::ProgressDialog(QWidget *parent, Type type)
 
 ProgressDialog::~ProgressDialog()
 {
-};
+}
