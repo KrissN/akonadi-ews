@@ -34,6 +34,7 @@
 #include "ewsmoveitemrequest.h"
 #include "ewsdeleteitemrequest.h"
 #include "ewscreatefolderrequest.h"
+#include "ewsdeletefolderrequest.h"
 #include "ewssubscriptionmanager.h"
 #include "ewsgetfolderrequest.h"
 #include "ewsitemhandler.h"
@@ -533,8 +534,40 @@ void EwsResource::folderCreateRequestFinished(KJob *job)
 
 void EwsResource::collectionRemoved(const Collection &collection)
 {
+    EwsDeleteFolderRequest *req = new EwsDeleteFolderRequest(mEwsClient, this);
+    EwsId::List ids;
+    ids.append(EwsId(collection.remoteId(), collection.remoteRevision()));
+    req->setFolderIds(ids);
+    connect(req, &EwsDeleteFolderRequest::result, this, &EwsResource::folderDeleteRequestFinished);
+    req->start();
 
 }
+
+void EwsResource::folderDeleteRequestFinished(KJob *job)
+{
+    qDebug() << "folderDeleteRequestFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsDeleteFolderRequest *req = qobject_cast<EwsDeleteFolderRequest*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+
+    EwsDeleteFolderRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        changeProcessed();
+    }
+    else {
+        cancelTask(i18n("Failed to delete folder"));
+        mFolderSyncState.clear();
+        synchronizeCollectionTree();
+    }
+}
+
 
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {
