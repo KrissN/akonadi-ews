@@ -41,6 +41,7 @@
 #include "ewsgetfolderrequest.h"
 #include "ewsitemhandler.h"
 #include "ewsmodifyitemjob.h"
+#include "ewscreateitemjob.h"
 #include "configdialog.h"
 #include "settings.h"
 #include "ewsclient_debug.h"
@@ -470,6 +471,32 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
 
 void EwsResource::itemAdded(const Item &item, const Collection &collection)
 {
+    EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
+    if (type == EwsItemTypeItem) {
+        cancelTask("Item type not supported for creation");
+    }
+    else {
+        EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
+            collection, this);
+        connect(job, &EwsCreateItemJob::result, this, &EwsResource::itemCreateRequestFinished);
+        job->start();
+    }
+}
+
+void EwsResource::itemCreateRequestFinished(KJob *job)
+{
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid job object"));
+        return;
+    }
+
+    changeCommitted(req->item());
 }
 
 void EwsResource::collectionAdded(const Collection &collection, const Collection &parent)
