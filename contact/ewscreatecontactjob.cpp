@@ -35,3 +35,9 @@ void EwsCreateContactJob::start()
     qCWarning(EWSRES_LOG) << QStringLiteral("Contact item creation not implemented!");
     emitResult();
 }
+
+bool EwsCreateContactJob::setSend(bool send)
+{
+    qCWarning(EWSRES_LOG) << QStringLiteral("Sending contact items is not supported!");
+    return false;
+}

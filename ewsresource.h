@@ -22,6 +22,7 @@
 
 #include <QtCore/QScopedPointer>
 #include <AkonadiAgentBase/ResourceBase>
+#include <AkonadiAgentBase/TransportResourceBase>
 
 #include "ewsclient.h"
 #include "ewsid.h"
@@ -32,7 +33,8 @@ class EwsFindFolderRequest;
 class EwsFolder;
 class EwsSubscriptionManager;
 
-class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV3
+class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV3,
+    public Akonadi::TransportResourceBase
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Resource")
@@ -52,6 +54,8 @@ public:
     virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
                             const Akonadi::Collection &destinationCollection) Q_DECL_OVERRIDE;
     virtual void itemsRemoved(const Akonadi::Item::List &items) Q_DECL_OVERRIDE;
+
+    virtual void sendItem(const Akonadi::Item &item) Q_DECL_OVERRIDE;
 public Q_SLOTS:
     void configure(WId windowId) Q_DECL_OVERRIDE;
     Q_SCRIPTABLE void clearSyncState();
@@ -68,6 +72,7 @@ private Q_SLOTS:
     void itemMoveRequestFinished(KJob *job);
     void itemDeleteRequestFinished(KJob *job);
     void itemCreateRequestFinished(KJob *job);
+    void itemSendRequestFinished(KJob *job);
     void folderCreateRequestFinished(KJob *job);
     void folderMoveRequestFinished(KJob *job);
     void folderUpdateRequestFinished(KJob *job);

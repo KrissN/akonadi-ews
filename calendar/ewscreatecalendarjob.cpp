@@ -35,3 +35,9 @@ void EwsCreateCalendarJob::start()
     qCWarning(EWSRES_LOG) << QStringLiteral("Calendar item creation not implemented!");
     emitResult();
 }
+
+bool EwsCreateCalendarJob::setSend(bool send)
+{
+    qCWarning(EWSRES_LOG) << QStringLiteral("Sending calendar items is not supported!");
+    return false;
+}

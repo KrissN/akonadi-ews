@@ -30,8 +30,11 @@ public:
                      const Akonadi::Collection &collection, QObject *parent);
     virtual ~EwsCreateMailJob();
     virtual void start() Q_DECL_OVERRIDE;
+    virtual bool setSend(bool send = true) Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void mailCreateFinished(KJob *job);
+private:
+    bool mSend;
 };
 
 #endif

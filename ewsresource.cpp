@@ -705,6 +705,39 @@ void EwsResource::folderDeleteRequestFinished(KJob *job)
     }
 }
 
+void EwsResource::sendItem(const Akonadi::Item &item)
+{
+    qDebug() << "sendItem" << item.remoteId();
+    EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
+    if (type == EwsItemTypeItem) {
+        itemSent(item, TransportFailed, QStringLiteral("Item type not supported for creation"));
+    }
+    else {
+        EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
+            Collection(), this);
+        job->setSend(true);
+        job->setProperty("item", QVariant::fromValue<Item>(item));
+        connect(job, &EwsCreateItemJob::result, this, &EwsResource::itemSendRequestFinished);
+        job->start();
+    }
+}
+
+void EwsResource::itemSendRequestFinished(KJob *job)
+{
+    Item item = job->property("item").value<Item>();
+    if (job->error()) {
+        itemSent(item, TransportFailed, job->errorString());
+        return;
+    }
+
+    EwsCreateItemJob *req = qobject_cast<EwsCreateItemJob*>(job);
+    if (!req) {
+        itemSent(item, TransportFailed, QStringLiteral("Invalid job object"));
+        return;
+    }
+
+    itemSent(item, TransportSucceeded);
+}
 
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {

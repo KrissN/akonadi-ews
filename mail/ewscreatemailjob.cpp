@@ -33,7 +33,7 @@ static const EwsPropertyField propPidMessageFlags(0x0e07, EwsPropTypeInteger);
 
 EwsCreateMailJob::EwsCreateMailJob(EwsClient& client, const Akonadi::Item &item,
                                    const Akonadi::Collection &collection, QObject *parent)
-    : EwsCreateItemJob(client, item, collection, parent)
+    : EwsCreateItemJob(client, item, collection, parent), mSend(false)
 {
 }
 EwsCreateMailJob::~EwsCreateMailJob()
@@ -54,12 +54,14 @@ void EwsCreateMailJob::start()
     EwsItem item;
     item.setType(EwsItemTypeMessage);
     item.setField(EwsItemFieldMimeContent, mimeContent);
-    /* When creating items using the CreateItem request Exchange will by default mark the  message
-     * as draft. Setting the extended property below causes the message to appear normally. */
-    item.setProperty(propPidMessageFlags, QStringLiteral("1"));
+    if (!mSend) {
+        /* When creating items using the CreateItem request Exchange will by default mark the  message
+         * as draft. Setting the extended property below causes the message to appear normally. */
+        item.setProperty(propPidMessageFlags, QStringLiteral("1"));
+        req->setSavedFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+    }
     req->setItems(EwsItem::List() << item);
-    req->setMessageDisposition(EwsDispSaveOnly);
-    req->setSavedFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+    req->setMessageDisposition(mSend ? EwsDispSendOnly : EwsDispSaveOnly);
     connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailCreateFinished);
     addSubjob(req);
     req->start();
@@ -68,13 +70,14 @@ void EwsCreateMailJob::start()
 void EwsCreateMailJob::mailCreateFinished(KJob *job)
 {
     qDebug() << "mailCreateFinished";
+    EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
+    req->dump();
     if (job->error()) {
         setErrorMsg(job->errorString());
         emitResult();
         return;
     }
 
-    EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
     if (!req) {
         setErrorMsg(QStringLiteral("Invalid job object"));
         emitResult();
@@ -99,4 +102,10 @@ void EwsCreateMailJob::mailCreateFinished(KJob *job)
     }
 
     emitResult();
+}
+
+bool EwsCreateMailJob::setSend(bool send)
+{
+    mSend = send;
+    return true;
 }

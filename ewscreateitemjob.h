@@ -34,6 +34,8 @@ public:
                      const Akonadi::Collection &collection, QObject *parent);
     virtual ~EwsCreateItemJob();
 
+    virtual bool setSend(bool send = true) = 0;
+
     const Akonadi::Item &item() const;
 
 protected:
