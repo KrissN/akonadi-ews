@@ -38,6 +38,8 @@ void EwsCreateTaskJob::start()
 
 bool EwsCreateTaskJob::setSend(bool send)
 {
+    Q_UNUSED(send)
+
     qCWarning(EWSRES_LOG) << QStringLiteral("Sending task items is not supported!");
     return false;
 }

@@ -38,6 +38,8 @@ void EwsCreateCalendarJob::start()
 
 bool EwsCreateCalendarJob::setSend(bool send)
 {
+    Q_UNUSED(send)
+
     qCWarning(EWSRES_LOG) << QStringLiteral("Sending calendar items is not supported!");
     return false;
 }

@@ -38,6 +38,8 @@ void EwsCreateContactJob::start()
 
 bool EwsCreateContactJob::setSend(bool send)
 {
+    Q_UNUSED(send)
+
     qCWarning(EWSRES_LOG) << QStringLiteral("Sending contact items is not supported!");
     return false;
 }
