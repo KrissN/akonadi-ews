@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Microsoft Exchange Server (EWS) Mail Transport
+Comment="Allows sending e-mail through the Microsoft Exchange server using EWS"
+Type=AkonadiResource
+Exec=akonadi_ewsmta_resource
+
+X-Akonadi-MimeTypes=text/directory,message/rfc822
+X-Akondai-Capabilities=Resource,NeedsNetwork,MailTransport
+X-Akonadi-Identifier=akonadi_ewsmta_resource

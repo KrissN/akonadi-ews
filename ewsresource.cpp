@@ -44,6 +44,9 @@
 #include "ewscreateitemjob.h"
 #include "configdialog.h"
 #include "settings.h"
+#ifdef HAVE_SEPARATE_MTA_RESOURCE
+#include "ewscreateitemrequest.h"
+#endif
 #include "ewsclient_debug.h"
 
 #include "resourceadaptor.h"
@@ -738,6 +741,51 @@ void EwsResource::itemSendRequestFinished(KJob *job)
 
     itemSent(item, TransportSucceeded);
 }
+
+#ifdef HAVE_SEPARATE_MTA_RESOURCE
+void EwsResource::sendMessage(QString id, QByteArray content)
+{
+    qDebug() << "sendMessage" << id;
+    EwsCreateItemRequest *req = new EwsCreateItemRequest(mEwsClient, this);
+
+    EwsItem item;
+    item.setType(EwsItemTypeMessage);
+    item.setField(EwsItemFieldMimeContent, content);
+    req->setItems(EwsItem::List() << item);
+    req->setMessageDisposition(EwsDispSendOnly);
+    req->setProperty("requestId", id);
+    connect(req, &EwsCreateItemRequest::finished, this, &EwsResource::messageSendRequestFinished);
+    req->start();
+}
+
+void EwsResource::messageSendRequestFinished(KJob *job)
+{
+    QString id = job->property("requestId").toString();
+    if (job->error()) {
+        Q_EMIT messageSent(id, job->errorString());
+        return;
+    }
+
+    EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
+    if (!req) {
+        Q_EMIT messageSent(id, QStringLiteral("Invalid job object"));
+        return;
+    }
+
+    if (req->responses().count() != 1) {
+        Q_EMIT messageSent(id, QStringLiteral("Invalid number of responses received from server."));
+        return;
+    }
+
+    EwsCreateItemRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        Q_EMIT messageSent(id, QString());
+    }
+    else {
+        Q_EMIT messageSent(id, resp.responseMessage());
+    }
+}
+#endif
 
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {

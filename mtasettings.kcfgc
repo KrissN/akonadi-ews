@@ -1,0 +1,7 @@
+File=ewsmtaresource.kcfg
+ClassName=MtaSettings
+Mutators=true
+ItemAccessors=true
+SetUserTexts=true
+Singleton=true
+GlobalEnums=true

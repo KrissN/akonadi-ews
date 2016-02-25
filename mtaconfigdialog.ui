@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SetupServerView</class>
+ <widget class="QWidget" name="SetupServerView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>553</width>
+    <height>421</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>EWS Mail Transport Configuration</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="accountLabel">
+     <property name="text">
+      <string>Account Name:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="accountName"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="recourceLabel">
+     <property name="text">
+      <string>Parent Exchange account:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Akonadi::AgentInstanceWidget" name="resourceWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Akonadi::AgentInstanceWidget</class>
+   <extends>QWidget</extends>
+   <header>agentinstancewidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -27,6 +27,8 @@
 #include "ewsclient.h"
 #include "ewsid.h"
 
+#include "config.h"
+
 class FetchItemState;
 class EwsGetItemRequest;
 class EwsFindFolderRequest;
@@ -83,6 +85,16 @@ private Q_SLOTS:
     void folderTreeModifiedEvent();
     void fullSyncRequestedEvent();
     void rootFolderFetchFinished(KJob *job);
+
+#ifdef HAVE_SEPARATE_MTA_RESOURCE
+public Q_SLOTS:
+    Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);
+Q_SIGNALS:
+    Q_SCRIPTABLE void messageSent(QString id, QString error);
+private Q_SLOTS:
+    void messageSendRequestFinished(KJob *job);
+#endif
+
 private:
     void finishItemsFetch(FetchItemState *state);
 

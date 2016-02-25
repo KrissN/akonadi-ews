@@ -45,7 +45,11 @@ find_package(KF5Contacts)
 find_package(KF5Codecs)
 find_package(KF5KDELibs4Support)
 
+option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail." TRUE)
+
 add_subdirectory(ewsclient)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ewsclient)
 
@@ -105,6 +109,35 @@ target_link_libraries(akonadi_ews_resource
     KF5::Contacts
     KF5::KDELibs4Support
     ewsclient)
+
+if (HAVE_SEPARATE_MTA_RESOURCE)
+  set(ewsmtaresource_SRCS
+    ewsmtaresource.cpp
+    mtaconfigdialog.cpp)
+
+  ki18n_wrap_ui(ewsmtaresource_SRCS mtaconfigdialog.ui)
+
+  kconfig_add_kcfg_files(ewsmtaresource_SRCS mtasettings.kcfgc)
+  kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/ewsmtaresource.kcfg org.kde.Akonadi.EwsMta.Settings)
+  qt5_add_dbus_adaptor(ewsmtaresource_SRCS
+    ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.EwsMta.Settings.xml mtasettings.h MtaSettings mtasettingsadaptor
+  )
+  qt5_add_dbus_interface(ewsmtaresource_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Resource.xml resourceinterface)
+
+  add_executable(akonadi_ewsmta_resource ${ewsmtaresource_SRCS})
+  target_link_libraries(akonadi_ewsmta_resource
+      KF5::AkonadiAgentBase
+      KF5::AkonadiCore
+      KF5::AkonadiWidgets
+      KF5::Mime
+      KF5::KDELibs4Support)
+
+  set(EWS_MTA_CAPABILITIES "X-EwsMailTransport")
+else (AKONADI_EWS_SEPARATE_MTA)
+  set(EWS_MTA_CAPABILITIES "MailTransport,Synchronizable")
+endif (AKONADI_EWS_SEPARATE_MTA)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.desktop.cmake ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.desktop)
 
 add_subdirectory(test)
 
