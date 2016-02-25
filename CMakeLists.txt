@@ -20,8 +20,6 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(akonadi-ews)
 
-enable_testing()
-
 find_package(ECM 5.16.0 NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
@@ -46,6 +44,7 @@ find_package(KF5Codecs)
 find_package(KF5KDELibs4Support)
 
 option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail." TRUE)
+option(ENABLE_TESTS "Build the test suite." FALSE)
 
 add_subdirectory(ewsclient)
 
@@ -133,11 +132,13 @@ if (HAVE_SEPARATE_MTA_RESOURCE)
       KF5::KDELibs4Support)
 
   set(EWS_MTA_CAPABILITIES "X-EwsMailTransport")
-else (AKONADI_EWS_SEPARATE_MTA)
+else (HAVE_SEPARATE_MTA_RESOURCE)
   set(EWS_MTA_CAPABILITIES "MailTransport,Synchronizable")
-endif (AKONADI_EWS_SEPARATE_MTA)
+endif (HAVE_SEPARATE_MTA_RESOURCE)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.desktop.cmake ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.desktop)
 
-add_subdirectory(test)
-
+if (ENABLE_TESTS)
+  enable_testing()
+  add_subdirectory(test)
+endif (ENABLE_TESTS)
