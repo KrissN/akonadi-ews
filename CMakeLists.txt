@@ -153,3 +153,9 @@ if (HAVE_SEPARATE_MTA_RESOURCE)
 	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/akonadi/agents" )
   install(TARGETS akonadi_ewsmta_resource ${INSTALL_TARGETS_DEFAULT_ARGS})
 endif (HAVE_SEPARATE_MTA_RESOURCE)
+
+foreach(icon_resolution 16 22 24 32 48 64 72 96 128)
+  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/akonadi-ews-${icon_resolution}.png
+	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/${icon_resolution}x${icon_resolution}"
+	RENAME "akonadi-ews.png")
+endforeach(icon_resolution)
