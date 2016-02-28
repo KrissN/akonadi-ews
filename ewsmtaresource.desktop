@@ -6,5 +6,5 @@ Exec=akonadi_ewsmta_resource
 Icon=akonadi-ews
 
 X-Akonadi-MimeTypes=text/directory,message/rfc822
-X-Akondai-Capabilities=Resource,NeedsNetwork,MailTransport
+X-Akonadi-Capabilities=Resource,NeedsNetwork,MailTransport
 X-Akonadi-Identifier=akonadi_ewsmta_resource
