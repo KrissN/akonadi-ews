@@ -499,9 +499,9 @@ void EwsResource::itemCreateRequestFinished(KJob *job)
         return;
     }
 
-    EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
+    EwsCreateItemJob *req = qobject_cast<EwsCreateItemJob*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid EwsModifyItemJob job object"));
+        cancelTask(QStringLiteral("Invalid EwsCreateItemJob job object"));
         return;
     }
 
