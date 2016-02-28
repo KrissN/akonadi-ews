@@ -101,10 +101,21 @@ bool EwsItemBasePrivate::extendedPropertyWriter(QXmlStreamWriter &writer, const 
 {
     PropertyHash propHash = val.value<PropertyHash>();
     PropertyHash::const_iterator it;
-    for (it = propHash.cbegin(); it != propHash.cend(); it++) {
-        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
+    for (it = propHash.cbegin(); it != propHash.cend();) {
+        /* EwsXml will already start the ExtendedProperty element expecting a single value.
+         * This is not exactly true for extended properties as there may be many. Work around this
+         * by avoiding writing the first element start tag and the last element end tag. */
+        if (it != propHash.cbegin()) {
+            writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
+        }
+        it.key().write(writer);
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Value"));
         it.key().writeValue(writer, it.value());
         writer.writeEndElement();
+        it++;
+        if (it != propHash.cend()) {
+            writer.writeEndElement();
+        }
     }
 
     return true;
