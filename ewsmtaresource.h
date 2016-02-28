@@ -43,6 +43,8 @@ protected Q_SLOTS:
 private Q_SLOTS:
     void messageSent(QString id, QString error);
 private:
+    bool connectEws();
+
     OrgKdeAkonadiEwsResourceInterface *mEwsResource;
     QHash<QString, Akonadi::Item> mItemHash;
 };

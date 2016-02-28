@@ -34,17 +34,31 @@
 using namespace Akonadi;
 
 EwsMtaResource::EwsMtaResource(const QString &id)
-    : Akonadi::ResourceBase(id)
+    : Akonadi::ResourceBase(id), mEwsResource(Q_NULLPTR)
 {
     qDebug() << "EwsMtaResource";
-
-    mEwsResource = new OrgKdeAkonadiEwsResourceInterface(QStringLiteral("org.freedesktop.Akonadi.Resource.") + MtaSettings::ewsResource(),
-                                                         QStringLiteral("/"), QDBusConnection::sessionBus(), this);
-    qDebug() << QStringLiteral("org.freedesktop.akonadi.Resource.") + MtaSettings::ewsResource() << mEwsResource->isValid();
 }
 
 EwsMtaResource::~EwsMtaResource()
 {
+}
+
+bool EwsMtaResource::connectEws()
+{
+    if (mEwsResource) {
+        return true;
+    }
+    mEwsResource = new OrgKdeAkonadiEwsResourceInterface(QStringLiteral("org.freedesktop.Akonadi.Resource.") + MtaSettings::ewsResource(),
+                                                         QStringLiteral("/"), QDBusConnection::sessionBus(), this);
+    qDebug() << QStringLiteral("org.freedesktop.akonadi.Resource.") + MtaSettings::ewsResource() << mEwsResource->isValid();
+    if (!mEwsResource->isValid()) {
+        delete mEwsResource;
+        mEwsResource = Q_NULLPTR;
+    } else {
+        connect(mEwsResource, &OrgKdeAkonadiEwsResourceInterface::messageSent, this, &EwsMtaResource::messageSent);
+    }
+
+    return mEwsResource != Q_NULLPTR;
 }
 
 void EwsMtaResource::configure(WId windowId)
@@ -58,6 +72,11 @@ void EwsMtaResource::configure(WId windowId)
 void EwsMtaResource::sendItem(const Akonadi::Item &item)
 {
     qDebug() << "sendItem" << item.remoteId();
+
+    if (!connectEws()) {
+        itemSent(item, TransportFailed, i18n("Unable to connect to master EWS resource"));
+        return;
+    }
 
     mItemHash.insert(item.remoteId(), item);
 
