@@ -29,22 +29,33 @@ class EwsGetFolderRequest : public EwsRequest
 {
     Q_OBJECT
 public:
+    class Response : public EwsRequest::Response
+    {
+    public:
+        Response(QXmlStreamReader &reader);
+        bool parseFolders(QXmlStreamReader &reader);
+
+        const EwsFolder &folder() const { return mFolder; };
+    private:
+        EwsFolder mFolder;
+    };
+
     EwsGetFolderRequest(EwsClient &client, QObject *parent);
     virtual ~EwsGetFolderRequest();
 
-    void setFolderId(const EwsId &id);
+    void setFolderIds(const EwsId::List &ids);
     void setFolderShape(const EwsFolderShape &shape);
 
     virtual void start();
 
-    const EwsFolder &folder() const { return mFolder; };
+    const QList<Response> &responses() const { return mResponses; };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader);
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
-    EwsId mId;
+    EwsId::List mIds;
     EwsFolderShape mShape;
-    EwsFolder mFolder;
+    QList<Response> mResponses;
 };
 
 #endif

@@ -106,7 +106,7 @@ void EwsResource::delayedInit()
 void EwsResource::resetUrl()
 {
     EwsGetFolderRequest *req = new EwsGetFolderRequest(mEwsClient, this);
-    req->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+    req->setFolderIds(EwsId::List() << EwsId(EwsDIdMsgFolderRoot));
     EwsFolderShape shape(EwsShapeIdOnly);
     shape << EwsPropertyField(QStringLiteral("folder:DisplayName"));
     req->setFolderShape(shape);
@@ -130,7 +130,13 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         return;
     }
 
-    EwsId id = req->folder()[EwsFolderFieldFolderId].value<EwsId>();
+    if (req->responses().size() != 1) {
+        Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid number of responses received");
+        return;
+    }
+
+    EwsId id = req->responses().first().folder()[EwsFolderFieldFolderId].value<EwsId>();
     if (id.type() == EwsId::Real) {
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());

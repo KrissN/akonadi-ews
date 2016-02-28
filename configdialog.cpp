@@ -218,7 +218,7 @@ void ConfigDialog::dialogAccepted()
         cli.setCredentials(fullUsername(), mUi->kcfg_Password->text());
         mTryConnectJob = new EwsGetFolderRequest(cli, this);
         mTryConnectJob->setFolderShape(EwsShapeIdOnly);
-        mTryConnectJob->setFolderId(EwsDIdInbox);
+        mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
         connect(mTryConnectJob, &EwsGetFolderRequest::result, this, &ConfigDialog::tryConnectFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::TryConnect);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::tryConnectCancelled);
@@ -254,7 +254,7 @@ void ConfigDialog::tryConnect()
     cli.setCredentials(fullUsername(), mUi->kcfg_Password->text());
     mTryConnectJob = new EwsGetFolderRequest(cli, this);
     mTryConnectJob->setFolderShape(EwsShapeIdOnly);
-    mTryConnectJob->setFolderId(EwsDIdInbox);
+    mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
     mProgressDialog = new ProgressDialog(this, ProgressDialog::TryConnect);
     connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::tryConnectCancelled);
     mProgressDialog->show();

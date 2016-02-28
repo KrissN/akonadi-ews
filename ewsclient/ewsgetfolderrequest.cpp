@@ -22,15 +22,6 @@
 #include "ewsgetfolderrequest.h"
 #include "ewsclient_debug.h"
 
-class EwsGetFolderResponse : public EwsRequest::Response
-{
-public:
-    EwsGetFolderResponse(QXmlStreamReader &reader);
-    bool parseFolders(QXmlStreamReader &reader);
-
-    EwsFolder mFolder;
-};
-
 EwsGetFolderRequest::EwsGetFolderRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent)
 {
@@ -40,9 +31,9 @@ EwsGetFolderRequest::~EwsGetFolderRequest()
 {
 }
 
-void EwsGetFolderRequest::setFolderId(const EwsId &id)
+void EwsGetFolderRequest::setFolderIds(const EwsId::List &ids)
 {
-    mId = id;
+    mIds = ids;
 }
 
 void EwsGetFolderRequest::setFolderShape(const EwsFolderShape &shape)
@@ -62,7 +53,9 @@ void EwsGetFolderRequest::start()
     mShape.write(writer);
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderIds"));
-    mId.writeFolderIds(writer);
+    Q_FOREACH(const EwsId &id, mIds) {
+        id.writeFolderIds(writer);
+    }
     writer.writeEndElement();
 
     writer.writeEndElement();
@@ -71,7 +64,7 @@ void EwsGetFolderRequest::start()
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetFolder request (id: %1)").arg(mId.id());
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetFolder request (%1 folders)").arg(mIds.size());
 
     prepare(reqString);
 
@@ -86,31 +79,31 @@ bool EwsGetFolderRequest::parseResult(QXmlStreamReader &reader)
 
 bool EwsGetFolderRequest::parseFoldersResponse(QXmlStreamReader &reader)
 {
-    EwsGetFolderResponse *resp = new EwsGetFolderResponse(reader);
-    if (resp->responseClass() == EwsResponseUnknown) {
+    Response resp(reader);
+    if (resp.responseClass() == EwsResponseUnknown) {
         return false;
     }
 
-    mFolder = resp->mFolder;
+    mResponses.append(resp);
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
-        if (resp->isSuccess()) {
+        if (resp.isSuccess()) {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetFolder response");
         }
         else {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetFolder response - %1")
-                            .arg(resp->responseMessage());
+                            .arg(resp.responseMessage());
         }
     }
 
-    QVariant dn = mFolder[EwsFolderFieldDisplayName];
+    QVariant dn = resp.folder()[EwsFolderFieldDisplayName];
     if (!dn.isNull()) {
-        EwsClient::folderHash[mFolder[EwsFolderFieldFolderId].value<EwsId>().id()] = dn.toString();
+        EwsClient::folderHash[resp.folder()[EwsFolderFieldFolderId].value<EwsId>().id()] = dn.toString();
     }
 
     return true;
 }
 
-EwsGetFolderResponse::EwsGetFolderResponse(QXmlStreamReader &reader)
+EwsGetFolderRequest::Response::Response(QXmlStreamReader &reader)
     : EwsRequest::Response(reader)
 {
     while (reader.readNextStartElement()) {
@@ -132,7 +125,7 @@ EwsGetFolderResponse::EwsGetFolderResponse(QXmlStreamReader &reader)
     }
 }
 
-bool EwsGetFolderResponse::parseFolders(QXmlStreamReader &reader)
+bool EwsGetFolderRequest::Response::parseFolders(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("Folders")) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected Folders element (got %1).")
