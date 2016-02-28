@@ -111,8 +111,17 @@ void EwsRequest::requestResult(KJob *job)
         dumpFile.close();
     }
 
+    KIO::TransferJob *trJob = qobject_cast<KIO::TransferJob*>(job);
+    int resp = trJob->metaData()["responsecode"].toUInt();
+
     if (job->error() != 0) {
         setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString());
+    }
+    /* Don't attempt to parse the response in case of a HTTP error. The only exception is
+     * 500 (Bad Request) as in such case the server does provide the usual SOAP response. */
+    else if ((resp >= 300) && (resp != 500)) {
+        setErrorMsg(QStringLiteral("Failed to process EWS request - HTTP code %1").arg(resp));
+        setError(resp);
     }
     else {
         QXmlStreamReader reader(mResponseData);
