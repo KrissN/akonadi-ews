@@ -156,6 +156,6 @@ endif (HAVE_SEPARATE_MTA_RESOURCE)
 
 foreach(icon_resolution 16 22 24 32 48 64 72 96 128)
   install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/akonadi-ews-${icon_resolution}.png
-	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/${icon_resolution}x${icon_resolution}"
+	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/${icon_resolution}x${icon_resolution}/apps/"
 	RENAME "akonadi-ews.png")
 endforeach(icon_resolution)
