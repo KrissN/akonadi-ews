@@ -81,7 +81,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
     {EwsItemFieldInternetMessageHeaders, QStringLiteral("InternetMessageHeaders"),
         &EwsItemPrivate::messageHeadersReader},
     {EwsItemFieldExtendedProperties, QStringLiteral("ExtendedProperty"),
-        &EwsItemBasePrivate::extendedPropertyReader},
+        &EwsItemBasePrivate::extendedPropertyReader, &EwsItemBasePrivate::extendedPropertyWriter},
     {EwsItemFieldHasAttachments, QStringLiteral("HasAttachments"), &ewsXmlBoolReader},
     // Message fields
     {EwsItemFieldFrom, QStringLiteral("From"), &EwsItemPrivate::mailboxReader},
