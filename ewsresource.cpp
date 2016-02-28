@@ -59,7 +59,11 @@ EwsResource::EwsResource(const QString &id)
     qDebug() << "EwsResource";
     //setName(i18n("Microsoft Exchange"));
     mEwsClient.setUrl(Settings::baseUrl());
-    mEwsClient.setCredentials(Settings::username(), Settings::password());
+    if (Settings::domain().isEmpty()) {
+        mEwsClient.setCredentials(Settings::username(), Settings::password());
+    } else {
+        mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), Settings::password());
+    }
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
@@ -194,7 +198,11 @@ void EwsResource::configure(WId windowId)
     if (dlg.exec()) {
         mSubManager.reset(Q_NULLPTR);
         mEwsClient.setUrl(Settings::baseUrl());
-        mEwsClient.setCredentials(Settings::username(), Settings::password());
+        if (Settings::domain().isEmpty()) {
+            mEwsClient.setCredentials(Settings::username(), Settings::password());
+        } else {
+            mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), Settings::password());
+        }
         Settings::self()->save();
         resetUrl();
     }
