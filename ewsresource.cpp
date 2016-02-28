@@ -227,11 +227,9 @@ void EwsResource::findFoldersRequestFinished(KJob *job)
     mFolderSyncState = req->syncState();
     if (req->fullSync()) {
         collectionsRetrieved(req->folders());
-        qCDebug(EWSRES_LOG) << req->folders();
     }
     else {
         collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
-        qCDebug(EWSRES_LOG) << req->changedFolders() << req->deletedFolders();
     }
 }
 
