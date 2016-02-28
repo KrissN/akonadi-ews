@@ -39,7 +39,6 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     EwsItemShape shape(EwsShapeIdOnly);
     shape << EwsPropertyField("item:Subject");
     shape << EwsPropertyField("item:Importance");
-    shape << EwsPropertyField("item:InternetMessageHeaders");
     shape << EwsPropertyField("message:From");
     shape << EwsPropertyField("message:ToRecipients");
     shape << EwsPropertyField("message:CcRecipients");
@@ -47,6 +46,10 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("message:IsRead");
     shape << EwsPropertyField("item:HasAttachments");
     shape << EwsPropertyField("item:Categories");
+    shape << EwsPropertyField("item:DateTimeReceived");
+    shape << EwsPropertyField("item:InReplyTo");
+    shape << EwsPropertyField("message:References");
+    shape << EwsPropertyField("message:InternetMessageId");
     shape << propPidFlagStatus;
     shape << propPidFlagIconIndex;
     mRequest->setItemShape(shape);
@@ -73,27 +76,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         KMime::Message::Ptr msg(new KMime::Message);
 
         // Rebuild the message headers
-        QStringList headers;
-
-        // Start with the miscellaneous headers
-        QVariant v = ewsItem[EwsItemFieldInternetMessageHeaders];
-        if (Q_LIKELY(v.isValid())) {
-            EwsItem::HeaderMap origHeaders = v.value<EwsItem::HeaderMap>();
-            EwsItem::HeaderMap::const_iterator headIt = origHeaders.cbegin();
-            for (; headIt != origHeaders.cend(); headIt++) {
-                QByteArray key = headIt.key().toLatin1();
-                KMime::Headers::Base *header = KMime::Headers::createHeader(key);
-                if (!header) {
-                    header = new KMime::Headers::Generic(headIt.key().toLatin1().constData());
-                }
-                header->fromUnicodeString(headIt.value(), "utf-8");
-                msg->appendHeader(header);
-            }
-        }
-
-        // Exchange will not return envelope headers (Subject, From, To, etc.) in the above
-        // list. Add them explicitly.
-        v = ewsItem[EwsItemFieldSubject];
+        QVariant v = ewsItem[EwsItemFieldSubject];
         if (Q_LIKELY(v.isValid())) {
             msg->subject()->fromUnicodeString(v.toString(), "utf-8");
         }
@@ -131,8 +114,27 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             }
         }
 
+        v = ewsItem[EwsItemFieldInternetMessageId];
+        if (v.isValid()) {
+            msg->messageID()->from7BitString(v.toString().toAscii());
+        }
+
+        v = ewsItem[EwsItemFieldInReplyTo];
+        if (v.isValid()) {
+            msg->inReplyTo()->from7BitString(v.toString().toAscii());
+        }
+
+        v = ewsItem[EwsItemFieldDateTimeReceived];
+        if (v.isValid()) {
+            msg->date()->setDateTime(v.toDateTime());
+        }
+
+        v = ewsItem[EwsItemFieldReferences];
+        if (v.isValid()) {
+            msg->references()->from7BitString(v.toString().toAscii());
+        }
+
         msg->assemble();
-        //qCDebugNC(EWSCLIENT_LOG) << QStringLiteral("Setting payload for msg %1").arg(item.id()) << msg->head();
         item.setPayload(KMime::Message::Ptr(msg));
 
         v = ewsItem[EwsItemFieldIsRead];
