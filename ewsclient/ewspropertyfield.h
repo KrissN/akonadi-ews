@@ -50,7 +50,8 @@ public:
     void write(QXmlStreamWriter &writer) const;
     bool read(QXmlStreamReader &reader);
 
-    bool writeValue(QXmlStreamWriter &writer, const QVariant &value) const;
+    bool writeWithValue(QXmlStreamWriter &writer, const QVariant &value) const;
+    void writeValue(QXmlStreamWriter &writer, const QVariant &value) const;
 private:
     QSharedDataPointer<EwsPropertyFieldPrivate> d;
 

@@ -110,7 +110,6 @@ public:
     uint mHash;  // Precalculated hash for the qHash() function.
 
     void recalcHash();
-    void writeValue(QXmlStreamWriter &writer, const QVariant &value) const;
 };
 
 void EwsPropertyFieldPrivate::recalcHash()
@@ -565,7 +564,7 @@ QDebug operator<<(QDebug debug, const EwsPropertyField &prop)
     return debug;
 }
 
-bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &value) const
+bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &value) const
 {
     switch (d->mPropType)
     {
@@ -577,7 +576,7 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
             return false;
         }
         writer.writeStartElement(ewsTypeNsUri, tokens[1]);
-        d->writeValue(writer, value);
+        writeValue(writer, value);
         writer.writeEndElement();
         break;
     }
@@ -591,7 +590,7 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
         writer.writeStartElement(ewsTypeNsUri, tokens[1] + QStringLiteral("es"));
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Entry"));
         writer.writeAttribute(QStringLiteral("Key"), tokens[1] + QString::number(d->mIndex));
-        d->writeValue(writer, value);
+        writeValue(writer, value);
         writer.writeEndElement();
         writer.writeEndElement();
         break;
@@ -600,7 +599,7 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
         write(writer);
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Value"));
-        d->writeValue(writer, value);
+        writeValue(writer, value);
         writer.writeEndElement();
         writer.writeEndElement();
         break;
@@ -611,7 +610,7 @@ bool EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
     return true;
 }
 
-void EwsPropertyFieldPrivate::writeValue(QXmlStreamWriter &writer, const QVariant &value) const
+void EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &value) const
 {
     switch (value.type()) {
     case QVariant::StringList:

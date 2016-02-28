@@ -185,7 +185,7 @@ bool EwsUpdateItemRequest::Update::write(QXmlStreamWriter &writer, EwsItemType i
 
     if (mType != Delete) {
         writer.writeStartElement(ewsTypeNsUri, ewsItemTypeNames[itemType]);
-        retVal = mField.writeValue(writer, mValue);
+        retVal = mField.writeWithValue(writer, mValue);
         writer.writeEndElement();
     }
 

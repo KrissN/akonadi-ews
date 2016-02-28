@@ -142,7 +142,7 @@ bool EwsUpdateFolderRequest::Update::write(QXmlStreamWriter &writer, EwsFolderTy
 
     if (mType != Delete) {
         writer.writeStartElement(ewsTypeNsUri, folderTypeNames[folderType]);
-        retVal = mField.writeValue(writer, mValue);
+        retVal = mField.writeWithValue(writer, mValue);
         writer.writeEndElement();
     }
 
