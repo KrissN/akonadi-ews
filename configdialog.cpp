@@ -222,7 +222,7 @@ void ConfigDialog::dialogAccepted()
         connect(mTryConnectJob, &EwsGetFolderRequest::result, this, &ConfigDialog::tryConnectFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::TryConnect);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::tryConnectCancelled);
-        mAutoDiscoveryJob->start();
+        mTryConnectJob->start();
         if (!mProgressDialog->exec()) {
             if (QMessageBox::question(this, i18n("Exchange server connection"),
                 i18n("Connecting to Exchange failed. This can be caused by incorrect parameters. Do you still want to save your settings?")) == QMessageBox::Yes) {
