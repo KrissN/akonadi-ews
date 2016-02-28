@@ -70,8 +70,8 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
 {
     EwsSyncFolderHierarchyRequest *req = qobject_cast<EwsSyncFolderHierarchyRequest*>(job);
     if (!req) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
-        setErrorMsg(QStringLiteral("Invalid job object"));
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object");
+        setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
         emitResult();
         return;
     }
@@ -119,8 +119,8 @@ void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)
 {
     EwsSyncFolderHierarchyRequest *req = qobject_cast<EwsSyncFolderHierarchyRequest*>(job);
     if (!req) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
-        setErrorMsg(QStringLiteral("Invalid job object"));
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsSyncFolderHierarchyRequestjob object");
+        setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
         emitResult();
         return;
     }

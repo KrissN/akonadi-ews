@@ -85,7 +85,7 @@ void EwsModifyMailJob::updateItemFinished(KJob *job)
 
     EwsUpdateItemRequest *req = qobject_cast<EwsUpdateItemRequest*>(job);
     if (!req) {
-        setErrorText(QStringLiteral("Invalid job object"));
+        setErrorText(QStringLiteral("Invalid EwsUpdateItemRequest job object"));
         emitResult();
         return;
     }

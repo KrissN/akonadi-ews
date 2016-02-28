@@ -79,7 +79,7 @@ void EwsCreateMailJob::mailCreateFinished(KJob *job)
     }
 
     if (!req) {
-        setErrorMsg(QStringLiteral("Invalid job object"));
+        setErrorMsg(QStringLiteral("Invalid EwsCreateItemRequest job object"));
         emitResult();
         return;
     }

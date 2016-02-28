@@ -106,7 +106,7 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
     else {
         EwsPoxAutodiscoverRequest *req = qobject_cast<EwsPoxAutodiscoverRequest*>(job);
         if (!req) {
-            setErrorMsg(QStringLiteral("Invalid job object"));
+            setErrorMsg(QStringLiteral("Invalid EwsPoxAutodiscoverRequest job object"));
             emitResult();
         }
 

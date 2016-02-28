@@ -138,7 +138,7 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
 {
     EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
     if (!req) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid job object.");
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid EwsEventRequestBase job object.");
         reset();
         return;
     }
@@ -155,7 +155,7 @@ void EwsSubscriptionManager::streamingEventsReceived(KJob *job)
 {
     EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
     if (!req) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid job object.");
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid EwsEventRequestBase job object.");
         reset();
         return;
     }

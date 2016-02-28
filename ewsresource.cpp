@@ -116,7 +116,7 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
         Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
-        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetFolderRequest job object");
         return;
     }
 
@@ -205,8 +205,8 @@ void EwsResource::findFoldersRequestFinished(KJob *job)
     qDebug() << "findFoldersRequestFinished";
     EwsFetchFoldersJob *req = qobject_cast<EwsFetchFoldersJob*>(job);
     if (!req) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid job object");
-        cancelTask(QStringLiteral("Invalid job object"));
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsFetchFoldersJob job object");
+        cancelTask(QStringLiteral("Invalid EwsFetchFoldersJob job object"));
         return;
     }
 
@@ -232,8 +232,8 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     EwsFetchItemsJob *fetchJob = qobject_cast<EwsFetchItemsJob*>(job);
 
     if (!fetchJob) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid job object");
-        cancelTask(QStringLiteral("Invalid job object"));
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid EwsFetchItemsJobjob object");
+        cancelTask(QStringLiteral("Invalid EwsFetchItemsJob job object"));
         return;
     }
     if (job->error()) {
@@ -309,7 +309,7 @@ void EwsResource::itemChangeRequestFinished(KJob *job)
 
     EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsModifyItemJob job object"));
         return;
     }
 
@@ -346,7 +346,7 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
 
     EwsMoveItemRequest *req = qobject_cast<EwsMoveItemRequest*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsMoveItemRequest job object"));
         return;
     }
     Item::List items = job->property("items").value<Item::List>();
@@ -426,7 +426,7 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
 
     EwsDeleteItemRequest *req = qobject_cast<EwsDeleteItemRequest*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsDeleteItemRequest job object"));
         return;
     }
     Item::List items = job->property("items").value<Item::List>();
@@ -495,7 +495,7 @@ void EwsResource::itemCreateRequestFinished(KJob *job)
 
     EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsModifyItemJob job object"));
         return;
     }
 
@@ -547,7 +547,7 @@ void EwsResource::folderCreateRequestFinished(KJob *job)
 
     EwsCreateFolderRequest *req = qobject_cast<EwsCreateFolderRequest*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsCreateFolderRequest job object"));
         return;
     }
     Collection col = job->property("collection").value<Collection>();
@@ -591,7 +591,7 @@ void EwsResource::folderMoveRequestFinished(KJob *job)
 
     EwsMoveFolderRequest *req = qobject_cast<EwsMoveFolderRequest*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsMoveFolderRequest job object"));
         return;
     }
     Collection col = job->property("collection").value<Collection>();
@@ -650,7 +650,7 @@ void EwsResource::folderUpdateRequestFinished(KJob *job)
 
     EwsUpdateFolderRequest *req = qobject_cast<EwsUpdateFolderRequest*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsUpdateFolderRequest job object"));
         return;
     }
     Collection col = job->property("collection").value<Collection>();
@@ -693,7 +693,7 @@ void EwsResource::folderDeleteRequestFinished(KJob *job)
 
     EwsDeleteFolderRequest *req = qobject_cast<EwsDeleteFolderRequest*>(job);
     if (!req) {
-        cancelTask(QStringLiteral("Invalid job object"));
+        cancelTask(QStringLiteral("Invalid EwsDeleteFolderRequest job object"));
         return;
     }
 
@@ -735,7 +735,7 @@ void EwsResource::itemSendRequestFinished(KJob *job)
 
     EwsCreateItemJob *req = qobject_cast<EwsCreateItemJob*>(job);
     if (!req) {
-        itemSent(item, TransportFailed, QStringLiteral("Invalid job object"));
+        itemSent(item, TransportFailed, QStringLiteral("Invalid EwsCreateItemJob job object"));
         return;
     }
 
@@ -768,7 +768,7 @@ void EwsResource::messageSendRequestFinished(KJob *job)
 
     EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
     if (!req) {
-        Q_EMIT messageSent(id, QStringLiteral("Invalid job object"));
+        Q_EMIT messageSent(id, QStringLiteral("Invalid EwsCreateItemRequest job object"));
         return;
     }
 
