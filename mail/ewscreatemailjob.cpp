@@ -71,7 +71,6 @@ void EwsCreateMailJob::mailCreateFinished(KJob *job)
 {
     qDebug() << "mailCreateFinished";
     EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
-    req->dump();
     if (job->error()) {
         setErrorMsg(job->errorString());
         emitResult();

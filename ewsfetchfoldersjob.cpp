@@ -80,8 +80,6 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
         return;
     }
 
-    req->dump();
-
     QHash<QString, Collection> map;
 
     mFolders.append(mRootCollection);
