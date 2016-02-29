@@ -56,6 +56,28 @@ static Q_CONSTEXPR int fetchBatchSize = 10;
  * The list of new/changed items is then used to perform a second remote request in order to
  * retrieve the details of these items. For e-mail items the second fetch only retrieves the
  * item headers. For other items the full MIME content is fetched.
+ *
+ * In case of an incremental sync the compare code checks if items marked as 'changed' or 'deleted'
+ * exist in Akonadi database. If not an error is raised. This serves as an information to the
+ * resource class that an incremental sync has failed due to an out-of-sync state and a full sync
+ * is required to bring thing back to order.
+ *
+ * In addition to a regular sync it is sometimes necessary to check for existence of some specific
+ * items. This happens when some operation failed and the resource tries to work its way around to
+ * get Akonadi into a synchronous state after the failure. For this purpose the caller can provide
+ * a list of item identifiers to look for besides the regular sync. If this list contains elements
+ * another request (EwsGetItemRequest) is issued in parallel for the selected items. Once this
+ * request returns the list is cross-checked with the server responses. If an item is found on the
+ * server side it is added to the "new items" list. Otherwise it is added to the "deleted items"
+ * list. In the latter case the code for determining if the deleted item is in the Akonadi database
+ * will not raise an error for such deleted item. This helps to avoid unnecessary full syncs.
+ *
+ * The fetch item job also allows providing a list of expected item changes. This is necessary
+ * because the incremental sync will return events for operations made by the resource itself. This
+ * can lead to false failures when for example an item was deleted (i.e. does not exist in Akonadi
+ * any more) and the incremental sync returns a delete event for this item. Typically this would
+ * result in an error and force a full sync. Providing this list allows for this particular error
+ * to be safely ignored.
  */
 
 EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client,
@@ -289,7 +311,11 @@ void EwsFetchItemsJob::compareItemLists()
              * The only exception is when an item is checked explicitly. In such case the absence
              * of this item can be ignored. */
             if (it == itemHash.end()) {
-                if (!mItemsToCheck.contains(id)) {
+                QHash<QString, QString>::iterator qit = mQueuedUpdates[EwsDeletedEvent].find(id.id());
+                if (EWSRES_LOG().isDebugEnabled() && qit != mQueuedUpdates[EwsDeletedEvent].end()) {
+                    qCDebugNC(EWSRES_LOG) << QStringLiteral("Match for queued deletion of item %1").arg(id.id());
+                }
+                if (!mItemsToCheck.contains(id) && qit == mQueuedUpdates[EwsDeletedEvent].end()) {
                     setErrorMsg(QStringLiteral("Got delete for item %1, but item not found in local store.")
                                     .arg(id.id()));
                     emitResult();
@@ -375,5 +401,14 @@ void EwsFetchItemsJob::itemDetailFetchDone(KJob *job)
         else {
             subjobs().first()->start();
         }
+    }
+}
+
+void EwsFetchItemsJob::setQueuedUpdates(const QueuedUpdateList &updates)
+{
+    mQueuedUpdates.clear();
+    Q_FOREACH(const QueuedUpdate &upd, updates) {
+        mQueuedUpdates[upd.type].insert(upd.id, upd.changeKey);
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("Queued update %1 for item %2").arg(upd.type).arg(upd.id);
     }
 }

@@ -34,6 +34,14 @@ class EwsFetchItemsJob : public EwsJob
 {
     Q_OBJECT
 public:
+    struct QueuedUpdate {
+        QString id;
+        QString changeKey;
+        EwsEventType type;
+    };
+
+    typedef QList<QueuedUpdate> QueuedUpdateList;
+
     EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient& client,
                      const QString &syncState, const EwsId::List &itemsToCheck,
                      QObject *parent);
@@ -43,6 +51,8 @@ public:
     Akonadi::Item::List deletedItems() const { return mDeletedItems; };
     const QString &syncState() const { return mSyncState; };
     const Akonadi::Collection &collection() const { return mCollection; };
+
+    void setQueuedUpdates(const QueuedUpdateList &updates);
 
     virtual void start() Q_DECL_OVERRIDE;
 private Q_SLOTS:
@@ -56,6 +66,8 @@ Q_SIGNALS:
 private:
     void compareItemLists();
 
+    typedef QHash<EwsEventType, QHash<QString, QString> > QueuedUpdateHash;
+
     const Akonadi::Collection mCollection;
     EwsClient& mClient;
     EwsId::List mItemsToCheck;
@@ -68,6 +80,7 @@ private:
     unsigned mTotalItems;
     QString mSyncState;
     bool mFullSync;
+    QueuedUpdateHash mQueuedUpdates;
 
     Akonadi::Item::List mChangedItems;
     Akonadi::Item::List mDeletedItems;
