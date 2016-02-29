@@ -29,7 +29,7 @@
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
     QStringLiteral("contacts"),
-    QStringLiteral("deletedItems"),
+    QStringLiteral("deleteditems"),
     QStringLiteral("drafts"),
     QStringLiteral("inbox"),
     QStringLiteral("journal"),
