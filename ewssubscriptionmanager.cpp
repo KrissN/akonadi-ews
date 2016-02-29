@@ -172,30 +172,45 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
     Q_FOREACH(const EwsGetEventsRequest::Response &resp, req->responses()) {
         Q_FOREACH(const EwsGetEventsRequest::Notification &nfy, resp.notifications()) {
             Q_FOREACH(const EwsGetEventsRequest::Event &event, nfy.events()) {
+
+                bool skip = false;
+                EwsId id = event.itemId();
+                for (auto it = mQueuedUpdates.find(id.id()); it != mQueuedUpdates.end(); it++) {
+                    if (it->type == event.type()
+                        && (it->type == EwsDeletedEvent || it->changeKey == id.changeKey())) {
+                        qCDebugNC(EWSRES_LOG) << QStringLiteral("Skipped queued update type %1 for item %2");
+                        skip = true;
+                        mQueuedUpdates.erase(it);
+                        break;
+                    }
+                }
+
                 mWatermark = event.watermark();
-                switch (event.type()) {
-                case EwsCopiedEvent:
-                case EwsMovedEvent:
-                    if (!event.itemIsFolder()) {
-                        mUpdatedFolderIds.insert(event.oldParentFolderId());
+                if (!skip) {
+                    switch (event.type()) {
+                    case EwsCopiedEvent:
+                    case EwsMovedEvent:
+                        if (!event.itemIsFolder()) {
+                            mUpdatedFolderIds.insert(event.oldParentFolderId());
+                        }
+                        /* no break */
+                    case EwsCreatedEvent:
+                    case EwsDeletedEvent:
+                    case EwsModifiedEvent:
+                    case EwsNewMailEvent:
+                        if (event.itemIsFolder()) {
+                            mFolderTreeChanged = true;
+                        }
+                        else {
+                            mUpdatedFolderIds.insert(event.parentFolderId());
+                        }
+                        break;
+                    case EwsStatusEvent:
+                        // Do nothing
+                        break;
+                    default:
+                        break;
                     }
-                    /* no break */
-                case EwsCreatedEvent:
-                case EwsDeletedEvent:
-                case EwsModifiedEvent:
-                case EwsNewMailEvent:
-                    if (event.itemIsFolder()) {
-                        mFolderTreeChanged = true;
-                    }
-                    else {
-                        mUpdatedFolderIds.insert(event.parentFolderId());
-                    }
-                    break;
-                case EwsStatusEvent:
-                    // Do nothing
-                    break;
-                default:
-                    break;
                 }
             }
             if (nfy.hasMoreEvents()) {
@@ -226,4 +241,9 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
             mUpdatedFolderIds.clear();
         }
     }
+}
+
+void EwsSubscriptionManager::queueUpdate(EwsEventType type, QString id, QString changeKey)
+{
+    mQueuedUpdates.insert(id, {type, changeKey});
 }

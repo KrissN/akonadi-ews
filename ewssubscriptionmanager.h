@@ -30,6 +30,40 @@ class EwsClient;
 class KJob;
 class EwsEventRequestBase;
 
+/**
+ *  @brief  Mailbox update subscription manager class
+ *
+ *  This class is responsible for retrieving update notifications from the Exchange server.
+ *
+ *  The Exchange server has the ability to incrementally inform the client about changes made to
+ *  selected folders in the mailbox. Each update informs about creation, modification or removal
+ *  of an item or folder. Additionally Exchange has the ability to notify about free/busy status
+ *  updates.
+ *
+ *  Notifications can be delivered in 3 ways:
+ *   - pull (i.e. polling) - the client needs to periodically question the server.
+ *   - push - the server issues a callback connection to the client with events (not supported)
+ *   - streaming - a combination of pull and push, where the client makes the connection, but the
+ *                 server keeps it open for a specified period of time and keeps delivering events
+ *                 over this connection (supported since Exchange 2010 SP2).
+ *
+ *  The responsibility of this class is to retrieve and act upon change events from the Exchange
+ *  server. The current implementation is simplified:
+ *   - when an item update is received the folder containing the update is asked to synchronise
+ *     itself.
+ *   - when a folder update is received a full collection tree sync is performed.
+ *
+ *  The above implementation has a major drawback in that operations performed by the resource
+ *  itself are also notified back as update events. This means that when for ex. an item is deleted
+ *  it is removed from Akonadi database, but subsequently a delete event is received which will try
+ *  to delete an item that has already been deleted from Akonadi.
+ *
+ *  To reduce such feedback loops the class implements a queued update mechanism. Each time an
+ *  operation is performed on the mailbox the resource class is responsible for informing the
+ *  subscription manager about it by adding an entry about the performed operation and its subject.
+ *  The subscription manager will in turn filter out update events that refer to oprerations that
+ *  have already been made.
+ */
 class EwsSubscriptionManager : public QObject
 {
     Q_OBJECT
@@ -37,6 +71,7 @@ public:
     EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent);
     virtual ~EwsSubscriptionManager();
     void start();
+    void queueUpdate(EwsEventType type, QString id, QString changeKey);
 Q_SIGNALS:
     void foldersModified(EwsId::List folders);
     void folderTreeModified();
@@ -52,6 +87,11 @@ private:
     void reset();
     void processEvents(EwsEventRequestBase *req, bool finished);
 
+    struct UpdateItem {
+        EwsEventType type;
+        QString changeKey;
+    };
+
     EwsClient &mEwsClient;
     QString mSubId;
     QString mWatermark;
@@ -61,6 +101,7 @@ private:
     QSet<EwsId> mUpdatedFolderIds;
     bool mFolderTreeChanged;
     bool mStreamingEvents;
+    QMultiHash<QString, UpdateItem> mQueuedUpdates;
 };
 
 #endif
