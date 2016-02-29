@@ -26,6 +26,7 @@
 
 #include "ewsclient.h"
 #include "ewsid.h"
+#include "ewsfetchitemsjob.h"
 
 #include "config.h"
 
@@ -107,6 +108,7 @@ private:
     QHash<QString, QString> mSyncState;
     QString mFolderSyncState;
     QHash<QString, EwsId::List> mItemsToCheck;
+    QHash<QString, EwsFetchItemsJob::QueuedUpdateList> mQueuedUpdates;
 };
 
 #endif

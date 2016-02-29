@@ -173,6 +173,8 @@ void EwsResource::retrieveItems(const Collection &collection)
     QString rid = collection.remoteId();
     EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient,
         mSyncState.value(rid), mItemsToCheck.value(rid), this);
+    job->setQueuedUpdates(mQueuedUpdates.value(collection.remoteId()));
+    mQueuedUpdates.remove(collection.remoteId());
     connect(job, SIGNAL(finished(KJob*)), SLOT(itemFetchJobFinished(KJob*)));
     connect(job, SIGNAL(status(int,const QString&)), SIGNAL(status(int,const QString&)));
     connect(job, SIGNAL(percent(int)), SIGNAL(percent(int)));
@@ -386,6 +388,13 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Move succeeded for item %1 %2").arg(resp.itemId().id()).arg(item.remoteId());
             if (item.isValid()) {
+                /* Log item deletion in the source folder so that the next sync doesn't trip over
+                 * non-existent items. Use old remote ids for that. */
+                if (mSubManager) {
+                    mSubManager->queueUpdate(EwsDeletedEvent, item.remoteId(), QString());
+                }
+                mQueuedUpdates[srcCol.remoteId()].append({item.remoteId(), QString(), EwsDeletedEvent});
+
                 item.setRemoteId(resp.itemId().id());
                 item.setRemoteRevision(resp.itemId().changeKey());
                 movedItems.append(item);
@@ -462,6 +471,10 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
         Item &item = *it;
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Delete succeeded for item %1").arg(item.remoteId());
+            if (mSubManager) {
+                mSubManager->queueUpdate(EwsDeletedEvent, item.remoteId(), QString());
+            }
+            mQueuedUpdates[item.parentCollection().remoteId()].append({item.remoteId(), QString(), EwsDeletedEvent});
         }
         else {
             warning(QStringLiteral("Delete failed for item %1").arg(item.remoteId()));
