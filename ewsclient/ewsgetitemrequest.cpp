@@ -103,6 +103,10 @@ bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
 EwsGetItemRequest::Response::Response(QXmlStreamReader &reader)
     : EwsRequest::Response(reader)
 {
+    if (mClass == EwsResponseParseError) {
+        return;
+    }
+
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
@@ -119,9 +123,6 @@ EwsGetItemRequest::Response::Response(QXmlStreamReader &reader)
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }
-    }
-    if (mClass != EwsResponseSuccess) {
-        reader.skipCurrentElement();
     }
 }
 
