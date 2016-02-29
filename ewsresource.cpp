@@ -78,6 +78,7 @@ EwsResource::EwsResource(const QString &id)
 
     if (Settings::baseUrl().isEmpty()) {
         setOnline(false);
+        Q_EMIT status(NotConfigured, i18nc("@info:status", "No server configured yet."));
     } else {
         resetUrl();
     }
@@ -93,8 +94,6 @@ EwsResource::EwsResource(const QString &id)
         }
     }
 
-    Q_EMIT status(0);
-
     QMetaObject::invokeMethod(this, "delayedInit", Qt::QueuedConnection);
 }
 
@@ -109,6 +108,8 @@ void EwsResource::delayedInit()
 
 void EwsResource::resetUrl()
 {
+    Q_EMIT status(Running, i18nc("@info:status", "Connecting to Exchange server"));
+
     EwsGetFolderRequest *req = new EwsGetFolderRequest(mEwsClient, this);
     req->setFolderIds(EwsId::List() << EwsId(EwsDIdMsgFolderRoot));
     EwsFolderShape shape(EwsShapeIdOnly);
@@ -123,21 +124,21 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
     qDebug() << "rootFolderFetchFinished";
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
-        Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
         setOnline(false);
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetFolderRequest job object");
         return;
     }
 
     if (req->error()) {
-        Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
         setOnline(false);
         qWarning() << "ERROR" << req->errorString();
         return;
     }
 
     if (req->responses().size() != 1) {
-        Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
         setOnline(false);
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid number of responses received");
         return;
@@ -148,7 +149,7 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());
         qDebug() << "Root folder is " << id;
-        Q_EMIT status(AgentBase::Running);
+        Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
 
         mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, this));
         connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
@@ -166,6 +167,8 @@ void EwsResource::retrieveCollections()
         return;
     }
 
+    Q_EMIT status(Running, i18nc("@info:status", "Retrieving collection tree"));
+
     EwsFetchFoldersJob *job = new EwsFetchFoldersJob(mEwsClient, mFolderSyncState,
         mRootCollection, this);
     connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::findFoldersRequestFinished);
@@ -176,6 +179,8 @@ void EwsResource::retrieveItems(const Collection &collection)
 {
     Q_EMIT status(1, QStringLiteral("Retrieving item list"));
     qDebug() << "retrieveItems";
+
+    Q_EMIT status(Running, i18nc("@info:status", "Retrieving %1 items").arg(collection.name()));
 
     QString rid = collection.remoteId();
     EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient,
@@ -226,6 +231,7 @@ void EwsResource::configure(WId windowId)
 void EwsResource::findFoldersRequestFinished(KJob *job)
 {
     qDebug() << "findFoldersRequestFinished";
+    Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
     EwsFetchFoldersJob *req = qobject_cast<EwsFetchFoldersJob*>(job);
     if (!req) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsFetchFoldersJob job object");
@@ -278,7 +284,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     }
     saveState();
     mItemsToCheck.remove(fetchJob->collection().remoteId());
-    Q_EMIT status(0);
+    Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
 }
 
 void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
