@@ -33,7 +33,7 @@
 using namespace Akonadi;
 
 static Q_CONSTEXPR int listBatchSize = 100;
-static Q_CONSTEXPR int fetchBatchSize = 10;
+static Q_CONSTEXPR int fetchBatchSize = 50;
 
 /**
  * The fetch items job is processed in two stages.
