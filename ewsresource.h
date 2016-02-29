@@ -59,6 +59,8 @@ public:
     virtual void itemsRemoved(const Akonadi::Item::List &items) Q_DECL_OVERRIDE;
 
     virtual void sendItem(const Akonadi::Item &item) Q_DECL_OVERRIDE;
+protected:
+    void doSetOnline(bool online) Q_DECL_OVERRIDE;
 public Q_SLOTS:
     void configure(WId windowId) Q_DECL_OVERRIDE;
     Q_SCRIPTABLE void clearSyncState();

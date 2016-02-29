@@ -76,7 +76,11 @@ EwsResource::EwsResource(const QString &id)
     mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
     mRootCollection.setRights(Collection::ReadOnly);
 
-    resetUrl();
+    if (Settings::baseUrl().isEmpty()) {
+        setOnline(false);
+    } else {
+        resetUrl();
+    }
 
     // Load the sync state
     QByteArray data = QByteArray::fromBase64(Settings::self()->syncState().toAscii());
@@ -120,18 +124,21 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
         Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        setOnline(false);
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetFolderRequest job object");
         return;
     }
 
     if (req->error()) {
         Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        setOnline(false);
         qWarning() << "ERROR" << req->errorString();
         return;
     }
 
     if (req->responses().size() != 1) {
         Q_EMIT status(AgentBase::Broken, i18n("Unable to connect to Exchange server"));
+        setOnline(false);
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid number of responses received");
         return;
     }
@@ -865,6 +872,15 @@ void EwsResource::saveState()
     dataStream << mSyncState;
     Settings::self()->setSyncState(qCompress(str, 9).toBase64());
     Settings::self()->save();
+}
+
+void EwsResource::doSetOnline(bool online)
+{
+    if (online) {
+        resetUrl();
+    } else {
+        mSubManager.reset(Q_NULLPTR);
+    }
 }
 
 AKONADI_RESOURCE_MAIN(EwsResource)
