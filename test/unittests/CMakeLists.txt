@@ -29,5 +29,7 @@ endmacro(akonadi_ews_add_ut utname)
 
 akonadi_ews_add_ut(ewsmoveitemrequest_ut)
 akonadi_ews_add_ut(ewsdeleteitemrequest_ut)
+akonadi_ews_add_ut(ewsgetitemrequest_ut)
+akonadi_ews_add_ut(ewsunsubscriberequest_ut)
 
 
