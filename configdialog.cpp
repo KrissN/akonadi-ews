@@ -179,6 +179,14 @@ void ConfigDialog::setAutoDiscoveryNeeded()
 {
     mAutoDiscoveryNeeded = true;
     mTryConnectNeeded = true;
+
+    /* Enable the OK button when at least the e-mail and username fields are set. Additionally if
+     * autodiscovery is disabled, enable the OK button only if the base URL is set. */
+    bool okEnabled = !mUi->kcfg_Username->text().isEmpty() && !mUi->kcfg_Email->text().isEmpty();
+    if (!mUi->kcfg_AutoDiscovery->isChecked() && mUi->kcfg_BaseUrl->text().isEmpty()) {
+        okEnabled = false;
+    }
+    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(okEnabled);
 }
 
 QString ConfigDialog::fullUsername() const
@@ -237,13 +245,24 @@ void ConfigDialog::dialogAccepted()
             accept();
         }
     }
+
+    if (!mTryConnectNeeded && !mAutoDiscoveryNeeded) {
+        accept();
+    }
 }
 
 void ConfigDialog::enableTryConnect()
 {
     mTryConnectNeeded = true;
     bool baseUrlEmpty = mUi->kcfg_BaseUrl->text().isEmpty();
-    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(!baseUrlEmpty);
+
+    /* Enable the OK button when at least the e-mail and username fields are set. Additionally if
+     * autodiscovery is disabled, enable the OK button only if the base URL is set. */
+    bool okEnabled = !mUi->kcfg_Username->text().isEmpty() && !mUi->kcfg_Email->text().isEmpty();
+    if (!mUi->kcfg_AutoDiscovery->isChecked() && baseUrlEmpty) {
+        okEnabled = false;
+    }
+    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(okEnabled);
     mUi->tryConnectButton->setEnabled(!baseUrlEmpty);
 }
 
