@@ -137,7 +137,8 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
 
         v = ewsItem[EwsItemFieldReplyTo];
         if (v.isValid()) {
-            msg->replyTo()->from7BitString(v.toString().toAscii());
+            EwsMailbox mbox = v.value<EwsMailbox>();
+            msg->replyTo()->addAddress(mbox);
         }
 
         msg->assemble();
