@@ -83,10 +83,14 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, const EwsClient &client,
     mUi->tryConnectButton->setEnabled(!baseUrlEmpty);
     mTryConnectNeeded = baseUrlEmpty;
 
+    QString password;
+    mParentResource->requestPassword(password, false);
+    mUi->passwordEdit->setText(password);
+
     connect(okButton, &QPushButton::clicked, this, &ConfigDialog::save);
     connect(mUi->autodiscoverButton, &QPushButton::clicked, this, &ConfigDialog::performAutoDiscovery);
     connect(mUi->kcfg_Username, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
-    connect(mUi->kcfg_Password, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
+    connect(mUi->passwordEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_Domain, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_Email, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_BaseUrl, SIGNAL(textChanged(const QString&)), this, SLOT(enableTryConnect()));
@@ -109,12 +113,14 @@ void ConfigDialog::save()
         Settings::setRetrievalMethod(1);
     }
     Settings::self()->save();
+
+    mParentResource->setPassword(mUi->passwordEdit->text());
 }
 
 void ConfigDialog::performAutoDiscovery()
 {
     mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
-        fullUsername(), mUi->kcfg_Password->text(), this);
+        fullUsername(), mUi->passwordEdit->text(), this);
     connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
     mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
     connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -203,7 +209,7 @@ void ConfigDialog::dialogAccepted()
 {
     if (mUi->kcfg_AutoDiscovery->isChecked() && mAutoDiscoveryNeeded) {
         mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
-            fullUsername(), mUi->kcfg_Password->text(), this);
+            fullUsername(), mUi->passwordEdit->text(), this);
         connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -223,7 +229,7 @@ void ConfigDialog::dialogAccepted()
     if (mTryConnectNeeded) {
         EwsClient cli;
         cli.setUrl(mUi->kcfg_BaseUrl->text());
-        cli.setCredentials(fullUsername(), mUi->kcfg_Password->text());
+        cli.setCredentials(fullUsername(), mUi->passwordEdit->text());
         mTryConnectJob = new EwsGetFolderRequest(cli, this);
         mTryConnectJob->setFolderShape(EwsShapeIdOnly);
         mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
@@ -270,7 +276,7 @@ void ConfigDialog::tryConnect()
 {
     EwsClient cli;
     cli.setUrl(mUi->kcfg_BaseUrl->text());
-    cli.setCredentials(fullUsername(), mUi->kcfg_Password->text());
+    cli.setCredentials(fullUsername(), mUi->passwordEdit->text());
     mTryConnectJob = new EwsGetFolderRequest(cli, this);
     mTryConnectJob->setFolderShape(EwsShapeIdOnly);
     mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));

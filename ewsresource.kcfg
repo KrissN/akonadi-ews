@@ -21,11 +21,6 @@
       <tooltip>The Active Directory domain the user belongs to</tooltip>
       <whatsthis>The Active Directory domain the user belongs to</whatsthis>
     </entry>
-    <entry name="Password" type="Password">
-      <label>Password</label>
-      <tooltip>The password that is used to log into the Microsoft Exchange server</tooltip>
-      <whatsthis>The password that is used to log into the Microsoft Exchange server</whatsthis>
-    </entry>
     <entry name="Email" type="String">
       <label>E-mail</label>
       <tooltip>The primary e-mail address of this account</tooltip>

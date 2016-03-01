@@ -59,6 +59,9 @@ public:
     virtual void itemsRemoved(const Akonadi::Item::List &items) Q_DECL_OVERRIDE;
 
     virtual void sendItem(const Akonadi::Item &item) Q_DECL_OVERRIDE;
+
+    bool requestPassword(QString &password, bool ask);
+    void setPassword(const QString &password);
 protected:
     void doSetOnline(bool online) Q_DECL_OVERRIDE;
 public Q_SLOTS:
@@ -111,6 +114,7 @@ private:
     QString mFolderSyncState;
     QHash<QString, EwsId::List> mItemsToCheck;
     QHash<QString, EwsFetchItemsJob::QueuedUpdateList> mQueuedUpdates;
+    QString mPassword;
 };
 
 #endif

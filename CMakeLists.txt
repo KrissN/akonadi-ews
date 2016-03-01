@@ -42,6 +42,8 @@ find_package(KF5CalendarCore)
 find_package(KF5Contacts)
 find_package(KF5Codecs)
 find_package(KF5KDELibs4Support)
+find_package(KF5Wallet)
+find_package(KF5WidgetsAddons)
 
 option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail." TRUE)
 option(ENABLE_TESTS "Build the test suite." FALSE)
@@ -107,6 +109,8 @@ target_link_libraries(akonadi_ews_resource
     KF5::CalendarCore
     KF5::Contacts
     KF5::KDELibs4Support
+    KF5::Wallet
+    KF5::WidgetsAddons
     ewsclient)
 
 if (HAVE_SEPARATE_MTA_RESOURCE)

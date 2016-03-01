@@ -112,7 +112,7 @@
               </widget>
              </item>
              <item row="4" column="1">
-              <widget class="KLineEdit" name="kcfg_Password">
+              <widget class="QLineEdit" name="passwordEdit">
                <property name="whatsThis">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The password used to login to the Exchange server.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; This can be left empty when using Kerberos authentication.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>

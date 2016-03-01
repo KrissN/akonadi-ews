@@ -25,6 +25,8 @@
 #include <AkonadiCore/ItemFetchScope>
 #include <AkonadiCore/CollectionFetchJob>
 #include <KMime/Message>
+#include <KWallet/KWallet>
+#include <KWidgetsAddons/KPasswordDialog>
 
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
@@ -59,10 +61,11 @@ EwsResource::EwsResource(const QString &id)
     qDebug() << "EwsResource";
     //setName(i18n("Microsoft Exchange"));
     mEwsClient.setUrl(Settings::baseUrl());
+    requestPassword(mPassword, true);
     if (Settings::domain().isEmpty()) {
-        mEwsClient.setCredentials(Settings::username(), Settings::password());
+        mEwsClient.setCredentials(Settings::username(), mPassword);
     } else {
-        mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), Settings::password());
+        mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), mPassword);
     }
 
     changeRecorder()->fetchCollection(true);
@@ -219,9 +222,9 @@ void EwsResource::configure(WId windowId)
         mSubManager.reset(Q_NULLPTR);
         mEwsClient.setUrl(Settings::baseUrl());
         if (Settings::domain().isEmpty()) {
-            mEwsClient.setCredentials(Settings::username(), Settings::password());
+            mEwsClient.setCredentials(Settings::username(), mPassword);
         } else {
-            mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), Settings::password());
+            mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), mPassword);
         }
         Settings::self()->save();
         resetUrl();
@@ -887,6 +890,65 @@ void EwsResource::doSetOnline(bool online)
     } else {
         mSubManager.reset(Q_NULLPTR);
     }
+}
+
+bool EwsResource::requestPassword(QString &password, bool ask)
+{
+    bool status = true;
+
+    if (!mPassword.isEmpty()) {
+        password = mPassword;
+        return true;
+    }
+
+    KWallet::Wallet *wallet = KWallet::Wallet::openWallet(KWallet::Wallet::NetworkWallet(),
+                                                          winIdForDialogs());
+    if (wallet && wallet->isOpen()) {
+        if (wallet->hasFolder(QStringLiteral("akonadi-ews"))) {
+            wallet->setFolder(QStringLiteral("akonadi-ews"));
+            wallet->readPassword(config()->name(), password);
+        } else {
+            wallet->createFolder(QStringLiteral("akonadi-ews"));
+        }
+    } else {
+        status = false;
+    }
+    delete wallet;
+
+    if (!status) {
+        if (!ask) {
+            return false;
+        }
+
+        KPasswordDialog *dlg = new KPasswordDialog(Q_NULLPTR);
+        dlg->setModal(true);
+        dlg->setPrompt(i18n("Please enter password for user '%1' and Exchange account '%2'.",
+                            Settings::username(), Settings::email()));
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        if (dlg->exec() == QDialog::Accepted) {
+            password = dlg->password();
+            setPassword(password);
+        } else {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void EwsResource::setPassword(const QString &password)
+{
+    mPassword = password;
+    KWallet::Wallet *wallet = KWallet::Wallet::openWallet(KWallet::Wallet::NetworkWallet(),
+                                                          winIdForDialogs());
+    if (wallet && wallet->isOpen()) {
+        if (!wallet->hasFolder(QStringLiteral("akonadi-ews"))) {
+            wallet->createFolder(QStringLiteral("akonadi-ews"));
+        }
+        wallet->setFolder(QStringLiteral("akonadi-ews"));
+        wallet->writePassword(config()->name(), password);
+    }
+    delete wallet;
 }
 
 AKONADI_RESOURCE_MAIN(EwsResource)
