@@ -93,6 +93,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
     {EwsItemFieldInternetMessageId, QStringLiteral("InternetMessageId"), &ewsXmlTextReader},
     {EwsItemFieldIsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader, &ewsXmlBoolWriter},
     {EwsItemFieldReferences, QStringLiteral("References"), &ewsXmlTextReader},
+    {EwsItemFieldReplyTo, QStringLiteral("ReplyTo"), &ewsXmlTextReader},
     // CalendarItem fields
     {EwsItemFieldCalendarItemType, QStringLiteral("CalendarItemType"),
         &ewsXmlCalendarItemTypeReader},

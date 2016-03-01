@@ -49,6 +49,7 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("item:DateTimeReceived");
     shape << EwsPropertyField("item:InReplyTo");
     shape << EwsPropertyField("message:References");
+    shape << EwsPropertyField("message:ReplyTo");
     shape << EwsPropertyField("message:InternetMessageId");
     shape << propPidFlagStatus;
     shape << propPidFlagIconIndex;
@@ -132,6 +133,11 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         v = ewsItem[EwsItemFieldReferences];
         if (v.isValid()) {
             msg->references()->from7BitString(v.toString().toAscii());
+        }
+
+        v = ewsItem[EwsItemFieldReplyTo];
+        if (v.isValid()) {
+            msg->replyTo()->from7BitString(v.toString().toAscii());
         }
 
         msg->assemble();
