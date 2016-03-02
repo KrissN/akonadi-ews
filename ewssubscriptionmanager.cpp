@@ -148,6 +148,8 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
         if (mStreamingEvents) {
             getEvents();
         }
+    } else {
+        reset();
     }
 }
 
