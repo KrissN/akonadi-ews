@@ -91,6 +91,7 @@ private Q_SLOTS:
     void folderTreeModifiedEvent();
     void fullSyncRequestedEvent();
     void rootFolderFetchFinished(KJob *job);
+    void specialFoldersFetchFinished(KJob *job);
 
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
 public Q_SLOTS:
@@ -103,6 +104,8 @@ private Q_SLOTS:
 
 private:
     void finishItemsFetch(FetchItemState *state);
+    void fetchSpecialFolders();
+    void specialFoldersCollectionsRetrieved(const Akonadi::Collection::List &folders);
 
     void saveState();
     void resetUrl();

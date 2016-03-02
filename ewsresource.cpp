@@ -24,6 +24,9 @@
 #include <AkonadiCore/CollectionFetchScope>
 #include <AkonadiCore/ItemFetchScope>
 #include <AkonadiCore/CollectionFetchJob>
+#include <AkonadiCore/CollectionModifyJob>
+#include <AkonadiCore/EntityDisplayAttribute>
+#include <Akonadi/KMime/SpecialMailCollections>
 #include <KMime/Message>
 #include <KWallet/KWallet>
 #include <KWidgetsAddons/KPasswordDialog>
@@ -54,6 +57,20 @@
 #include "resourceadaptor.h"
 
 using namespace Akonadi;
+
+struct SpecialFolders {
+    EwsDistinguishedId did;
+    SpecialMailCollections::Type type;
+    QString iconName;
+};
+
+static const QVector<SpecialFolders> specialFolderList = {
+    {EwsDIdInbox, SpecialMailCollections::Inbox, QStringLiteral("mail-folder-inbox")},
+    {EwsDIdOutbox, SpecialMailCollections::Outbox, QStringLiteral("mail-folder-outbox")},
+    {EwsDIdSentItems, SpecialMailCollections::SentMail, QStringLiteral("mail-folder-sent")},
+    {EwsDIdDeletedItems, SpecialMailCollections::Trash, QStringLiteral("user-trash")},
+    {EwsDIdDrafts, SpecialMailCollections::Drafts, QStringLiteral("document-properties")}
+};
 
 EwsResource::EwsResource(const QString &id)
     : Akonadi::ResourceBase(id)
@@ -159,6 +176,8 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
         connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
         mSubManager->start();
+
+        fetchSpecialFolders();
     }
 }
 
@@ -872,6 +891,89 @@ void EwsResource::clearSyncState()
 void EwsResource::clearFolderSyncState(QString folderId)
 {
     mSyncState.remove(folderId);
+}
+
+void EwsResource::fetchSpecialFolders()
+{
+    CollectionFetchJob *job = new CollectionFetchJob(mRootCollection, CollectionFetchJob::Recursive, this);
+    connect(job, &CollectionFetchJob::collectionsReceived, this, &EwsResource::specialFoldersCollectionsRetrieved);
+    job->start();
+}
+
+void EwsResource::specialFoldersCollectionsRetrieved(const Collection::List &folders)
+{
+    QHash<qint64, Collection> map;
+
+    Q_FOREACH(const Collection &col, folders) {
+        if (col.id() != -1) {
+            map.insert(col.id(), col);
+        }
+    }
+
+    QStringList queryItemNames;
+    EwsId::List queryItems;
+
+    Q_FOREACH(const SpecialFolders &sf, specialFolderList) {
+        queryItems.append(EwsId(sf.did));
+    }
+
+    if (!queryItems.isEmpty()) {
+        EwsGetFolderRequest *req = new EwsGetFolderRequest(mEwsClient, this);
+        req->setFolderShape(EwsShapeIdOnly);
+        req->setFolderIds(queryItems);
+        req->setProperty("collections", QVariant::fromValue<Collection::List>(folders));
+        connect(req, &EwsGetFolderRequest::finished, this, &EwsResource::specialFoldersFetchFinished);
+        req->start();
+    }
+}
+
+void EwsResource::specialFoldersFetchFinished(KJob *job)
+{
+    qDebug() << "specialFoldersFetchFinished";
+    if (job->error()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Special collection fetch failed:") << job->errorString();
+        return;
+    }
+
+    EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
+    if (!req) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Special collection fetch failed:")
+                        << QStringLiteral("Invalid EwsGetFolderRequest job object");
+        return;
+    }
+
+    Collection::List collections = req->property("collections").value<Collection::List>();
+
+    if (req->responses().size() != specialFolderList.size()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Special collection fetch failed:")
+                        << QStringLiteral("Invalid number of responses received");
+        return;
+    }
+
+    QMap<QString, Collection> map;
+    Q_FOREACH(const Collection &col, collections) {
+        map.insert(col.remoteId(), col);
+    }
+
+    auto it = specialFolderList.cbegin();
+    Q_FOREACH(const EwsGetFolderRequest::Response &resp, req->responses()) {
+        if (resp.isSuccess()) {
+            EwsId fid = resp.folder()[EwsFolderFieldFolderId].value<EwsId>();
+            QMap<QString, Collection>::iterator mapIt = map.find(fid.id());
+            if (mapIt != map.end()) {
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Registering folder %1(%2) as special collection %3")
+                                .arg(mapIt->remoteId()).arg(mapIt->id()).arg(it->type);
+                SpecialMailCollections::self()->registerCollection(it->type, *mapIt);
+                if (!mapIt->hasAttribute<EntityDisplayAttribute>()) {
+                    EntityDisplayAttribute *attr = mapIt->attribute<EntityDisplayAttribute>(Collection::AddIfMissing);
+                    attr->setIconName(it->iconName);
+                    CollectionModifyJob *modJob = new CollectionModifyJob(*mapIt, this);
+                    modJob->start();
+                }
+            }
+        }
+        it++;
+    }
 }
 
 void EwsResource::saveState()
