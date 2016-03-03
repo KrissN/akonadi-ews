@@ -598,9 +598,7 @@ bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &
     case EwsPropertyFieldPrivate::ExtendedField:
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
         write(writer);
-        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Value"));
-        writeValue(writer, value);
-        writer.writeEndElement();
+        writeExtendedValue(writer, value);
         writer.writeEndElement();
         break;
     default:
@@ -623,6 +621,29 @@ void EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
     }
     case QVariant::String:
         writer.writeCharacters(value.toString());
+        break;
+    default:
+        qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1").arg(value.typeName());
+    }
+}
+
+void EwsPropertyField::writeExtendedValue(QXmlStreamWriter &writer, const QVariant &value) const
+{
+    switch (value.type()) {
+    case QVariant::StringList:
+    {
+        QStringList list = value.toStringList();
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Values"));
+        Q_FOREACH(const QString &str, list) {
+            writer.writeTextElement(ewsTypeNsUri, QStringLiteral("Value"), str);
+        }
+        writer.writeEndElement();
+        break;
+    }
+    case QVariant::String:
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Value"));
+        writer.writeCharacters(value.toString());
+        writer.writeEndElement();
         break;
     default:
         qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1").arg(value.typeName());
