@@ -41,7 +41,7 @@ public:
     bool hasField(EwsItemFields f) const;
     QVariant operator[](EwsItemFields f) const;
 
-    QStringRef operator[](const EwsPropertyField &prop) const;
+    QVariant operator[](const EwsPropertyField &prop) const;
 
     void setField(EwsItemFields f, const QVariant &value);
     void setProperty(const EwsPropertyField &prop, const QString &value);

@@ -27,7 +27,7 @@
 class EwsItemBasePrivate : public QSharedData
 {
 public:
-    typedef QHash<EwsPropertyField, QString> PropertyHash;
+    typedef QHash<EwsPropertyField, QVariant> PropertyHash;
 
     EwsItemBasePrivate();
     virtual ~EwsItemBasePrivate();

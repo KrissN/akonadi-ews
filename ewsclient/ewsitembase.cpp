@@ -59,7 +59,7 @@ bool EwsItemBase::isValid() const
 bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVariant &val)
 {
     EwsPropertyField prop;
-    QString value;
+    QVariant value;
     PropertyHash propHash = val.value<PropertyHash>();
     QString elmName = reader.name().toString();
 
@@ -82,6 +82,23 @@ bool EwsItemBasePrivate::extendedPropertyReader(QXmlStreamReader &reader, QVaria
         }
         else if (reader.name() == QStringLiteral("Value")) {
             value = reader.readElementText();
+        }
+        else if (reader.name() == QStringLiteral("Values")) {
+            QStringList values;
+            while (reader.readNextStartElement()) {
+                if (reader.namespaceUri() != ewsTypeNsUri) {
+                    qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid namespace.")
+                                    .arg(elmName);
+                    reader.skipCurrentElement();
+                    reader.skipCurrentElement();
+                    return false;
+                }
+
+                if (reader.name() == QStringLiteral("Value")) {
+                    values.append(reader.readElementText());
+                }
+            }
+            value = values;
         }
         else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unexpected child element %2")
@@ -119,16 +136,16 @@ bool EwsItemBasePrivate::extendedPropertyWriter(QXmlStreamWriter &writer, const 
     return true;
 }
 
-QStringRef EwsItemBase::operator[](const EwsPropertyField &prop) const
+QVariant EwsItemBase::operator[](const EwsPropertyField &prop) const
 {
     EwsItemBasePrivate::PropertyHash propHash =
         d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();
-    QHash<EwsPropertyField, QString>::iterator it = propHash.find(prop);
+    EwsItemBasePrivate::PropertyHash::iterator it = propHash.find(prop);
     if (it != propHash.end()) {
-        return QStringRef(&it.value());
+        return it.value();
     }
     else {
-        return QStringRef();
+        return QVariant();
     }
 }
 
