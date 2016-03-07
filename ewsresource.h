@@ -110,6 +110,8 @@ private:
     void saveState();
     void resetUrl();
 
+    int reconnectTimeout();
+
     EwsClient mEwsClient;
     Akonadi::Collection mRootCollection;
     QScopedPointer<EwsSubscriptionManager> mSubManager;
@@ -118,6 +120,7 @@ private:
     QHash<QString, EwsId::List> mItemsToCheck;
     QHash<QString, EwsFetchItemsJob::QueuedUpdateList> mQueuedUpdates;
     QString mPassword;
+    int mReconnectTimeout;
 };
 
 #endif

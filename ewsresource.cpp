@@ -72,8 +72,11 @@ static const QVector<SpecialFolders> specialFolderList = {
     {EwsDIdDrafts, SpecialMailCollections::Drafts, QStringLiteral("document-properties")}
 };
 
+static Q_CONSTEXPR int InitialReconnectTimeout = 60;
+static Q_CONSTEXPR int ReconnectTimeout = 300;
+
 EwsResource::EwsResource(const QString &id)
-    : Akonadi::ResourceBase(id)
+    : Akonadi::ResourceBase(id), mReconnectTimeout(InitialReconnectTimeout)
 {
     qDebug() << "EwsResource";
     //setName(i18n("Microsoft Exchange"));
@@ -144,22 +147,22 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
     qDebug() << "rootFolderFetchFinished";
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
-        Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
-        setOnline(false);
+        Q_EMIT status(Idle, i18nc("@info:status", "Unable to connect to Exchange server"));
+        setTemporaryOffline(reconnectTimeout());
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetFolderRequest job object");
         return;
     }
 
     if (req->error()) {
-        Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
-        setOnline(false);
+        Q_EMIT status(Idle, i18nc("@info:status", "Unable to connect to Exchange server"));
+        setTemporaryOffline(reconnectTimeout());
         qWarning() << "ERROR" << req->errorString();
         return;
     }
 
     if (req->responses().size() != 1) {
-        Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
-        setOnline(false);
+        Q_EMIT status(Idle, i18nc("@info:status", "Unable to connect to Exchange server"));
+        setTemporaryOffline(reconnectTimeout());
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid number of responses received");
         return;
     }
@@ -1051,6 +1054,14 @@ void EwsResource::setPassword(const QString &password)
         wallet->writePassword(config()->name(), password);
     }
     delete wallet;
+}
+
+int EwsResource::reconnectTimeout()
+{
+    // Return InitialReconnectTimeout for the first time, then ReconnectTimeout.
+    int timeout = mReconnectTimeout;
+    mReconnectTimeout = ReconnectTimeout;
+    return timeout;
 }
 
 AKONADI_RESOURCE_MAIN(EwsResource)
