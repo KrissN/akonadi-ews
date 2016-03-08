@@ -93,6 +93,9 @@ void EwsUpdateItemRequest::start()
 
     endSoapDocument(writer);
 
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting UpdateItem request (%1 changes)")
+                    .arg(mChanges.size());
+
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     prepare(reqString);
@@ -111,6 +114,16 @@ bool EwsUpdateItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     Response resp(reader);
     if (resp.responseClass() == EwsResponseUnknown) {
         return false;
+    }
+
+    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+        if (resp.isSuccess()) {
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateItem response - OK");
+        }
+        else {
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateItem response - %1")
+                            .arg(resp.responseMessage());
+        }
     }
 
     mResponses.append(resp);
@@ -165,11 +178,9 @@ EwsUpdateItemRequest::Response::Response(QXmlStreamReader &reader)
             }
             // Finish the Value element.
             reader.skipCurrentElement();
-            // Finish the ConflictResults element.
-            reader.skipCurrentElement();
         }
         else if (!readResponseElement(reader)) {
-            setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
+            setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element %1.").arg(reader.name().toString()));
             return;
         }
     }
