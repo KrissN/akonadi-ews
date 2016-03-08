@@ -21,9 +21,9 @@
 
 #include "ewsclient_debug.h"
 
-EwsModifyCalendarJob::EwsModifyCalendarJob(EwsClient& client, const Akonadi::Item &item,
+EwsModifyCalendarJob::EwsModifyCalendarJob(EwsClient& client, const Akonadi::Item::List &items,
                                            const QSet<QByteArray> &parts, QObject *parent)
-    : EwsModifyItemJob(client, item, parts, parent)
+    : EwsModifyItemJob(client, items, parts, parent)
 {
 }
 EwsModifyCalendarJob::~EwsModifyCalendarJob()

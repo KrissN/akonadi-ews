@@ -26,7 +26,7 @@ class EwsModifyContactJob : public EwsModifyItemJob
 {
     Q_OBJECT
 public:
-    EwsModifyContactJob(EwsClient& client, const Akonadi::Item &item, const QSet<QByteArray> &parts,
+    EwsModifyContactJob(EwsClient& client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
                          QObject *parent);
     virtual ~EwsModifyContactJob();
     virtual void start() Q_DECL_OVERRIDE;

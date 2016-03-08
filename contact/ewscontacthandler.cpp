@@ -66,10 +66,10 @@ bool EwsContactHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsIt
     return true;
 }
 
-EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
                                                    const QSet<QByteArray> &parts, QObject *parent)
 {
-    return new EwsModifyContactJob(client, item, parts, parent);
+    return new EwsModifyContactJob(client, items, parts, parent);
 }
 
 EwsCreateItemJob *EwsContactHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,

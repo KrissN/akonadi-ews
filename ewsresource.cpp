@@ -345,8 +345,8 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
         cancelTask("Item type not supported for changing");
     }
     else {
-        EwsModifyItemJob *job = EwsItemHandler::itemHandler(type)->modifyItemJob(mEwsClient, item,
-            partIdentifiers, this);
+        EwsModifyItemJob *job = EwsItemHandler::itemHandler(type)->modifyItemJob(mEwsClient,
+            Item::List() << item, partIdentifiers, this);
         connect(job, SIGNAL(result(KJob*)), SLOT(itemChangeRequestFinished(KJob*)));
         job->start();
     }
@@ -365,7 +365,7 @@ void EwsResource::itemChangeRequestFinished(KJob *job)
         return;
     }
 
-    changeCommitted(req->item());
+    changesCommitted(req->items());
 }
 
 void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCollection,

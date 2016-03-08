@@ -19,9 +19,9 @@
 
 #include "ewsmodifyitemjob.h"
 
-EwsModifyItemJob::EwsModifyItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsModifyItemJob::EwsModifyItemJob(EwsClient& client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)
-    : EwsJob(parent), mItem(item), mParts(parts), mClient(client)
+    : EwsJob(parent), mItems(items), mParts(parts), mClient(client)
 {
 }
 
@@ -29,7 +29,14 @@ EwsModifyItemJob::~EwsModifyItemJob()
 {
 }
 
-const Akonadi::Item &EwsModifyItemJob::item() const
+void EwsModifyItemJob::setModifiedFlags(const QSet<QByteArray> &addedFlags,
+                                        const QSet<QByteArray> &removedFlags)
 {
-    return mItem;
+    mAddedFlags = addedFlags;
+    mRemovedFlags = removedFlags;
+}
+
+const Akonadi::Item::List &EwsModifyItemJob::items() const
+{
+    return mItems;
 }

@@ -80,10 +80,10 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     return true;
 }
 
-EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
                                                 const QSet<QByteArray> &parts, QObject *parent)
 {
-    return new EwsModifyMailJob(client, item, parts, parent);
+    return new EwsModifyMailJob(client, items, parts, parent);
 }
 
 EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,

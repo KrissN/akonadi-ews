@@ -29,9 +29,9 @@ using namespace Akonadi;
 
 static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
 
-EwsModifyMailJob::EwsModifyMailJob(EwsClient& client, const Akonadi::Item &item,
+EwsModifyMailJob::EwsModifyMailJob(EwsClient& client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)
-    : EwsModifyItemJob(client, item, parts, parent)
+    : EwsModifyItemJob(client, items, parts, parent)
 {
 }
 EwsModifyMailJob::~EwsModifyMailJob()
@@ -42,26 +42,30 @@ void EwsModifyMailJob::start()
 {
     bool doSubmit = false;
     EwsUpdateItemRequest *req = new EwsUpdateItemRequest(mClient, this);
-    EwsId itemId(mItem.remoteId(), mItem.remoteRevision());
+    EwsId itemId;
 
-    if (mParts.contains("FLAGS")) {
-        EwsUpdateItemRequest::ItemChange ic(itemId, EwsItemTypeMessage);
-        qDebug() << "Item flags" << mItem.flags();
-        bool isRead = mItem.flags().contains(MessageFlags::Seen);
-        EwsUpdateItemRequest::Update *upd =
-                        new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("message:IsRead")),
-                                                            isRead ? QStringLiteral("true") : QStringLiteral("false"));
-        ic.addUpdate(upd);
-        bool isFlagged = mItem.flags().contains(MessageFlags::Flagged);
-        if (isFlagged) {
-            upd = new EwsUpdateItemRequest::SetUpdate(propPidFlagStatus, QStringLiteral("2"));
+    Q_FOREACH(const Item &item, mItems) {
+        itemId = EwsId(item.remoteId(), item.remoteRevision());
+
+        if (mParts.contains("FLAGS")) {
+            EwsUpdateItemRequest::ItemChange ic(itemId, EwsItemTypeMessage);
+            qDebug() << "Item flags" << item.flags();
+            bool isRead = item.flags().contains(MessageFlags::Seen);
+            EwsUpdateItemRequest::Update *upd =
+                            new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("message:IsRead")),
+                                                                isRead ? QStringLiteral("true") : QStringLiteral("false"));
+            ic.addUpdate(upd);
+            bool isFlagged = item.flags().contains(MessageFlags::Flagged);
+            if (isFlagged) {
+                upd = new EwsUpdateItemRequest::SetUpdate(propPidFlagStatus, QStringLiteral("2"));
+            }
+            else {
+                upd = new EwsUpdateItemRequest::DeleteUpdate(propPidFlagStatus);
+            }
+            ic.addUpdate(upd);
+            req->addItemChange(ic);
+            doSubmit = true;
         }
-        else {
-            upd = new EwsUpdateItemRequest::DeleteUpdate(propPidFlagStatus);
-        }
-        ic.addUpdate(upd);
-        req->addItemChange(ic);
-        doSubmit = true;
     }
 
     if (doSubmit) {
@@ -90,16 +94,17 @@ void EwsModifyMailJob::updateItemFinished(KJob *job)
         return;
     }
 
-    EwsUpdateItemRequest::Response resp = req->responses().first();
-    if (!resp.isSuccess()) {
-        setErrorText(QStringLiteral("Item update failed: ") + resp.responseMessage());
-        emitResult();
-        return;
-    }
+    Q_ASSERT(req->responses().size() == mItems.size());
 
-    Item item = job->property("item").value<Item>();
-    if (item.isValid()) {
-        item.setRemoteRevision(resp.itemId().changeKey());
+    Item::List::iterator it = mItems.begin();
+    Q_FOREACH(const EwsUpdateItemRequest::Response &resp, req->responses()) {
+        if (!resp.isSuccess()) {
+            setErrorText(QStringLiteral("Item update failed: ") + resp.responseMessage());
+            emitResult();
+            return;
+        }
+
+        it->setRemoteRevision(resp.itemId().changeKey());
     }
 
     emitResult();
