@@ -54,6 +54,8 @@ public:
     virtual void collectionRemoved(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
     virtual void itemAdded(const Akonadi::Item &item, const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
     virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) Q_DECL_OVERRIDE;
+    virtual void itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
+                                  const QSet<QByteArray> &removedFlags) Q_DECL_OVERRIDE;
     virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
                             const Akonadi::Collection &destinationCollection) Q_DECL_OVERRIDE;
     virtual void itemsRemoved(const Akonadi::Item::List &items) Q_DECL_OVERRIDE;
@@ -77,6 +79,7 @@ private Q_SLOTS:
     void itemFetchJobFinished(KJob *job);
     void getItemRequestFinished(EwsGetItemRequest *req);
     void itemChangeRequestFinished(KJob *job);
+    void itemModifyFlagsRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);
     void itemDeleteRequestFinished(KJob *job);
     void itemCreateRequestFinished(KJob *job);

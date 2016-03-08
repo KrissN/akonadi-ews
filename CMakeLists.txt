@@ -81,6 +81,7 @@ set(ewsresource_SRCS
     ewsfetchitemdetailjob.cpp
     ewsitemhandler.cpp
     ewsmodifyitemjob.cpp
+    ewsmodifyitemflagsjob.cpp
     ewsresource.cpp
     ewssubscriptionmanager.cpp
     progressdialog.cpp)

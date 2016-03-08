@@ -36,6 +36,7 @@
 #include "ewsfetchfoldersjob.h"
 #include "ewsgetitemrequest.h"
 #include "ewsupdateitemrequest.h"
+#include "ewsmodifyitemflagsjob.h"
 #include "ewsmoveitemrequest.h"
 #include "ewsdeleteitemrequest.h"
 #include "ewscreatefolderrequest.h"
@@ -350,6 +351,34 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
         connect(job, SIGNAL(result(KJob*)), SLOT(itemChangeRequestFinished(KJob*)));
         job->start();
     }
+}
+
+void EwsResource::itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
+                                   const QSet<QByteArray> &removedFlags)
+{
+    qDebug() << "itemsFlagsChanged" << addedFlags << removedFlags << items.size();
+    Item::List changedItems[EwsItemTypeUnknown + 1];
+
+    EwsModifyItemFlagsJob *job = new EwsModifyItemFlagsJob(mEwsClient, this, items, addedFlags, removedFlags);
+    connect(job, &EwsModifyItemFlagsJob::result, this, &EwsResource::itemModifyFlagsRequestFinished);
+    job->start();
+}
+
+void EwsResource::itemModifyFlagsRequestFinished(KJob *job)
+{
+    qDebug() << "itemModifyFlagsRequestFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsModifyItemFlagsJob *req = qobject_cast<EwsModifyItemFlagsJob*>(job);
+    if (!req) {
+        cancelTask(QStringLiteral("Invalid EwsModifyItemFlagsJob job object"));
+        return;
+    }
+
+    changesCommitted(req->items());
 }
 
 void EwsResource::itemChangeRequestFinished(KJob *job)
