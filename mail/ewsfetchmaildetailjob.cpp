@@ -174,7 +174,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             }
         }
 
-        QStringRef flagProp = ewsItem[propPidFlagStatus];
+        QVariant flagProp = ewsItem[propPidFlagStatus];
         if (!flagProp.isNull() && (flagProp.toUInt() == 2)) {
             item.setFlag(MessageFlags::Flagged);
         }
