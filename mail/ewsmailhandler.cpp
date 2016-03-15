@@ -76,6 +76,13 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     KMime::Message::Ptr msg(new KMime::Message);
     msg->setContent(mimeContent.toLatin1());
     msg->parse();
+    // Some messages might just be empty (just headers). This results in the body being empty.
+    // The problem is that when Akonadi sees an empty body it will interpret this as "body not
+    // yet loaded" and will retry which will cause an endless loop. To work around this put a
+    // single newline so that it is not empty.
+    if (msg->body().isEmpty()) {
+        msg->setBody("\n");
+    }
     item.setPayload<KMime::Message::Ptr>(msg);
     return true;
 }
