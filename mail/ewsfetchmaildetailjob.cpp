@@ -51,6 +51,7 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("message:References");
     shape << EwsPropertyField("message:ReplyTo");
     shape << EwsPropertyField("message:InternetMessageId");
+    shape << EwsPropertyField("item:Size");
     shape << propPidFlagStatus;
     shape << propPidFlagIconIndex;
     mRequest->setItemShape(shape);
@@ -172,6 +173,11 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             else {
                 item.clearFlag(MessageFlags::Sent);
             }
+        }
+
+        v = ewsItem[EwsItemFieldSize];
+        if (v.isValid()) {
+            item.setSize(v.toUInt());
         }
 
         QVariant flagProp = ewsItem[propPidFlagStatus];
