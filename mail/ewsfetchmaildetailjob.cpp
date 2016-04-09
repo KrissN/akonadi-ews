@@ -188,6 +188,10 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             item.clearFlag(MessageFlags::Flagged);
         }
 
+        if (ewsItem.type() == EwsItemTypeMeetingRequest) {
+            item.setFlag(MessageFlags::HasInvitation);
+        }
+
         it++;
     }
 
