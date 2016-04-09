@@ -53,6 +53,10 @@
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
 #include "ewscreateitemrequest.h"
 #endif
+#include "tags/ewstagstore.h"
+#include "tags/ewsupdateitemstagsjob.h"
+#include "tags/ewsglobaltagswritejob.h"
+#include "tags/ewsglobaltagsreadjob.h"
 #include "ewsclient_debug.h"
 
 #include "resourceadaptor.h"
@@ -73,11 +77,22 @@ static const QVector<SpecialFolders> specialFolderList = {
     {EwsDIdDrafts, SpecialMailCollections::Drafts, QStringLiteral("document-properties")}
 };
 
+const QString EwsResource::akonadiEwsPropsetUuid = QStringLiteral("9bf757ae-69b5-4d8a-bf1d-2dd0c0871a28");
+
+const EwsPropertyField EwsResource::globalTagsProperty(EwsResource::akonadiEwsPropsetUuid,
+                                                       QStringLiteral("GlobalTags"),
+                                                       EwsPropTypeStringArray);
+const EwsPropertyField EwsResource::globalTagsVersionProperty(EwsResource::akonadiEwsPropsetUuid,
+                                                              QStringLiteral("GlobalTagsVersion"),
+                                                              EwsPropTypeInteger);
+const EwsPropertyField EwsResource::tagsProperty(EwsResource::akonadiEwsPropsetUuid,
+                                                 QStringLiteral("Tags"), EwsPropTypeStringArray);
+
 static Q_CONSTEXPR int InitialReconnectTimeout = 60;
 static Q_CONSTEXPR int ReconnectTimeout = 300;
 
 EwsResource::EwsResource(const QString &id)
-    : Akonadi::ResourceBase(id), mReconnectTimeout(InitialReconnectTimeout)
+    : Akonadi::ResourceBase(id), mTagsRetrieved(false), mReconnectTimeout(InitialReconnectTimeout)
 {
     qDebug() << "EwsResource";
     //setName(i18n("Microsoft Exchange"));
@@ -94,11 +109,14 @@ EwsResource::EwsResource(const QString &id)
     changeRecorder()->itemFetchScope().fetchFullPayload(true);
     changeRecorder()->itemFetchScope().setAncestorRetrieval(ItemFetchScope::Parent);
     changeRecorder()->itemFetchScope().setFetchModificationTime(false);
+    changeRecorder()->itemFetchScope().setFetchTags(true);
 
     mRootCollection.setParentCollection(Collection::root());
     mRootCollection.setName(name());
     mRootCollection.setContentMimeTypes(QStringList() << Collection::mimeType() << KMime::Message::mimeType());
     mRootCollection.setRights(Collection::ReadOnly);
+
+    setScheduleAttributeSyncBeforeItemSync(true);
 
     if (Settings::baseUrl().isEmpty()) {
         setOnline(false);
@@ -117,6 +135,8 @@ EwsResource::EwsResource(const QString &id)
             qDebug() << mSyncState;
         }
     }
+
+    mTagStore = new EwsTagStore(this);
 
     QMetaObject::invokeMethod(this, "delayedInit", Qt::QueuedConnection);
 }
@@ -138,6 +158,8 @@ void EwsResource::resetUrl()
     req->setFolderIds(EwsId::List() << EwsId(EwsDIdMsgFolderRoot));
     EwsFolderShape shape(EwsShapeIdOnly);
     shape << EwsPropertyField(QStringLiteral("folder:DisplayName"));
+    // Use the opportunity of reading the root folder to read the tag data.
+    shape << globalTagsProperty << globalTagsVersionProperty;
     req->setFolderShape(shape);
     connect(req, &EwsRequest::result, this, &EwsResource::rootFolderFetchFinished);
     req->start();
@@ -168,7 +190,8 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         return;
     }
 
-    EwsId id = req->responses().first().folder()[EwsFolderFieldFolderId].value<EwsId>();
+    EwsFolder folder = req->responses().first().folder();
+    EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
     if (id.type() == EwsId::Real) {
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());
@@ -182,6 +205,8 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         mSubManager->start();
 
         fetchSpecialFolders();
+
+        mTagStore->readTags(folder[globalTagsProperty].toStringList(), folder[globalTagsVersionProperty].toInt());
     }
 }
 
@@ -199,6 +224,7 @@ void EwsResource::retrieveCollections()
         mRootCollection, this);
     connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::findFoldersRequestFinished);
     job->start();
+    synchronizeTags();
 }
 
 void EwsResource::retrieveItems(const Collection &collection)
@@ -210,7 +236,7 @@ void EwsResource::retrieveItems(const Collection &collection)
 
     QString rid = collection.remoteId();
     EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient,
-        mSyncState.value(rid), mItemsToCheck.value(rid), this);
+        mSyncState.value(rid), mItemsToCheck.value(rid), mTagStore, this);
     job->setQueuedUpdates(mQueuedUpdates.value(collection.remoteId()));
     mQueuedUpdates.remove(collection.remoteId());
     connect(job, SIGNAL(finished(KJob*)), SLOT(itemFetchJobFinished(KJob*)));
@@ -572,7 +598,7 @@ void EwsResource::itemAdded(const Item &item, const Collection &collection)
     }
     else {
         EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
-            collection, this);
+            collection, mTagStore, this);
         connect(job, &EwsCreateItemJob::result, this, &EwsResource::itemCreateRequestFinished);
         job->start();
     }
@@ -809,7 +835,7 @@ void EwsResource::sendItem(const Akonadi::Item &item)
     }
     else {
         EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
-            Collection(), this);
+            Collection(), mTagStore, this);
         job->setSend(true);
         job->setProperty("item", QVariant::fromValue<Item>(item));
         connect(job, &EwsCreateItemJob::result, this, &EwsResource::itemSendRequestFinished);
@@ -1091,6 +1117,99 @@ int EwsResource::reconnectTimeout()
     int timeout = mReconnectTimeout;
     mReconnectTimeout = ReconnectTimeout;
     return timeout;
+}
+
+void EwsResource::itemsTagsChanged(const Item::List &items, const QSet<Tag> &addedTags,
+                                   const QSet<Tag> &removedTags)
+{
+    Q_UNUSED(addedTags)
+    Q_UNUSED(removedTags)
+
+    qDebug() << "itemsTagsChanged";
+
+    EwsUpdateItemsTagsJob *job = new EwsUpdateItemsTagsJob(items, mTagStore, mEwsClient, this);
+    connect(job, &EwsUpdateItemsTagsJob::result, this, &EwsResource::itemsTagChangeFinished);
+    job->start();
+}
+
+void EwsResource::itemsTagChangeFinished(KJob *job)
+{
+    if (job->error()) {
+        cancelTask(job->errorString());
+        return;
+    }
+
+    EwsUpdateItemsTagsJob *updJob = qobject_cast<EwsUpdateItemsTagsJob*>(job);
+    if (!updJob) {
+        cancelTask(QStringLiteral("Invalid EwsUpdateItemsTagsJob object"));
+        return;
+    }
+
+    changesCommitted(updJob->items());
+}
+
+void EwsResource::tagAdded(const Tag &tag)
+{
+    qDebug() << "tagAdded" << tag.gid() << tag.id();
+
+    mTagStore->addTag(tag);
+
+    EwsGlobalTagsWriteJob *job = new EwsGlobalTagsWriteJob(mTagStore, mEwsClient, mRootCollection, this);
+    connect(job, &EwsGlobalTagsWriteJob::result, this, &EwsResource::globalTagChangeFinished);
+    job->start();
+}
+
+void EwsResource::tagChanged(const Tag &tag)
+{
+    qDebug() << "tagChanged" << tag.gid();
+
+    mTagStore->addTag(tag);
+
+    EwsGlobalTagsWriteJob *job = new EwsGlobalTagsWriteJob(mTagStore, mEwsClient, mRootCollection, this);
+    connect(job, &EwsGlobalTagsWriteJob::result, this, &EwsResource::globalTagChangeFinished);
+    job->start();
+}
+
+
+void EwsResource::tagRemoved(const Tag &tag)
+{
+    qDebug() << "tagRemoved" << tag.gid();
+
+    mTagStore->removeTag(tag);
+
+    EwsGlobalTagsWriteJob *job = new EwsGlobalTagsWriteJob(mTagStore, mEwsClient, mRootCollection, this);
+    connect(job, &EwsGlobalTagsWriteJob::result, this, &EwsResource::globalTagChangeFinished);
+    job->start();
+}
+
+void EwsResource::globalTagChangeFinished(KJob *job)
+{
+    if (job->error()) {
+        cancelTask(job->errorString());
+    } else {
+        changeProcessed();
+    }
+}
+
+
+void EwsResource::retrieveTags()
+{
+    qDebug() << "retrieveTags";
+    EwsGlobalTagsReadJob *job = new EwsGlobalTagsReadJob(mTagStore, mEwsClient, mRootCollection, this);
+    connect(job, &EwsGlobalTagsReadJob::result, this, &EwsResource::globalTagsRetrievalFinished);
+    job->start();
+}
+
+void EwsResource::globalTagsRetrievalFinished(KJob *job)
+{
+    qDebug() << "globalTagsRetrievalFinished";
+    if (job->error()) {
+        cancelTask(job->errorString());
+    } else {
+        EwsGlobalTagsReadJob *readJob = qobject_cast<EwsGlobalTagsReadJob*>(job);
+        Q_ASSERT(readJob);
+        tagsRetrieved(readJob->tags(), QHash<QString, Item::List>());
+    }
 }
 
 AKONADI_RESOURCE_MAIN(EwsResource)

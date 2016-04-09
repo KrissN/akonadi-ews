@@ -32,15 +32,16 @@ using namespace Akonadi;
 static const EwsPropertyField propPidMessageFlags(0x0e07, EwsPropTypeInteger);
 
 EwsCreateMailJob::EwsCreateMailJob(EwsClient& client, const Akonadi::Item &item,
-                                   const Akonadi::Collection &collection, QObject *parent)
-    : EwsCreateItemJob(client, item, collection, parent), mSend(false)
+                                   const Akonadi::Collection &collection, EwsTagStore *tagStore,
+                                   EwsResource *parent)
+    : EwsCreateItemJob(client, item, collection, tagStore, parent), mSend(false)
 {
 }
 EwsCreateMailJob::~EwsCreateMailJob()
 {
 }
 
-void EwsCreateMailJob::start()
+void EwsCreateMailJob::doStart()
 {
     if (!mItem.hasPayload<KMime::Message::Ptr>()) {
         setErrorMsg(QStringLiteral("Expected MIME message payload"));
@@ -60,6 +61,7 @@ void EwsCreateMailJob::start()
         item.setProperty(propPidMessageFlags, QStringLiteral("1"));
         req->setSavedFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
     }
+    populateCommonProperties(item);
     req->setItems(EwsItem::List() << item);
     req->setMessageDisposition(mSend ? EwsDispSendOnly : EwsDispSaveOnly);
     connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailCreateFinished);

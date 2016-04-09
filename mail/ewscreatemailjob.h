@@ -27,10 +27,11 @@ class EwsCreateMailJob : public EwsCreateItemJob
     Q_OBJECT
 public:
     EwsCreateMailJob(EwsClient& client, const Akonadi::Item &item,
-                     const Akonadi::Collection &collection, QObject *parent);
+                     const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateMailJob();
-    virtual void start() Q_DECL_OVERRIDE;
     virtual bool setSend(bool send = true) Q_DECL_OVERRIDE;
+protected:
+    virtual void doStart() Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void mailCreateFinished(KJob *job);
 private:

@@ -27,10 +27,11 @@ class EwsCreateTaskJob : public EwsCreateItemJob
     Q_OBJECT
 public:
     EwsCreateTaskJob(EwsClient& client, const Akonadi::Item &item,
-                     const Akonadi::Collection &collection, QObject *parent);
+                     const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateTaskJob();
     virtual bool setSend(bool send = true) Q_DECL_OVERRIDE;
-    virtual void start() Q_DECL_OVERRIDE;
+protected:
+    virtual void doStart() Q_DECL_OVERRIDE;
 };
 
 #endif

@@ -94,9 +94,10 @@ EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient& client, const QVector
 }
 
 EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
-                                                const Akonadi::Collection &collection, QObject *parent)
+                                                const Akonadi::Collection &collection,
+                                                EwsTagStore *tagStore, EwsResource *parent)
 {
-    return new EwsCreateMailJob(client, item, collection, parent);
+    return new EwsCreateMailJob(client, item, collection, tagStore, parent);
 }
 
 

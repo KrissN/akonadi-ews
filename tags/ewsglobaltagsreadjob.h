@@ -17,30 +17,37 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewscreatecalendarjob.h"
+#ifndef EWSGLOBALTAGSREADJOB_H
+#define EWSGLOBALTAGSREADJOB_H
 
-#include "ewsclient_debug.h"
+#include "ewsjob.h"
 
-EwsCreateCalendarJob::EwsCreateCalendarJob(EwsClient& client, const Akonadi::Item &item,
-                                           const Akonadi::Collection &collection,
-                                           EwsTagStore *tagStore, EwsResource *parent)
-    : EwsCreateItemJob(client, item, collection, tagStore, parent)
-{
-}
-EwsCreateCalendarJob::~EwsCreateCalendarJob()
-{
-}
+#include <AkonadiCore/Tag>
 
-void EwsCreateCalendarJob::doStart()
-{
-    qCWarning(EWSRES_LOG) << QStringLiteral("Calendar item creation not implemented!");
-    emitResult();
+class EwsTagStore;
+class EwsClient;
+namespace Akonadi {
+class Collection;
 }
 
-bool EwsCreateCalendarJob::setSend(bool send)
+class EwsGlobalTagsReadJob : public EwsJob
 {
-    Q_UNUSED(send)
+    Q_OBJECT
+public:
+    EwsGlobalTagsReadJob(EwsTagStore *tagStore, EwsClient &client,
+                         const Akonadi::Collection &rootCollection, QObject *parent);
+    ~EwsGlobalTagsReadJob();
 
-    qCWarning(EWSRES_LOG) << QStringLiteral("Sending calendar items is not supported!");
-    return false;
-}
+    void start() Q_DECL_OVERRIDE;
+
+    const Akonadi::Tag::List &tags() const { return mTags; };
+private Q_SLOTS:
+    void getFolderRequestFinished(KJob *job);
+private:
+    EwsTagStore *mTagStore;
+    EwsClient &mClient;
+    const Akonadi::Collection &mRootCollection;
+    Akonadi::Tag::List mTags;
+};
+
+#endif

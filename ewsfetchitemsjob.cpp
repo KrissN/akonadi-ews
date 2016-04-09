@@ -28,6 +28,9 @@
 #include "ewsmailbox.h"
 #include "ewsitemhandler.h"
 #include "ewsfetchitemdetailjob.h"
+#include "tags/ewstagstore.h"
+#include "tags/ewsakonaditagssyncjob.h"
+#include "ewsresource.h"
 #include "ewsclient_debug.h"
 
 using namespace Akonadi;
@@ -82,9 +85,10 @@ static Q_CONSTEXPR int fetchBatchSize = 50;
 
 EwsFetchItemsJob::EwsFetchItemsJob(const Collection &collection, EwsClient &client,
                                    const QString &syncState, const EwsId::List &itemsToCheck,
-                                   QObject *parent)
+                                   EwsTagStore *tagStore, EwsResource *parent)
     : EwsJob(parent), mCollection(collection), mClient(client), mItemsToCheck(itemsToCheck),
-      mPendingJobs(0), mTotalItems(0), mSyncState(syncState), mFullSync(syncState.isNull())
+      mPendingJobs(0), mTotalItems(0), mSyncState(syncState), mFullSync(syncState.isNull()),
+      mTagStore(tagStore), mTagsSynced(false)
 {
     qRegisterMetaType<EwsId::List>();
 }
@@ -99,6 +103,7 @@ void EwsFetchItemsJob::start()
     EwsSyncFolderItemsRequest *syncItemsReq = new EwsSyncFolderItemsRequest(mClient, this);
     syncItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
     EwsItemShape shape(EwsShapeIdOnly);
+    shape << EwsResource::tagsProperty;
     syncItemsReq->setItemShape(shape);
     if (!mSyncState.isNull()) {
         syncItemsReq->setSyncState(mSyncState);
@@ -266,12 +271,22 @@ void EwsFetchItemsJob::compareItemLists()
             EwsId id = ewsItem[EwsItemFieldItemId].value<EwsId>();
             item.setRemoteId(id.id());
             item.setRemoteRevision(id.changeKey());
+            if (!mTagStore->readEwsProperties(item, ewsItem)) {
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Missing tags encountered - forcing sync");
+                syncTags();
+                return;
+            }
             toFetchItems[type].append(item);
         }
         else {
             Item &item = *it;
             item.clearPayload();
             item.setRemoteRevision(id.changeKey());
+            if (!mTagStore->readEwsProperties(item, ewsItem)) {
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Missing tags encountered - forcing sync");
+                syncTags();
+                return;
+            }
             toFetchItems[type].append(item);
             itemHash.erase(it);
         }
@@ -298,6 +313,11 @@ void EwsFetchItemsJob::compareItemLists()
             Item &item = *it;
             item.clearPayload();
             item.setRemoteRevision(id.changeKey());
+            if (!mTagStore->readEwsProperties(item, ewsItem)) {
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Missing tags encountered - forcing sync");
+                syncTags();
+                return;
+            }
             EwsItemType type = ewsItem.internalType();
             toFetchItems[type].append(item);
             itemHash.erase(it);
@@ -410,5 +430,29 @@ void EwsFetchItemsJob::setQueuedUpdates(const QueuedUpdateList &updates)
     Q_FOREACH(const QueuedUpdate &upd, updates) {
         mQueuedUpdates[upd.type].insert(upd.id, upd.changeKey);
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Queued update %1 for item %2").arg(upd.type).arg(upd.id);
+    }
+}
+
+void EwsFetchItemsJob::syncTags()
+{
+    if (mTagsSynced) {
+        setErrorMsg(QStringLiteral("Missing tags encountered despie previous sync."));
+        emitResult();
+    } else {
+        EwsAkonadiTagsSyncJob *job = new EwsAkonadiTagsSyncJob(mTagStore, mClient,
+            qobject_cast<EwsResource*>(parent())->rootCollection(), this);
+        connect(job, &EwsAkonadiTagsSyncJob::result, this, &EwsFetchItemsJob::tagSyncFinished);
+        job->start();
+        mTagsSynced = true;
+    }
+}
+
+void EwsFetchItemsJob::tagSyncFinished(KJob *job)
+{
+    if (job->error()) {
+        setErrorMsg(job->errorText());
+        emitResult();
+    } else {
+        compareItemLists();
     }
 }

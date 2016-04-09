@@ -169,7 +169,7 @@ void EwsItemBase::setField(EwsItemFields f, const QVariant& value)
     d->mFields[f] = value;
 }
 
-void EwsItemBase::setProperty(const EwsPropertyField &prop, const QString &value)
+void EwsItemBase::setProperty(const EwsPropertyField &prop, const QVariant &value)
 {
     EwsItemBasePrivate::PropertyHash propHash =
         d->mFields[EwsItemFieldExtendedProperties].value<EwsItemBasePrivate::PropertyHash>();

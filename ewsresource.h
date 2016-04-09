@@ -35,15 +35,27 @@ class EwsGetItemRequest;
 class EwsFindFolderRequest;
 class EwsFolder;
 class EwsSubscriptionManager;
+class EwsTagStore;
 
-class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV3,
+class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV4,
     public Akonadi::TransportResourceBase
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Resource")
 public:
+    static const QString akonadiEwsPropsetUuid;
+    static const EwsPropertyField globalTagsProperty;
+    static const EwsPropertyField globalTagsVersionProperty;
+    static const EwsPropertyField tagsProperty;
+
     explicit EwsResource(const QString &id);
     ~EwsResource();
+
+    virtual void itemsTagsChanged(const Akonadi::Item::List &items, const QSet<Akonadi::Tag> &addedTags,
+                                  const QSet<Akonadi::Tag> &removedTags) Q_DECL_OVERRIDE;
+    virtual void tagAdded(const Akonadi::Tag &tag) Q_DECL_OVERRIDE;
+    virtual void tagChanged(const Akonadi::Tag &tag) Q_DECL_OVERRIDE;
+    virtual void tagRemoved(const Akonadi::Tag &tag) Q_DECL_OVERRIDE;
 
     virtual void collectionAdded(const Akonadi::Collection &collection, const Akonadi::Collection &parent) Q_DECL_OVERRIDE;
     virtual void collectionMoved(const Akonadi::Collection &collection, const Akonadi::Collection &collectionSource,
@@ -64,6 +76,8 @@ public:
 
     bool requestPassword(QString &password, bool ask);
     void setPassword(const QString &password);
+
+    const Akonadi::Collection &rootCollection() const { return mRootCollection; };
 protected:
     void doSetOnline(bool online) Q_DECL_OVERRIDE;
 public Q_SLOTS:
@@ -74,6 +88,7 @@ protected Q_SLOTS:
     void retrieveCollections() Q_DECL_OVERRIDE;
     void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
     bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+    void retrieveTags() Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void findFoldersRequestFinished(KJob *job);
     void itemFetchJobFinished(KJob *job);
@@ -95,7 +110,9 @@ private Q_SLOTS:
     void fullSyncRequestedEvent();
     void rootFolderFetchFinished(KJob *job);
     void specialFoldersFetchFinished(KJob *job);
-
+    void itemsTagChangeFinished(KJob *job);
+    void globalTagChangeFinished(KJob *job);
+    void globalTagsRetrievalFinished(KJob *job);
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
 public Q_SLOTS:
     Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);
@@ -123,7 +140,9 @@ private:
     QHash<QString, EwsId::List> mItemsToCheck;
     QHash<QString, EwsFetchItemsJob::QueuedUpdateList> mQueuedUpdates;
     QString mPassword;
+    bool mTagsRetrieved;
     int mReconnectTimeout;
+    EwsTagStore *mTagStore;
 };
 
 #endif

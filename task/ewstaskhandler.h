@@ -36,7 +36,8 @@ public:
     virtual EwsModifyItemJob *modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
                                             const QSet<QByteArray> &parts, QObject *parent) Q_DECL_OVERRIDE;
     virtual EwsCreateItemJob *createItemJob(EwsClient& client, const Akonadi::Item &item,
-                                            const Akonadi::Collection &collection, QObject *parent) Q_DECL_OVERRIDE;
+                                            const Akonadi::Collection &collection,
+                                            EwsTagStore *tagStore, EwsResource *parent) Q_DECL_OVERRIDE;
     static EwsItemHandler *factory();
 private:
 };

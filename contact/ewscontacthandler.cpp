@@ -73,9 +73,10 @@ EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient& client, const QVec
 }
 
 EwsCreateItemJob *EwsContactHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
-                                                   const Akonadi::Collection &collection, QObject *parent)
+                                                   const Akonadi::Collection &collection,
+                                                   EwsTagStore *tagStore, EwsResource *parent)
 {
-    return new EwsCreateContactJob(client, item, collection, parent);
+    return new EwsCreateContactJob(client, item, collection, tagStore, parent);
 }
 
 EWS_DECLARE_ITEM_HANDLER(EwsContactHandler, EwsItemTypeContact)

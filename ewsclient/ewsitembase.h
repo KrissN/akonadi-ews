@@ -44,7 +44,7 @@ public:
     QVariant operator[](const EwsPropertyField &prop) const;
 
     void setField(EwsItemFields f, const QVariant &value);
-    void setProperty(const EwsPropertyField &prop, const QString &value);
+    void setProperty(const EwsPropertyField &prop, const QVariant &value);
 
 protected:
     EwsItemBase(QSharedDataPointer<EwsItemBasePrivate> priv);

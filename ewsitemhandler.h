@@ -34,6 +34,8 @@ class EwsFetchItemDetailJob;
 class EwsModifyItemJob;
 class EwsCreateItemJob;
 class EwsItem;
+class EwsTagStore;
+class EwsResource;
 
 class EwsItemHandler
 {
@@ -48,7 +50,8 @@ public:
     virtual EwsModifyItemJob *modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
                                             const QSet<QByteArray> &parts, QObject *parent) = 0;
     virtual EwsCreateItemJob *createItemJob(EwsClient& client, const Akonadi::Item &item,
-                                            const Akonadi::Collection &collection, QObject *parent) = 0;
+                                            const Akonadi::Collection &collection,
+                                            EwsTagStore *tagStore, EwsResource *parent) = 0;
 
     typedef std::function<EwsItemHandler*()> ItemHandlerFactory;
     static void registerItemHandler(EwsItemType type, ItemHandlerFactory factory);

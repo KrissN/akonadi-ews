@@ -69,6 +69,11 @@ set(ewsresource_SRCS
     mail/ewsfetchmaildetailjob.cpp
     mail/ewsmailhandler.cpp
     mail/ewsmodifymailjob.cpp
+    tags/ewsakonaditagssyncjob.cpp
+    tags/ewsglobaltagsreadjob.cpp
+    tags/ewsglobaltagswritejob.cpp
+    tags/ewstagstore.cpp
+    tags/ewsupdateitemstagsjob.cpp
     task/ewscreatetaskjob.cpp
     task/ewsfetchtaskdetailjob.cpp
     task/ewsmodifytaskjob.cpp

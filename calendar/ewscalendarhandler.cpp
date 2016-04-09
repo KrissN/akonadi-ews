@@ -72,9 +72,10 @@ EwsModifyItemJob *EwsCalendarHandler::modifyItemJob(EwsClient& client, const QVe
 }
 
 EwsCreateItemJob *EwsCalendarHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
-                                                    const Akonadi::Collection &collection, QObject *parent)
+                                                    const Akonadi::Collection &collection,
+                                                    EwsTagStore *tagStore, EwsResource *parent)
 {
-    return new EwsCreateCalendarJob(client, item, collection, parent);
+    return new EwsCreateCalendarJob(client, item, collection, tagStore, parent);
 }
 
 EWS_DECLARE_ITEM_HANDLER(EwsCalendarHandler, EwsItemTypeCalendarItem)

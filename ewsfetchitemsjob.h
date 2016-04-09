@@ -29,6 +29,8 @@ namespace Akonadi {
 class Collection;
 }
 class EwsClient;
+class EwsTagStore;
+class EwsResource;
 
 class EwsFetchItemsJob : public EwsJob
 {
@@ -44,7 +46,7 @@ public:
 
     EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient& client,
                      const QString &syncState, const EwsId::List &itemsToCheck,
-                     QObject *parent);
+                     EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsFetchItemsJob();
 
     Akonadi::Item::List changedItems() const { return mChangedItems; };
@@ -60,12 +62,18 @@ private Q_SLOTS:
     void remoteItemFetchDone(KJob *job);
     void itemDetailFetchDone(KJob *job);
     void checkedItemsFetchFinished(KJob *job);
+    void tagSyncFinished(KJob *job);
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);
 private:
     void compareItemLists();
+    void syncTags();
 
+    /*struct QueuedUpdateInt {
+        QString changeKey;
+        EwsEventType type;
+    };*/
     typedef QHash<EwsEventType, QHash<QString, QString> > QueuedUpdateHash;
 
     const Akonadi::Collection mCollection;
@@ -81,6 +89,8 @@ private:
     QString mSyncState;
     bool mFullSync;
     QueuedUpdateHash mQueuedUpdates;
+    EwsTagStore *mTagStore;
+    bool mTagsSynced;
 
     Akonadi::Item::List mChangedItems;
     Akonadi::Item::List mDeletedItems;

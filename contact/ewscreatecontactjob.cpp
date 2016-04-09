@@ -22,15 +22,16 @@
 #include "ewsclient_debug.h"
 
 EwsCreateContactJob::EwsCreateContactJob(EwsClient& client, const Akonadi::Item &item,
-                                         const Akonadi::Collection &collection, QObject *parent)
-    : EwsCreateItemJob(client, item, collection, parent)
+                                         const Akonadi::Collection &collection,
+                                         EwsTagStore *tagStore, EwsResource *parent)
+    : EwsCreateItemJob(client, item, collection, tagStore, parent)
 {
 }
 EwsCreateContactJob::~EwsCreateContactJob()
 {
 }
 
-void EwsCreateContactJob::start()
+void EwsCreateContactJob::doStart()
 {
     qCWarning(EWSRES_LOG) << QStringLiteral("Contact item creation not implemented!");
     emitResult();

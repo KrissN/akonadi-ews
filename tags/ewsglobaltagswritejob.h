@@ -17,30 +17,32 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewscreatecalendarjob.h"
+#ifndef EWSGLOBALTAGSWRITEJOB_H
+#define EWSGLOBALTAGSWRITEJOB_H
 
-#include "ewsclient_debug.h"
+#include "ewsjob.h"
 
-EwsCreateCalendarJob::EwsCreateCalendarJob(EwsClient& client, const Akonadi::Item &item,
-                                           const Akonadi::Collection &collection,
-                                           EwsTagStore *tagStore, EwsResource *parent)
-    : EwsCreateItemJob(client, item, collection, tagStore, parent)
-{
-}
-EwsCreateCalendarJob::~EwsCreateCalendarJob()
-{
+class EwsTagStore;
+class EwsClient;
+namespace Akonadi {
+class Collection;
 }
 
-void EwsCreateCalendarJob::doStart()
+class EwsGlobalTagsWriteJob : public EwsJob
 {
-    qCWarning(EWSRES_LOG) << QStringLiteral("Calendar item creation not implemented!");
-    emitResult();
-}
+    Q_OBJECT
+public:
+    EwsGlobalTagsWriteJob(EwsTagStore *tagStore, EwsClient &client,
+                          const Akonadi::Collection &rootCollection, QObject *parent);
+    ~EwsGlobalTagsWriteJob();
 
-bool EwsCreateCalendarJob::setSend(bool send)
-{
-    Q_UNUSED(send)
+    void start() Q_DECL_OVERRIDE;
+private Q_SLOTS:
+    void updateFolderRequestFinished(KJob *job);
+private:
+    EwsTagStore *mTagStore;
+    EwsClient &mClient;
+    const Akonadi::Collection &mRootCollection;
+};
 
-    qCWarning(EWSRES_LOG) << QStringLiteral("Sending calendar items is not supported!");
-    return false;
-}
+#endif

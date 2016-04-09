@@ -72,9 +72,10 @@ EwsModifyItemJob *EwsTaskHandler::modifyItemJob(EwsClient& client, const QVector
 }
 
 EwsCreateItemJob *EwsTaskHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
-                                                const Akonadi::Collection &collection, QObject *parent)
+                                                const Akonadi::Collection &collection,
+                                                EwsTagStore *tagStore, EwsResource *parent)
 {
-    return new EwsCreateTaskJob(client, item, collection, parent);
+    return new EwsCreateTaskJob(client, item, collection, tagStore, parent);
 }
 
 EWS_DECLARE_ITEM_HANDLER(EwsTaskHandler, EwsItemTypeTask)
