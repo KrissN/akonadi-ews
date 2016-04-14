@@ -286,20 +286,22 @@ bool EwsTagStore::readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem)
 
 bool EwsTagStore::writeEwsProperties(const Akonadi::Item &item, EwsItem &ewsItem) const
 {
-    QStringList tagList;
-    QStringList categoryList;
-    Q_FOREACH(const Tag &tag, item.tags()) {
-        if (!containsId(tag.id())) {
-            return false;
+    if (!item.tags().isEmpty()) {
+        QStringList tagList;
+        QStringList categoryList;
+        Q_FOREACH(const Tag &tag, item.tags()) {
+            if (!containsId(tag.id())) {
+                return false;
+            }
+            tagList.append(tagRemoteId(tag.id()));
+            QString name = tagName(tag.id());
+            if (!name.isEmpty()) {
+                categoryList.append(name);
+            }
         }
-        tagList.append(tagRemoteId(tag.id()));
-        QString name = tagName(tag.id());
-        if (!name.isEmpty()) {
-            categoryList.append(name);
-        }
+        ewsItem.setProperty(EwsResource::tagsProperty, tagList);
+        ewsItem.setField(EwsItemFieldCategories, categoryList);
     }
-    ewsItem.setProperty(EwsResource::tagsProperty, tagList);
-    ewsItem.setField(EwsItemFieldCategories, categoryList);
 
     return true;
 }
