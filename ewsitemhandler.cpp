@@ -19,6 +19,7 @@
 
 #include "ewsitemhandler.h"
 
+#include "ewsresource.h"
 #include "ewsclient_debug.h"
 
 struct HandlerFactory {
@@ -78,4 +79,21 @@ EwsItemType EwsItemHandler::mimeToItemType(QString mimeType)
     else {
         return EwsItemTypeItem;
     }
+}
+
+QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(QSet<QByteArray> flags)
+{
+    QHash<EwsPropertyField, QVariant> propertyHash;
+
+    if (flags.isEmpty()) {
+        propertyHash.insert(EwsResource::flagsProperty, QVariant());
+    } else {
+        QStringList flagList;
+        Q_FOREACH(const QByteArray flag, flags) {
+            flagList.append(flag);
+        }
+        propertyHash.insert(EwsResource::flagsProperty, flagList);
+    }
+
+    return propertyHash;
 }

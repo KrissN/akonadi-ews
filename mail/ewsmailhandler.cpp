@@ -29,6 +29,8 @@
 
 using namespace Akonadi;
 
+static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
+
 EwsMailHandler::EwsMailHandler()
 {
 }
@@ -65,6 +67,7 @@ QString EwsMailHandler::mimeType()
 
 bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
 {
+    qDebug() << "EwsMailHandler::setItemPayload";
     QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
     if (mimeContent.isEmpty()) {
         qWarning() << QStringLiteral("MIME content is empty!");
@@ -76,12 +79,19 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     KMime::Message::Ptr msg(new KMime::Message);
     msg->setContent(mimeContent.toLatin1());
     msg->parse();
+    qDebug() << msg->attachments().size() << "attachments";
     // Some messages might just be empty (just headers). This results in the body being empty.
     // The problem is that when Akonadi sees an empty body it will interpret this as "body not
     // yet loaded" and will retry which will cause an endless loop. To work around this put a
     // single newline so that it is not empty.
     if (msg->body().isEmpty()) {
         msg->setBody("\n");
+    }
+    Q_FOREACH(KMime::Content* c, msg->attachments()) {
+        KMime::Headers::ContentID *cid = c->contentID(false);
+        if (cid) {
+            qDebug() << cid->asUnicodeString();
+        }
     }
     item.setPayload<KMime::Message::Ptr>(msg);
     return true;
@@ -100,5 +110,41 @@ EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient& client, const Akonadi
     return new EwsCreateMailJob(client, item, collection, tagStore, parent);
 }
 
+QHash<EwsPropertyField, QVariant> EwsMailHandler::writeFlags(const QSet<QByteArray> flags)
+{
+    // Strip all the message flags that can be stored in dedicated Exchange fields and leave
+    // any remaining ones to be stored in a private property.
+
+    QSet<QByteArray> unknownFlags;
+    QHash<EwsPropertyField, QVariant> propertyHash;
+    bool isRead = false;
+    bool isFlagged = false;
+
+    Q_FOREACH(const QByteArray &flag, flags) {
+        if (flag == MessageFlags::Seen) {
+            isRead = true;
+        } else if (flag == MessageFlags::Flagged) {
+            isFlagged = true;
+        } else if (flag == MessageFlags::HasAttachment || flag == MessageFlags::HasInvitation ||
+                        flag == MessageFlags::Signed || flag == MessageFlags::Encrypted) {
+            // These flags are read-only. Remove them from the unknown list but don't do anything with them.
+        } else {
+            unknownFlags.insert(flag);
+        }
+    }
+
+    propertyHash.insert(EwsPropertyField(QStringLiteral("message:IsRead")),
+        isRead ? QStringLiteral("true") : QStringLiteral("false"));
+    if (isFlagged) {
+        propertyHash.insert(propPidFlagStatus, QStringLiteral("2"));
+    }
+    else {
+        propertyHash.insert(propPidFlagStatus, QVariant());
+    }
+
+    propertyHash.unite(EwsItemHandler::writeFlags(unknownFlags));
+
+    return propertyHash;
+}
 
 EWS_DECLARE_ITEM_HANDLER(EwsMailHandler, EwsItemTypeMessage)

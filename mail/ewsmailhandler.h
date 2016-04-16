@@ -39,6 +39,7 @@ public:
                                             const Akonadi::Collection &collection,
                                             EwsTagStore *tagStore, EwsResource *parent) Q_DECL_OVERRIDE;
     static EwsItemHandler *factory();
+    static QHash<EwsPropertyField, QVariant> writeFlags(const QSet<QByteArray> flags);
 private:
 };
 

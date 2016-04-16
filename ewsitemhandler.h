@@ -24,6 +24,7 @@
 #include <QtCore/QSharedPointer>
 
 #include "ewstypes.h"
+#include "ewspropertyfield.h"
 
 namespace Akonadi {
 class Collection;
@@ -57,6 +58,7 @@ public:
     static void registerItemHandler(EwsItemType type, ItemHandlerFactory factory);
     static EwsItemHandler *itemHandler(EwsItemType type);
     static EwsItemType mimeToItemType(QString mimeType);
+    static QHash<EwsPropertyField, QVariant> writeFlags(QSet<QByteArray> flags);
 private:
     struct HandlerFactory {
         EwsItemType type;

@@ -87,6 +87,8 @@ const EwsPropertyField EwsResource::globalTagsVersionProperty(EwsResource::akona
                                                               EwsPropTypeInteger);
 const EwsPropertyField EwsResource::tagsProperty(EwsResource::akonadiEwsPropsetUuid,
                                                  QStringLiteral("Tags"), EwsPropTypeStringArray);
+const EwsPropertyField EwsResource::flagsProperty(EwsResource::akonadiEwsPropsetUuid,
+                                                  QStringLiteral("Flags"), EwsPropTypeStringArray);
 
 static Q_CONSTEXPR int InitialReconnectTimeout = 60;
 static Q_CONSTEXPR int ReconnectTimeout = 300;

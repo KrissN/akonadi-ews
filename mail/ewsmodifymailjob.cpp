@@ -22,12 +22,11 @@
 #include <Akonadi/KMime/MessageFlags>
 
 #include "ewsupdateitemrequest.h"
+#include "ewsmailhandler.h"
 
 #include "ewsclient_debug.h"
 
 using namespace Akonadi;
-
-static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
 
 EwsModifyMailJob::EwsModifyMailJob(EwsClient& client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)
@@ -50,19 +49,18 @@ void EwsModifyMailJob::start()
         if (mParts.contains("FLAGS")) {
             EwsUpdateItemRequest::ItemChange ic(itemId, EwsItemTypeMessage);
             qDebug() << "Item flags" << item.flags();
-            bool isRead = item.flags().contains(MessageFlags::Seen);
-            EwsUpdateItemRequest::Update *upd =
-                            new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("message:IsRead")),
-                                                                isRead ? QStringLiteral("true") : QStringLiteral("false"));
-            ic.addUpdate(upd);
-            bool isFlagged = item.flags().contains(MessageFlags::Flagged);
-            if (isFlagged) {
-                upd = new EwsUpdateItemRequest::SetUpdate(propPidFlagStatus, QStringLiteral("2"));
+            QHash<EwsPropertyField, QVariant> propertyHash = EwsMailHandler::writeFlags(item.flags());
+
+            for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); it++) {
+                EwsUpdateItemRequest::Update *upd;
+                if (it.value().isNull()) {
+                    upd = new EwsUpdateItemRequest::DeleteUpdate(it.key());
+                } else {
+                    upd = new EwsUpdateItemRequest::SetUpdate(it.key(), it.value());
+                }
+                ic.addUpdate(upd);
             }
-            else {
-                upd = new EwsUpdateItemRequest::DeleteUpdate(propPidFlagStatus);
-            }
-            ic.addUpdate(upd);
+
             req->addItemChange(ic);
             doSubmit = true;
         }
@@ -93,6 +91,8 @@ void EwsModifyMailJob::updateItemFinished(KJob *job)
         emitResult();
         return;
     }
+
+    req->dump();
 
     Q_ASSERT(req->responses().size() == mItems.size());
 

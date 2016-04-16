@@ -47,6 +47,7 @@ public:
     static const EwsPropertyField globalTagsProperty;
     static const EwsPropertyField globalTagsVersionProperty;
     static const EwsPropertyField tagsProperty;
+    static const EwsPropertyField flagsProperty;
 
     explicit EwsResource(const QString &id);
     ~EwsResource();
