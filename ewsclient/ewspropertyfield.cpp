@@ -67,17 +67,10 @@ class EwsPropertyFieldPrivate : public QSharedData
 {
 public:
     EwsPropertyFieldPrivate()
-        : mPropType(UnknownField), mIndex(0), mPsIdType(DistinguishedPropSet),
+        : mPropType(EwsPropertyField::UnknownField), mIndex(0), mPsIdType(DistinguishedPropSet),
           mPsDid(EwsPropSetMeeting), mIdType(PropName), mId(0), mHasTag(false), mTag(0),
           mType(EwsPropTypeNull), mHash(0)
     {};
-
-    enum Type {
-        Field,
-        ExtendedField,
-        IndexedField,
-        UnknownField
-    };
 
     enum PropSetIdType {
         DistinguishedPropSet,
@@ -89,7 +82,7 @@ public:
         PropId
     };
 
-    Type mPropType;
+    EwsPropertyField::Type mPropType;
 
     QString mUri;
     unsigned mIndex;
@@ -116,13 +109,13 @@ void EwsPropertyFieldPrivate::recalcHash()
 {
     mHash = 0;
     switch (mPropType) {
-    case Field:
+    case EwsPropertyField::Field:
         mHash = 0x00000000 | (qHash(mUri) & 0x3FFFFFFF);
         break;
-    case IndexedField:
+    case EwsPropertyField::IndexedField:
         mHash = 0x80000000 | ((qHash(mUri) ^ mIndex) & 0x3FFFFFFF);
         break;
-    case ExtendedField:
+    case EwsPropertyField::ExtendedField:
         if (mHasTag) {
             mHash = 0x40000000 | mTag;
         }
@@ -156,7 +149,7 @@ EwsPropertyField::EwsPropertyField()
 EwsPropertyField::EwsPropertyField(QString uri)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::Field;
+    d->mPropType = Field;
     d->mUri = uri;
     d->recalcHash();
 }
@@ -164,7 +157,7 @@ EwsPropertyField::EwsPropertyField(QString uri)
 EwsPropertyField::EwsPropertyField(QString uri, unsigned index)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::IndexedField;
+    d->mPropType = IndexedField;
     d->mUri = uri;
     d->mIndex = index;
     d->recalcHash();
@@ -173,7 +166,7 @@ EwsPropertyField::EwsPropertyField(QString uri, unsigned index)
 EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+    d->mPropType = ExtendedField;
 
     d->mPsIdType = EwsPropertyFieldPrivate::DistinguishedPropSet;
     d->mPsDid = psid;
@@ -188,7 +181,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, 
 EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+    d->mPropType = ExtendedField;
 
     d->mPsIdType = EwsPropertyFieldPrivate::DistinguishedPropSet;
     d->mPsDid = psid;
@@ -203,7 +196,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name,
 EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+    d->mPropType = ExtendedField;
 
     d->mPsIdType = EwsPropertyFieldPrivate::RealPropSet;
     d->mPsId = psid;
@@ -218,7 +211,7 @@ EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType ty
 EwsPropertyField::EwsPropertyField(QString psid, QString name, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+    d->mPropType = ExtendedField;
 
     d->mPsIdType = EwsPropertyFieldPrivate::RealPropSet;
     d->mPsId = psid;
@@ -233,7 +226,7 @@ EwsPropertyField::EwsPropertyField(QString psid, QString name, EwsPropertyType t
 EwsPropertyField::EwsPropertyField(unsigned tag, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
-    d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+    d->mPropType = ExtendedField;
 
     d->mHasTag = true;
     d->mTag = tag;
@@ -280,13 +273,13 @@ bool EwsPropertyField::operator==(const EwsPropertyField &other) const
 
     switch (d->mPropType)
     {
-    case EwsPropertyFieldPrivate::UnknownField:
+    case UnknownField:
         return true;
-    case EwsPropertyFieldPrivate::Field:
+    case Field:
         return (d->mUri == od->mUri);
-    case EwsPropertyFieldPrivate::IndexedField:
+    case IndexedField:
         return (d->mUri == od->mUri) && (d->mIndex == od->mIndex);
-    case EwsPropertyFieldPrivate::ExtendedField:
+    case ExtendedField:
         if (d->mType != od->mType)
             return false;
 
@@ -322,12 +315,12 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
 {
     switch (d->mPropType)
     {
-    case EwsPropertyFieldPrivate::Field:
+    case Field:
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FieldURI"));
         writer.writeAttribute(QStringLiteral("FieldURI"), d->mUri);
         writer.writeEndElement();
         break;
-    case EwsPropertyFieldPrivate::IndexedField:
+    case IndexedField:
     {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("IndexedFieldURI"));
         writer.writeAttribute(QStringLiteral("FieldURI"), d->mUri);
@@ -336,7 +329,7 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
         writer.writeEndElement();
         break;
     }
-    case EwsPropertyFieldPrivate::ExtendedField:
+    case ExtendedField:
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedFieldURI"));
         if (d->mHasTag) {
             writer.writeAttribute(QStringLiteral("PropertyTag"),
@@ -361,7 +354,7 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
         writer.writeAttribute(QStringLiteral("PropertyType"), propertyTypeNames[d->mType]);
         writer.writeEndElement();
         break;
-    case EwsPropertyFieldPrivate::UnknownField:
+    case UnknownField:
         break;
     }
 }
@@ -383,7 +376,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
                             .arg(QStringLiteral("FieldURI"));
             return false;
         }
-        d->mPropType = EwsPropertyFieldPrivate::Field;
+        d->mPropType = Field;
         d->mUri = attrs.value(QStringLiteral("FieldURI")).toString();
     }
     else if (reader.name() == QStringLiteral("IndexedFieldURI")) {
@@ -411,7 +404,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
                             .arg(QStringLiteral("FieldIndex"));
             return false;
         }
-        d->mPropType = EwsPropertyFieldPrivate::IndexedField;
+        d->mPropType = IndexedField;
         d->mUri = uri;
         d->mIndex = index;
     }
@@ -508,7 +501,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
         }
 
         d->mType = propType;
-        d->mPropType = EwsPropertyFieldPrivate::ExtendedField;
+        d->mPropType = ExtendedField;
     }
     d->recalcHash();
     return true;
@@ -527,13 +520,13 @@ QDebug operator<<(QDebug debug, const EwsPropertyField &prop)
 
     switch (prop.d->mPropType)
     {
-    case EwsPropertyFieldPrivate::Field:
+    case EwsPropertyField::Field:
         d << QStringLiteral("FieldUri: ") << prop.d->mUri;
         break;
-    case EwsPropertyFieldPrivate::IndexedField:
+    case EwsPropertyField::IndexedField:
         d << QStringLiteral("IndexedFieldUri: ") << prop.d->mUri << '@' << prop.d->mIndex;
         break;
-    case EwsPropertyFieldPrivate::ExtendedField:
+    case EwsPropertyField::ExtendedField:
         d << QStringLiteral("ExtendedFieldUri: ");
         if (prop.d->mHasTag) {
             d << QStringLiteral("tag: 0x") << QString::number(prop.d->mTag, 16);
@@ -556,7 +549,7 @@ QDebug operator<<(QDebug debug, const EwsPropertyField &prop)
         }
         d << QStringLiteral(", type: ") << propertyTypeNames[prop.d->mType];
         break;
-    case EwsPropertyFieldPrivate::UnknownField:
+    case EwsPropertyField::UnknownField:
         d << QStringLiteral("Unknown");
         break;
     }
@@ -568,7 +561,7 @@ bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &
 {
     switch (d->mPropType)
     {
-    case EwsPropertyFieldPrivate::Field:
+    case Field:
     {
         QStringList tokens = d->mUri.split(':');
         if (tokens.size() != 2) {
@@ -580,7 +573,7 @@ bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &
         writer.writeEndElement();
         break;
     }
-    case EwsPropertyFieldPrivate::IndexedField:
+    case IndexedField:
     {
         QStringList tokens = d->mUri.split(':');
         if (tokens.size() != 2) {
@@ -595,7 +588,7 @@ bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &
         writer.writeEndElement();
         break;
     }
-    case EwsPropertyFieldPrivate::ExtendedField:
+    case ExtendedField:
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("ExtendedProperty"));
         write(writer);
         writeExtendedValue(writer, value);
@@ -647,5 +640,19 @@ void EwsPropertyField::writeExtendedValue(QXmlStreamWriter &writer, const QVaria
         break;
     default:
         qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1").arg(value.typeName());
+    }
+}
+
+EwsPropertyField::Type EwsPropertyField::type() const
+{
+    return d->mPropType;
+}
+
+QString EwsPropertyField::uri() const
+{
+    if (d->mPropType == Field || d->mPropType == IndexedField) {
+        return d->mUri;
+    } else {
+        return QString();
     }
 }

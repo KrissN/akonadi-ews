@@ -30,6 +30,13 @@ class EwsPropertyFieldPrivate;
 class EwsPropertyField
 {
 public:
+    enum Type {
+        Field,
+        ExtendedField,
+        IndexedField,
+        UnknownField
+    };
+
     EwsPropertyField();
     EwsPropertyField(QString uri);  // FieldURI
     EwsPropertyField(QString uri, unsigned index);   // IndexedFieldURI
@@ -53,6 +60,9 @@ public:
     bool writeWithValue(QXmlStreamWriter &writer, const QVariant &value) const;
     void writeValue(QXmlStreamWriter &writer, const QVariant &value) const;
     void writeExtendedValue(QXmlStreamWriter &writer, const QVariant &value) const;
+
+    Type type() const;
+    QString uri() const;
 private:
     QSharedDataPointer<EwsPropertyFieldPrivate> d;
 
