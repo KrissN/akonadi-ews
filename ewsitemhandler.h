@@ -59,6 +59,8 @@ public:
     static EwsItemHandler *itemHandler(EwsItemType type);
     static EwsItemType mimeToItemType(QString mimeType);
     static QHash<EwsPropertyField, QVariant> writeFlags(QSet<QByteArray> flags);
+    static QSet<QByteArray> readFlags(const EwsItem &item);
+    static QList<EwsPropertyField> flagsProperties();
 private:
     struct HandlerFactory {
         EwsItemType type;

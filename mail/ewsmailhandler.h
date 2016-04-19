@@ -40,6 +40,8 @@ public:
                                             EwsTagStore *tagStore, EwsResource *parent) Q_DECL_OVERRIDE;
     static EwsItemHandler *factory();
     static QHash<EwsPropertyField, QVariant> writeFlags(const QSet<QByteArray> flags);
+    static QSet<QByteArray> readFlags(const EwsItem &item);
+    static QList<EwsPropertyField> flagsProperties();
 private:
 };
 

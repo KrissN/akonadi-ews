@@ -97,3 +97,23 @@ QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(QSet<QByteArray> fl
 
     return propertyHash;
 }
+
+QSet<QByteArray> EwsItemHandler::readFlags(const EwsItem &item)
+{
+    QSet<QByteArray> flags;
+
+    QVariant flagProp = item[EwsResource::flagsProperty];
+    if (!flagProp.isNull() && (flagProp.canConvert<QStringList>())) {
+        QStringList flagList = flagProp.toStringList();
+        Q_FOREACH(const QString &flag, flags) {
+            flags.insert(flag.toAscii());
+        }
+    }
+
+    return flags;
+}
+
+QList<EwsPropertyField> EwsItemHandler::flagsProperties()
+{
+    return {EwsResource::flagsProperty};
+}

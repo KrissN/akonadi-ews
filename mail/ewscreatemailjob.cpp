@@ -25,6 +25,8 @@
 #include <KI18n/KLocalizedString>
 
 #include "ewscreateitemrequest.h"
+#include "ewspropertyfield.h"
+#include "ewsmailhandler.h"
 #include "ewsclient_debug.h"
 
 using namespace Akonadi;
@@ -61,7 +63,27 @@ void EwsCreateMailJob::doStart()
         item.setProperty(propPidMessageFlags, QStringLiteral("1"));
         req->setSavedFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
     }
+    // Set flags
+    QHash<EwsPropertyField, QVariant> propertyHash = EwsMailHandler::writeFlags(mItem.flags());
+    for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); it++) {
+        if (!it.value().isNull()) {
+            if (it.key().type() == EwsPropertyField::ExtendedField) {
+                item.setProperty(it.key(), it.value());
+            } else if (it.key().type() == EwsPropertyField::Field) {
+                /* TODO: Currently EwsItem distinguishes between regular fields and extended fields
+                 * and keeps them in separate lists. Someday it will make more sense to unify them.
+                 * Until that the code below needs to manually translate the field names into
+                 * EwsItemField enum items.
+                 */
+                if (it.key().uri() == QStringLiteral("message:IsRead")) {
+                    item.setField(EwsItemFieldIsRead, it.value());
+                }
+            }
+        }
+    }
+
     populateCommonProperties(item);
+
     req->setItems(EwsItem::List() << item);
     req->setMessageDisposition(mSend ? EwsDispSendOnly : EwsDispSaveOnly);
     connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailCreateFinished);

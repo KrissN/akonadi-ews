@@ -147,4 +147,41 @@ QHash<EwsPropertyField, QVariant> EwsMailHandler::writeFlags(const QSet<QByteArr
     return propertyHash;
 }
 
+QSet<QByteArray> EwsMailHandler::readFlags(const EwsItem &item)
+{
+    QSet<QByteArray> flags = EwsItemHandler::readFlags(item);
+
+    QVariant v = item[EwsItemFieldIsRead];
+    if (v.isValid() && v.toBool()) {
+        flags.insert(MessageFlags::Seen);
+    }
+
+    v = item[EwsItemFieldHasAttachments];
+    if (v.isValid() && v.toBool()) {
+        flags.insert(MessageFlags::HasAttachment);
+    }
+
+    QVariant flagProp = item[propPidFlagStatus];
+    if (!flagProp.isNull() && (flagProp.toUInt() == 2)) {
+        flags.insert(MessageFlags::Flagged);
+    }
+
+    if (item.type() == EwsItemTypeMeetingRequest) {
+        flags.insert(MessageFlags::HasInvitation);
+    }
+
+    return flags;
+}
+
+QList<EwsPropertyField> EwsMailHandler::flagsProperties()
+{
+    QList<EwsPropertyField> props = EwsItemHandler::flagsProperties();
+
+    props.append(propPidFlagStatus);
+    props.append(EwsPropertyField(QStringLiteral("message:IsRead")));
+    props.append(EwsPropertyField(QStringLiteral("item:HasAttachments")));
+
+    return props;
+}
+
 EWS_DECLARE_ITEM_HANDLER(EwsMailHandler, EwsItemTypeMessage)

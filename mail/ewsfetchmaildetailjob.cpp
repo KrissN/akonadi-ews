@@ -26,12 +26,10 @@
 #include "ewsitemshape.h"
 #include "ewsgetitemrequest.h"
 #include "ewsmailbox.h"
+#include "ewsmailhandler.h"
 #include "ewsclient_debug.h"
 
 using namespace Akonadi;
-
-static const EwsPropertyField propPidFlagStatus(0x1090, EwsPropTypeInteger);
-static const EwsPropertyField propPidFlagIconIndex(0x1080, EwsPropTypeInteger);
 
 EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection)
     : EwsFetchItemDetailJob(client, parent, collection)
@@ -43,8 +41,6 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("message:ToRecipients");
     shape << EwsPropertyField("message:CcRecipients");
     shape << EwsPropertyField("message:BccRecipients");
-    shape << EwsPropertyField("message:IsRead");
-    shape << EwsPropertyField("item:HasAttachments");
     shape << EwsPropertyField("item:Categories");
     shape << EwsPropertyField("item:DateTimeReceived");
     shape << EwsPropertyField("item:InReplyTo");
@@ -52,8 +48,9 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField("message:ReplyTo");
     shape << EwsPropertyField("message:InternetMessageId");
     shape << EwsPropertyField("item:Size");
-    shape << propPidFlagStatus;
-    shape << propPidFlagIconIndex;
+    Q_FOREACH(const EwsPropertyField &field, EwsMailHandler::flagsProperties()) {
+        shape << field;
+    }
     mRequest->setItemShape(shape);
 }
 
@@ -145,52 +142,13 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         msg->assemble();
         item.setPayload(KMime::Message::Ptr(msg));
 
-        v = ewsItem[EwsItemFieldIsRead];
-        if (v.isValid()) {
-            if (v.toBool()) {
-                item.setFlag(MessageFlags::Seen);
-            }
-            else {
-                item.clearFlag(MessageFlags::Seen);
-            }
-        }
-
-        v = ewsItem[EwsItemFieldHasAttachments];
-        if (v.isValid()) {
-            if (v.toBool()) {
-                item.setFlag(MessageFlags::HasAttachment);
-            }
-            else {
-                item.clearFlag(MessageFlags::HasAttachment);
-            }
-        }
-
-        v = ewsItem[EwsItemFieldIsFromMe];
-        if (v.isValid()) {
-            if (v.toBool()) {
-                item.setFlag(MessageFlags::Sent);
-            }
-            else {
-                item.clearFlag(MessageFlags::Sent);
-            }
-        }
-
         v = ewsItem[EwsItemFieldSize];
         if (v.isValid()) {
             item.setSize(v.toUInt());
         }
 
-        QVariant flagProp = ewsItem[propPidFlagStatus];
-        if (!flagProp.isNull() && (flagProp.toUInt() == 2)) {
-            item.setFlag(MessageFlags::Flagged);
-        }
-        else {
-            item.clearFlag(MessageFlags::Flagged);
-        }
-
-        if (ewsItem.type() == EwsItemTypeMeetingRequest) {
-            item.setFlag(MessageFlags::HasInvitation);
-        }
+        item.setFlags(EwsMailHandler::readFlags(ewsItem));
+        qDebug() << item.flags();
 
         it++;
     }
