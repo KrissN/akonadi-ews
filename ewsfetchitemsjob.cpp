@@ -167,7 +167,6 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
 
     if (!itemReq->error()) {
         removeSubjob(job);
-        itemReq->dump();
         Q_FOREACH(const EwsSyncFolderItemsRequest::Change &change, itemReq->changes()) {
             switch (change.type()) {
             case EwsSyncFolderItemsRequest::Create:
