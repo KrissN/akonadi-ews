@@ -23,6 +23,8 @@
 #include "ewsgeteventsrequest.h"
 #include "ewsgetstreamingeventsrequest.h"
 #include "ewsgetfolderrequest.h"
+#include "settings.h"
+#include "ewssubscribedfoldersjob.h"
 #include "ewsclient_debug.h"
 
 // TODO: Allow customisation
@@ -65,6 +67,25 @@ void EwsSubscriptionManager::cancelSubscription()
 
 void EwsSubscriptionManager::setupSubscription()
 {
+    EwsId::List ids;
+
+    EwsSubscribedFoldersJob *job = new EwsSubscribedFoldersJob(mEwsClient, this);
+    connect(job, &EwsRequest::result, this, &EwsSubscriptionManager::verifySubFoldersRequestFinished);
+    job->start();
+}
+
+void EwsSubscriptionManager::verifySubFoldersRequestFinished(KJob *job)
+{
+    if (!job->error()) {
+        EwsSubscribedFoldersJob *folderJob = qobject_cast<EwsSubscribedFoldersJob*>(job);
+        Q_ASSERT(folderJob);
+
+        setupSubscriptionReq(folderJob->folders());
+    }
+}
+
+void EwsSubscriptionManager::setupSubscriptionReq(const EwsId::List &ids)
+{
     EwsSubscribeRequest *req = new EwsSubscribeRequest(mEwsClient, this);
     //req->setAllFolders(true);
     QList<EwsEventType> events;
@@ -81,8 +102,6 @@ void EwsSubscriptionManager::setupSubscription()
     else {
         req->setType(EwsSubscribeRequest::PullSubscription);
     }
-    EwsId::List ids;
-    ids << EwsId(EwsDIdInbox);
     req->setFolderIds(ids);
     req->setAllFolders(false);
     connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::subscribeRequestFinished);

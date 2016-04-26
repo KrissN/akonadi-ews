@@ -78,12 +78,14 @@ Q_SIGNALS:
     void fullSyncRequested();
 private Q_SLOTS:
     void subscribeRequestFinished(KJob *job);
+    void verifySubFoldersRequestFinished(KJob *job);
     void getEventsRequestFinished(KJob *job);
     void streamingEventsReceived(KJob *job);
     void getEvents();
 private:
     void cancelSubscription();
     void setupSubscription();
+    void setupSubscriptionReq(const EwsId::List &ids);
     void reset();
     void processEvents(EwsEventRequestBase *req, bool finished);
 

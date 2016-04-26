@@ -197,11 +197,13 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         qDebug() << "Root folder is " << id;
         Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
 
-        mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, this));
-        connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
-        connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
-        connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
-        mSubManager->start();
+        if (Settings::serverSubscription()) {
+            mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, this));
+            connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
+            connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
+            connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
+            mSubManager->start();
+        }
 
         fetchSpecialFolders();
 

@@ -88,7 +88,9 @@ set(ewsresource_SRCS
     ewsmodifyitemjob.cpp
     ewsmodifyitemflagsjob.cpp
     ewsresource.cpp
+    ewssubscribedfoldersjob.cpp
     ewssubscriptionmanager.cpp
+    ewssubscriptionwidget.cpp
     progressdialog.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)

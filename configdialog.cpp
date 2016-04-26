@@ -32,8 +32,9 @@
 #include "ewsautodiscoveryjob.h"
 #include "ewsgetfolderrequest.h"
 #include "progressdialog.h"
+#include "ewssubscriptionwidget.h"
 
-ConfigDialog::ConfigDialog(EwsResource *parentResource, const EwsClient &client, WId wId)
+ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId wId)
     : QDialog(), mParentResource(parentResource), mAutoDiscoveryNeeded(false), mTryConnectNeeded(false),
       mProgressDialog(Q_NULLPTR)
 {
@@ -58,6 +59,9 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, const EwsClient &client,
     mUi = new Ui::SetupServerView;
     mUi->setupUi(mainWidget);
     mUi->accountName->setText(parentResource->name());
+
+    mSubWidget = new EwsSubscriptionWidget(client, this);
+    mUi->subscriptionTabLayout->addWidget(mSubWidget);
 
     mConfigManager = new KConfigDialogManager(this, Settings::self());
     mConfigManager->updateWidgets();
@@ -112,6 +116,12 @@ void ConfigDialog::save()
     else {
         Settings::setRetrievalMethod(1);
     }
+
+    Settings::setServerSubscriptionList(mSubWidget->subscribedList());
+    if (mSubWidget->subscribedListValid()) {
+        Settings::setServerSubscription(mSubWidget->subscriptionEnabled());
+    }
+
     Settings::self()->save();
 
     mParentResource->setPassword(mUi->passwordEdit->text());

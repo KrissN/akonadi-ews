@@ -34,12 +34,13 @@ class KJob;
 class EwsAutodiscoveryJob;
 class EwsGetFolderRequest;
 class ProgressDialog;
+class EwsSubscriptionWidget;
 
 class ConfigDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit ConfigDialog(EwsResource *parentResource, const EwsClient &client, WId windowId);
+    explicit ConfigDialog(EwsResource *parentResource, EwsClient &client, WId windowId);
     virtual ~ConfigDialog();
 private Q_SLOTS:
     void save();
@@ -65,6 +66,7 @@ private:
     bool mAutoDiscoveryNeeded;
     bool mTryConnectNeeded;
     ProgressDialog *mProgressDialog;
+    EwsSubscriptionWidget *mSubWidget;
 };
 
 #endif

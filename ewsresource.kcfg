@@ -39,6 +39,13 @@
     <entry name="RetrievalMethod" type="Int">
       <label>Retrieval</label>
     </entry>
+    <entry name="ServerSubscription" type="Bool">
+      <label>Enable Server-Side Subscriptions</label>
+    </entry>
+    <entry name="ServerSubscriptionList" type="StringList">
+      <label>List of folders to subscribe to</label>
+      <default>default</default>
+    </entry>
     <entry name="SyncState" type="String" />
   </group>
 </kcfg>

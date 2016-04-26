@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>EWS Configuration</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="mainLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -23,7 +23,7 @@
       <attribute name="title">
        <string>General</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="generalTabLayout">
        <item>
         <widget class="QGroupBox" name="accountInfoGroupBox">
          <property name="minimumSize">
@@ -35,10 +35,10 @@
          <property name="title">
           <string>Account Information</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="accountInfoGroupBoxLayout">
           <item>
            <widget class="QWidget" name="accountInfoContainer" native="true">
-            <layout class="QFormLayout" name="formLayout">
+            <layout class="QFormLayout" name="accountInfoContainerLayout">
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -123,7 +123,7 @@
              </item>
              <item row="5" column="1">
               <widget class="QWidget" name="autodiscoveryContainer" native="true">
-               <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <layout class="QHBoxLayout" name="autodiscoveryContainerLayout">
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -209,7 +209,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
+        <spacer name="generalTabSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -223,17 +223,23 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="subscriptionTab">
+      <attribute name="title">
+       <string>Subscriptions</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="subscriptionTabLayout"/>
+     </widget>
      <widget class="QWidget" name="advancedTab">
       <attribute name="title">
        <string>Advanced</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QVBoxLayout" name="advancedTabLayout">
        <item>
         <widget class="QGroupBox" name="retrievalMethodGroupBox">
          <property name="title">
           <string>Retrieval</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <layout class="QVBoxLayout" name="retrievalMethodGroupBoxLayout">
           <item>
            <widget class="QRadioButton" name="pollRadioButton">
             <property name="whatsThis">
@@ -249,7 +255,7 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
-            <layout class="QFormLayout" name="formLayout_2">
+            <layout class="QFormLayout" name="pollingIntervalWidgetLayout">
              <property name="leftMargin">
               <number>48</number>
              </property>
@@ -308,7 +314,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
+        <spacer name="advancedTabSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -326,13 +332,13 @@
       <attribute name="title">
        <string>Status</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
+      <layout class="QVBoxLayout" name="statusTabLayout">
        <item>
         <widget class="QGroupBox" name="serverStatusGroupBox">
          <property name="title">
           <string>Server Status</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_3">
+         <layout class="QFormLayout" name="serverStatusGroupBoxLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="serverStatusLabel">
             <property name="text">
@@ -368,7 +374,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
+        <spacer name="statusTabSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -399,7 +405,6 @@
   <tabstop>kcfg_Email</tabstop>
   <tabstop>kcfg_Domain</tabstop>
   <tabstop>kcfg_Username</tabstop>
-  <tabstop>kcfg_Password</tabstop>
   <tabstop>kcfg_AutoDiscovery</tabstop>
   <tabstop>autodiscoverButton</tabstop>
   <tabstop>tryConnectButton</tabstop>

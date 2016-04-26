@@ -57,6 +57,11 @@ public:
         return mUrl;
     }
 
+    bool isConfigured() const
+    {
+        return !mUrl.isEmpty();
+    }
+
     void setServerVersion(const EwsServerVersion &version);
     const EwsServerVersion &serverVersion() const { return mServerVersion; };
 
