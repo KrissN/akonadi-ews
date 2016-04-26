@@ -112,8 +112,13 @@ public:
      *
      *  This method reads the server-side tag information for an item and populates the Akonadi
      *  item with tags.
+     *
+     *  The code returns @e true if all tags have been converted from Exchange properties into
+     *  Akonadi tags. If at least one tag is not found in Akonadi database the method returns
+     *  @e false, unless @e ignoreMissing is set to true, in which case the missing tags are
+     *  ignored.
      */
-    bool readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem) const;
+    bool readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem, bool ignoreMissing) const;
 
     /**
      *  @brief  Checks if a given Akonadi tag is in the store

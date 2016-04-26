@@ -264,7 +264,7 @@ Tag::Id EwsTagStore::tagIdForRid(const QByteArray &rid) const
     return mTagIdMap.key(rid, -1);
 }
 
-bool EwsTagStore::readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem) const
+bool EwsTagStore::readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem, bool ignoreMissing) const
 {
     QVariant tagProp = ewsItem[EwsResource::tagsProperty];
     if (tagProp.isValid() && tagProp.canConvert<QStringList>()) {
@@ -274,7 +274,12 @@ bool EwsTagStore::readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem)
             Tag::Id tagId = tagIdForRid(tagRid.toAscii());
             if (tagId == -1) {
                 /* Tag not found. */
-                return false;
+                qCDebug(EWSRES_LOG) << QStringLiteral("Found missing tag: %1").arg(tagRid);
+                if (ignoreMissing) {
+                    continue;
+                } else {
+                    return false;
+                }
             }
             Tag tag(tagId);
             item.setTag(tag);
