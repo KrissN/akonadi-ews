@@ -117,9 +117,9 @@ void ConfigDialog::save()
         Settings::setRetrievalMethod(1);
     }
 
-    Settings::setServerSubscriptionList(mSubWidget->subscribedList());
+    Settings::setServerSubscription(mSubWidget->subscriptionEnabled());
     if (mSubWidget->subscribedListValid()) {
-        Settings::setServerSubscription(mSubWidget->subscriptionEnabled());
+        Settings::setServerSubscriptionList(mSubWidget->subscribedList());
     }
 
     Settings::self()->save();
