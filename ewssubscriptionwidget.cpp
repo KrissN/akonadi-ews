@@ -67,6 +67,7 @@ public:
 public Q_SLOTS:
     void enableCheckBoxToggled(bool checked);
     void reloadFolderList(bool);
+    void resetSelection(bool);
     void readFolderListFinished(KJob *job);
     void subscribedFoldersJobFinished(KJob *job);
     void treeItemChanged(QStandardItem *item);
@@ -84,6 +85,7 @@ public:
     int mFolderListPendingRequests;
     EwsFolder::List mFolders;
     EwsId::List mSubscribedIds;
+    EwsId::List mOrigSubscribedIds;
     bool mSubscribedIdsRetrieved;
     EwsSubscriptionFilterModel *mFilterModel;
 
@@ -218,6 +220,7 @@ void EwsSubscriptionWidgetPrivate::subscribedFoldersJobFinished(KJob *job)
         mSubscribedIds = req->folders();
 
         mFolderListPendingRequests--;
+        mOrigSubscribedIds = mSubscribedIds;
         mSubscribedIdsRetrieved = true;
         if (mFolderListPendingRequests == 0) {
             mRefreshButton->setEnabled(true);
@@ -273,6 +276,12 @@ void EwsSubscriptionWidgetPrivate::treeItemChanged(QStandardItem *item)
 void EwsSubscriptionWidgetPrivate::filterTextChanged(const QString &text)
 {
     mFilterModel->setFilterFixedString(text);
+}
+
+void EwsSubscriptionWidgetPrivate::resetSelection(bool)
+{
+    mSubscribedIds = mOrigSubscribedIds;
+    populateFolderTree();
 }
 
 EwsSubscriptionWidget::EwsSubscriptionWidget(EwsClient &client, QWidget *parent)
@@ -339,6 +348,7 @@ EwsSubscriptionWidget::EwsSubscriptionWidget(EwsClient &client, QWidget *parent)
 
     connect(d->mEnableCheckBox, &QCheckBox::toggled, d, &EwsSubscriptionWidgetPrivate::enableCheckBoxToggled);
     connect(d->mRefreshButton, &QPushButton::clicked, d, &EwsSubscriptionWidgetPrivate::reloadFolderList);
+    connect(resetButton, &QPushButton::clicked, d, &EwsSubscriptionWidgetPrivate::resetSelection);
     connect(d->mFolderTreeModel, &QStandardItemModel::itemChanged, d, &EwsSubscriptionWidgetPrivate::treeItemChanged);
     connect(filterLineEdit, &QLineEdit::textChanged, d, &EwsSubscriptionWidgetPrivate::filterTextChanged);
     connect(subOnlyCheckBox, &QCheckBox::toggled, d->mFilterModel, &EwsSubscriptionFilterModel::setFilterSelected);
