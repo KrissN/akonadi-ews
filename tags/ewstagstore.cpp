@@ -114,7 +114,6 @@ bool EwsTagStore::unserializeTag(const QByteArray &data, Akonadi::Tag &tag) cons
 
 bool EwsTagStore::readTags(const QStringList &taglist, int version)
 {
-    mTagData.clear();
 
     if (version < mVersion) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Reading tags from older version (have %1, got %2)")
@@ -124,6 +123,8 @@ bool EwsTagStore::readTags(const QStringList &taglist, int version)
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Both tag lists in version %1 - not syncing").arg(version);
         return true;
     }
+
+    mTagData.clear();
 
     Q_FOREACH(const QString tag, taglist) {
         QByteArray tagdata = qUncompress(QByteArray::fromBase64(tag.toAscii()));
