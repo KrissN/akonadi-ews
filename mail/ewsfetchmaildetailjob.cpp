@@ -147,8 +147,16 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
             item.setSize(v.toUInt());
         }
 
-        item.setFlags(EwsMailHandler::readFlags(ewsItem));
-        qDebug() << item.flags();
+        // Workaround for Akonadi bug
+        // When setting flags, adding each of them separately vs. setting a list in one go makes
+        // a difference. In the former case the item treats this as an incremental change and
+        // records flags added and removed. In the latter it sets a flag indicating that flags were
+        // reset.
+        // For some strange reason Akonadi is not seeing the flags in the latter case.
+        Q_FOREACH(const QByteArray &flag, EwsMailHandler::readFlags(ewsItem)) {
+            item.setFlag(flag);
+        }
+        qDebug() << "processItems:" << item.flags();
 
         it++;
     }
