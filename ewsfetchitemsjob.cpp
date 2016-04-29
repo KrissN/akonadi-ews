@@ -190,6 +190,7 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
             EwsSyncFolderItemsRequest *syncItemsReq = new EwsSyncFolderItemsRequest(mClient, this);
             syncItemsReq->setFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
             EwsItemShape shape(EwsShapeIdOnly);
+            shape << EwsResource::tagsProperty;
             syncItemsReq->setItemShape(shape);
             syncItemsReq->setSyncState(itemReq->syncState());
             syncItemsReq->setMaxChanges(listBatchSize);
@@ -404,7 +405,6 @@ void EwsFetchItemsJob::compareItemLists()
 
 void EwsFetchItemsJob::itemDetailFetchDone(KJob *job)
 {
-    qDebug() << "itemDetailFetchDone";
     removeSubjob(job);
 
     if (!job->error()) {
