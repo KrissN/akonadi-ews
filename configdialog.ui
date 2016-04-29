@@ -405,6 +405,7 @@
   <tabstop>kcfg_Email</tabstop>
   <tabstop>kcfg_Domain</tabstop>
   <tabstop>kcfg_Username</tabstop>
+  <tabstop>passwordEdit</tabstop>
   <tabstop>kcfg_AutoDiscovery</tabstop>
   <tabstop>autodiscoverButton</tabstop>
   <tabstop>tryConnectButton</tabstop>
