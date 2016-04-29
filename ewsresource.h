@@ -114,6 +114,7 @@ private Q_SLOTS:
     void itemsTagChangeFinished(KJob *job);
     void globalTagChangeFinished(KJob *job);
     void globalTagsRetrievalFinished(KJob *job);
+    void adjustInboxRemoteIdFetchFinished(KJob *job);
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
 public Q_SLOTS:
     Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);

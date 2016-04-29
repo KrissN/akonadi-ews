@@ -46,6 +46,7 @@ find_package(KF5Wallet)
 find_package(KF5WidgetsAddons)
 
 option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail." TRUE)
+option(HAVE_INBOX_FILTERING_WORKAROUND "Include inbox filtering workaround." TRUE)
 option(ENABLE_TESTS "Build the test suite." FALSE)
 
 add_subdirectory(ewsclient)

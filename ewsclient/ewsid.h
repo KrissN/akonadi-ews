@@ -25,6 +25,7 @@
 #include <QtCore/QString>
 
 #include "ewstypes.h"
+#include "../config.h"
 
 class QXmlStreamWriter;
 class QXmlStreamReader;
@@ -56,8 +57,7 @@ public:
     typedef QList<EwsId> List;
 
     EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
-    EwsId(QString id, QString changeKey = QString()) : mType(Real), mId(id), mChangeKey(changeKey),
-                    mDid(EwsDIdCalendar) {};
+    EwsId(QString id, QString changeKey = QString());
     EwsId(const EwsId &id) { *this = id; };
     EwsId(EwsId &&id) { *this = std::move(id); };
     EwsId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
@@ -76,6 +76,9 @@ public:
     void writeItemIds(QXmlStreamWriter &writer) const;
 
     friend QDebug operator<<(QDebug debug, const EwsId &id);
+#ifdef HAVE_INBOX_FILTERING_WORKAROUND
+    static void setInboxId(EwsId id);
+#endif
 private:
     Type mType;
     QString mId;
