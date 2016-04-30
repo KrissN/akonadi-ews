@@ -92,8 +92,6 @@ void EwsModifyMailJob::updateItemFinished(KJob *job)
         return;
     }
 
-    req->dump();
-
     Q_ASSERT(req->responses().size() == mItems.size());
 
     Item::List::iterator it = mItems.begin();
