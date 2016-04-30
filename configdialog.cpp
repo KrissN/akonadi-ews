@@ -91,6 +91,15 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     mParentResource->requestPassword(password, false);
     mUi->passwordEdit->setText(password);
 
+    QIcon ewsIcon = QIcon::fromTheme(QStringLiteral("akonadi-ews"));
+    qDebug() << ewsIcon.availableSizes();
+    mUi->aboutIconLabel->setPixmap(ewsIcon.pixmap(96, 96, QIcon::Normal, QIcon::On));
+    mUi->aboutTextLabel->setText(i18nc("@info", "Akonadi Resource for Microsoft Exchange Web Services (EWS)"));
+    mUi->aboutCopyrightLabel->setText(i18nc("@info", "Copyright (c) Krzysztof Nowicki 2015-2016"));
+    mUi->aboutVersionLabel->setText(i18nc("@info", "Version %1").arg(AKONADI_EWS_VERSION));
+    mUi->aboutLicenseLabel->setText(i18nc("@info", "Distributed under the GNU Library General Public License version 2.0 or later."));
+    mUi->aboutUrlLabel->setText(QStringLiteral("<a href=\"https://github.com/KrissN/akonadi-ews\">https://github.com/KrissN/akonadi-ews</a>"));
+
     connect(okButton, &QPushButton::clicked, this, &ConfigDialog::save);
     connect(mUi->autodiscoverButton, &QPushButton::clicked, this, &ConfigDialog::performAutoDiscovery);
     connect(mUi->kcfg_Username, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));

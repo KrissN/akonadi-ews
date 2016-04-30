@@ -49,6 +49,8 @@ option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail.
 option(HAVE_INBOX_FILTERING_WORKAROUND "Include inbox filtering workaround." TRUE)
 option(ENABLE_TESTS "Build the test suite." FALSE)
 
+set(AKONADI_EWS_VERSION "0.8.0")
+
 add_subdirectory(ewsclient)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
