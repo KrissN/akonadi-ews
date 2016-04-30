@@ -221,17 +221,21 @@ Collection EwsFetchFoldersJob::createFolderCollection(const EwsFolder &folder)
     collection.setContentMimeTypes(mimeTypes);
     Collection::Rights colRights;
     EwsEffectiveRights ewsRights = folder[EwsFolderFieldEffectiveRights].value<EwsEffectiveRights>();
-    if (ewsRights.canDelete()) {
-        colRights |= Collection::CanDeleteCollection | Collection::CanDeleteItem;
-    }
-    if (ewsRights.canModify()) {
-        colRights |= Collection::CanChangeCollection | Collection::CanChangeItem;
-    }
-    if (ewsRights.canCreateContents()) {
-        colRights |= Collection::CanCreateItem;
-    }
-    if (ewsRights.canCreateHierarchy()) {
-        colRights |= Collection::CanCreateCollection;
+    // FIXME: For now full read/write support is only implemented for e-mail. In order to avoid
+    // potential problems block write access to all other folder types.
+    if (folder.type() == EwsFolderTypeMail) {
+        if (ewsRights.canDelete()) {
+            colRights |= Collection::CanDeleteCollection | Collection::CanDeleteItem;
+        }
+        if (ewsRights.canModify()) {
+            colRights |= Collection::CanChangeCollection | Collection::CanChangeItem;
+        }
+        if (ewsRights.canCreateContents()) {
+            colRights |= Collection::CanCreateItem;
+        }
+        if (ewsRights.canCreateHierarchy()) {
+            colRights |= Collection::CanCreateCollection;
+        }
     }
     collection.setRights(colRights);
     EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
