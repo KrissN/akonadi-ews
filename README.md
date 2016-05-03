@@ -107,9 +107,11 @@ to the default ones:
 To enable these messages edit (or create) the file
 `~/.config/QtProject/qtlogging.ini` and put the following lines inside:
 
-> [Rules]
-> log_ews_resource_request.debug=true
-> log_ews_resource_proto.debug=true
+```
+[Rules]
+log_ews_resource_request.debug=true
+log_ews_resource_proto.debug=true
+```
 
 Setting each of them to `false` or adding a `#` character in front of the line
 will disable each of the logging categories.
