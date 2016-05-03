@@ -87,12 +87,15 @@ void EwsGetStreamingEventsRequest::requestDataTimeout()
         return;
     }
     if (EWSRES_PROTO_LOG().isDebugEnabled()) {
-        QTemporaryFile dumpFile("/tmp/ews_xmldump_XXXXXX.xml");
-        dumpFile.open();
-        dumpFile.setAutoRemove(false);
-        dumpFile.write(mResponseData.toUtf8());
-        qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
-        dumpFile.close();
+        ewsLogDir.setAutoRemove(false);
+        if (ewsLogDir.isValid()) {
+            QTemporaryFile dumpFile(ewsLogDir.path() + "/ews_xmldump_XXXXXXX.xml");
+            dumpFile.open();
+            dumpFile.setAutoRemove(false);
+            dumpFile.write(mResponseData.toUtf8());
+            qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
+            dumpFile.close();
+        }
     }
 
     QXmlStreamReader reader(mResponseData);

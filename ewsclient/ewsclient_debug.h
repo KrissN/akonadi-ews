@@ -20,6 +20,7 @@
 #ifndef EWSRESOURCE_DEBUG_H
 #define EWSRESOURCE_DEBUG_H
 
+#include <QtCore/QTemporaryDir>
 #include <QtCore/QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(EWSRES_LOG)
 
@@ -27,9 +28,13 @@ Q_DECLARE_LOGGING_CATEGORY(EWSRES_PROTO_LOG)
 
 Q_DECLARE_LOGGING_CATEGORY(EWSRES_REQUEST_LOG)
 
+Q_DECLARE_LOGGING_CATEGORY(EWSRES_FAILEDREQUEST_LOG)
+
 #define qCDebugNC(cat) qCDebug(cat).noquote()
 #define qCInfoNC(cat) qCInfo(cat).noquote()
 #define qCWarningNC(cat) qCWarning(cat).noquote()
 #define qCCriticalNC(cat) qCCritical(cat).noquote()
+
+extern QTemporaryDir ewsLogDir;
 
 #endif

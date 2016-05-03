@@ -106,12 +106,15 @@ void EwsPoxAutodiscoverRequest::requestData(KIO::Job *job, const QByteArray &dat
 void EwsPoxAutodiscoverRequest::requestResult(KJob *job)
 {
     if (EWSRES_PROTO_LOG().isDebugEnabled()) {
-        QTemporaryFile dumpFile("/tmp/ews_xmldump_XXXXXX.xml");
-        dumpFile.open();
-        dumpFile.setAutoRemove(false);
-        dumpFile.write(mResponseData.toUtf8());
-        qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
-        dumpFile.close();
+        ewsLogDir.setAutoRemove(false);
+        if (ewsLogDir.isValid()) {
+            QTemporaryFile dumpFile(ewsLogDir.path() + "/ews_xmldump_XXXXXXX.xml");
+            dumpFile.open();
+            dumpFile.setAutoRemove(false);
+            dumpFile.write(mResponseData.toUtf8());
+            qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
+            dumpFile.close();
+        }
     }
 
     KIO::TransferJob *trJob = qobject_cast<KIO::TransferJob*>(job);
@@ -262,16 +265,21 @@ bool EwsPoxAutodiscoverRequest::readProtocol(QXmlStreamReader &reader)
 
 void EwsPoxAutodiscoverRequest::dump() const
 {
-    QTemporaryFile reqDumpFile("/tmp/ews_xmlreqdump_XXXXXX.xml");
-    reqDumpFile.open();
-    reqDumpFile.setAutoRemove(false);
-    reqDumpFile.write(mBody.toUtf8());
-    reqDumpFile.close();
-    QTemporaryFile resDumpFile("/tmp/ews_xmlresdump_XXXXXX.xml");
-    resDumpFile.open();
-    resDumpFile.setAutoRemove(false);
-    resDumpFile.write(mResponseData.toUtf8());
-    resDumpFile.close();
-    qCDebug(EWSRES_LOG) << "request  dumped to" << reqDumpFile.fileName();
-    qCDebug(EWSRES_LOG) << "response dumped to" << resDumpFile.fileName();
+    ewsLogDir.setAutoRemove(false);
+    if (ewsLogDir.isValid()) {
+        QTemporaryFile reqDumpFile(ewsLogDir.path() + "/ews_xmlreqdump_XXXXXXX.xml");
+        reqDumpFile.open();
+        reqDumpFile.setAutoRemove(false);
+        reqDumpFile.write(mBody.toUtf8());
+        reqDumpFile.close();
+        QTemporaryFile resDumpFile(ewsLogDir.path() + "/ews_xmlresdump_XXXXXXX.xml");
+        resDumpFile.open();
+        resDumpFile.setAutoRemove(false);
+        resDumpFile.write(mResponseData.toUtf8());
+        resDumpFile.close();
+        qCDebug(EWSRES_LOG) << "request  dumped to" << reqDumpFile.fileName();
+        qCDebug(EWSRES_LOG) << "response dumped to" << resDumpFile.fileName();
+    } else {
+        qCWarning(EWSRES_LOG) << "failed to dump request and response";
+    }
 }
