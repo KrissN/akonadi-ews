@@ -147,14 +147,21 @@ void EwsId::writeFolderIds(QXmlStreamWriter &writer) const
         writer.writeEndElement();
     }
     else if (mType == Real) {
-        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
 #ifdef HAVE_INBOX_FILTERING_WORKAROUND
         if (mId == QStringLiteral("INBOX")) {
-            writer.writeAttribute(QStringLiteral("Id"), inboxId);
+            if (inboxId.isEmpty()) {
+                writer.writeStartElement(ewsTypeNsUri, QStringLiteral("DistinguishedFolderId"));
+                writer.writeAttribute(QStringLiteral("Id"), distinguishedIdNames[EwsDIdInbox]);
+            } else {
+                writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
+                writer.writeAttribute(QStringLiteral("Id"), inboxId);
+            }
         } else {
+            writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
             writer.writeAttribute(QStringLiteral("Id"), mId);
         }
 #else
+        writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderId"));
         writer.writeAttribute(QStringLiteral("Id"), mId);
 #endif
         if (!mChangeKey.isEmpty()) {
