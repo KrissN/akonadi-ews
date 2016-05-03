@@ -45,8 +45,17 @@ and accepting meetings) it is necessary to use wither OWA or Microsoft Outlook.
 * Microsoft Exchange 2007 SP1 or later
 * Qt 5.5 or later
 * KDE Frameworks 5.17 or later (at least 5.19 is recommended when using NTLMv2
-  authentication)
+  authentication)*
 * KDE PIM 15.04.0 or later
+
+\* Alternatively you can also recompile the `kio` package and backport the
+following commits from [kio.git](https://quickgit.kde.org/?p=kio.git):
+
+* 5961ac8e Fix NTLMv2 stage 3 response creation
+* 2f894291 Try NTLMv2 authentication if the server denies NTLMv1
+* f665dd30 Try multiple authentication methods in case of failures
+
+The last commit is only necessary if your system is also configured to use Kerberos.
 
 ### Debugging
 
