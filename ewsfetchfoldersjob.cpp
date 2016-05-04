@@ -172,7 +172,8 @@ void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)
                 c.setParentCollection(parent);
                 reparentMap.insert(c.remoteId(), c);
             }
-            map.insert(parentId.id(), c);
+            EwsId id = ch.folder()[EwsFolderFieldFolderId].value<EwsId>();
+            map.insert(id.id(), c);
             mChangedFolders.append(c);
             break;
         }
