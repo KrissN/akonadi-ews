@@ -64,7 +64,8 @@ void EwsFetchFoldersJob::start()
     }
     connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
             mFullSync ? &EwsFetchFoldersJob::remoteFolderFullFetchDone : &EwsFetchFoldersJob::remoteFolderIncrFetchDone);
-    addSubjob(syncFoldersReq);
+    // Don't add this as a subjob as the error is handled in its own way rather than throwing an
+    // error code to the parent.
 
     syncFoldersReq->start();
 }
