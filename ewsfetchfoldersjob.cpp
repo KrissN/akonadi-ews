@@ -27,6 +27,7 @@
 #include <AkonadiCore/CollectionStatistics>
 
 #include "ewssyncfolderhierarchyrequest.h"
+#include "ewsgetfolderrequest.h"
 #include "ewseffectiverights.h"
 #include "ewsclient.h"
 #include "ewsclient_debug.h"
@@ -34,6 +35,8 @@
 using namespace Akonadi;
 
 static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString);
+
+static Q_CONSTEXPR int fetchBatchSize = 50;
 
 EwsFetchFoldersJob::EwsFetchFoldersJob(EwsClient &client, const QString &syncState,
                                        const Akonadi::Collection &rootCollection, QObject *parent)
@@ -77,6 +80,20 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
     }
 
     if (req->error()) {
+        /* It has been reported that the SyncFolderHierarchyRequest can fail with Internal Server
+         * Error (possibly because of a large number of folders). In order to work around this
+         * try to fallback to fetching just the folder identifiers and retrieve the details later. */
+        qCDebug(EWSRES_LOG) << QStringLiteral("Full fetch failed. Trying to fetch ids only.");
+
+        EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(mClient, this);
+        syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+        EwsFolderShape shape(EwsShapeIdOnly);
+        syncFoldersReq->setFolderShape(shape);
+        connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
+                &EwsFetchFoldersJob::remoteFolderIdFullFetchDone);
+        addSubjob(syncFoldersReq);
+        syncFoldersReq->start();
+
         return;
     }
 
@@ -101,8 +118,7 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
 
             mFolders.append(collection);
             map.insert(collection.remoteId(), collection);
-        }
-        else {
+        } else {
             setErrorMsg(QStringLiteral("Got non-create change for full sync."));
             emitResult();
             return;
@@ -111,6 +127,108 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
     mSyncState = req->syncState();
 
     emitResult();
+}
+
+void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
+{
+    EwsSyncFolderHierarchyRequest *req = qobject_cast<EwsSyncFolderHierarchyRequest*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object");
+        setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
+        emitResult();
+        return;
+    }
+
+    if (req->error()) {
+        return;
+    }
+
+    EwsId::List folderIds;
+
+    Q_FOREACH(const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
+        if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
+            folderIds.append(ch.folder()[EwsFolderFieldFolderId].value<EwsId>());
+        } else {
+            setErrorMsg(QStringLiteral("Got non-create change for full sync."));
+            emitResult();
+            return;
+        }
+    }
+
+    EwsFolderShape shape(EwsShapeDefault);
+    shape << propPidTagContainerClass;
+    shape << EwsPropertyField("folder:EffectiveRights");
+    shape << EwsPropertyField("folder:ParentFolderId");
+    mPendingFetchJobs = 0;
+
+    for (int i = 0; i < folderIds.size(); i += fetchBatchSize) {
+        EwsGetFolderRequest *req = new EwsGetFolderRequest(mClient, this);
+        req->setFolderIds(folderIds.mid(i, fetchBatchSize));
+        req->setFolderShape(shape);
+        connect(req, &EwsSyncFolderHierarchyRequest::result, this,
+                &EwsFetchFoldersJob::remoteFolderDetailFetchDone);
+        req->start();
+        addSubjob(req);
+        mPendingFetchJobs++;
+    }
+
+    qCDebugNC(EWSRES_LOG) << QStringLiteral("Starting %1 folder fetch jobs.").arg(mPendingFetchJobs);
+
+    mSyncState = req->syncState();
+}
+
+void EwsFetchFoldersJob::remoteFolderDetailFetchDone(KJob *job)
+{
+    EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetFolderRequest job object");
+        setErrorMsg(QStringLiteral("Invalid EwsGetFolderRequest job object"));
+        emitResult();
+        return;
+    }
+
+    if (req->error()) {
+        return;
+    }
+
+    Q_FOREACH(const EwsGetFolderRequest::Response& resp, req->responses()) {
+        if (resp.isSuccess()) {
+            mRemoteAddedFolders.append(resp.folder());
+        } else {
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch folder details.");
+        }
+    }
+
+    mPendingFetchJobs--;
+    qCDebugNC(EWSRES_LOG) << QStringLiteral("%1 folder fetch jobs pending").arg(mPendingFetchJobs);
+
+    if (mPendingFetchJobs == 0) {
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("All folder fetch jobs complete");
+
+        QHash<QString, Collection> map;
+
+        mFolders.append(mRootCollection);
+        map.insert(mRootCollection.remoteId(), mRootCollection);
+
+        Q_FOREACH(const EwsFolder &folder, mRemoteAddedFolders) {
+            Collection collection = createFolderCollection(folder);
+
+            EwsId parentId = folder[EwsFolderFieldParentFolderId].value<EwsId>();
+            QHash<QString, Collection>::iterator it = map.find(parentId.id());
+            if (it == map.end()) {
+                qCWarningNC(EWSRES_LOG) << QStringLiteral("No collection found for ") << parentId;
+                setErrorMsg(QStringLiteral("No collection found for %1").arg(parentId.id()));
+                emitResult();
+                return;
+            }
+            collection.setParentCollection(*it);
+
+            mFolders.append(collection);
+            map.insert(collection.remoteId(), collection);
+        }
+
+        emitResult();
+   }
 }
 
 void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)

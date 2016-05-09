@@ -44,6 +44,8 @@ public:
     virtual void start() Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void remoteFolderFullFetchDone(KJob *job);
+    void remoteFolderIdFullFetchDone(KJob *job);
+    void remoteFolderDetailFetchDone(KJob *job);
     void remoteFolderIncrFetchDone(KJob *job);
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
@@ -58,6 +60,7 @@ private:
     EwsId::List mRemoteDeletedIds;
     QString mSyncState;
     bool mFullSync;
+    int mPendingFetchJobs;
 
     Akonadi::Collection::List mChangedFolders;
     Akonadi::Collection::List mDeletedFolders;
