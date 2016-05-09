@@ -49,7 +49,7 @@ option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail.
 option(HAVE_INBOX_FILTERING_WORKAROUND "Include inbox filtering workaround." TRUE)
 option(ENABLE_TESTS "Build the test suite." FALSE)
 
-set(AKONADI_EWS_VERSION "0.8.0")
+set(AKONADI_EWS_VERSION "0.8.0-dev")
 
 add_subdirectory(ewsclient)
 
