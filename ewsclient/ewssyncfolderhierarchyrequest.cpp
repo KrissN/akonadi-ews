@@ -126,6 +126,7 @@ bool EwsSyncFolderHierarchyRequest::parseItemsResponse(QXmlStreamReader &reader)
 
     mChanges = resp->mChanges;
     mSyncState = resp->mSyncState;
+    mIncludesLastItem = resp->mIncludesLastFolder;
 
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp->isSuccess()) {
