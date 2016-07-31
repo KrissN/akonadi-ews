@@ -25,6 +25,9 @@
 #include <KContacts/Addressee>
 #include <KContacts/ContactGroup>
 #include <AkonadiCore/CollectionStatistics>
+#include <AkonadiCore/CollectionFetchJob>
+#include <AkonadiCore/CollectionFetchScope>
+#include <AkonadiCore/CollectionMoveJob>
 
 #include "ewssyncfolderhierarchyrequest.h"
 #include "ewsgetfolderrequest.h"
@@ -39,9 +42,11 @@ static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString
 static Q_CONSTEXPR int fetchBatchSize = 50;
 
 EwsFetchFoldersJob::EwsFetchFoldersJob(EwsClient &client, const QString &syncState,
-                                       const Akonadi::Collection &rootCollection, QObject *parent)
+                                       const Akonadi::Collection &rootCollection,
+                                       const QHash<QString, QString> &folderTreeCache, QObject *parent)
     : EwsJob(parent), mClient(client), mRootCollection(rootCollection), mSyncState(syncState),
-      mFullSync(syncState.isNull())
+      mFullSync(syncState.isNull()), mPendingFetchJobs(0), mPendingMoveJobs(0),
+      mFolderTreeCache(folderTreeCache)
 {
     qRegisterMetaType<EwsId::List>();
 }
@@ -68,6 +73,16 @@ void EwsFetchFoldersJob::start()
     // error code to the parent.
 
     syncFoldersReq->start();
+}
+
+void EwsFetchFoldersJob::localFolderFetchDone(KJob *job)
+{
+
+}
+
+void EwsFetchFoldersJob::localCollectionsRetrieved(const Collection::List &collections)
+{
+
 }
 
 void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
@@ -98,36 +113,40 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
         return;
     }
 
-    QHash<QString, Collection> map;
-
-    mFolders.append(mRootCollection);
-    map.insert(mRootCollection.remoteId(), mRootCollection);
-
     Q_FOREACH(const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
         if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
-            Collection collection = createFolderCollection(ch.folder());
-
-            EwsId parentId = ch.folder()[EwsFolderFieldParentFolderId].value<EwsId>();
-            QHash<QString, Collection>::iterator it = map.find(parentId.id());
-            if (it == map.end()) {
-                qCWarningNC(EWSRES_LOG) << QStringLiteral("No collection found for ") << parentId;
-                setErrorMsg(QStringLiteral("No collection found for %1").arg(parentId.id()));
-                emitResult();
-                return;
-            }
-            collection.setParentCollection(*it);
-
-            mFolders.append(collection);
-            map.insert(collection.remoteId(), collection);
+            mRemoteChangedFolders.append(ch.folder());
         } else {
             setErrorMsg(QStringLiteral("Got non-create change for full sync."));
             emitResult();
             return;
         }
     }
-    mSyncState = req->syncState();
 
-    emitResult();
+    if (req->includesLastItem()) {
+        processRemoteFolders();
+
+        Collection::List colList;
+        colList.append(mRootCollection);
+        buildCollectionList(colList);
+
+        mFolders = mChangedFolders;
+        mSyncState = req->syncState();
+
+        emitResult();
+    } else {
+        EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(mClient, this);
+        syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+        EwsFolderShape shape;
+        shape << propPidTagContainerClass;
+        shape << EwsPropertyField("folder:EffectiveRights");
+        shape << EwsPropertyField("folder:ParentFolderId");
+        syncFoldersReq->setFolderShape(shape);
+        syncFoldersReq->setSyncState(req->syncState());
+        connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
+                &EwsFetchFoldersJob::remoteFolderFullFetchDone);
+        syncFoldersReq->start();
+    }
 }
 
 void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
@@ -144,11 +163,9 @@ void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
         return;
     }
 
-    EwsId::List folderIds;
-
     Q_FOREACH(const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
         if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
-            folderIds.append(ch.folder()[EwsFolderFieldFolderId].value<EwsId>());
+            mRemoteFolderIds.append(ch.folder()[EwsFolderFieldFolderId].value<EwsId>());
         } else {
             setErrorMsg(QStringLiteral("Got non-create change for full sync."));
             emitResult();
@@ -156,26 +173,38 @@ void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
         }
     }
 
-    EwsFolderShape shape(EwsShapeDefault);
-    shape << propPidTagContainerClass;
-    shape << EwsPropertyField("folder:EffectiveRights");
-    shape << EwsPropertyField("folder:ParentFolderId");
-    mPendingFetchJobs = 0;
+    if (req->includesLastItem()) {
+        EwsFolderShape shape(EwsShapeDefault);
+        shape << propPidTagContainerClass;
+        shape << EwsPropertyField("folder:EffectiveRights");
+        shape << EwsPropertyField("folder:ParentFolderId");
+        mPendingFetchJobs = 0;
 
-    for (int i = 0; i < folderIds.size(); i += fetchBatchSize) {
-        EwsGetFolderRequest *req = new EwsGetFolderRequest(mClient, this);
-        req->setFolderIds(folderIds.mid(i, fetchBatchSize));
-        req->setFolderShape(shape);
-        connect(req, &EwsSyncFolderHierarchyRequest::result, this,
-                &EwsFetchFoldersJob::remoteFolderDetailFetchDone);
-        req->start();
-        addSubjob(req);
-        mPendingFetchJobs++;
+        for (int i = 0; i < mRemoteFolderIds.size(); i += fetchBatchSize) {
+            EwsGetFolderRequest *req = new EwsGetFolderRequest(mClient, this);
+            req->setFolderIds(mRemoteFolderIds.mid(i, fetchBatchSize));
+            req->setFolderShape(shape);
+            connect(req, &EwsSyncFolderHierarchyRequest::result, this,
+                    &EwsFetchFoldersJob::remoteFolderDetailFetchDone);
+            req->start();
+            addSubjob(req);
+            mPendingFetchJobs++;
+        }
+
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("Starting %1 folder fetch jobs.").arg(mPendingFetchJobs);
+
+        mSyncState = req->syncState();
+    } else {
+        EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(mClient, this);
+        syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+        EwsFolderShape shape(EwsShapeIdOnly);
+        syncFoldersReq->setFolderShape(shape);
+        syncFoldersReq->setSyncState(req->syncState());
+        connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
+                &EwsFetchFoldersJob::remoteFolderIdFullFetchDone);
+        addSubjob(syncFoldersReq);
+        syncFoldersReq->start();
     }
-
-    qCDebugNC(EWSRES_LOG) << QStringLiteral("Starting %1 folder fetch jobs.").arg(mPendingFetchJobs);
-
-    mSyncState = req->syncState();
 }
 
 void EwsFetchFoldersJob::remoteFolderDetailFetchDone(KJob *job)
@@ -194,7 +223,7 @@ void EwsFetchFoldersJob::remoteFolderDetailFetchDone(KJob *job)
 
     Q_FOREACH(const EwsGetFolderRequest::Response& resp, req->responses()) {
         if (resp.isSuccess()) {
-            mRemoteAddedFolders.append(resp.folder());
+            mRemoteChangedFolders.append(resp.folder());
         } else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch folder details.");
         }
@@ -206,27 +235,13 @@ void EwsFetchFoldersJob::remoteFolderDetailFetchDone(KJob *job)
     if (mPendingFetchJobs == 0) {
         qCDebugNC(EWSRES_LOG) << QStringLiteral("All folder fetch jobs complete");
 
-        QHash<QString, Collection> map;
+        processRemoteFolders();
 
-        mFolders.append(mRootCollection);
-        map.insert(mRootCollection.remoteId(), mRootCollection);
+        Collection::List colList;
+        colList.append(mRootCollection);
+        buildCollectionList(colList);
 
-        Q_FOREACH(const EwsFolder &folder, mRemoteAddedFolders) {
-            Collection collection = createFolderCollection(folder);
-
-            EwsId parentId = folder[EwsFolderFieldParentFolderId].value<EwsId>();
-            QHash<QString, Collection>::iterator it = map.find(parentId.id());
-            if (it == map.end()) {
-                qCWarningNC(EWSRES_LOG) << QStringLiteral("No collection found for ") << parentId;
-                setErrorMsg(QStringLiteral("No collection found for %1").arg(parentId.id()));
-                emitResult();
-                return;
-            }
-            collection.setParentCollection(*it);
-
-            mFolders.append(collection);
-            map.insert(collection.remoteId(), collection);
-        }
+        mFolders = mChangedFolders;
 
         emitResult();
    }
@@ -246,71 +261,199 @@ void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)
         return;
     }
 
-    QHash<QString, Collection> map;
-    QHash<QString, Collection> dummyMap;
-    QMultiHash<QString, Collection> reparentMap;
-
     Q_FOREACH(const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
         switch (ch.type()) {
-        case EwsSyncFolderHierarchyRequest::Create:
         case EwsSyncFolderHierarchyRequest::Update:
         {
-            Collection c = createFolderCollection(ch.folder());
-
-            /* Some previously processed collection might have used this collection as a parent. At
-             * that time full details about this collections were not known and a dummy item was used
-             * as the parent. Now check if this item has appeared in full detail and if yes, replace
-             * the dummy parent with the full one. */
-            QMultiHash<QString, Collection>::iterator reparentIt = reparentMap.find(c.remoteId());
-            for (; reparentIt != reparentMap.end(); reparentIt++) {
-                Collection rc = *reparentIt;
-                mChangedFolders.removeOne(rc);
-                dummyMap.remove(c.remoteId());
-                rc.setParentCollection(c);
-                mChangedFolders.append(c);
-            }
-
-            /* Set the parent collection. If the parent collection was already processed then use
-             * it. Otherwise create a dummy collection. */
-            EwsId parentId = ch.folder()[EwsFolderFieldParentFolderId].value<EwsId>();
-            QHash<QString, Collection>::iterator it = map.find(parentId.id());
-            if (it != map.end()) {
-                c.setParentCollection(*it);
-            }
-            else {
-                QHash<QString, Collection>::iterator it = dummyMap.find(parentId.id());
-                Collection parent;
-                if (it != dummyMap.end()) {
-                    parent = *it;
-                }
-                else {
-                    parent.setRemoteId(parentId.id());
-                    dummyMap.insert(parentId.id(), parent);
-                }
-
-                c.setParentCollection(parent);
-                reparentMap.insert(c.remoteId(), c);
-            }
             EwsId id = ch.folder()[EwsFolderFieldFolderId].value<EwsId>();
-            map.insert(id.id(), c);
-            mChangedFolders.append(c);
+            mRemoteChangedIds.append(id.id());
+        }
+        /* no break */
+        case EwsSyncFolderHierarchyRequest::Create:
+        {
+            mRemoteChangedFolders.append(ch.folder());
             break;
         }
         case EwsSyncFolderHierarchyRequest::Delete:
         {
-            Collection c;
-            c.setRemoteId(ch.folderId().id());
-            mDeletedFolders.append(c);
+            mRemoteDeletedIds.append(ch.folderId().id());
             break;
         }
         default:
             break;
         }
     }
+
     mSyncState = req->syncState();
 
-    emitResult();
+    if (!processRemoteFolders()) {
+        buildCollectionList(Collection::List());
+
+        setErrorMsg(QStringLiteral("No parent collections to fetch found for incremental sync."));
+        emitResult();
+    }
 }
+
+bool EwsFetchFoldersJob::processRemoteFolders()
+{
+    /* mCollectionMap contains the global collection list keyed by the EWS ID. */
+    /* mParentMap contains the parent->child map for each collection. */
+    /* mUnknownParentList contains the list of parent collections that are not known and
+     *     will need to be fetched in order to provide real parents for child collections that
+     *     might have changed or been added. */
+
+
+    /* Iterate over all changed folders. */
+    Q_FOREACH(const EwsFolder &folder, mRemoteChangedFolders) {
+        /* Create a collection for each folder. */
+        Collection c = createFolderCollection(folder);
+
+        /* Insert it into the global collection list. */
+        mCollectionMap.insert(c.remoteId(), c);
+
+        /* Determine the parent and insert a parent->child relationship.
+         * Don't use Collection::setParentCollection() yet as the collection object will be updated
+         * which will cause the parent->child relationship to be broken. This happens because the
+         * collection object holds a copy of the parent collection object. An update to that
+         * object in the list will not be visible in the copy inside of the child object. */
+        EwsId parentId = folder[EwsFolderFieldParentFolderId].value<EwsId>();
+        mParentMap.insert(parentId.id(), c.remoteId());
+
+        /* Check if the parent of this collection is known. If not mark the parent as unknown. */
+        if (!mCollectionMap.contains(parentId.id()) && !mUnknownParentList.contains(parentId.id())) {
+            mUnknownParentList.append(parentId.id());
+        }
+
+        /* Remove this collection from the unknown parent list. */
+        mUnknownParentList.removeOne(c.remoteId());
+    }
+
+    /* The unknown parent list may contain the root folder. Normally this is not a problem as all
+     * of these folders will be fetched from Akonadi in the next step. However when doing a full
+     * sync it may happen that this is actually an initial sync and the root collection doesn't
+     * exist yet. Remove it from the unknown list. It will be used later as the root for building
+     * the collection tree. */
+    if (mFullSync) {
+        mUnknownParentList.removeOne(mRootCollection.remoteId());
+
+        /* In case if a full sync the only unknown parent must be the root. If any additional
+         * parents are unknown then something is wrong. */
+        if (!mUnknownParentList.isEmpty()) {
+            qCWarningNC(EWSRES_LOG) << "Unknown parents found for full sync.";
+        }
+        return false;
+    } else if (!mUnknownParentList.isEmpty() || !mRemoteDeletedIds.isEmpty()) {
+        /* Fetch any unknown parent collections from Akonadi. */
+        Collection::List fetchList;
+        Q_FOREACH(const QString &id, mUnknownParentList + mRemoteDeletedIds) {
+            Collection c;
+            c.setRemoteId(id);
+            fetchList.append(c);
+        }
+        Q_FOREACH(const QString &id, mRemoteChangedIds) {
+            if (!mUnknownParentList.contains(id)) {
+                Collection c;
+                c.setRemoteId(id);
+                fetchList.append(c);
+            } else {
+                /* Remotely changed folders should not appear here as the code would have put their
+                 * parents into the unknown list instead. */
+                qCWarningNC(EWSRES_LOG) << QStringLiteral("Found remotely changed folder %1 on unknown folder list")
+                                .arg(id);
+            }
+        }
+        CollectionFetchJob *fetchJob = new CollectionFetchJob(fetchList, CollectionFetchJob::Base);
+        CollectionFetchScope scope;
+        scope.setAncestorRetrieval(CollectionFetchScope::All);
+        fetchJob->setFetchScope(scope);
+        connect(fetchJob, &CollectionFetchJob::result, this,
+                &EwsFetchFoldersJob::unknownParentCollectionsFetchDone);
+
+        return true;
+    } else {
+        /* No unknown parent collections. */
+        return false;
+    }
+
+
+}
+
+void EwsFetchFoldersJob::unknownParentCollectionsFetchDone(KJob *job)
+{
+    if (job->error()) {
+        setErrorMsg(QStringLiteral("Failed to fetch unknown parent collections."));
+        emitResult();
+        return;
+    }
+
+    CollectionFetchJob *fetchJob = qobject_cast<CollectionFetchJob*>(job);
+    Q_ASSERT(fetchJob);
+
+    buildCollectionList(fetchJob->collections());
+
+    if (!mPendingMoveJobs) {
+        emitResult();
+    }
+}
+
+void EwsFetchFoldersJob::buildCollectionList(const Akonadi::Collection::List &unknownCollections)
+{
+    QHash<QString, Collection> unknownColHash;
+    Q_FOREACH(const Collection &col, unknownCollections) {
+        unknownColHash.insert(col.remoteId(), col);
+    }
+    Q_FOREACH(const Collection &col, unknownCollections) {
+        if (mRemoteDeletedIds.contains(col.remoteId())) {
+            /* This collection has been removed. */
+            mDeletedFolders.append(col);
+        } else if (mFullSync || mUnknownParentList.contains(col.remoteId())) {
+            /* This collection is parent to a subtree of collections that have been added or changed.
+             * Build a list of collections to update. */
+            mChangedFolders.append(col);
+            buildChildCollectionList(unknownColHash, col);
+        }
+    }
+
+    if (!mCollectionMap.isEmpty()) {
+        setErrorMsg(QStringLiteral("Found orphaned collections"));
+    }
+}
+
+void EwsFetchFoldersJob::buildChildCollectionList(QHash<QString, Collection> unknownColHash,
+                                                  const Akonadi::Collection &col)
+{
+    QStringList children = mParentMap.values(col.remoteId());
+    Q_FOREACH(const QString &childId, children) {
+        Collection child(mCollectionMap.take(childId));
+        child.setParentCollection(col);
+        if (mRemoteChangedIds.contains(childId) &&
+            unknownColHash.value(childId).parentCollection().remoteId() != col.remoteId()) {
+            /* This collection has changed parents. Since Akonadi cannot detect collection moves
+             * it is necessary to manually issue a request.
+             */
+            CollectionMoveJob *job = new CollectionMoveJob(unknownColHash.value(childId), col);
+            connect(job, &CollectionMoveJob::result, this, &EwsFetchFoldersJob::localFolderMoveDone);
+            mPendingMoveJobs++;
+            job->start();
+        }
+        mChangedFolders.append(child);
+        buildChildCollectionList(unknownColHash, child);
+    }
+}
+
+void EwsFetchFoldersJob::localFolderMoveDone(KJob *job)
+{
+    if (job->error()) {
+        setErrorMsg(QStringLiteral("Failed to move collection."));
+        emitResult();
+        return;
+    }
+
+    if (--mPendingMoveJobs == 0) {
+        emitResult();
+    }
+}
+
 
 Collection EwsFetchFoldersJob::createFolderCollection(const EwsFolder &folder)
 {

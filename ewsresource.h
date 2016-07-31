@@ -115,6 +115,7 @@ private Q_SLOTS:
     void globalTagChangeFinished(KJob *job);
     void globalTagsRetrievalFinished(KJob *job);
     void adjustInboxRemoteIdFetchFinished(KJob *job);
+    void rootCollectionFetched(KJob *job);
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
 public Q_SLOTS:
     Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);
@@ -132,6 +133,8 @@ private:
     void saveState();
     void resetUrl();
 
+    void doRetrieveCollections();
+
     int reconnectTimeout();
 
     EwsClient mEwsClient;
@@ -145,6 +148,8 @@ private:
     bool mTagsRetrieved;
     int mReconnectTimeout;
     EwsTagStore *mTagStore;
+    QHash<QString, QString> mFolderTreeCache;
+    QHash<QString, Akonadi::Collection::Id> mFolderIdCache;
 };
 
 #endif

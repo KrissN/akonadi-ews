@@ -136,6 +136,8 @@ EwsResource::EwsResource(const QString &id)
         }
     }
 
+    setHierarchicalRemoteIdentifiersEnabled(true);
+
     mTagStore = new EwsTagStore(this);
 
     QMetaObject::invokeMethod(this, "delayedInit", Qt::QueuedConnection);
@@ -265,11 +267,49 @@ void EwsResource::retrieveCollections()
 
     Q_EMIT status(Running, i18nc("@info:status", "Retrieving collection tree"));
 
+    if (!mFolderSyncState.isEmpty() && !mRootCollection.isValid()) {
+        /* When doing an incremental sync the real Akonadi identifier of the root collection must
+         * be known, because the retrieved list of changes needs to include all parent folders up
+         * to the root. None of the child collections are required to be valid, but the root must
+         * be, as it needs to be the anchor point.
+         */
+        CollectionFetchJob *fetchJob = new CollectionFetchJob(mRootCollection,
+            CollectionFetchJob::Base);
+        connect(fetchJob, &CollectionFetchJob::result, this, &EwsResource::rootCollectionFetched);
+        fetchJob->start();
+    } else {
+        doRetrieveCollections();
+    }
+    synchronizeTags();
+}
+
+void EwsResource::rootCollectionFetched(KJob *job)
+{
+    if (job->error()) {
+        qCWarning(EWSRES_LOG) << "ERROR" << job->errorString();
+    } else {
+        CollectionFetchJob *fetchJob = qobject_cast<CollectionFetchJob*>(job);
+        if (fetchJob && !fetchJob->collections().isEmpty()) {
+            mRootCollection = fetchJob->collections().first();
+            qCDebugNC(EWSRES_LOG) << QStringLiteral("Root collection fetched: ") << mRootCollection;
+        }
+    }
+
+    /* If the fetch failed for whatever reason force a full sync, which doesn't require the root
+     * collection to be valid. */
+    if (!mRootCollection.isValid()) {
+        mFolderSyncState.clear();
+    }
+
+    doRetrieveCollections();
+}
+
+void EwsResource::doRetrieveCollections()
+{
     EwsFetchFoldersJob *job = new EwsFetchFoldersJob(mEwsClient, mFolderSyncState,
-        mRootCollection, this);
+        mRootCollection, mFolderTreeCache, this);
     connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::findFoldersRequestFinished);
     job->start();
-    synchronizeTags();
 }
 
 void EwsResource::retrieveItems(const Collection &collection)
@@ -342,9 +382,18 @@ void EwsResource::findFoldersRequestFinished(KJob *job)
 
     mFolderSyncState = req->syncState();
     if (req->fullSync()) {
+        mFolderTreeCache.clear();
+        mFolderIdCache.clear();
+        Q_FOREACH(const Collection &col, req->folders()) {
+            const Collection &parent = col.parentCollection();
+            if (parent != Collection::root()) {
+                mFolderTreeCache.insert(col.remoteId(), parent.remoteId());
+            }
+        }
         collectionsRetrieved(req->folders());
     }
     else {
+        // TODO: Update cache.
         collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
     }
 }

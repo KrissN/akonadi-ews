@@ -32,7 +32,8 @@ class EwsFetchFoldersJob : public EwsJob
     Q_OBJECT
 public:
     EwsFetchFoldersJob(EwsClient& client, const QString &syncState,
-                       const Akonadi::Collection &rootCollection, QObject *parent);
+                       const Akonadi::Collection &rootCollection,
+                       const QHash<QString, QString> &folderTreeCache, QObject *parent);
     virtual ~EwsFetchFoldersJob();
 
     Akonadi::Collection::List changedFolders() const { return mChangedFolders; };
@@ -47,24 +48,44 @@ private Q_SLOTS:
     void remoteFolderIdFullFetchDone(KJob *job);
     void remoteFolderDetailFetchDone(KJob *job);
     void remoteFolderIncrFetchDone(KJob *job);
+    void localFolderFetchDone(KJob *job);
+    void unknownParentCollectionsFetchDone(KJob *job);
+    void localCollectionsRetrieved(const Akonadi::Collection::List &collections);
+    void localFolderMoveDone(KJob *job);
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);
 private:
     Akonadi::Collection createFolderCollection(const EwsFolder &folder);
+    bool processRemoteFolders();
+    void buildCollectionList(const Akonadi::Collection::List &unknownCollections);
+    void buildChildCollectionList(QHash<QString, Akonadi::Collection> unknownColHash,
+                                  const Akonadi::Collection &col);
 
     EwsClient& mClient;
     const Akonadi::Collection &mRootCollection;
-    EwsFolder::List mRemoteAddedFolders;
-    EwsFolder::List mRemoteChangedFolders;
-    EwsId::List mRemoteDeletedIds;
+    EwsFolder::List mRemoteChangedFolders;  // Contains details of folders that need update
+                                            // (either created or changed)
+    QStringList mRemoteDeletedIds;  // Contains IDs of folders that have been deleted.
+    QStringList mRemoteChangedIds;  // Contains IDs of folders that have changed (not created).
     QString mSyncState;
     bool mFullSync;
     int mPendingFetchJobs;
+    int mPendingMoveJobs;
+    EwsId::List mRemoteFolderIds;
 
     Akonadi::Collection::List mChangedFolders;
     Akonadi::Collection::List mDeletedFolders;
     Akonadi::Collection::List mFolders;
+
+    //QHash<QString, Akonadi::Collection> mDummyMap;
+    //QMultiHash<QString, Akonadi::Collection> mReparentMap;
+    const QHash<QString, QString> &mFolderTreeCache;
+    QList<QString> mUnknownParentList;
+
+    QHash<QString, Akonadi::Collection> mCollectionMap;
+    QMultiHash<QString, QString> mParentMap;
+
 };
 
 #endif
