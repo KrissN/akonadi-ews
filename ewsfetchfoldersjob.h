@@ -21,11 +21,13 @@
 #define EWSFETCHIFOLDERSJOB_H
 
 #include <AkonadiCore/Collection>
+#include <QtCore/QScopedPointer>
 
 #include "ewsjob.h"
 #include "ewsfolder.h"
 
 class EwsClient;
+class EwsFetchFoldersJobPrivate;
 
 class EwsFetchFoldersJob : public EwsJob
 {
@@ -44,48 +46,21 @@ public:
 
     virtual void start() Q_DECL_OVERRIDE;
 private Q_SLOTS:
-    void remoteFolderFullFetchDone(KJob *job);
-    void remoteFolderIdFullFetchDone(KJob *job);
-    void remoteFolderDetailFetchDone(KJob *job);
-    void remoteFolderIncrFetchDone(KJob *job);
     void localFolderFetchDone(KJob *job);
-    void unknownParentCollectionsFetchDone(KJob *job);
     void localCollectionsRetrieved(const Akonadi::Collection::List &collections);
-    void localFolderMoveDone(KJob *job);
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);
 private:
-    Akonadi::Collection createFolderCollection(const EwsFolder &folder);
-    bool processRemoteFolders();
-    void buildCollectionList(const Akonadi::Collection::List &unknownCollections);
-    void buildChildCollectionList(QHash<QString, Akonadi::Collection> unknownColHash,
-                                  const Akonadi::Collection &col);
-
-    EwsClient& mClient;
-    const Akonadi::Collection &mRootCollection;
-    EwsFolder::List mRemoteChangedFolders;  // Contains details of folders that need update
-                                            // (either created or changed)
-    QStringList mRemoteDeletedIds;  // Contains IDs of folders that have been deleted.
-    QStringList mRemoteChangedIds;  // Contains IDs of folders that have changed (not created).
-    QString mSyncState;
-    bool mFullSync;
-    int mPendingFetchJobs;
-    int mPendingMoveJobs;
-    EwsId::List mRemoteFolderIds;
-
     Akonadi::Collection::List mChangedFolders;
     Akonadi::Collection::List mDeletedFolders;
     Akonadi::Collection::List mFolders;
+    bool mFullSync;
 
-    //QHash<QString, Akonadi::Collection> mDummyMap;
-    //QMultiHash<QString, Akonadi::Collection> mReparentMap;
-    const QHash<QString, QString> &mFolderTreeCache;
-    QList<QString> mUnknownParentList;
+    QString mSyncState;
 
-    QHash<QString, Akonadi::Collection> mCollectionMap;
-    QMultiHash<QString, QString> mParentMap;
-
+    QScopedPointer<EwsFetchFoldersJobPrivate> d_ptr;
+    Q_DECLARE_PRIVATE(EwsFetchFoldersJob)
 };
 
 #endif

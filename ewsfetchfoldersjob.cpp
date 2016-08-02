@@ -41,57 +41,74 @@ static const EwsPropertyField propPidTagContainerClass(0x3613, EwsPropTypeString
 
 static Q_CONSTEXPR int fetchBatchSize = 50;
 
-EwsFetchFoldersJob::EwsFetchFoldersJob(EwsClient &client, const QString &syncState,
-                                       const Akonadi::Collection &rootCollection,
-                                       const QHash<QString, QString> &folderTreeCache, QObject *parent)
-    : EwsJob(parent), mClient(client), mRootCollection(rootCollection), mSyncState(syncState),
-      mFullSync(syncState.isNull()), mPendingFetchJobs(0), mPendingMoveJobs(0),
-      mFolderTreeCache(folderTreeCache)
+class EwsFetchFoldersJobPrivate : public QObject
 {
-    qRegisterMetaType<EwsId::List>();
+public:
+    EwsFetchFoldersJobPrivate(EwsFetchFoldersJob *parent, EwsClient &client,
+                              const QHash<QString, QString> &folderTreeCache,
+                              const Collection &rootCollection);
+    ~EwsFetchFoldersJobPrivate();
+
+    bool processRemoteFolders();
+    Collection createFolderCollection(const EwsFolder &folder);
+
+    void buildCollectionList(const Collection::List &unknownCollections);
+    void buildChildCollectionList(QHash<QString, Collection> unknownColHash, const Collection &col);
+public Q_SLOTS:
+    void remoteFolderFullFetchDone(KJob *job);
+    void remoteFolderIncrFetchDone(KJob *job);
+    void remoteFolderIdFullFetchDone(KJob *job);
+    void remoteFolderDetailFetchDone(KJob *job);
+    void unknownParentCollectionsFetchDone(KJob *job);
+    void localFolderMoveDone(KJob *job);
+public:
+    EwsClient& mClient;
+    int mPendingFetchJobs;
+    int mPendingMoveJobs;
+    EwsId::List mRemoteFolderIds;
+
+    const Collection &mRootCollection;
+
+    EwsFolder::List mRemoteChangedFolders;  // Contains details of folders that need update
+                                            // (either created or changed)
+    QStringList mRemoteDeletedIds;  // Contains IDs of folders that have been deleted.
+    QStringList mRemoteChangedIds;  // Contains IDs of folders that have changed (not created).
+
+    //QHash<QString, Akonadi::Collection> mDummyMap;
+    //QMultiHash<QString, Akonadi::Collection> mReparentMap;
+    const QHash<QString, QString> &mFolderTreeCache;
+    QList<QString> mUnknownParentList;
+
+    QHash<QString, Akonadi::Collection> mCollectionMap;
+    QMultiHash<QString, QString> mParentMap;
+
+    EwsFetchFoldersJob *q_ptr;
+    Q_DECLARE_PUBLIC(EwsFetchFoldersJob)
+};
+
+EwsFetchFoldersJobPrivate::EwsFetchFoldersJobPrivate(EwsFetchFoldersJob *parent, EwsClient &client,
+                                                     const QHash<QString, QString> &folderTreeCache,
+                                                     const Collection &rootCollection)
+    : QObject(parent), mClient(client), mRootCollection(rootCollection),
+      mFolderTreeCache(folderTreeCache), q_ptr(parent)
+{
+    mPendingFetchJobs = 0;
+    mPendingMoveJobs = 0;
 }
 
-EwsFetchFoldersJob::~EwsFetchFoldersJob()
+EwsFetchFoldersJobPrivate::~EwsFetchFoldersJobPrivate()
 {
 }
 
-void EwsFetchFoldersJob::start()
+void EwsFetchFoldersJobPrivate::remoteFolderFullFetchDone(KJob *job)
 {
-    EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(mClient, this);
-    syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
-    EwsFolderShape shape;
-    shape << propPidTagContainerClass;
-    shape << EwsPropertyField("folder:EffectiveRights");
-    shape << EwsPropertyField("folder:ParentFolderId");
-    syncFoldersReq->setFolderShape(shape);
-    if (!mSyncState.isNull()) {
-        syncFoldersReq->setSyncState(mSyncState);
-    }
-    connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
-            mFullSync ? &EwsFetchFoldersJob::remoteFolderFullFetchDone : &EwsFetchFoldersJob::remoteFolderIncrFetchDone);
-    // Don't add this as a subjob as the error is handled in its own way rather than throwing an
-    // error code to the parent.
+    Q_Q(EwsFetchFoldersJob);
 
-    syncFoldersReq->start();
-}
-
-void EwsFetchFoldersJob::localFolderFetchDone(KJob *job)
-{
-
-}
-
-void EwsFetchFoldersJob::localCollectionsRetrieved(const Collection::List &collections)
-{
-
-}
-
-void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
-{
     EwsSyncFolderHierarchyRequest *req = qobject_cast<EwsSyncFolderHierarchyRequest*>(job);
     if (!req) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object");
-        setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
+        q->emitResult();
         return;
     }
 
@@ -106,8 +123,8 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
         EwsFolderShape shape(EwsShapeIdOnly);
         syncFoldersReq->setFolderShape(shape);
         connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
-                &EwsFetchFoldersJob::remoteFolderIdFullFetchDone);
-        addSubjob(syncFoldersReq);
+                &EwsFetchFoldersJobPrivate::remoteFolderIdFullFetchDone);
+        q->addSubjob(syncFoldersReq);
         syncFoldersReq->start();
 
         return;
@@ -117,8 +134,8 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
         if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
             mRemoteChangedFolders.append(ch.folder());
         } else {
-            setErrorMsg(QStringLiteral("Got non-create change for full sync."));
-            emitResult();
+            q->setErrorMsg(QStringLiteral("Got non-create change for full sync."));
+            q->emitResult();
             return;
         }
     }
@@ -130,10 +147,10 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
         colList.append(mRootCollection);
         buildCollectionList(colList);
 
-        mFolders = mChangedFolders;
-        mSyncState = req->syncState();
+        q->mFolders = q->mChangedFolders;
+        q->mSyncState = req->syncState();
 
-        emitResult();
+        q->emitResult();
     } else {
         EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(mClient, this);
         syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
@@ -144,18 +161,20 @@ void EwsFetchFoldersJob::remoteFolderFullFetchDone(KJob *job)
         syncFoldersReq->setFolderShape(shape);
         syncFoldersReq->setSyncState(req->syncState());
         connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
-                &EwsFetchFoldersJob::remoteFolderFullFetchDone);
+                &EwsFetchFoldersJobPrivate::remoteFolderFullFetchDone);
         syncFoldersReq->start();
     }
 }
 
-void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
+void EwsFetchFoldersJobPrivate::remoteFolderIdFullFetchDone(KJob *job)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     EwsSyncFolderHierarchyRequest *req = qobject_cast<EwsSyncFolderHierarchyRequest*>(job);
     if (!req) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object");
-        setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
+        q->emitResult();
         return;
     }
 
@@ -167,8 +186,8 @@ void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
         if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
             mRemoteFolderIds.append(ch.folder()[EwsFolderFieldFolderId].value<EwsId>());
         } else {
-            setErrorMsg(QStringLiteral("Got non-create change for full sync."));
-            emitResult();
+            q->setErrorMsg(QStringLiteral("Got non-create change for full sync."));
+            q->emitResult();
             return;
         }
     }
@@ -185,15 +204,15 @@ void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
             req->setFolderIds(mRemoteFolderIds.mid(i, fetchBatchSize));
             req->setFolderShape(shape);
             connect(req, &EwsSyncFolderHierarchyRequest::result, this,
-                    &EwsFetchFoldersJob::remoteFolderDetailFetchDone);
+                    &EwsFetchFoldersJobPrivate::remoteFolderDetailFetchDone);
             req->start();
-            addSubjob(req);
+            q->addSubjob(req);
             mPendingFetchJobs++;
         }
 
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Starting %1 folder fetch jobs.").arg(mPendingFetchJobs);
 
-        mSyncState = req->syncState();
+        q->mSyncState = req->syncState();
     } else {
         EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(mClient, this);
         syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
@@ -201,19 +220,21 @@ void EwsFetchFoldersJob::remoteFolderIdFullFetchDone(KJob *job)
         syncFoldersReq->setFolderShape(shape);
         syncFoldersReq->setSyncState(req->syncState());
         connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
-                &EwsFetchFoldersJob::remoteFolderIdFullFetchDone);
-        addSubjob(syncFoldersReq);
+                &EwsFetchFoldersJobPrivate::remoteFolderIdFullFetchDone);
+        q->addSubjob(syncFoldersReq);
         syncFoldersReq->start();
     }
 }
 
-void EwsFetchFoldersJob::remoteFolderDetailFetchDone(KJob *job)
+void EwsFetchFoldersJobPrivate::remoteFolderDetailFetchDone(KJob *job)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetFolderRequest job object");
-        setErrorMsg(QStringLiteral("Invalid EwsGetFolderRequest job object"));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("Invalid EwsGetFolderRequest job object"));
+        q->emitResult();
         return;
     }
 
@@ -241,19 +262,21 @@ void EwsFetchFoldersJob::remoteFolderDetailFetchDone(KJob *job)
         colList.append(mRootCollection);
         buildCollectionList(colList);
 
-        mFolders = mChangedFolders;
+        q->mFolders = q->mChangedFolders;
 
-        emitResult();
+        q->emitResult();
    }
 }
 
-void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)
+void EwsFetchFoldersJobPrivate::remoteFolderIncrFetchDone(KJob *job)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     EwsSyncFolderHierarchyRequest *req = qobject_cast<EwsSyncFolderHierarchyRequest*>(job);
     if (!req) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsSyncFolderHierarchyRequestjob object");
-        setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("Invalid EwsSyncFolderHierarchyRequest job object"));
+        q->emitResult();
         return;
     }
 
@@ -284,18 +307,20 @@ void EwsFetchFoldersJob::remoteFolderIncrFetchDone(KJob *job)
         }
     }
 
-    mSyncState = req->syncState();
+    q->mSyncState = req->syncState();
 
     if (!processRemoteFolders()) {
         buildCollectionList(Collection::List());
 
-        setErrorMsg(QStringLiteral("No parent collections to fetch found for incremental sync."));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("No parent collections to fetch found for incremental sync."));
+        q->emitResult();
     }
 }
 
-bool EwsFetchFoldersJob::processRemoteFolders()
+bool EwsFetchFoldersJobPrivate::processRemoteFolders()
 {
+    Q_Q(const EwsFetchFoldersJob);
+
     /* mCollectionMap contains the global collection list keyed by the EWS ID. */
     /* mParentMap contains the parent->child map for each collection. */
     /* mUnknownParentList contains the list of parent collections that are not known and
@@ -333,7 +358,7 @@ bool EwsFetchFoldersJob::processRemoteFolders()
      * sync it may happen that this is actually an initial sync and the root collection doesn't
      * exist yet. Remove it from the unknown list. It will be used later as the root for building
      * the collection tree. */
-    if (mFullSync) {
+    if (q->mFullSync) {
         mUnknownParentList.removeOne(mRootCollection.remoteId());
 
         /* In case if a full sync the only unknown parent must be the root. If any additional
@@ -367,7 +392,7 @@ bool EwsFetchFoldersJob::processRemoteFolders()
         scope.setAncestorRetrieval(CollectionFetchScope::All);
         fetchJob->setFetchScope(scope);
         connect(fetchJob, &CollectionFetchJob::result, this,
-                &EwsFetchFoldersJob::unknownParentCollectionsFetchDone);
+                &EwsFetchFoldersJobPrivate::unknownParentCollectionsFetchDone);
 
         return true;
     } else {
@@ -378,11 +403,13 @@ bool EwsFetchFoldersJob::processRemoteFolders()
 
 }
 
-void EwsFetchFoldersJob::unknownParentCollectionsFetchDone(KJob *job)
+void EwsFetchFoldersJobPrivate::unknownParentCollectionsFetchDone(KJob *job)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     if (job->error()) {
-        setErrorMsg(QStringLiteral("Failed to fetch unknown parent collections."));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("Failed to fetch unknown parent collections."));
+        q->emitResult();
         return;
     }
 
@@ -392,12 +419,14 @@ void EwsFetchFoldersJob::unknownParentCollectionsFetchDone(KJob *job)
     buildCollectionList(fetchJob->collections());
 
     if (!mPendingMoveJobs) {
-        emitResult();
+        q->emitResult();
     }
 }
 
-void EwsFetchFoldersJob::buildCollectionList(const Akonadi::Collection::List &unknownCollections)
+void EwsFetchFoldersJobPrivate::buildCollectionList(const Collection::List &unknownCollections)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     QHash<QString, Collection> unknownColHash;
     Q_FOREACH(const Collection &col, unknownCollections) {
         unknownColHash.insert(col.remoteId(), col);
@@ -405,23 +434,25 @@ void EwsFetchFoldersJob::buildCollectionList(const Akonadi::Collection::List &un
     Q_FOREACH(const Collection &col, unknownCollections) {
         if (mRemoteDeletedIds.contains(col.remoteId())) {
             /* This collection has been removed. */
-            mDeletedFolders.append(col);
-        } else if (mFullSync || mUnknownParentList.contains(col.remoteId())) {
+            q->mDeletedFolders.append(col);
+        } else if (q->mFullSync || mUnknownParentList.contains(col.remoteId())) {
             /* This collection is parent to a subtree of collections that have been added or changed.
              * Build a list of collections to update. */
-            mChangedFolders.append(col);
+            q->mChangedFolders.append(col);
             buildChildCollectionList(unknownColHash, col);
         }
     }
 
     if (!mCollectionMap.isEmpty()) {
-        setErrorMsg(QStringLiteral("Found orphaned collections"));
+        q->setErrorMsg(QStringLiteral("Found orphaned collections"));
     }
 }
 
-void EwsFetchFoldersJob::buildChildCollectionList(QHash<QString, Collection> unknownColHash,
-                                                  const Akonadi::Collection &col)
+void EwsFetchFoldersJobPrivate::buildChildCollectionList(QHash<QString, Collection> unknownColHash,
+                                                         const Collection &col)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     QStringList children = mParentMap.values(col.remoteId());
     Q_FOREACH(const QString &childId, children) {
         Collection child(mCollectionMap.take(childId));
@@ -432,30 +463,32 @@ void EwsFetchFoldersJob::buildChildCollectionList(QHash<QString, Collection> unk
              * it is necessary to manually issue a request.
              */
             CollectionMoveJob *job = new CollectionMoveJob(unknownColHash.value(childId), col);
-            connect(job, &CollectionMoveJob::result, this, &EwsFetchFoldersJob::localFolderMoveDone);
+            connect(job, &CollectionMoveJob::result, this, &EwsFetchFoldersJobPrivate::localFolderMoveDone);
             mPendingMoveJobs++;
             job->start();
         }
-        mChangedFolders.append(child);
+        q->mChangedFolders.append(child);
         buildChildCollectionList(unknownColHash, child);
     }
 }
 
-void EwsFetchFoldersJob::localFolderMoveDone(KJob *job)
+void EwsFetchFoldersJobPrivate::localFolderMoveDone(KJob *job)
 {
+    Q_Q(EwsFetchFoldersJob);
+
     if (job->error()) {
-        setErrorMsg(QStringLiteral("Failed to move collection."));
-        emitResult();
+        q->setErrorMsg(QStringLiteral("Failed to move collection."));
+        q->emitResult();
         return;
     }
 
     if (--mPendingMoveJobs == 0) {
-        emitResult();
+        q->emitResult();
     }
 }
 
 
-Collection EwsFetchFoldersJob::createFolderCollection(const EwsFolder &folder)
+Collection EwsFetchFoldersJobPrivate::createFolderCollection(const EwsFolder &folder)
 {
     Collection collection;
     collection.setName(folder[EwsFolderFieldDisplayName].toString());
@@ -507,3 +540,53 @@ Collection EwsFetchFoldersJob::createFolderCollection(const EwsFolder &folder)
 
     return collection;
 }
+
+EwsFetchFoldersJob::EwsFetchFoldersJob(EwsClient &client, const QString &syncState,
+                                       const Akonadi::Collection &rootCollection,
+                                       const QHash<QString, QString> &folderTreeCache, QObject *parent)
+    : EwsJob(parent), mSyncState(syncState),
+      d_ptr(new EwsFetchFoldersJobPrivate(this, client, folderTreeCache, rootCollection))
+{
+    Q_D(EwsFetchFoldersJob);
+
+    qRegisterMetaType<EwsId::List>();
+
+    mFullSync = syncState.isNull();
+}
+
+EwsFetchFoldersJob::~EwsFetchFoldersJob()
+{
+}
+
+void EwsFetchFoldersJob::start()
+{
+    Q_D(const EwsFetchFoldersJob);
+
+    EwsSyncFolderHierarchyRequest *syncFoldersReq = new EwsSyncFolderHierarchyRequest(d->mClient, this);
+    syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
+    EwsFolderShape shape;
+    shape << propPidTagContainerClass;
+    shape << EwsPropertyField("folder:EffectiveRights");
+    shape << EwsPropertyField("folder:ParentFolderId");
+    syncFoldersReq->setFolderShape(shape);
+    if (!mSyncState.isNull()) {
+        syncFoldersReq->setSyncState(mSyncState);
+    }
+    connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, d,
+            mFullSync ? &EwsFetchFoldersJobPrivate::remoteFolderFullFetchDone : &EwsFetchFoldersJobPrivate::remoteFolderIncrFetchDone);
+    // Don't add this as a subjob as the error is handled in its own way rather than throwing an
+    // error code to the parent.
+
+    syncFoldersReq->start();
+}
+
+void EwsFetchFoldersJob::localFolderFetchDone(KJob *job)
+{
+
+}
+
+void EwsFetchFoldersJob::localCollectionsRetrieved(const Collection::List &collections)
+{
+
+}
+
