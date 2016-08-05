@@ -31,6 +31,8 @@
 #include <KWallet/KWallet>
 #include <KWidgetsAddons/KPasswordDialog>
 
+#include "config.h"
+
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
 #include "ewsfetchfoldersjob.h"

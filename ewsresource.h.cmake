@@ -28,7 +28,8 @@
 #include "ewsid.h"
 #include "ewsfetchitemsjob.h"
 
-#include "config.h"
+/* Work around QTBUG-55148 */
+#cmakedefine HAVE_SEPARATE_MTA_RESOURCE
 
 class FetchItemState;
 class EwsGetItemRequest;
