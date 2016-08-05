@@ -31,8 +31,6 @@
 #include <KWallet/KWallet>
 #include <KWidgetsAddons/KPasswordDialog>
 
-#include "config.h"
-
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
 #include "ewsfetchfoldersjob.h"
@@ -959,9 +957,9 @@ void EwsResource::itemSendRequestFinished(KJob *job)
     itemSent(item, TransportSucceeded);
 }
 
-#ifdef HAVE_SEPARATE_MTA_RESOURCE
 void EwsResource::sendMessage(QString id, QByteArray content)
 {
+#ifdef HAVE_SEPARATE_MTA_RESOURCE
     EwsCreateItemRequest *req = new EwsCreateItemRequest(mEwsClient, this);
 
     EwsItem item;
@@ -972,8 +970,10 @@ void EwsResource::sendMessage(QString id, QByteArray content)
     req->setProperty("requestId", id);
     connect(req, &EwsCreateItemRequest::finished, this, &EwsResource::messageSendRequestFinished);
     req->start();
+#endif
 }
 
+#ifdef HAVE_SEPARATE_MTA_RESOURCE
 void EwsResource::messageSendRequestFinished(KJob *job)
 {
     QString id = job->property("requestId").toString();

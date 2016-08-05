@@ -28,8 +28,7 @@
 #include "ewsid.h"
 #include "ewsfetchitemsjob.h"
 
-/* Work around QTBUG-55148 */
-#cmakedefine HAVE_SEPARATE_MTA_RESOURCE
+#include "config.h"
 
 class FetchItemState;
 class EwsGetItemRequest;
@@ -118,11 +117,11 @@ private Q_SLOTS:
     void globalTagsRetrievalFinished(KJob *job);
     void adjustInboxRemoteIdFetchFinished(KJob *job);
     void rootCollectionFetched(KJob *job);
-#ifdef HAVE_SEPARATE_MTA_RESOURCE
 public Q_SLOTS:
     Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);
 Q_SIGNALS:
     Q_SCRIPTABLE void messageSent(QString id, QString error);
+#ifdef HAVE_SEPARATE_MTA_RESOURCE
 private Q_SLOTS:
     void messageSendRequestFinished(KJob *job);
 #endif

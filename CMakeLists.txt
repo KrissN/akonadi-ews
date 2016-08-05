@@ -54,7 +54,6 @@ set(AKONADI_EWS_VERSION "0.8.0-dev")
 add_subdirectory(ewsclient)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ewsclient)
 
@@ -96,8 +95,7 @@ set(ewsresource_SRCS
     ewssubscribedfoldersjob.cpp
     ewssubscriptionmanager.cpp
     ewssubscriptionwidget.cpp
-    progressdialog.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.h)
+    progressdialog.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 
@@ -107,10 +105,12 @@ qt5_add_dbus_adaptor(ewsresource_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Settings.xml settings.h Settings
 )
 
-qt5_generate_dbus_interface( ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.h org.kde.Akonadi.Ews.Resource.xml OPTIONS -a )
+qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.h org.kde.Akonadi.Ews.Resource.xml OPTIONS -a )
 qt5_add_dbus_adaptor(ewsresource_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Resource.xml ewsresource.h EwsResource
 )
+
+
 
 add_executable(akonadi_ews_resource ${ewsresource_SRCS})
 
