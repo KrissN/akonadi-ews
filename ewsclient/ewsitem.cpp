@@ -482,6 +482,9 @@ EwsItemType EwsItem::internalType() const
     case EwsItemTypeMeetingCancellation:
         type = EwsItemTypeMessage;
         break;
+    case EwsItemTypeDistributionList:
+        type = EwsItemTypeContact;
+        break;
     default:
         break;
     }
