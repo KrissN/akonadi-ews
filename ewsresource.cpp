@@ -34,6 +34,7 @@
 #include "ewsresource.h"
 #include "ewsfetchitemsjob.h"
 #include "ewsfetchfoldersjob.h"
+#include "ewsfetchfoldersincrjob.h"
 #include "ewsgetitemrequest.h"
 #include "ewsupdateitemrequest.h"
 #include "ewsmodifyitemflagsjob.h"
@@ -306,10 +307,17 @@ void EwsResource::rootCollectionFetched(KJob *job)
 
 void EwsResource::doRetrieveCollections()
 {
-    EwsFetchFoldersJob *job = new EwsFetchFoldersJob(mEwsClient, mFolderSyncState,
-        mRootCollection, mFolderTreeCache, this);
-    connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::findFoldersRequestFinished);
-    job->start();
+    if (mFolderSyncState.isEmpty()) {
+        EwsFetchFoldersJob *job = new EwsFetchFoldersJob(mEwsClient, mRootCollection, this);
+        connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::fetchFoldersJobFinished);
+        job->start();
+    }
+    else {
+        EwsFetchFoldersIncrJob *job = new EwsFetchFoldersIncrJob(mEwsClient, mFolderSyncState,
+            mRootCollection, this);
+        connect(job, &EwsFetchFoldersIncrJob::result, this, &EwsResource::fetchFoldersIncrJobFinished);
+        job->start();
+    }
 }
 
 void EwsResource::retrieveItems(const Collection &collection)
@@ -364,7 +372,7 @@ void EwsResource::configure(WId windowId)
     }
 }
 
-void EwsResource::findFoldersRequestFinished(KJob *job)
+void EwsResource::fetchFoldersJobFinished(KJob *job)
 {
     Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
     EwsFetchFoldersJob *req = qobject_cast<EwsFetchFoldersJob*>(job);
@@ -381,21 +389,39 @@ void EwsResource::findFoldersRequestFinished(KJob *job)
     }
 
     mFolderSyncState = req->syncState();
-    if (req->fullSync()) {
-        mFolderTreeCache.clear();
-        mFolderIdCache.clear();
-        Q_FOREACH(const Collection &col, req->folders()) {
-            const Collection &parent = col.parentCollection();
-            if (parent != Collection::root()) {
-                mFolderTreeCache.insert(col.remoteId(), parent.remoteId());
-            }
+    mFolderTreeCache.clear();
+    mFolderIdCache.clear();
+    Q_FOREACH(const Collection &col, req->folders()) {
+        const Collection &parent = col.parentCollection();
+        if (parent != Collection::root()) {
+            mFolderTreeCache.insert(col.remoteId(), parent.remoteId());
         }
-        collectionsRetrieved(req->folders());
     }
-    else {
-        // TODO: Update cache.
-        collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
+    collectionsRetrieved(req->folders());
+}
+
+void EwsResource::fetchFoldersIncrJobFinished(KJob *job)
+{
+    Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
+    EwsFetchFoldersIncrJob *req = qobject_cast<EwsFetchFoldersIncrJob*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsFetchFoldersIncrJob job object");
+        cancelTask(QStringLiteral("Invalid EwsFetchFoldersIncrJob job object"));
+        return;
     }
+
+    if (req->error()) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("ERROR") << req->errorString();
+
+        /* Retry with a full sync. */
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Retrying with a full sync.");
+        mFolderSyncState.clear();
+        doRetrieveCollections();
+        return;
+    }
+
+    mFolderSyncState = req->syncState();
+    collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
 }
 
 void EwsResource::itemFetchJobFinished(KJob *job)

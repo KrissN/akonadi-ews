@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFETCHIFOLDERSJOB_H
-#define EWSFETCHIFOLDERSJOB_H
+#ifndef EWSFETCHIFOLDERSINCRJOB_H
+#define EWSFETCHIFOLDERSINCRJOB_H
 
 #include <AkonadiCore/Collection>
 #include <QtCore/QScopedPointer>
@@ -27,16 +27,18 @@
 #include "ewsfolder.h"
 
 class EwsClient;
-class EwsFetchFoldersJobPrivate;
+class EwsFetchFoldersIncrJobPrivate;
 
-class EwsFetchFoldersJob : public EwsJob
+class EwsFetchFoldersIncrJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsFetchFoldersJob(EwsClient& client, const Akonadi::Collection &rootCollection, QObject *parent);
-    virtual ~EwsFetchFoldersJob();
+    EwsFetchFoldersIncrJob(EwsClient& client, const QString &syncState,
+                           const Akonadi::Collection &rootCollection, QObject *parent);
+    virtual ~EwsFetchFoldersIncrJob();
 
-    Akonadi::Collection::List folders() const { return mFolders; };
+    Akonadi::Collection::List changedFolders() const { return mChangedFolders; };
+    Akonadi::Collection::List deletedFolders() const { return mDeletedFolders; };
     const QString &syncState() const { return mSyncState; };
 
     virtual void start() Q_DECL_OVERRIDE;
@@ -44,12 +46,13 @@ Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);
 private:
-    Akonadi::Collection::List mFolders;
+    Akonadi::Collection::List mChangedFolders;
+    Akonadi::Collection::List mDeletedFolders;
 
     QString mSyncState;
 
-    QScopedPointer<EwsFetchFoldersJobPrivate> d_ptr;
-    Q_DECLARE_PRIVATE(EwsFetchFoldersJob)
+    QScopedPointer<EwsFetchFoldersIncrJobPrivate> d_ptr;
+    Q_DECLARE_PRIVATE(EwsFetchFoldersIncrJob)
 };
 
 #endif

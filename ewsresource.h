@@ -91,7 +91,8 @@ protected Q_SLOTS:
     bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
     void retrieveTags() Q_DECL_OVERRIDE;
 private Q_SLOTS:
-    void findFoldersRequestFinished(KJob *job);
+    void fetchFoldersJobFinished(KJob *job);
+    void fetchFoldersIncrJobFinished(KJob *job);
     void itemFetchJobFinished(KJob *job);
     void getItemRequestFinished(EwsGetItemRequest *req);
     void itemChangeRequestFinished(KJob *job);
