@@ -389,14 +389,6 @@ void EwsResource::fetchFoldersJobFinished(KJob *job)
     }
 
     mFolderSyncState = req->syncState();
-    mFolderTreeCache.clear();
-    mFolderIdCache.clear();
-    Q_FOREACH(const Collection &col, req->folders()) {
-        const Collection &parent = col.parentCollection();
-        if (parent != Collection::root()) {
-            mFolderTreeCache.insert(col.remoteId(), parent.remoteId());
-        }
-    }
     collectionsRetrieved(req->folders());
 }
 

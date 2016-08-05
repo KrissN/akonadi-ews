@@ -149,8 +149,6 @@ private:
     bool mTagsRetrieved;
     int mReconnectTimeout;
     EwsTagStore *mTagStore;
-    QHash<QString, QString> mFolderTreeCache;
-    QHash<QString, Akonadi::Collection::Id> mFolderIdCache;
 };
 
 #endif
