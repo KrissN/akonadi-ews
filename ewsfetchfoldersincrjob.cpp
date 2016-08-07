@@ -193,7 +193,11 @@ void EwsFetchFoldersIncrJobPrivate::remoteFolderIncrFetchDone(KJob *job)
         return;
     }
 
-    req->dump();
+    if (req->changes().isEmpty()) {
+        /* Nothing to do. */
+        q->emitResult();
+        return;
+    }
 
     /* Build a list of local collections to fetch in response to the remote changes.
      * Use a hash to auto-eliminate duplicates. */
