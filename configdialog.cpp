@@ -177,7 +177,8 @@ void ConfigDialog::performAutoDiscovery()
 {
     mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
         fullUsername(), mUi->passwordEdit->text(),
-        mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(), this);
+        mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(),
+        mUi->kcfg_EnableNTLMv2->isChecked(), this);
     connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
     mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
     connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -267,7 +268,8 @@ void ConfigDialog::dialogAccepted()
     if (mUi->kcfg_AutoDiscovery->isChecked() && mAutoDiscoveryNeeded) {
         mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
             fullUsername(), mUi->passwordEdit->text(),
-            mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(), this);
+            mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(),
+            mUi->kcfg_EnableNTLMv2->isChecked(), this);
         connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -291,6 +293,7 @@ void ConfigDialog::dialogAccepted()
         if (mUi->userAgentGroupBox->isChecked()) {
             cli.setUserAgent(mUi->userAgentEdit->text());
         }
+        cli.setEnableNTLMv2(mUi->kcfg_EnableNTLMv2->isChecked());
         mTryConnectJob = new EwsGetFolderRequest(cli, this);
         mTryConnectJob->setFolderShape(EwsShapeIdOnly);
         mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
@@ -341,6 +344,7 @@ void ConfigDialog::tryConnect()
     if (mUi->userAgentGroupBox->isChecked()) {
         cli.setUserAgent(mUi->userAgentEdit->text());
     }
+    cli.setEnableNTLMv2(mUi->kcfg_EnableNTLMv2->isChecked());
     mTryConnectJob = new EwsGetFolderRequest(cli, this);
     mTryConnectJob->setFolderShape(EwsShapeIdOnly);
     mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));

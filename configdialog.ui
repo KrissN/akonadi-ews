@@ -314,6 +314,25 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="advAuthenticationGroupBox">
+         <property name="title">
+          <string>Authentication</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="kcfg_EnableNTLMv2">
+            <property name="whatsThis">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;By default KDE uses the less secure NTLMv1 authentication. Enabling this will cause the more secure NTLMv2 protocol to be used.&lt;/p&gt;&lt;p&gt;Some newer Microsoft Exchange servers are configured to only allow NTLMv2 authentication. In such case this option must be enabled in order to connect successfully.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable NTLMv2</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="userAgentGroupBox">
          <property name="whatsThis">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some organizations restrict access to mail only to approved clients, such as Microsoft Outlook. On the server-side this is implemented by analyzing the User-Agent string and only allowing a list of approved clients.&lt;/p&gt;&lt;p&gt;This setting allows to emulate some well known clients as well as providing a custom User-Agent string.&lt;/p&gt;&lt;p&gt;Please be advised that bypasing company policies may result in personal consequences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

@@ -8,7 +8,7 @@
 QHash<QString, QString> EwsClient::folderHash;
 
 EwsClient::EwsClient(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), mEnableNTLMv2(true)
 {
     
 }

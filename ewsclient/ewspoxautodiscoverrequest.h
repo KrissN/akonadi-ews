@@ -63,7 +63,7 @@ public:
     };
 
     EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email, const QString &userAgent,
-                              QObject *parent);
+                              bool useNTLMv2, QObject *parent);
     virtual ~EwsPoxAutodiscoverRequest();
 
     const EwsServerVersion &serverVersion() const { return mServerVersion; };
@@ -94,6 +94,7 @@ private:
     QUrl mUrl;
     QString mEmail;
     QString mUserAgent;
+    bool mUseNTLMv2;
     EwsServerVersion mServerVersion;
     Action mAction;
     QString mRedirectUrl;

@@ -68,6 +68,9 @@ public:
     void setUserAgent(const QString &userAgent) { mUserAgent = userAgent; };
     const QString &userAgent() const { return mUserAgent; };
 
+    void setEnableNTLMv2(bool enable) { mEnableNTLMv2 = enable; };
+    bool isNTLMv2Enabled() const { return mEnableNTLMv2; };
+
     static QHash<QString, QString> folderHash;
 private:
     QUrl mUrl;
@@ -75,6 +78,7 @@ private:
     QString mPassword;
 
     QString mUserAgent;
+    bool mEnableNTLMv2;
 
     EwsServerVersion mServerVersion;
 

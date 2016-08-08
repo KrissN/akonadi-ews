@@ -32,8 +32,9 @@ static const QString poxAdRespNsUri = QStringLiteral("http://schemas.microsoft.c
 static const QString poxAdOuRespNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
 
 EwsPoxAutodiscoverRequest::EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email,
-                                                     const QString &userAgent, QObject *parent)
-    : EwsJob(parent), mUrl(url), mEmail(email), mUserAgent(userAgent),
+                                                     const QString &userAgent, bool useNTLMv2,
+                                                     QObject *parent)
+    : EwsJob(parent), mUrl(url), mEmail(email), mUserAgent(userAgent), mUseNTLMv2(useNTLMv2),
       mServerVersion(EwsServerVersion::ewsVersion2007Sp1), mAction(Settings)
 {
 }
@@ -55,6 +56,9 @@ void EwsPoxAutodiscoverRequest::prepare(const QString body)
     KIO::TransferJob *job = KIO::http_post(mUrl, body.toUtf8(), KIO::HideProgressInfo);
     job->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
     job->addMetaData(QStringLiteral("no-auth-prompt"), QStringLiteral("true"));
+    if (mUseNTLMv2) {
+        job->addMetaData(QStringLiteral("EnableNTLMv2Auth"), QStringLiteral("true"));
+    }
     if (!mUserAgent.isEmpty()) {
         job->addMetaData(QStringLiteral("UserAgent"), mUserAgent);
     }
