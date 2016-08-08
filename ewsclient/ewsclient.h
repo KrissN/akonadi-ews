@@ -65,11 +65,16 @@ public:
     void setServerVersion(const EwsServerVersion &version);
     const EwsServerVersion &serverVersion() const { return mServerVersion; };
 
+    void setUserAgent(const QString &userAgent) { mUserAgent = userAgent; };
+    const QString &userAgent() const { return mUserAgent; };
+
     static QHash<QString, QString> folderHash;
 private:
     QUrl mUrl;
     QString mUsername;
     QString mPassword;
+
+    QString mUserAgent;
 
     EwsServerVersion mServerVersion;
 

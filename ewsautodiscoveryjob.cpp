@@ -24,8 +24,9 @@
 #include "ewsclient_debug.h"
 
 EwsAutodiscoveryJob::EwsAutodiscoveryJob(QString email, QString username, QString password,
-                                         QObject *parent)
-    : EwsJob(parent), mEmail(email), mUsername(username), mPassword(password), mUsedCreds(false)
+                                         const QString &userAgent, QObject *parent)
+    : EwsJob(parent), mEmail(email), mUsername(username), mPassword(password), mUserAgent(userAgent),
+      mUsedCreds(false)
 {
 }
 
@@ -75,7 +76,7 @@ void EwsAutodiscoveryJob::sendNextRequest(bool useCreds)
         url.setPassword(mPassword);
     }
     mUsedCreds = useCreds;
-    EwsPoxAutodiscoverRequest *req = new EwsPoxAutodiscoverRequest(url, mEmail, this);
+    EwsPoxAutodiscoverRequest *req = new EwsPoxAutodiscoverRequest(url, mEmail, mUserAgent, this);
     connect(req, &EwsPoxAutodiscoverRequest::result, this,
             &EwsAutodiscoveryJob::autodiscoveryRequestFinished);
     req->start();

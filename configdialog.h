@@ -53,6 +53,7 @@ private Q_SLOTS:
     void dialogAccepted();
     void enableTryConnect();
     void tryConnect();
+    void userAgentChanged(int index);
 private:
     QString fullUsername() const;
 

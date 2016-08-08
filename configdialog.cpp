@@ -34,6 +34,18 @@
 #include "progressdialog.h"
 #include "ewssubscriptionwidget.h"
 
+typedef QPair<QString, QString> StringPair;
+
+static const QVector<StringPair> userAgents = {
+    {"Microsoft Outlook 2016", "Microsoft Office/16.0 (Windows NT 10.0; Microsoft Outlook 16.0.6326; Pro)"},
+    {"Microsoft Outlook 2013", "Microsoft Office/15.0 (Windows NT 6.1; Microsoft Outlook 15.0.4420; Pro)"},
+    {"Microsoft Outlook 2010", "Microsoft Office/14.0 (Windows NT 6.1; Microsoft Outlook 14.0.5128; Pro)"},
+    {"Microsoft Outlook 2011 for Mac", "MacOutlook/14.2.0.101115 (Intel Mac OS X 10.6.7)"},
+    {"Mozilla Thunderbird 38 for Windows (with ExQuilla)", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Thunderbird/38.2.0"},
+    {"Mozilla Thunderbird 38 for Linux (with ExQuilla)", "Mozilla/5.0 (X11; Linux x86_64; rv:38.0) Gecko/20100101 Thunderbird/38.2.0"},
+    {"Mozilla Thunderbird 38 for Mac (with ExQuilla)", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:38.0) Gecko/20100101 Thunderbird/38.2.0"}
+};
+
 ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId wId)
     : QDialog(), mParentResource(parentResource), mAutoDiscoveryNeeded(false), mTryConnectNeeded(false),
       mProgressDialog(Q_NULLPTR)
@@ -91,6 +103,24 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     mParentResource->requestPassword(password, false);
     mUi->passwordEdit->setText(password);
 
+    int selectedIndex = -1;
+    int i = 0;
+    Q_FOREACH(const StringPair &item, userAgents) {
+        mUi->userAgentCombo->addItem(item.first, item.second);
+        if (Settings::userAgent() == item.second) {
+            selectedIndex = i;
+        }
+        i++;
+    }
+    mUi->userAgentCombo->addItem(i18nc("User Agent", "Custom"));
+    if (!Settings::userAgent().isEmpty()) {
+        mUi->userAgentGroupBox->setChecked(true);
+        mUi->userAgentCombo->setCurrentIndex(selectedIndex >= 0 ? selectedIndex : mUi->userAgentCombo->count() - 1);
+        mUi->userAgentEdit->setText(Settings::userAgent());
+    } else {
+        mUi->userAgentCombo->setCurrentIndex(mUi->userAgentCombo->count());
+    }
+
     QIcon ewsIcon = QIcon::fromTheme(QStringLiteral("akonadi-ews"));
     qDebug() << ewsIcon.availableSizes();
     mUi->aboutIconLabel->setPixmap(ewsIcon.pixmap(96, 96, QIcon::Normal, QIcon::On));
@@ -108,6 +138,7 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     connect(mUi->kcfg_Email, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_BaseUrl, SIGNAL(textChanged(const QString&)), this, SLOT(enableTryConnect()));
     connect(mUi->tryConnectButton, &QPushButton::clicked, this, &ConfigDialog::tryConnect);
+    connect(mUi->userAgentCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(userAgentChanged(int)));
 }
 
 ConfigDialog::~ConfigDialog()
@@ -131,6 +162,12 @@ void ConfigDialog::save()
         Settings::setServerSubscriptionList(mSubWidget->subscribedList());
     }
 
+    if (mUi->userAgentGroupBox->isChecked()) {
+        Settings::setUserAgent(mUi->userAgentEdit->text());
+    } else {
+        Settings::setUserAgent(QString());
+    }
+
     Settings::self()->save();
 
     mParentResource->setPassword(mUi->passwordEdit->text());
@@ -139,7 +176,8 @@ void ConfigDialog::save()
 void ConfigDialog::performAutoDiscovery()
 {
     mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
-        fullUsername(), mUi->passwordEdit->text(), this);
+        fullUsername(), mUi->passwordEdit->text(),
+        mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(), this);
     connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
     mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
     connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -228,7 +266,8 @@ void ConfigDialog::dialogAccepted()
 {
     if (mUi->kcfg_AutoDiscovery->isChecked() && mAutoDiscoveryNeeded) {
         mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
-            fullUsername(), mUi->passwordEdit->text(), this);
+            fullUsername(), mUi->passwordEdit->text(),
+            mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(), this);
         connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -249,6 +288,9 @@ void ConfigDialog::dialogAccepted()
         EwsClient cli;
         cli.setUrl(mUi->kcfg_BaseUrl->text());
         cli.setCredentials(fullUsername(), mUi->passwordEdit->text());
+        if (mUi->userAgentGroupBox->isChecked()) {
+            cli.setUserAgent(mUi->userAgentEdit->text());
+        }
         mTryConnectJob = new EwsGetFolderRequest(cli, this);
         mTryConnectJob->setFolderShape(EwsShapeIdOnly);
         mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
@@ -296,6 +338,9 @@ void ConfigDialog::tryConnect()
     EwsClient cli;
     cli.setUrl(mUi->kcfg_BaseUrl->text());
     cli.setCredentials(fullUsername(), mUi->passwordEdit->text());
+    if (mUi->userAgentGroupBox->isChecked()) {
+        cli.setUserAgent(mUi->userAgentEdit->text());
+    }
     mTryConnectJob = new EwsGetFolderRequest(cli, this);
     mTryConnectJob->setFolderShape(EwsShapeIdOnly);
     mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
@@ -312,4 +357,13 @@ void ConfigDialog::tryConnect()
         mUi->serverVersionText->setText(mTryConnectJob->serverVersion().toString());
     }
     mProgressDialog->hide();
+}
+
+void ConfigDialog::userAgentChanged(int)
+{
+    QString data = mUi->userAgentCombo->currentData().toString();
+    mUi->userAgentEdit->setEnabled(data.isEmpty());
+    if (!data.isEmpty()) {
+        mUi->userAgentEdit->setText(data);
+    }
 }

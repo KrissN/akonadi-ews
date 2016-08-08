@@ -28,7 +28,8 @@ class EwsAutodiscoveryJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsAutodiscoveryJob(QString email, QString username, QString password, QObject *parent);
+    EwsAutodiscoveryJob(QString email, QString username, QString password, const QString &userAgent,
+                        QObject *parent);
     virtual ~EwsAutodiscoveryJob();
 
     virtual void start() Q_DECL_OVERRIDE;
@@ -46,6 +47,8 @@ private:
     QString mEmail;
     QString mUsername;
     QString mPassword;
+
+    QString mUserAgent;
 
     QQueue<QString> mUrlQueue;
 

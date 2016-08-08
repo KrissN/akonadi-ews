@@ -46,6 +46,9 @@
       <label>List of folders to subscribe to</label>
       <default>default</default>
     </entry>
+    <entry name="UserAgent" type="String">
+      <label>Forces a non-default User-Agent string</label>
+    </entry>
     <entry name="SyncState" type="String" />
   </group>
 </kcfg>

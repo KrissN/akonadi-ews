@@ -31,9 +31,10 @@ static const QString poxAdOuReqNsUri = QStringLiteral("http://schemas.microsoft.
 static const QString poxAdRespNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006");
 static const QString poxAdOuRespNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a");
 
-EwsPoxAutodiscoverRequest::EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email, QObject *parent)
-    : EwsJob(parent), mUrl(url), mEmail(email), mServerVersion(EwsServerVersion::ewsVersion2007Sp1),
-      mAction(Settings)
+EwsPoxAutodiscoverRequest::EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email,
+                                                     const QString &userAgent, QObject *parent)
+    : EwsJob(parent), mUrl(url), mEmail(email), mUserAgent(userAgent),
+      mServerVersion(EwsServerVersion::ewsVersion2007Sp1), mAction(Settings)
 {
 }
 
@@ -54,6 +55,9 @@ void EwsPoxAutodiscoverRequest::prepare(const QString body)
     KIO::TransferJob *job = KIO::http_post(mUrl, body.toUtf8(), KIO::HideProgressInfo);
     job->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
     job->addMetaData(QStringLiteral("no-auth-prompt"), QStringLiteral("true"));
+    if (!mUserAgent.isEmpty()) {
+        job->addMetaData(QStringLiteral("UserAgent"), mUserAgent);
+    }
     //config->readEntry("no-spoof-check", false)
 
     connect(job, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));

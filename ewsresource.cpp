@@ -105,6 +105,7 @@ EwsResource::EwsResource(const QString &id)
     } else {
         mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), mPassword);
     }
+    mEwsClient.setUserAgent(Settings::userAgent());
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);

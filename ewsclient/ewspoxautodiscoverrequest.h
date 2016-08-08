@@ -62,7 +62,8 @@ public:
         friend class EwsPoxAutodiscoverRequest;
     };
 
-    EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email, QObject *parent);
+    EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email, const QString &userAgent,
+                              QObject *parent);
     virtual ~EwsPoxAutodiscoverRequest();
 
     const EwsServerVersion &serverVersion() const { return mServerVersion; };
@@ -92,6 +93,7 @@ private:
     QString mBody;
     QUrl mUrl;
     QString mEmail;
+    QString mUserAgent;
     EwsServerVersion mServerVersion;
     Action mAction;
     QString mRedirectUrl;
