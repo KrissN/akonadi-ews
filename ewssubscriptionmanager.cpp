@@ -32,10 +32,16 @@ static Q_CONSTEXPR uint pollInterval = 10; /* seconds */
 
 static Q_CONSTEXPR uint streamingTimeout = 30; /* minutes */
 
+static Q_CONSTEXPR uint streamingConnTimeout = 60; /* seconds */
+
 EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent)
-    : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false)
+    : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false),
+      mEventReq(Q_NULLPTR)
 {
     mStreamingEvents = mEwsClient.serverVersion().supports(EwsServerVersion::StreamingSubscription);
+    mStreamingTimer.setInterval(streamingConnTimeout * 1000);
+    mStreamingTimer.setSingleShot(true);
+    connect(&mStreamingTimer, SIGNAL(timeout()), this, SLOT(streamingConnectionTimeout()));
 }
 
 EwsSubscriptionManager::~EwsSubscriptionManager()
@@ -143,6 +149,8 @@ void EwsSubscriptionManager::getEvents()
         connect(req, &EwsGetStreamingEventsRequest::eventsReceived, this,
                 &EwsSubscriptionManager::streamingEventsReceived);
         req->start();
+        mEventReq = req;
+        mStreamingTimer.start();
     }
     else {
         EwsGetEventsRequest *req = new EwsGetEventsRequest(mEwsClient, this);
@@ -150,11 +158,17 @@ void EwsSubscriptionManager::getEvents()
         req->setWatermark(mWatermark);
         connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
         req->start();
+        mEventReq = req;
     }
 }
 
 void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
 {
+    mStreamingTimer.stop();
+
+    mEventReq->deleteLater();
+    mEventReq = Q_NULLPTR;
+
     EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
     if (!req) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid EwsEventRequestBase job object.");
@@ -174,6 +188,8 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
 
 void EwsSubscriptionManager::streamingEventsReceived(KJob *job)
 {
+    mStreamingTimer.stop();
+
     EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
     if (!req) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid EwsEventRequestBase job object.");
@@ -183,6 +199,17 @@ void EwsSubscriptionManager::streamingEventsReceived(KJob *job)
 
     if (!job->error()) {
         processEvents(req, false);
+        mStreamingTimer.start();
+    }
+}
+
+void EwsSubscriptionManager::streamingConnectionTimeout()
+{
+    if (mEventReq) {
+        qCWarningNC(EWSRES_LOG) << QStringLiteral("Streaming request timeout - restarting");
+        mEventReq->deleteLater();
+        mEventReq = Q_NULLPTR;
+        getEvents();
     }
 }
 

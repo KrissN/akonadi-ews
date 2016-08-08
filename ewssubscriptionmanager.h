@@ -82,6 +82,7 @@ private Q_SLOTS:
     void getEventsRequestFinished(KJob *job);
     void streamingEventsReceived(KJob *job);
     void getEvents();
+    void streamingConnectionTimeout();
 private:
     void cancelSubscription();
     void setupSubscription();
@@ -104,6 +105,8 @@ private:
     bool mFolderTreeChanged;
     bool mStreamingEvents;
     QMultiHash<QString, UpdateItem> mQueuedUpdates;
+    QTimer mStreamingTimer;
+    EwsEventRequestBase *mEventReq;
 };
 
 #endif
