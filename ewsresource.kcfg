@@ -21,6 +21,10 @@
       <tooltip>The Active Directory domain the user belongs to</tooltip>
       <whatsthis>The Active Directory domain the user belongs to</whatsthis>
     </entry>
+    <entry name="HasDomain" type="Bool">
+      <label>Use a domain name during authentication</label>
+      <default>true</default>
+    </entry>
     <entry name="Email" type="String">
       <label>E-mail</label>
       <tooltip>The primary e-mail address of this account</tooltip>

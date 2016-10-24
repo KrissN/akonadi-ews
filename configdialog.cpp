@@ -135,6 +135,7 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     connect(mUi->kcfg_Username, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->passwordEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_Domain, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
+    connect(mUi->kcfg_HasDomain, SIGNAL(toggled(bool)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_Email, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_BaseUrl, SIGNAL(textChanged(const QString&)), this, SLOT(enableTryConnect()));
     connect(mUi->tryConnectButton, &QPushButton::clicked, this, &ConfigDialog::tryConnect);
@@ -256,9 +257,8 @@ void ConfigDialog::setAutoDiscoveryNeeded()
 QString ConfigDialog::fullUsername() const
 {
     QString username = mUi->kcfg_Username->text();
-    QString domain = mUi->kcfg_Domain->text();
-    if (!domain.isEmpty()) {
-        username.prepend(domain + QStringLiteral("\\"));
+    if (mUi->kcfg_HasDomain->isChecked()) {
+        username.prepend(mUi->kcfg_Domain->text() + QStringLiteral("\\"));
     }
     return username;
 }

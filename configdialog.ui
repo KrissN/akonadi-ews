@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
+    <width>532</width>
     <height>444</height>
    </rect>
   </property>
@@ -76,15 +76,11 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="domainLabel">
-               <property name="text">
-                <string>Domain:</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="1">
               <widget class="KLineEdit" name="kcfg_Domain">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="whatsThis">
                 <string>The Active Directory domain the user belongs to.</string>
                </property>
@@ -186,6 +182,19 @@
                </property>
                <property name="whatsThis">
                 <string>The Microsoft Exchange server URL used to send EWS requests.</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="kcfg_HasDomain">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Domain:</string>
                </property>
               </widget>
              </item>
@@ -338,7 +347,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some organizations restrict access to mail only to approved clients, such as Microsoft Outlook. On the server-side this is implemented by analyzing the User-Agent string and only allowing a list of approved clients.&lt;/p&gt;&lt;p&gt;This setting allows to emulate some well known clients as well as providing a custom User-Agent string.&lt;/p&gt;&lt;p&gt;Please be advised that bypasing company policies may result in personal consequences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="title">
-          <string>Use custom User Agent</string>
+          <string>Use custo&amp;m User Agent</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -624,6 +633,22 @@
     <hint type="destinationlabel">
      <x>260</x>
      <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>kcfg_HasDomain</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>kcfg_Domain</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>87</x>
+     <y>172</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>172</y>
     </hint>
    </hints>
   </connection>
