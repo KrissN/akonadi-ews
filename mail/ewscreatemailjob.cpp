@@ -22,9 +22,12 @@
 #include <KMime/Message>
 #include <AkonadiCore/Collection>
 #include <AkonadiCore/Item>
+#include <AkonadiCore/AgentManager>
+#include <Akonadi/KMime/SpecialMailCollections>
 #include <KI18n/KLocalizedString>
 
 #include "ewscreateitemrequest.h"
+#include "ewsmoveitemrequest.h"
 #include "ewspropertyfield.h"
 #include "ewsmailhandler.h"
 #include "ewsclient_debug.h"
@@ -54,6 +57,7 @@ void EwsCreateMailJob::doStart()
 
     KMime::Message::Ptr msg = mItem.payload<KMime::Message::Ptr>();
     QByteArray mimeContent = msg->encodedContent(true);
+    bool sentItemsCreateWorkaround = false;
     EwsItem item;
     item.setType(EwsItemTypeMessage);
     item.setField(EwsItemFieldMimeContent, mimeContent);
@@ -61,7 +65,21 @@ void EwsCreateMailJob::doStart()
         /* When creating items using the CreateItem request Exchange will by default mark the  message
          * as draft. Setting the extended property below causes the message to appear normally. */
         item.setProperty(propPidMessageFlags, QStringLiteral("1"));
-        req->setSavedFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+        const Akonadi::AgentInstance& inst = Akonadi::AgentManager::self()->instance(mCollection.resource());
+
+        /* WORKAROUND: The "Sent Items" folder is a little "special" when it comes to creating items.
+         * Unlike other folders when creating items there the creation date/time is always set to the
+         * current date/time instead of the value from the MIME Date header. This causes mail that
+         * was copied from other folders to appear with the current date/time instead of the original one.
+         * To work around this create the item in the "Drafts" folder first and then move it to "Sent Items". */
+        if (mCollection == SpecialMailCollections::self()->collection(SpecialMailCollections::SentMail, inst)) {
+            qCInfoNC(EWSRES_LOG) << "Move to \"Sent Items\" detected - activating workaround.";
+            const Collection &draftColl = SpecialMailCollections::self()->collection(SpecialMailCollections::Drafts, inst);
+            req->setSavedFolderId(EwsId(draftColl.remoteId(), draftColl.remoteRevision()));
+            sentItemsCreateWorkaround = true;
+        } else {
+            req->setSavedFolderId(EwsId(mCollection.remoteId(), mCollection.remoteRevision()));
+        }
     }
     // Set flags
     QHash<EwsPropertyField, QVariant> propertyHash = EwsMailHandler::writeFlags(mItem.flags());
@@ -86,7 +104,8 @@ void EwsCreateMailJob::doStart()
 
     req->setItems(EwsItem::List() << item);
     req->setMessageDisposition(mSend ? EwsDispSendOnly : EwsDispSaveOnly);
-    connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailCreateFinished);
+    connect(req, &EwsCreateItemRequest::finished, this,
+            sentItemsCreateWorkaround ? &EwsCreateMailJob::mailCreateWorkaroundFinished : &EwsCreateMailJob::mailCreateFinished);
     addSubjob(req);
     req->start();
 }
@@ -126,6 +145,83 @@ void EwsCreateMailJob::mailCreateFinished(KJob *job)
 
     emitResult();
 }
+
+void EwsCreateMailJob::mailCreateWorkaroundFinished(KJob *job)
+{
+    qDebug() << "mailCreateWorkaroundFinished";
+
+    EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
+    if (job->error()) {
+        setErrorMsg(job->errorString());
+        emitResult();
+        return;
+    }
+
+    if (!req) {
+        setErrorMsg(QStringLiteral("Invalid EwsCreateItemRequest job object"));
+        emitResult();
+        return;
+    }
+
+    if (req->responses().count() != 1) {
+        setErrorMsg(QStringLiteral("Invalid number of responses received from server."));
+        emitResult();
+        return;
+    }
+
+    EwsCreateItemRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        EwsId id = resp.itemId();
+        EwsMoveItemRequest *req = new EwsMoveItemRequest(mClient, this);
+        req->setItemIds(EwsId::List() << id);
+        req->setDestinationFolderId(mCollection.remoteId());
+        connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailMoveWorkaroundFinished);
+        addSubjob(req);
+        req->start();
+    }
+    else {
+        setErrorMsg(i18n("Failed to create mail item"));
+        emitResult();
+    }
+}
+
+void EwsCreateMailJob::mailMoveWorkaroundFinished(KJob *job)
+{
+    qDebug() << "mailMoveWorkaroundFinished";
+
+    EwsMoveItemRequest *req = qobject_cast<EwsMoveItemRequest*>(job);
+    if (job->error()) {
+        setErrorMsg(job->errorString());
+        emitResult();
+        return;
+    }
+
+    if (!req) {
+        setErrorMsg(QStringLiteral("Invalid EwsMoveItemRequest job object"));
+        emitResult();
+        return;
+    }
+
+    if (req->responses().count() != 1) {
+        setErrorMsg(QStringLiteral("Invalid number of responses received from server."));
+        emitResult();
+        return;
+    }
+
+    EwsMoveItemRequest::Response resp = req->responses().first();
+    if (resp.isSuccess()) {
+        EwsId id = resp.itemId();
+        mItem.setRemoteId(id.id());
+        mItem.setRemoteRevision(id.changeKey());
+        mItem.setParentCollection(mCollection);
+    }
+    else {
+        setErrorMsg(i18n("Failed to create mail item"));
+    }
+
+    emitResult();
+}
+
 
 bool EwsCreateMailJob::setSend(bool send)
 {

@@ -34,6 +34,8 @@ protected:
     virtual void doStart() Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void mailCreateFinished(KJob *job);
+    void mailCreateWorkaroundFinished(KJob *job);
+    void mailMoveWorkaroundFinished(KJob *job);
 private:
     bool mSend;
 };
