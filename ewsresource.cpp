@@ -339,7 +339,82 @@ void EwsResource::retrieveItems(const Collection &collection)
     job->start();
 }
 
-bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts)
+#if (AKONADI_VERSION > 0x50328)
+bool EwsResource::retrieveItems(const Item::List &items, const QSet<QByteArray> &parts)
+{
+    Q_UNUSED(parts)
+
+    qDebug() << "retrieveItems";
+    EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
+    EwsId::List ids;
+    Q_FOREACH(const Item &item, items) {
+        ids << EwsId(item.remoteId(), item.remoteRevision());
+    }
+    req->setItemIds(ids);
+    EwsItemShape shape(EwsShapeIdOnly);
+    shape << EwsPropertyField("item:MimeContent");
+    req->setItemShape(shape);
+    req->setProperty("items", QVariant::fromValue<Item::List>(items));
+    connect(req, &EwsGetItemRequest::result, this, &EwsResource::getItemsRequestFinished);
+    req->start();
+
+    return true;
+}
+
+void EwsResource::getItemsRequestFinished(KJob *job)
+{
+    if (job->error()) {
+        qWarning() << "ERROR" << job->errorString();
+        cancelTask(job->errorString());
+        return;
+    }
+    EwsGetItemRequest *req = qobject_cast<EwsGetItemRequest*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetItemRequest job object");
+        cancelTask(QStringLiteral("Invalid EwsGetItemRequest job object"));
+        return;
+    }
+
+    Item::List items = req->property("items").value<Item::List>();
+
+    QHash<QString, Item> itemHash;
+    Q_FOREACH(const Item& item, items) {
+        itemHash.insert(item.remoteId(), item);
+    }
+
+    const EwsGetItemRequest::Response &resp = req->responses()[0];
+    if (!resp.isSuccess()) {
+        qWarning() << QStringLiteral("Item fetch failed!");
+        cancelTask(QStringLiteral("Item fetch failed!"));
+        return;
+    }
+
+    if (items.size() != req->responses().size()) {
+        qWarning() << QStringLiteral("Item fetch failed - incorrect number of responses!");
+        cancelTask(QStringLiteral("Item fetch failed - incorrect number of responses!"));
+        return;
+
+    }
+
+    Q_FOREACH(const EwsGetItemRequest::Response &resp, req->responses()) {
+        const EwsItem &ewsItem = resp.item();
+        EwsId id = ewsItem[EwsItemFieldItemId].value<EwsId>();
+        auto it = itemHash.find(id.id());
+        if (it == itemHash.end()) {
+            qWarning() << QStringLiteral("Item fetch failed - Akonadi item not found for item %s!").arg(id.id());
+            cancelTask(QStringLiteral("Item fetch failed - Akonadi item not found for item %s!").arg(id.id()));
+            return;
+        }
+        if (!EwsItemHandler::itemHandler(ewsItem.internalType())->setItemPayload(*it, ewsItem)) {
+            cancelTask(QStringLiteral("Failed to fetch item payload."));
+            return;
+        }
+    }
+
+    itemsRetrieved(itemHash.values().toVector());
+}
+#else
+bool EwsResource::retrieveItem(const Item &item, const QSet<QByteArray> &parts)
 {
     Q_UNUSED(parts)
 
@@ -352,11 +427,41 @@ bool EwsResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray>
     shape << EwsPropertyField("item:MimeContent");
     req->setItemShape(shape);
     req->setProperty("item", QVariant::fromValue<Item>(item));
-    connect(req, &EwsGetItemRequest::result, req,
-            [this](KJob *job){getItemRequestFinished(qobject_cast<EwsGetItemRequest*>(job));});
+    connect(req, &EwsGetItemRequest::result, this, &EwsResource::getItemRequestFinished);
     req->start();
     return true;
 }
+
+void EwsResource::getItemRequestFinished(KJob *job)
+{
+    if (job->error()) {
+        qWarning() << "ERROR" << job->errorString();
+        cancelTask(job->errorString());
+        return;
+    }
+    EwsGetItemRequest *req = qobject_cast<EwsGetItemRequest*>(job);
+    if (!req) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetItemRequest job object");
+        cancelTask(QStringLiteral("Invalid EwsGetItemRequest job object"));
+        return;
+    }
+
+    Item item = req->property("item").value<Item>();
+    const EwsGetItemRequest::Response &resp = req->responses()[0];
+    if (!resp.isSuccess()) {
+        qWarning() << QStringLiteral("Item fetch failed!");
+        cancelTask(QStringLiteral("Item fetch failed!"));
+        return;
+    }
+    const EwsItem &ewsItem = resp.item();
+    if (!EwsItemHandler::itemHandler(ewsItem.internalType())->setItemPayload(item, ewsItem)) {
+        cancelTask(QStringLiteral("Failed to fetch item payload."));
+        return;
+    }
+
+    itemRetrieved(item);
+}
+#endif
 
 void EwsResource::configure(WId windowId)
 {
@@ -449,30 +554,6 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     saveState();
     mItemsToCheck.remove(fetchJob->collection().remoteId());
     Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
-}
-
-void EwsResource::getItemRequestFinished(EwsGetItemRequest *req)
-{
-    if (req->error()) {
-        qWarning() << "ERROR" << req->errorString();
-        cancelTask(req->errorString());
-        return;
-    }
-
-    Item item = req->property("item").value<Item>();
-    const EwsGetItemRequest::Response &resp = req->responses()[0];
-    if (!resp.isSuccess()) {
-        qWarning() << QStringLiteral("Item fetch failed!");
-        cancelTask(QStringLiteral("Item fetch failed!"));
-        return;
-    }
-    const EwsItem &ewsItem = resp.item();
-    if (!EwsItemHandler::itemHandler(ewsItem.internalType())->setItemPayload(item, ewsItem)) {
-        cancelTask(QStringLiteral("Failed to fetch item payload."));
-        return;
-    }
-
-    itemRetrieved(item);
 }
 
 void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers)

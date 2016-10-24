@@ -20,6 +20,7 @@
 #ifndef EWSRESOURCE_H
 #define EWSRESOURCE_H
 
+#include <akonadi_version.h>
 #include <QtCore/QScopedPointer>
 #include <AkonadiAgentBase/ResourceBase>
 #include <AkonadiAgentBase/TransportResourceBase>
@@ -88,13 +89,21 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void retrieveCollections() Q_DECL_OVERRIDE;
     void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
+#if (AKONADI_VERSION > 0x50328)
+    bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+#else
     bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+#endif
     void retrieveTags() Q_DECL_OVERRIDE;
 private Q_SLOTS:
     void fetchFoldersJobFinished(KJob *job);
     void fetchFoldersIncrJobFinished(KJob *job);
     void itemFetchJobFinished(KJob *job);
-    void getItemRequestFinished(EwsGetItemRequest *req);
+#if (AKONADI_VERSION > 0x50328)
+    void getItemsRequestFinished(KJob *job);
+#else
+    void getItemRequestFinished(KJob *job);
+#endif
     void itemChangeRequestFinished(KJob *job);
     void itemModifyFlagsRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);

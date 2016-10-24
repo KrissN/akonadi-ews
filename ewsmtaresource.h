@@ -20,6 +20,7 @@
 #ifndef EWSMTARESOURCE_H
 #define EWSMTARESOURCE_H
 
+#include <akonadi_version.h>
 #include <AkonadiAgentBase/ResourceBase>
 #include <AkonadiAgentBase/TransportResourceBase>
 #include <AkonadiCore/Item>
@@ -39,7 +40,11 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void retrieveCollections() Q_DECL_OVERRIDE;
     void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
+#if (AKONADI_VERSION > 0x50328)
+    bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+#else
     bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+#endif
 private Q_SLOTS:
     void messageSent(QString id, QString error);
 private:
