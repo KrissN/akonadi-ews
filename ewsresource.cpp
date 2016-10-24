@@ -215,6 +215,8 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
 
         fetchSpecialFolders();
 
+        synchronizeCollectionTree();
+
         mTagStore->readTags(folder[globalTagsProperty].toStringList(), folder[globalTagsVersionProperty].toInt());
     }
 
