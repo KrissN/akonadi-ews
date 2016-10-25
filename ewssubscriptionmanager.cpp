@@ -51,11 +51,14 @@ EwsSubscriptionManager::~EwsSubscriptionManager()
 
 void EwsSubscriptionManager::start()
 {
-    // Set-up change notification subscription
-    setupSubscription();
+    // Set-up change notification subscription (if needed)
+    if (Settings::eventSubscriptionId().isEmpty()) {
+        setupSubscription();
+    } else {
+        reset();
+    }
 
     if (!mStreamingEvents) {
-        mStreamingEvents = false;
         mPollTimer.setInterval(pollInterval * 1000);
         mPollTimer.setSingleShot(false);
         connect(&mPollTimer, &QTimer::timeout, this, &EwsSubscriptionManager::getEvents);
@@ -64,10 +67,13 @@ void EwsSubscriptionManager::start()
 
 void EwsSubscriptionManager::cancelSubscription()
 {
-    if (!mSubId.isNull()) {
+    if (!Settings::eventSubscriptionId().isEmpty()) {
         EwsUnsubscribeRequest *req = new EwsUnsubscribeRequest(mEwsClient, this);
-        req->setSubscriptionId(mSubId);
+        req->setSubscriptionId(Settings::eventSubscriptionId());
         req->exec();
+        Settings::setEventSubscriptionId(QString());
+        Settings::setEventSubscriptionWatermark(QString());
+        Settings::self()->save();
     }
 }
 
@@ -119,6 +125,15 @@ void EwsSubscriptionManager::setupSubscriptionReq(const EwsId::List &ids)
 void EwsSubscriptionManager::reset()
 {
     mPollTimer.stop();
+    getEvents();
+    if (!mStreamingEvents) {
+        mPollTimer.start();
+    }
+}
+
+void EwsSubscriptionManager::resetSubscription()
+{
+    mPollTimer.stop();
     cancelSubscription();
     setupSubscription();
 }
@@ -128,16 +143,19 @@ void EwsSubscriptionManager::subscribeRequestFinished(KJob *job)
     if (!job->error()) {
         EwsSubscribeRequest *req = qobject_cast<EwsSubscribeRequest*>(job);
         if (req) {
-            mSubId = req->response().subscriptionId();
+            Settings::setEventSubscriptionId(req->response().subscriptionId());
             if (mStreamingEvents) {
                 getEvents();
             }
             else {
-                mWatermark = req->response().watermark();
+                Settings::setEventSubscriptionWatermark(req->response().watermark());
                 getEvents();
                 mPollTimer.start();
             }
+            Settings::self()->save();
         }
+    } else {
+        Q_EMIT connectionError();
     }
 }
 
@@ -145,7 +163,7 @@ void EwsSubscriptionManager::getEvents()
 {
     if (mStreamingEvents) {
         EwsGetStreamingEventsRequest *req = new EwsGetStreamingEventsRequest(mEwsClient, this);
-        req->setSubscriptionId(mSubId);
+        req->setSubscriptionId(Settings::eventSubscriptionId());
         req->setTimeout(streamingTimeout);
         connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
         connect(req, &EwsGetStreamingEventsRequest::eventsReceived, this,
@@ -156,8 +174,8 @@ void EwsSubscriptionManager::getEvents()
     }
     else {
         EwsGetEventsRequest *req = new EwsGetEventsRequest(mEwsClient, this);
-        req->setSubscriptionId(mSubId);
-        req->setWatermark(mWatermark);
+        req->setSubscriptionId(Settings::eventSubscriptionId());
+        req->setWatermark(Settings::eventSubscriptionWatermark());
         connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
         req->start();
         mEventReq = req;
@@ -184,6 +202,13 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
             getEvents();
         }
     } else {
+        if ((req->responses()[0].responseCode() == QStringLiteral("ErrorInvalidSubscription")) ||
+            (req->responses()[0].responseCode() == QStringLiteral("ErrorSubscriptionNotFound"))) {
+            Settings::setEventSubscriptionId(QString());
+            Settings::setEventSubscriptionWatermark(QString());
+            Settings::self()->save();
+            resetSubscription();
+        }
         reset();
     }
 }
@@ -235,7 +260,7 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
                     }
                 }
 
-                mWatermark = event.watermark();
+                Settings::setEventSubscriptionWatermark(event.watermark());
                 if (!skip) {
                     switch (event.type()) {
                     case EwsCopiedEvent:

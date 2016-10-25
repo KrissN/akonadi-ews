@@ -113,15 +113,6 @@ void EwsGetStreamingEventsRequest::requestDataTimeout()
     mResponseData.clear();
 }
 
-void EwsGetStreamingEventsRequest::requestResult(KJob *job)
-{
-    if (job->error() != 0) {
-        setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString());
-    }
-
-    emitResult();
-}
-
 void EwsGetStreamingEventsRequest::eventsProcessed(const Response &resp)
 {
     mResponses.removeOne(resp);

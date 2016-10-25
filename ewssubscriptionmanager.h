@@ -89,6 +89,7 @@ private:
     void setupSubscription();
     void setupSubscriptionReq(const EwsId::List &ids);
     void reset();
+    void resetSubscription();
     void processEvents(EwsEventRequestBase *req, bool finished);
 
     struct UpdateItem {
@@ -97,8 +98,6 @@ private:
     };
 
     EwsClient &mEwsClient;
-    QString mSubId;
-    QString mWatermark;
     QTimer mPollTimer;
     EwsId mMsgRootId;
 

@@ -58,5 +58,7 @@
       <label>Forces a non-default User-Agent string</label>
     </entry>
     <entry name="SyncState" type="String" />
+    <entry name="EventSubscriptionId" type="String" />
+    <entry name="EventSubscriptionWatermark" type="String" />
   </group>
 </kcfg>

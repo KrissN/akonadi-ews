@@ -46,7 +46,6 @@ public Q_SLOTS:
 Q_SIGNALS:
     void eventsReceived(KJob *job);
 protected Q_SLOTS:
-    void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
     void requestDataTimeout();
 protected:

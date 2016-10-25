@@ -158,6 +158,14 @@ void ConfigDialog::save()
         Settings::setRetrievalMethod(1);
     }
 
+    /* Erase the subscription id in case subscription is disabled or its parameters changed. This
+     * fill force creation of a new subscription. */
+    if (!mSubWidget->subscriptionEnabled() ||
+        (mSubWidget->subscribedList() != Settings::serverSubscriptionList())) {
+        Settings::setEventSubscriptionId(QString());
+        Settings::setEventSubscriptionWatermark(QString());
+    }
+
     Settings::setServerSubscription(mSubWidget->subscriptionEnabled());
     if (mSubWidget->subscribedListValid()) {
         Settings::setServerSubscriptionList(mSubWidget->subscribedList());

@@ -297,6 +297,9 @@ bool EwsRequest::Response::readResponseElement(QXmlStreamReader &reader)
     else if (reader.name() == QStringLiteral("MessageXml")) {
         reader.skipCurrentElement();
     }
+    else if (reader.name() == QStringLiteral("ErrorSubscriptionIds")) {
+        reader.skipCurrentElement();
+    }
     else {
         return false;
     }
