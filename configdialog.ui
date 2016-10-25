@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>444</height>
+    <width>602</width>
+    <height>527</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -327,7 +327,7 @@
          <property name="title">
           <string>Authentication</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <layout class="QVBoxLayout" name="advAuthenticationGroupBoxLayout">
           <item>
            <widget class="QCheckBox" name="kcfg_EnableNTLMv2">
             <property name="whatsThis">
@@ -355,7 +355,7 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="userAgentGroupBoxLayout">
           <item>
            <widget class="QComboBox" name="userAgentCombo"/>
           </item>
@@ -370,7 +370,58 @@
         </widget>
        </item>
        <item>
-        <spacer name="advancedTabSpacer">
+        <widget class="QGroupBox" name="clearSyncStateGroupBox">
+         <property name="title">
+          <string>Clear Synchronisation State</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QLabel" name="clearSyncStateLabel">
+            <property name="text">
+             <string>Resets synchronisation state between Exchange and Akonadi. Use in case some items or folders are not showing up despite existing in Exchange.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="clearSyncStateBtnContainer" native="true">
+            <layout class="QHBoxLayout" name="clearSyncStateBtnContainerLayout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="clearFolderTreeSyncStateButton">
+               <property name="text">
+                <string>Clear Folder Tree State</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clearFolderItemSyncStateButton">
+               <property name="text">
+                <string>Clear Folder Item State</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

@@ -140,6 +140,10 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     connect(mUi->kcfg_BaseUrl, SIGNAL(textChanged(const QString&)), this, SLOT(enableTryConnect()));
     connect(mUi->tryConnectButton, &QPushButton::clicked, this, &ConfigDialog::tryConnect);
     connect(mUi->userAgentCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(userAgentChanged(int)));
+    connect(mUi->clearFolderTreeSyncStateButton, &QPushButton::clicked, mParentResource,
+            &EwsResource::clearFolderTreeSyncState);
+    connect(mUi->clearFolderItemSyncStateButton, &QPushButton::clicked, mParentResource,
+            static_cast<void (EwsResource::*)()>(&EwsResource::clearFolderSyncState));
 }
 
 ConfigDialog::~ConfigDialog()

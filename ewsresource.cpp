@@ -138,6 +138,13 @@ EwsResource::EwsResource(const QString &id)
             stream >> mSyncState;
         }
     }
+    data = QByteArray::fromBase64(Settings::folderSyncState().toAscii());
+    if (!data.isEmpty()) {
+        data = qUncompress(data);
+        if (!data.isEmpty()) {
+            mFolderSyncState = QString::fromAscii(data);
+        }
+    }
 
     setHierarchicalRemoteIdentifiersEnabled(true);
 
@@ -509,6 +516,7 @@ void EwsResource::fetchFoldersJobFinished(KJob *job)
     }
 
     mFolderSyncState = req->syncState();
+    saveState();
     collectionsRetrieved(req->folders());
 }
 
@@ -533,6 +541,7 @@ void EwsResource::fetchFoldersIncrJobFinished(KJob *job)
     }
 
     mFolderSyncState = req->syncState();
+    saveState();
     collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
 }
 
@@ -1134,14 +1143,22 @@ void EwsResource::fullSyncRequestedEvent()
     synchronize();
 }
 
-void EwsResource::clearSyncState()
+void EwsResource::clearFolderSyncState()
 {
     mSyncState.clear();
+    saveState();
 }
 
 void EwsResource::clearFolderSyncState(QString folderId)
 {
     mSyncState.remove(folderId);
+    saveState();
+}
+
+void EwsResource::clearFolderTreeSyncState()
+{
+    mFolderSyncState.clear();
+    saveState();
 }
 
 void EwsResource::fetchSpecialFolders()
@@ -1232,6 +1249,7 @@ void EwsResource::saveState()
     QDataStream dataStream(&str, QIODevice::WriteOnly);
     dataStream << mSyncState;
     Settings::self()->setSyncState(qCompress(str, 9).toBase64());
+    Settings::self()->setFolderSyncState(qCompress(mFolderSyncState.toAscii(), 9).toBase64());
     Settings::self()->save();
 }
 
