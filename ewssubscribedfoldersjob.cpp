@@ -86,7 +86,7 @@ void EwsSubscribedFoldersJob::verifySubFoldersRequestFinished(KJob *job)
         // Once verified write the final list back to the configuration.
         Settings::setServerSubscriptionList(idList);
     } else {
-        setErrorMsg(job->errorString());
+        setErrorMsg(job->errorString(), job->error());
     }
     emitResult();
 }

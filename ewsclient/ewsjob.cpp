@@ -39,9 +39,9 @@ bool EwsJob::doKill()
     return true;
 }
 
-bool EwsJob::setErrorMsg(const QString msg)
+bool EwsJob::setErrorMsg(const QString msg, int code)
 {
-    setError(1);
+    setError(code);
     setErrorText(msg);
     qCWarningNC(EWSRES_LOG) << msg;
     return false;

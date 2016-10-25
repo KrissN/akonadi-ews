@@ -124,7 +124,7 @@ void EwsRequest::requestResult(KJob *job)
     int resp = trJob->metaData()["responsecode"].toUInt();
 
     if (job->error() != 0) {
-        setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString());
+        setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString(), job->error());
     }
     /* Don't attempt to parse the response in case of a HTTP error. The only exception is
      * 500 (Bad Request) as in such case the server does provide the usual SOAP response. */

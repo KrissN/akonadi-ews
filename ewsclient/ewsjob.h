@@ -30,7 +30,7 @@ public:
     virtual ~EwsJob();
 protected:
     virtual bool doKill() Q_DECL_OVERRIDE;
-    bool setErrorMsg(const QString msg);
+    bool setErrorMsg(const QString msg, int code = KJob::UserDefinedError);
 };
 
 #endif
