@@ -1,0 +1,38 @@
+#### Version 0.8.1 - TBD
+
+ Bugfix release.
+
+ Notable changes:
+ 
+  * Improve collection tree retrieval:
+    - Fix full collection tree synchronisation for some servers (bug #2).
+    - Fix incremental collection tree synchronisation.
+    - Reduce the number of full collection tree retrievals by keeping the state
+      persistent.
+
+  * Fix Qt 5.7 compatibility
+
+  * Fix crash upon encountering a distribution list item (bug #7).
+
+  * Improve behaviour in case of temporary server connection loss.
+
+  * Add option to customize User Agent string sent to the server.
+
+  * Add option to enable NTLMv2 authentication.
+
+  * Allow specifying an empty domain name (bug #3). Requires KF 5.28 to have any
+    effect.
+
+  * Fix dates when copying items from other resources to the Sent Items folder
+    (bug #5).
+
+  * Improve batch item retrieval performace (will be effective with KDE
+    Applications 16.12).
+
+  * Synchronise the collection tree upon connection. Fixes empty collection tree
+    after adding a new resource until a manual mail fetch is triggered (bug #15).
+
+
+#### Version 0.8.0 - 2016-04-30
+
+ Initial release with functional mail and read-only calendar & tasks.
