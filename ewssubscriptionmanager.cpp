@@ -87,6 +87,8 @@ void EwsSubscriptionManager::verifySubFoldersRequestFinished(KJob *job)
         Q_ASSERT(folderJob);
 
         setupSubscriptionReq(folderJob->folders());
+    } else {
+        Q_EMIT connectionError();
     }
 }
 

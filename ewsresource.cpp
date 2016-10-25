@@ -210,6 +210,11 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
             connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
             connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
             connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
+
+            /* Use a queued connection here as the connectionError() method will actually destroy the subscription manager. If this
+             * was done with a direct connection this would have ended up with destroying the caller object followed by a crash. */
+            connect(mSubManager.data(), &EwsSubscriptionManager::connectionError, this, &EwsResource::connectionError,
+                    Qt::QueuedConnection);
             mSubManager->start();
         }
 
@@ -322,6 +327,12 @@ void EwsResource::doRetrieveCollections()
         connect(job, &EwsFetchFoldersIncrJob::result, this, &EwsResource::fetchFoldersIncrJobFinished);
         job->start();
     }
+}
+
+void EwsResource::connectionError()
+{
+    Q_EMIT status(Broken, i18nc("@info:status", "Unable to connect to Exchange server"));
+    setTemporaryOffline(reconnectTimeout());
 }
 
 void EwsResource::retrieveItems(const Collection &collection)

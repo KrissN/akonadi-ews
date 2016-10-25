@@ -76,6 +76,7 @@ Q_SIGNALS:
     void foldersModified(EwsId::List folders);
     void folderTreeModified();
     void fullSyncRequested();
+    void connectionError();
 private Q_SLOTS:
     void subscribeRequestFinished(KJob *job);
     void verifySubFoldersRequestFinished(KJob *job);
