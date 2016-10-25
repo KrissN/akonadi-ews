@@ -37,13 +37,13 @@
 typedef QPair<QString, QString> StringPair;
 
 static const QVector<StringPair> userAgents = {
-    {"Microsoft Outlook 2016", "Microsoft Office/16.0 (Windows NT 10.0; Microsoft Outlook 16.0.6326; Pro)"},
-    {"Microsoft Outlook 2013", "Microsoft Office/15.0 (Windows NT 6.1; Microsoft Outlook 15.0.4420; Pro)"},
-    {"Microsoft Outlook 2010", "Microsoft Office/14.0 (Windows NT 6.1; Microsoft Outlook 14.0.5128; Pro)"},
-    {"Microsoft Outlook 2011 for Mac", "MacOutlook/14.2.0.101115 (Intel Mac OS X 10.6.7)"},
-    {"Mozilla Thunderbird 38 for Windows (with ExQuilla)", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Thunderbird/38.2.0"},
-    {"Mozilla Thunderbird 38 for Linux (with ExQuilla)", "Mozilla/5.0 (X11; Linux x86_64; rv:38.0) Gecko/20100101 Thunderbird/38.2.0"},
-    {"Mozilla Thunderbird 38 for Mac (with ExQuilla)", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:38.0) Gecko/20100101 Thunderbird/38.2.0"}
+    {QStringLiteral("Microsoft Outlook 2016"), QStringLiteral("Microsoft Office/16.0 (Windows NT 10.0; Microsoft Outlook 16.0.6326; Pro)")},
+    {QStringLiteral("Microsoft Outlook 2013"), QStringLiteral("Microsoft Office/15.0 (Windows NT 6.1; Microsoft Outlook 15.0.4420; Pro)")},
+    {QStringLiteral("Microsoft Outlook 2010"), QStringLiteral("Microsoft Office/14.0 (Windows NT 6.1; Microsoft Outlook 14.0.5128; Pro)")},
+    {QStringLiteral("Microsoft Outlook 2011 for Mac"), QStringLiteral("MacOutlook/14.2.0.101115 (Intel Mac OS X 10.6.7)")},
+    {QStringLiteral("Mozilla Thunderbird 38 for Windows (with ExQuilla)"), QStringLiteral("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:38.0) Gecko/20100101 Thunderbird/38.2.0")},
+    {QStringLiteral("Mozilla Thunderbird 38 for Linux (with ExQuilla)"), QStringLiteral("Mozilla/5.0 (X11; Linux x86_64; rv:38.0) Gecko/20100101 Thunderbird/38.2.0")},
+    {QStringLiteral("Mozilla Thunderbird 38 for Mac (with ExQuilla)"), QStringLiteral("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:38.0) Gecko/20100101 Thunderbird/38.2.0")}
 };
 
 ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId wId)
