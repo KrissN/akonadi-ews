@@ -3,7 +3,7 @@
  Bugfix release.
 
  Notable changes:
- 
+
   * Improve collection tree retrieval:
     - Fix full collection tree synchronisation for some servers (bug #2).
     - Fix incremental collection tree synchronisation.
@@ -16,7 +16,7 @@
 
   * Improve behaviour in case of temporary server connection loss.
 
-  * Add option to customize User Agent string sent to the server.
+  * Add option to customise User Agent string sent to the server.
 
   * Add option to enable NTLMv2 authentication.
 
@@ -26,7 +26,7 @@
   * Fix dates when copying items from other resources to the Sent Items folder
     (bug #5).
 
-  * Improve batch item retrieval performace (will be effective with KDE
+  * Improve batch item retrieval performance (will be effective with KDE
     Applications 16.12).
 
   * Synchronise the collection tree upon connection. Fixes empty collection tree
