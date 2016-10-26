@@ -31,6 +31,11 @@
 
 #include "config.h"
 
+// Some older variants of akonadi_version.h use a different name
+#ifndef AKONADI_VERSION
+#define AKONADI_VERSION AKONADILIBRARIES_VERSION
+#endif
+
 class FetchItemState;
 class EwsGetItemRequest;
 class EwsFindFolderRequest;
