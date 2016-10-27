@@ -202,8 +202,9 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
             getEvents();
         }
     } else {
-        if ((req->responses()[0].responseCode() == QStringLiteral("ErrorInvalidSubscription")) ||
-            (req->responses()[0].responseCode() == QStringLiteral("ErrorSubscriptionNotFound"))) {
+        if ((!req->responses().isEmpty()) &&
+            ((req->responses()[0].responseCode() == QStringLiteral("ErrorInvalidSubscription")) ||
+            (req->responses()[0].responseCode() == QStringLiteral("ErrorSubscriptionNotFound")))) {
             Settings::setEventSubscriptionId(QString());
             Settings::setEventSubscriptionWatermark(QString());
             Settings::self()->save();
