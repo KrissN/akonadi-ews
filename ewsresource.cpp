@@ -204,8 +204,39 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         return;
     }
 
-    EwsFolder folder = req->responses().first().folder();
+    EwsFolder folder = req->responses()[1].folder();
     EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
+    if (id.type() == EwsId::Real) {
+#ifdef HAVE_INBOX_FILTERING_WORKAROUND
+        EwsId::setInboxId(id);
+        Collection c;
+        c.setRemoteId(id.id());
+        CollectionFetchJob *job = new CollectionFetchJob(c, CollectionFetchJob::Base, this);
+        job->setFetchScope(changeRecorder()->collectionFetchScope());
+        job->fetchScope().setResource(identifier());
+        job->fetchScope().setListFilter(CollectionFetchScope::Sync);
+        connect(job, &CollectionFetchJob::result, this, &EwsResource::adjustInboxRemoteIdFetchFinished);
+#else
+        Collection c;
+        c.setRemoteId(QStringLiteral("INBOX"));
+        CollectionFetchJob *job = new CollectionFetchJob(c, CollectionFetchJob::Base, this);
+        job->setFetchScope(changeRecorder()->collectionFetchScope());
+        job->fetchScope().setResource(identifier());
+        job->fetchScope().setListFilter(CollectionFetchScope::Sync);
+        job->setProperty("inboxId", id.id());
+        connect(job, &CollectionFetchJob::result, this, &EwsResource::adjustInboxRemoteIdFetchFinished);
+
+        int inboxIdx = Settings::serverSubscriptionList().indexOf(QStringLiteral("INBOX"));
+        if (inboxIdx >= 0) {
+            QStringList subList = Settings::serverSubscriptionList();
+            subList[inboxIdx] = id.id();
+            Settings::setServerSubscriptionList(subList);
+        }
+#endif
+    }
+
+    folder = req->responses().first().folder();
+    id = folder[EwsFolderFieldFolderId].value<EwsId>();
     if (id.type() == EwsId::Real) {
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());
@@ -230,30 +261,6 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         synchronizeCollectionTree();
 
         mTagStore->readTags(folder[globalTagsProperty].toStringList(), folder[globalTagsVersionProperty].toInt());
-    }
-
-    folder = req->responses()[1].folder();
-    id = folder[EwsFolderFieldFolderId].value<EwsId>();
-    if (id.type() == EwsId::Real) {
-#ifdef HAVE_INBOX_FILTERING_WORKAROUND
-        EwsId::setInboxId(id);
-        Collection c;
-        c.setRemoteId(id.id());
-        CollectionFetchJob *job = new CollectionFetchJob(c, CollectionFetchJob::Base, this);
-        job->setFetchScope(changeRecorder()->collectionFetchScope());
-        job->fetchScope().setResource(identifier());
-        job->fetchScope().setListFilter(CollectionFetchScope::Sync);
-        connect(job, &CollectionFetchJob::result, this, &EwsResource::adjustInboxRemoteIdFetchFinished);
-#else
-        Collection c;
-        c.setRemoteId(QStringLiteral("INBOX"));
-        CollectionFetchJob *job = new CollectionFetchJob(c, CollectionFetchJob::Base, this);
-        job->setFetchScope(changeRecorder()->collectionFetchScope());
-        job->fetchScope().setResource(identifier());
-        job->fetchScope().setListFilter(CollectionFetchScope::Sync);
-        job->setProperty("inboxId", id.id());
-        connect(job, &CollectionFetchJob::result, this, &EwsResource::adjustInboxRemoteIdFetchFinished);
-#endif
     }
 }
 
