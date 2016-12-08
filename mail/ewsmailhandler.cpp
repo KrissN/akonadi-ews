@@ -68,16 +68,16 @@ QString EwsMailHandler::mimeType()
 bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
 {
     qDebug() << "EwsMailHandler::setItemPayload";
-    QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
+    QByteArray mimeContent = ewsItem[EwsItemFieldMimeContent].toByteArray();
     if (mimeContent.isEmpty()) {
         qWarning() << QStringLiteral("MIME content is empty!");
         return false;
     }
 
-    mimeContent.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    mimeContent.replace("\r\n", "\n");
 
     KMime::Message::Ptr msg(new KMime::Message);
-    msg->setContent(mimeContent.toLatin1());
+    msg->setContent(mimeContent);
     msg->parse();
     qDebug() << msg->attachments().size() << "attachments";
     // Some messages might just be empty (just headers). This results in the body being empty.
