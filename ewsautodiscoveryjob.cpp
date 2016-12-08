@@ -110,6 +110,7 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
         if (!req) {
             setErrorMsg(QStringLiteral("Invalid EwsPoxAutodiscoverRequest job object"));
             emitResult();
+            return;
         }
 
         switch (req->action()) {

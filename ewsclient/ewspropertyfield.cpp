@@ -441,12 +441,12 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
             d->mTag = tag;
         }
         else {
-            EwsPropertyFieldPrivate::PropSetIdType psIdType;
-            EwsDistinguishedPropSetId psDid;
-            QString psId;
+            EwsPropertyFieldPrivate::PropSetIdType psIdType = EwsPropertyFieldPrivate::DistinguishedPropSet;
+            EwsDistinguishedPropSetId psDid = EwsPropSetMeeting;
+            QString psId = 0;
 
-            EwsPropertyFieldPrivate::PropIdType idType;
-            unsigned id;
+            EwsPropertyFieldPrivate::PropIdType idType = EwsPropertyFieldPrivate::PropName;
+            unsigned id = 0;
             QString name;
             if (attrs.hasAttribute(QStringLiteral("PropertyId"))) {
                 id = attrs.value(QStringLiteral("PropertyId")).toUInt(&ok, 0);

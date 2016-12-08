@@ -602,8 +602,6 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
 void EwsResource::itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
                                    const QSet<QByteArray> &removedFlags)
 {
-    Item::List changedItems[EwsItemTypeUnknown + 1];
-
     EwsModifyItemFlagsJob *job = new EwsModifyItemFlagsJob(mEwsClient, this, items, addedFlags, removedFlags);
     connect(job, &EwsModifyItemFlagsJob::result, this, &EwsResource::itemModifyFlagsRequestFinished);
     job->start();

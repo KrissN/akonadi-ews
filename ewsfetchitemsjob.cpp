@@ -142,6 +142,7 @@ void EwsFetchItemsJob::localItemFetchDone(KJob *job)
         setErrorMsg(QStringLiteral("Invalid item fetch job pointer."));
         doKill();
         emitResult();
+        return;
     }
 
     if (!fetchJob->error()) {
@@ -163,6 +164,7 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
         setErrorMsg(QStringLiteral("Invalid find item request pointer."));
         doKill();
         emitResult();
+        return;
     }
 
     if (!itemReq->error()) {
@@ -217,6 +219,7 @@ void EwsFetchItemsJob::checkedItemsFetchFinished(KJob *job)
         setErrorMsg(QStringLiteral("Invalid item fetch job pointer."));
         doKill();
         emitResult();
+        return;
     }
 
     if (!req->error()) {

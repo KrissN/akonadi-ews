@@ -250,8 +250,6 @@ void EwsFetchFoldersJobPrivate::remoteFolderDetailFetchDone(KJob *job)
 
 void EwsFetchFoldersJobPrivate::processRemoteFolders()
 {
-    Q_Q(const EwsFetchFoldersJob);
-
     /* mCollectionMap contains the global collection list keyed by the EWS ID. */
     /* mParentMap contains the parent->child map for each collection. */
 
@@ -357,8 +355,6 @@ EwsFetchFoldersJob::EwsFetchFoldersJob(EwsClient &client, const Akonadi::Collect
     : EwsJob(parent),
       d_ptr(new EwsFetchFoldersJobPrivate(this, client, rootCollection))
 {
-    Q_D(EwsFetchFoldersJob);
-
     qRegisterMetaType<EwsId::List>();
 }
 

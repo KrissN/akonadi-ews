@@ -204,6 +204,8 @@ bool EwsRecurrence::readAbsoluteYearlyRecurrence(QXmlStreamReader &reader)
 {
     short dom;
     short month;
+    bool domReceived = false;
+    bool monthReceived = false;
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
@@ -221,6 +223,7 @@ bool EwsRecurrence::readAbsoluteYearlyRecurrence(QXmlStreamReader &reader)
                                 .arg(QStringLiteral("DayOfMonth").arg(text));
                 return false;
             }
+            domReceived = true;
         }
         else if (reader.name() == QStringLiteral("Month")) {
             bool ok;
@@ -231,12 +234,18 @@ bool EwsRecurrence::readAbsoluteYearlyRecurrence(QXmlStreamReader &reader)
                                 .arg(QStringLiteral("Month").arg(text));
                 return false;
             }
+            monthReceived = true;
         }
         else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read recurrence element - unknown element: %1.")
                             .arg(reader.name().toString());
             return false;
         }
+    }
+
+    if (!domReceived || !monthReceived) {
+        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read recurrence element - need both month and dom values.");
+        return false;
     }
 
     // "If for a particular month this value is larger than the number of days in the month,

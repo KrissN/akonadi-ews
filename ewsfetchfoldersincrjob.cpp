@@ -528,8 +528,6 @@ EwsFetchFoldersIncrJob::EwsFetchFoldersIncrJob(EwsClient &client, const QString 
     : EwsJob(parent), mSyncState(syncState),
       d_ptr(new EwsFetchFoldersIncrJobPrivate(this, client, rootCollection))
 {
-    Q_D(EwsFetchFoldersIncrJob);
-
     qRegisterMetaType<EwsId::List>();
 }
 
