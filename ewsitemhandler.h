@@ -61,6 +61,7 @@ public:
     static QHash<EwsPropertyField, QVariant> writeFlags(QSet<QByteArray> flags);
     static QSet<QByteArray> readFlags(const EwsItem &item);
     static QList<EwsPropertyField> flagsProperties();
+    static QList<EwsPropertyField> tagsProperties();
 private:
     struct HandlerFactory {
         EwsItemType type;

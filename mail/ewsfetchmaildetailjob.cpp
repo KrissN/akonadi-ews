@@ -51,6 +51,9 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     Q_FOREACH(const EwsPropertyField &field, EwsMailHandler::flagsProperties()) {
         shape << field;
     }
+    Q_FOREACH(const EwsPropertyField &field, EwsItemHandler::tagsProperties()) {
+        shape << field;
+    }
     mRequest->setItemShape(shape);
 }
 

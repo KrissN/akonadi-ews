@@ -117,3 +117,9 @@ QList<EwsPropertyField> EwsItemHandler::flagsProperties()
 {
     return {EwsResource::flagsProperty};
 }
+
+QList<EwsPropertyField> EwsItemHandler::tagsProperties()
+{
+    return {EwsResource::tagsProperty};
+}
+
