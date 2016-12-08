@@ -206,6 +206,7 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
 
     bool changed = false;
 
+    QList<QByteArray> tagIds = mTagData.keys();
     Q_FOREACH(const Tag &tag, tags) {
         QByteArray serialized = serializeTag(tag);
         auto it = mTagData.find(tag.gid());
@@ -219,6 +220,9 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
             mTagData.insert(tag.gid(), serialized);
             changed = true;
         }
+        if (it != mTagData.end()) {
+        	tagIds.removeOne(tag.gid());
+        }
         if (!mTagIdMap.contains(tag.id())) {
             mTagIdMap.insert(tag.id(), tag.gid());
             QString name;
@@ -231,6 +235,10 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
                 mTagNameMap.insert(tag.id(), tag.name());
             }
         }
+    }
+
+    Q_FOREACH(const QByteArray &tagId, tagIds) {
+        mTagData.remove(tagId);
     }
 
     if (changed) {
