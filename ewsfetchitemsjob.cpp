@@ -267,6 +267,10 @@ void EwsFetchItemsJob::compareItemLists()
         EwsId id(ewsItem[EwsItemFieldItemId].value<EwsId>());
         QHash<QString, Item>::iterator it = itemHash.find(id.id());
         EwsItemType type = ewsItem.internalType();
+        if (type == EwsItemTypeUnknown) {
+            /* Ignore unknown items. */
+            continue;
+        }
         QString mimeType = EwsItemHandler::itemHandler(type)->mimeType();
         if (it == itemHash.end()) {
             Item item(mimeType);

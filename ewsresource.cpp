@@ -432,7 +432,13 @@ void EwsResource::getItemsRequestFinished(KJob *job)
             cancelTask(QStringLiteral("Item fetch failed - Akonadi item not found for item %s!").arg(id.id()));
             return;
         }
-        if (!EwsItemHandler::itemHandler(ewsItem.internalType())->setItemPayload(*it, ewsItem)) {
+        EwsItemType type = ewsItem.internalType();
+        if (type == EwsItemTypeUnknown) {
+            qWarning() << QStringLiteral("Item fetch failed - Unknown item type for item %s!").arg(id.id());
+            cancelTask(QStringLiteral("Item fetch failed - Unknown item type for item %s!").arg(id.id()));
+            return;
+        }
+        if (!EwsItemHandler::itemHandler(type)->setItemPayload(*it, ewsItem)) {
             cancelTask(QStringLiteral("Failed to fetch item payload."));
             return;
         }
@@ -481,7 +487,13 @@ void EwsResource::getItemRequestFinished(KJob *job)
         return;
     }
     const EwsItem &ewsItem = resp.item();
-    if (!EwsItemHandler::itemHandler(ewsItem.internalType())->setItemPayload(item, ewsItem)) {
+    EwsItemType type = ewsItem.internalType();
+    if (type == EwsItemTypeUnknown) {
+        qWarning() << QStringLiteral("Item fetch failed - Unknown item type!");
+        cancelTask(QStringLiteral("Item fetch failed - Unknown item type!"));
+        return;
+    }
+    if (!EwsItemHandler::itemHandler(type)->setItemPayload(item, ewsItem)) {
         cancelTask(QStringLiteral("Failed to fetch item payload."));
         return;
     }
