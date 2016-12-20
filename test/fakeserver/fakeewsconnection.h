@@ -36,8 +36,6 @@ public:
     FakeEwsConnection(QTcpSocket *sock, const FakeEwsServer::DialogEntry::ReplyCallback replyCallback,
                       QObject *parent);
     virtual ~FakeEwsConnection();
-/*public Q_SLOTS:
-    void sendResponse(const QByteArray &resp, bool closeConn);*/
 private Q_SLOTS:
     void disconnected();
     void dataAvailable();

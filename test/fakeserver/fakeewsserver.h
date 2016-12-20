@@ -51,11 +51,6 @@ public:
     FakeEwsServer(const DialogEntry::List &dialog, DialogEntry::ReplyCallback defaultReplyCallback,
                   QObject *parent);
     virtual ~FakeEwsServer();
-/*Q_SIGNALS:
-    void requestReceived(QByteArray req);*/
-/*public Q_SLOTS:
-    void sendResponse(const QByteArray &resp, bool closeConn = false);
-    void sendError(const QLatin1String &msg, ushort code = 500);*/
 private Q_SLOTS:
     void newConnectionReceived();
     //void connectionClosed(QObject *obj);
