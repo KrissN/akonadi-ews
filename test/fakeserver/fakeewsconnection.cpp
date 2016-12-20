@@ -21,8 +21,7 @@
 
 #include <QtNetwork/QTcpSocket>
 
-#define XML_ERROR_POS(reader, msg, code) \
-    sendError(msg + QStringLiteral(" at character offset %1").arg(reader.characterOffset()), code)
+#include "fakeewsserver_debug.h"
 
 static const QHash<uint, QLatin1String> responseCodes = {
     {200, QLatin1String("OK")},
@@ -39,6 +38,7 @@ FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock,
                                      QObject* parent)
     : QObject(parent), mSock(sock), mReplyCallback(replyCallback), mContentLength(0)
 {
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got new EWS connection.");
     connect(mSock.data(), &QTcpSocket::disconnected, this, &FakeEwsConnection::disconnected);
     connect(mSock.data(), &QTcpSocket::readyRead, this, &FakeEwsConnection::dataAvailable);
     connect(&mDataTimer, &QTimer::timeout, this, &FakeEwsConnection::dataTimeout);
@@ -46,6 +46,7 @@ FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock,
 
 FakeEwsConnection::~FakeEwsConnection()
 {
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Connection closed.");
 }
 
 void FakeEwsConnection::disconnected()
@@ -113,6 +114,7 @@ void FakeEwsConnection::dataAvailable()
 
 void FakeEwsConnection::sendError(const QString &msg, ushort code)
 {
+    qCWarningNC(EWSFAKE_LOG) << msg;
     QLatin1String codeStr = responseCodes.value(code);
     QByteArray response(QStringLiteral("HTTP/1.1 %1 %2\nConnection: close\n\n").arg(code).arg(codeStr).toLatin1());
     response += msg.toLatin1();
@@ -122,136 +124,6 @@ void FakeEwsConnection::sendError(const QString &msg, ushort code)
 
 void FakeEwsConnection::dataTimeout()
 {
+    qCWarning(EWSFAKE_LOG) << QLatin1String("Timeout waiting for content.");
     sendError(QLatin1String("Timeout waiting for content."));
 }
-
-
-
-
-/*
-
-
-void FakeEwsConnection::dataReadyRead()
-{
-    QByteArray line = mSock->readLine();
-    QList<QByteArray> tokens = line.split(' ');
-    uint contentLength = 0;
-
-    if (tokens.size() < 3) {
-        sendError(QLatin1String("Invalid request header"));
-        return;
-    }
-    if (tokens.at(0) != "POST") {
-        sendError(QLatin1String("Expected POST request"));
-        return;
-    }
-    if (tokens.at(1) != "/EWS/Exchange.asmx") {
-        sendError(QLatin1String("Invalid EWS URL"));
-        return;
-    }
-
-    do {
-        line = mSock->readLine().trimmed();
-        if (line.toLower().startsWith("content-length: ")) {
-            bool ok;
-            contentLength = line.mid(16).toUInt(&ok);
-            if (!ok) {
-                sendError(QLatin1String("Failed to parse content length."));
-                return;
-            }
-        }
-    } while (!line.isEmpty());
-
-    if (contentLength == 0) {
-        sendError(QLatin1String("Expected content"));
-        return;
-    }
-
-    QByteArray content = mSock->read(contentLength);
-
-    parseRequest(content);
-}
-
-void FakeEwsConnection::parseRequest(const QByteArray &req)
-{
-    QXmlStreamReader reader(req);
-
-    if (!reader.readNextStartElement() || !SOAP_ELEMENT(reader, "Envelope")) {
-        XML_ERROR_POS(reader, QStringLiteral("Expected SOAP Envelope element '%1'").arg(reader.name().toString()), 400);
-        return;
-    }
-
-    if (!reader.readNextStartElement()) {
-        XML_ERROR_POS(reader, QStringLiteral("Expected element inside SOAP Envelope"), 400);
-        return;
-    }
-
-    if (SOAP_ELEMENT(reader, "Header")) {
-        if (reader.readNextStartElement()) {
-            if (EWS_TYPES_ELEMENT(reader, "ServerVersion")) {
-                FakeEwsServerVersion ver(reader);
-
-                if (!ver.isValid()) {
-                    XML_ERROR_POS(reader, QStringLiteral("Invalid server version"), 400);
-                    return;
-                } else if (ver > mServerVersion) {
-                    XML_ERROR_POS(reader, QStringLiteral("Unsupported server version"), 400);
-                    return;
-                }
-                mServerVersion = ver;
-            } else {
-                XML_ERROR_POS(reader, QStringLiteral("Unknown header element \"%1\"").arg(reader.name().toString()), 400);
-                return;
-            }
-            reader.skipCurrentElement();
-        }
-        reader.skipCurrentElement();
-    }
-
-    if (!SOAP_ELEMENT(reader, "Body")) {
-        XML_ERROR_POS(reader, QStringLiteral("Unknown element '%1' inside SOAP envelope").arg(reader.name().toString()), 400);
-        return;
-    }
-
-    if (!reader.readNextStartElement()) {
-        XML_ERROR_POS(reader, QStringLiteral("Expected element inside SOAP Body"), 400);
-        return;
-    }
-
-    if (reader.namespaceUri() != ewsMsgNsUri) {
-        XML_ERROR_POS(reader, QStringLiteral("Expected valid EWS request element"), 400);
-        return;
-    }
-
-    FakeEwsAbstractRequest *request = FakeEwsAbstractRequest::createRequest(reader.name().toString(), reader, *this);
-    if (!request) {
-        XML_ERROR_POS(reader, QStringLiteral("Unhandled EWS request '%1'").arg(reader.name().toString()), 400);
-        return;
-    } else {
-        request->processRequest();
-    }
-}
-
-void FakeEwsConnection::sendError(const QString &msg, ushort code)
-{
-    QLatin1String codeStr = responseCodes.value(code);
-    QByteArray response(QStringLiteral("HTTP/1.1 %1 %2\nConnection: close\n\n").arg(code).arg(codeStr).toLatin1());
-    response += msg.toLatin1();
-    mSock->write(response);
-    mSock->disconnectFromHost();
-}
-
-void FakeEwsConnection::sendResponse(const QByteArray &resp, bool closeConn)
-{
-    QByteArray buffer;
-    buffer += "HTTP/1.1 200 OK\n";
-    buffer += "Connection: ";
-    buffer += closeConn ? "close\n" : "keep-alive\n";
-    buffer += "\n";
-    buffer += resp;
-    mSock->write(buffer);
-
-    if (closeConn) {
-        mSock->disconnectFromHost();
-    }
-}*/

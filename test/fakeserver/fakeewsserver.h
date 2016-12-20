@@ -41,6 +41,7 @@ public:
         HttpResponse response;
         ConditionCallback conditionCallback;
         ReplyCallback replyCallback;
+        QString description;
 
         typedef QVector<DialogEntry> List;
     };

@@ -22,21 +22,13 @@
 #include <QtCore/QCoreApplication>
 
 #include "fakeewsconnection.h"
-
-static const QHash<uint, QLatin1String> responseCodes = {
-    {200, QLatin1String("OK")},
-    {400, QLatin1String("Bad Request")},
-    {401, QLatin1String("Unauthorized")},
-    {403, QLatin1String("Forbidden")},
-    {404, QLatin1String("Not Found")},
-    {405, QLatin1String("Method Not Allowed")},
-    {500, QLatin1String("Internal Server Error")}
-};
+#include "fakeewsserver_debug.h"
 
 FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog,
                              DialogEntry::ReplyCallback defaultReplyCallback, QObject *parent)
     : QTcpServer(parent), mDialog(dialog), mDefaultReplyCallback(defaultReplyCallback)
 {
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Starting fake EWS server at 127.0.0.1:") << Port;
     listen(QHostAddress::LocalHost, Port);
 
     connect(this, &QTcpServer::newConnection, this, &FakeEwsServer::newConnectionReceived);
@@ -44,6 +36,7 @@ FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog,
 
 FakeEwsServer::~FakeEwsServer()
 {
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Stopping fake EWS server.");
 }
 
 void FakeEwsServer::newConnectionReceived()
@@ -52,64 +45,48 @@ void FakeEwsServer::newConnectionReceived()
 
     auto replyCallback = std::bind(&FakeEwsServer::parseRequest, this, std::placeholders::_1);
     new FakeEwsConnection(sock, replyCallback, this);
-
-    //connect(sock, &QObject::destroyed, this, &FakeEwsServer::connectionClosed);*/
-    //connect(mConnection, &FakeEwsConnection::requestReceived, this, &FakeEwsServer::requestReceived);*/
-/*    connect(sock, &QTcpSocket::readyRead, this, [this, sock]() {
-        FakeEwsServer::dataAvailable(sock);
-    });*/
 }
 
 FakeEwsServer::DialogEntry::HttpResponse FakeEwsServer::parseRequest(const QString &content)
 {
-    //qDebug() << "Got request" << content;
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got request: ") << content;
+
     Q_FOREACH(const DialogEntry &de, mDialog) {
         if ((!de.expected.isNull() && content == de.expected) ||
             (de.expectedRe.isValid() && de.expectedRe.match(content).hasMatch())) {
-            //qDebug() << "Matched entry";
+            if (EWSFAKE_LOG().isDebugEnabled()) {
+                if (!de.expected.isNull() && content == de.expected) {
+                    qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Matched entry \"") << de.description
+                            << QStringLiteral("\" by expected string");
+                } else {
+                    qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Matched entry \"") << de.description
+                            << QStringLiteral("\" by regular expression");
+                }
+            }
             if (de.conditionCallback && !de.conditionCallback(content)) {
-                //qDebug() << "Condition callback returned false - skipping";
+                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Condition callback for entry \"")
+                        << de.description << QStringLiteral("\" returned false - skipping");
                 continue;
             }
             if (de.replyCallback) {
-                //qDebug() << "Found reply callback - calling";
-                return de.replyCallback(content);
+                auto resp = de.replyCallback(content);
+                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from callback ")
+                        << resp.second << QStringLiteral(": ") << resp.first;
+                return resp;
             }
-            //qDebug() << "Returning static response";
+            qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning static response ")
+                    << de.response.second << QStringLiteral(": ") << de.response.first;
             return de.response;
         }
     }
 
     if (mDefaultReplyCallback) {
-        return mDefaultReplyCallback(content);
+        auto resp = mDefaultReplyCallback(content);
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
+                << resp.second << QStringLiteral(": ") << resp.first;
+        return resp;
     } else {
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
         return { QStringLiteral(""), 500 };
     }
 }
-
-/*void FakeEwsServer::connectionClosed(QObject *obj)
-{
-    if (mConnection == qobject_cast<FakeEwsConnection*>(obj)) {
-        mConnection = Q_NULLPTR;
-    }
-}
-
-void FakeEwsServer::sendResponse(const QByteArray &resp, bool closeConn)
-{
-    if (mConnection) {
-        mConnection->sendResponse(resp, closeConn);
-    }
-    else {
-        qWarning() << QStringLiteral("No server connection active.");
-    }
-}
-
-void FakeEwsServer::sendError(const QLatin1String &msg, ushort code)
-{
-    if (mConnection) {
-        mConnection->sendError(msg, code);
-    }
-    else {
-        qWarning() << QStringLiteral("No server connection active.");
-    }
-}*/

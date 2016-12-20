@@ -170,7 +170,8 @@ void UtEwsFakeSrvTest::simpleResponse()
             QRegularExpression(),
             {QStringLiteral("sampleresp1"), 200},
             FakeEwsServer::DialogEntry::ConditionCallback(),
-            FakeEwsServer::DialogEntry::ReplyCallback()
+            FakeEwsServer::DialogEntry::ReplyCallback(),
+            QStringLiteral("Sample request 1")
         }
     };
 
@@ -194,7 +195,8 @@ void UtEwsFakeSrvTest::callbackResponse()
             FakeEwsServer::DialogEntry::ConditionCallback(),
             [](const QString &) {
                 return FakeEwsServer::DialogEntry::HttpResponse("sampleresp2", 200);
-            }
+            },
+            QStringLiteral("Sample request 1")
         }
     };
 
@@ -216,7 +218,8 @@ void UtEwsFakeSrvTest::regexpResponse()
             QRegularExpression(QStringLiteral("samplereq[24]")),
             {QStringLiteral("sampleresp1"), 200},
             FakeEwsServer::DialogEntry::ConditionCallback(),
-            FakeEwsServer::DialogEntry::ReplyCallback()
+            FakeEwsServer::DialogEntry::ReplyCallback(),
+            QStringLiteral("Sample request 1")
         }
     };
 
@@ -250,7 +253,8 @@ void UtEwsFakeSrvTest::conditionalResponse()
             [](const QString& req) {
                 return (req[9] == '1' || req[9] == '3');
             },
-            FakeEwsServer::DialogEntry::ReplyCallback()
+            FakeEwsServer::DialogEntry::ReplyCallback(),
+            QStringLiteral("Sample request 1")
         },
         {
             QString(),
@@ -259,7 +263,8 @@ void UtEwsFakeSrvTest::conditionalResponse()
             [](const QString& req) {
                 return (req[9] == '2' || req[9] == '3');
             },
-            FakeEwsServer::DialogEntry::ReplyCallback()
+            FakeEwsServer::DialogEntry::ReplyCallback(),
+            QStringLiteral("Sample request 2")
         }
     };
 
