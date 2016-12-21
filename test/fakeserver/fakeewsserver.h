@@ -26,7 +26,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 
-class __attribute__((visibility("default"))) FakeEwsServer : public QTcpServer
+class Q_DECL_EXPORT FakeEwsServer : public QTcpServer
 {
     Q_OBJECT
 public:
