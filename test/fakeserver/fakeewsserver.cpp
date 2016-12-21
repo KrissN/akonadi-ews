@@ -50,46 +50,13 @@ void FakeEwsServer::newConnectionReceived()
     new FakeEwsConnection(sock, this);
 }
 
-FakeEwsServer::DialogEntry::HttpResponse FakeEwsServer::parseRequest(const QString &content)
+const FakeEwsServer::DialogEntry::List FakeEwsServer::dialog() const
 {
-    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got request: ") << content;
-
-    Q_FOREACH(const DialogEntry &de, mDialog) {
-        if ((!de.expected.isNull() && content == de.expected) ||
-            (de.expectedRe.isValid() && de.expectedRe.match(content).hasMatch())) {
-            if (EWSFAKE_LOG().isDebugEnabled()) {
-                if (!de.expected.isNull() && content == de.expected) {
-                    qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Matched entry \"") << de.description
-                            << QStringLiteral("\" by expected string");
-                } else {
-                    qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Matched entry \"") << de.description
-                            << QStringLiteral("\" by regular expression");
-                }
-            }
-            if (de.conditionCallback && !de.conditionCallback(content)) {
-                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Condition callback for entry \"")
-                        << de.description << QStringLiteral("\" returned false - skipping");
-                continue;
-            }
-            if (de.replyCallback) {
-                auto resp = de.replyCallback(content);
-                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from callback ")
-                        << resp.second << QStringLiteral(": ") << resp.first;
-                return resp;
-            }
-            qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning static response ")
-                    << de.response.second << QStringLiteral(": ") << de.response.first;
-            return de.response;
-        }
-    }
-
-    if (mDefaultReplyCallback) {
-        auto resp = mDefaultReplyCallback(content);
-        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
-                << resp.second << QStringLiteral(": ") << resp.first;
-        return resp;
-    } else {
-        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
-        return { QStringLiteral(""), 500 };
-    }
+    return mDialog;
 }
+
+const FakeEwsServer::DialogEntry::ReplyCallback FakeEwsServer::defaultReplyCallback() const
+{
+    return mDefaultReplyCallback;
+}
+

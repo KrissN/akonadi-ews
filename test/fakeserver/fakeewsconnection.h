@@ -27,7 +27,6 @@
 #include "fakeewsserver.h"
 
 class QTcpSocket;
-class FakeEwsServer;
 
 class FakeEwsConnection : public QObject
 {
@@ -42,6 +41,7 @@ private Q_SLOTS:
     void dataTimeout();
 private:
     void sendError(const QString &msg, ushort code = 500);
+    FakeEwsServer::DialogEntry::HttpResponse parseRequest(const QString &content);
 
     QPointer<QTcpSocket> mSock;
     uint mContentLength;

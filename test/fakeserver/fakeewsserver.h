@@ -59,7 +59,8 @@ private Q_SLOTS:
 private:
     void dataAvailable(QTcpSocket *sock);
     void sendError(QTcpSocket *sock, const QString &msg, ushort code = 500);
-    DialogEntry::HttpResponse parseRequest(const QString &content);
+    const DialogEntry::List dialog() const;
+    const DialogEntry::ReplyCallback defaultReplyCallback() const;
 
     const DialogEntry::List &mDialog;
     DialogEntry::ReplyCallback mDefaultReplyCallback;
