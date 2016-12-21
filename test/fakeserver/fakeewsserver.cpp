@@ -47,8 +47,7 @@ void FakeEwsServer::newConnectionReceived()
 {
     QTcpSocket *sock = nextPendingConnection();
 
-    auto replyCallback = std::bind(&FakeEwsServer::parseRequest, this, std::placeholders::_1);
-    new FakeEwsConnection(sock, replyCallback, this);
+    new FakeEwsConnection(sock, this);
 }
 
 FakeEwsServer::DialogEntry::HttpResponse FakeEwsServer::parseRequest(const QString &content)

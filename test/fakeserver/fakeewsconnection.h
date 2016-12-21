@@ -27,14 +27,14 @@
 #include "fakeewsserver.h"
 
 class QTcpSocket;
+class FakeEwsServer;
 
 class FakeEwsConnection : public QObject
 {
     Q_OBJECT
 public:
 
-    FakeEwsConnection(QTcpSocket *sock, const FakeEwsServer::DialogEntry::ReplyCallback replyCallback,
-                      QObject *parent);
+    FakeEwsConnection(QTcpSocket *sock, FakeEwsServer *parent);
     virtual ~FakeEwsConnection();
 private Q_SLOTS:
     void disconnected();
@@ -44,7 +44,6 @@ private:
     void sendError(const QString &msg, ushort code = 500);
 
     QPointer<QTcpSocket> mSock;
-    const FakeEwsServer::DialogEntry::ReplyCallback mReplyCallback;
     uint mContentLength;
     QByteArray mContent;
     QTimer mDataTimer;

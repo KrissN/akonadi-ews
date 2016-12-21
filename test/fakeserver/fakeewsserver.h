@@ -26,6 +26,8 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 
+class FakeEwsConnection;
+
 class Q_DECL_EXPORT FakeEwsServer : public QTcpServer
 {
     Q_OBJECT
@@ -61,6 +63,8 @@ private:
 
     const DialogEntry::List &mDialog;
     DialogEntry::ReplyCallback mDefaultReplyCallback;
+
+    friend class FakeEwsConnection;
 };
 
 #endif

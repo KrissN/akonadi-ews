@@ -21,6 +21,7 @@
 
 #include <QtNetwork/QTcpSocket>
 
+#include "fakeewsserver.h"
 #include "fakeewsserver_debug.h"
 
 static const QHash<uint, QLatin1String> responseCodes = {
@@ -33,10 +34,8 @@ static const QHash<uint, QLatin1String> responseCodes = {
     {500, QLatin1String("Internal Server Error")}
 };
 
-FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock,
-                                     const FakeEwsServer::DialogEntry::ReplyCallback replyCallback,
-                                     QObject* parent)
-    : QObject(parent), mSock(sock), mReplyCallback(replyCallback), mContentLength(0), mKeepAlive(false)
+FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock, FakeEwsServer* parent)
+    : QObject(parent), mSock(sock), mContentLength(0), mKeepAlive(false)
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got new EWS connection.");
     connect(mSock.data(), &QTcpSocket::disconnected, this, &FakeEwsConnection::disconnected);
@@ -99,7 +98,8 @@ void FakeEwsConnection::dataAvailable()
     if (mContent.size() >= static_cast<int>(mContentLength)) {
         mDataTimer.stop();
 
-        FakeEwsServer::DialogEntry::HttpResponse resp = mReplyCallback(QString::fromUtf8(mContent));
+        FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
+        FakeEwsServer::DialogEntry::HttpResponse resp = server->parseRequest(QString::fromUtf8(mContent));
 
         QByteArray buffer;
         QLatin1String codeStr = responseCodes.value(resp.second);
