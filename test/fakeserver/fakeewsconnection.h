@@ -48,6 +48,7 @@ private:
     uint mContentLength;
     QByteArray mContent;
     QTimer mDataTimer;
+    bool mKeepAlive;
 };
 
 #endif

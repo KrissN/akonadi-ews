@@ -36,7 +36,7 @@ static const QHash<uint, QLatin1String> responseCodes = {
 FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock,
                                      const FakeEwsServer::DialogEntry::ReplyCallback replyCallback,
                                      QObject* parent)
-    : QObject(parent), mSock(sock), mReplyCallback(replyCallback), mContentLength(0)
+    : QObject(parent), mSock(sock), mReplyCallback(replyCallback), mContentLength(0), mKeepAlive(false)
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got new EWS connection.");
     connect(mSock.data(), &QTcpSocket::disconnected, this, &FakeEwsConnection::disconnected);
@@ -59,6 +59,7 @@ void FakeEwsConnection::dataAvailable()
     if (mContentLength == 0) {
         QByteArray line = mSock->readLine();
         QList<QByteArray> tokens = line.split(' ');
+        mKeepAlive = false;
 
         if (tokens.size() < 3) {
             sendError(QLatin1String("Invalid request header"));
@@ -82,6 +83,8 @@ void FakeEwsConnection::dataAvailable()
                     sendError(QLatin1String("Failed to parse content length."));
                     return;
                 }
+            } else if (line.toLower() == "connection: keep-alive") {
+                mKeepAlive = true;
             }
         } while (!line.isEmpty());
 
@@ -100,13 +103,17 @@ void FakeEwsConnection::dataAvailable()
 
         QByteArray buffer;
         QLatin1String codeStr = responseCodes.value(resp.second);
-        buffer += QStringLiteral("HTTP/1.1 %1 %2\n").arg(resp.second).arg(codeStr).toLatin1();
-        buffer += "Connection: close\n";
-        buffer += "\n";
-        buffer += resp.first.toUtf8();
+        QByteArray respContent = resp.first.toUtf8();
+        buffer += QStringLiteral("HTTP/1.1 %1 %2\r\n").arg(resp.second).arg(codeStr).toLatin1();
+        buffer += mKeepAlive ? "Connection: Keep-Alive\n" : "Connection: Close\r\n";
+        buffer += "Content-Length: " + QByteArray::number(respContent.size()) + "\r\n";
+        buffer += "\r\n";
+        buffer += respContent;
         mSock->write(buffer);
 
-        mSock->disconnectFromHost();
+        if (!mKeepAlive) {
+            mSock->disconnectFromHost();
+        }
     } else {
         mDataTimer.start(3000);
     }
