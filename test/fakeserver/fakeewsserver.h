@@ -48,9 +48,9 @@ public:
 
     static Q_CONSTEXPR ushort Port = 13548;
 
-    FakeEwsServer(const DialogEntry::List &dialog, DialogEntry::ReplyCallback defaultReplyCallback,
-                  QObject *parent);
+    FakeEwsServer(const DialogEntry::List &dialog, QObject *parent);
     virtual ~FakeEwsServer();
+    void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);
 private Q_SLOTS:
     void newConnectionReceived();
     //void connectionClosed(QObject *obj);

@@ -24,9 +24,8 @@
 #include "fakeewsconnection.h"
 #include "fakeewsserver_debug.h"
 
-FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog,
-                             DialogEntry::ReplyCallback defaultReplyCallback, QObject *parent)
-    : QTcpServer(parent), mDialog(dialog), mDefaultReplyCallback(defaultReplyCallback)
+FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog, QObject *parent)
+    : QTcpServer(parent), mDialog(dialog)
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Starting fake EWS server at 127.0.0.1:") << Port;
     listen(QHostAddress::LocalHost, Port);
@@ -37,6 +36,11 @@ FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog,
 FakeEwsServer::~FakeEwsServer()
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Stopping fake EWS server.");
+}
+
+void FakeEwsServer::setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback)
+{
+    mDefaultReplyCallback = defaultReplyCallback;
 }
 
 void FakeEwsServer::newConnectionReceived()

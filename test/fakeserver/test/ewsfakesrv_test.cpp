@@ -46,8 +46,7 @@ void UtEwsFakeSrvTest::emptyDialog()
 {
     const FakeEwsServer::DialogEntry::List emptyDialog;
 
-    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, FakeEwsServer::DialogEntry::ReplyCallback(),
-                                           this);
+    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, this);
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:13548/EWS/Exchange.asmx"));
@@ -76,8 +75,7 @@ void UtEwsFakeSrvTest::invalidURL()
 {
     const FakeEwsServer::DialogEntry::List emptyDialog;
 
-    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, FakeEwsServer::DialogEntry::ReplyCallback(),
-                                           this);
+    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, this);
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:13548/some/url"));
@@ -106,8 +104,7 @@ void UtEwsFakeSrvTest::invalidMethod()
 {
     const FakeEwsServer::DialogEntry::List emptyDialog;
 
-    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, FakeEwsServer::DialogEntry::ReplyCallback(),
-                                           this);
+    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, this);
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:13548/some/url"));
@@ -135,8 +132,7 @@ void UtEwsFakeSrvTest::emptyRequest()
 {
     const FakeEwsServer::DialogEntry::List emptyDialog;
 
-    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, FakeEwsServer::DialogEntry::ReplyCallback(),
-                                           this);
+    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, this);
 
     auto resp = synchronousHttpReq(QStringLiteral(""));
     QCOMPARE(resp.second, static_cast<ushort>(500));
@@ -149,10 +145,11 @@ void UtEwsFakeSrvTest::defaultCallback()
     const FakeEwsServer::DialogEntry::List emptyDialog;
 
     QString receivedReq;
-    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, [&receivedReq](const QString &req) {
+    FakeEwsServer *srv = new FakeEwsServer(emptyDialog, this);
+    srv->setDefaultReplyCallback([&receivedReq](const QString &req) {
         receivedReq = req;
         return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("testresp"), 200);
-    }, this);
+    });
 
     auto resp = synchronousHttpReq(QStringLiteral("testreq"));
     QCOMPARE(receivedReq, QStringLiteral("testreq"));
@@ -176,7 +173,7 @@ void UtEwsFakeSrvTest::simpleResponse()
     };
 
     QString receivedReq;
-    FakeEwsServer *srv = new FakeEwsServer(dialog, FakeEwsServer::DialogEntry::ReplyCallback(), this);
+    FakeEwsServer *srv = new FakeEwsServer(dialog, this);
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
@@ -201,7 +198,7 @@ void UtEwsFakeSrvTest::callbackResponse()
     };
 
     QString receivedReq;
-    FakeEwsServer *srv = new FakeEwsServer(dialog, FakeEwsServer::DialogEntry::ReplyCallback(), this);
+    FakeEwsServer *srv = new FakeEwsServer(dialog, this);
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
     QCOMPARE(resp.first, QStringLiteral("sampleresp2"));
@@ -224,7 +221,7 @@ void UtEwsFakeSrvTest::regexpResponse()
     };
 
     QString receivedReq;
-    FakeEwsServer *srv = new FakeEwsServer(dialog, FakeEwsServer::DialogEntry::ReplyCallback(), this);
+    FakeEwsServer *srv = new FakeEwsServer(dialog, this);
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
     QCOMPARE(resp.second, static_cast<ushort>(500));
@@ -269,7 +266,7 @@ void UtEwsFakeSrvTest::conditionalResponse()
     };
 
     QString receivedReq;
-    FakeEwsServer *srv = new FakeEwsServer(dialog, FakeEwsServer::DialogEntry::ReplyCallback(), this);
+    FakeEwsServer *srv = new FakeEwsServer(dialog, this);
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
