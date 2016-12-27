@@ -188,7 +188,7 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
 
 FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsRequest(const QString &content)
 {
-    const QRegularExpression re("<?xml .*<\\w*:?GetEvents[ >].*<\\w*:?SubscriptionId>(?<subid>[^<]*)</\\w*:?SubscriptionId><\\w*:?Watermark>(?<watermark>[^<]*)</\\w*:?Watermark></\\w*:?GetEvents>.*");
+    const QRegularExpression re(QStringLiteral("<?xml .*<\\w*:?GetEvents[ >].*<\\w*:?SubscriptionId>(?<subid>[^<]*)</\\w*:?SubscriptionId><\\w*:?Watermark>(?<watermark>[^<]*)</\\w*:?Watermark></\\w*:?GetEvents>.*"));
 
     QRegularExpressionMatch match = re.match(content);
     if (!match.hasMatch() || match.hasPartialMatch()) {
