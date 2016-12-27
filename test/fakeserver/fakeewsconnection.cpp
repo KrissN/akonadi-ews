@@ -139,6 +139,7 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got request: ") << content;
 
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
+    FakeEwsServer::DialogEntry::HttpResponse resp = FakeEwsServer::EmptyResponse;
     Q_FOREACH(const FakeEwsServer::DialogEntry &de, server->dialog()) {
         if ((!de.expected.isNull() && content == de.expected) ||
             (de.expectedRe.isValid() && de.expectedRe.match(content).hasMatch())) {
@@ -151,32 +152,33 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
                             << QStringLiteral("\" by regular expression");
                 }
             }
-            if (de.conditionCallback && !de.conditionCallback(content)) {
-                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Condition callback for entry \"")
-                        << de.description << QStringLiteral("\" returned false - skipping");
-                continue;
-            }
             if (de.replyCallback) {
-                auto resp = de.replyCallback(content);
+                resp = de.replyCallback(content);
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from callback ")
                         << resp.second << QStringLiteral(": ") << resp.first;
-                return resp;
+            } else {
+                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning static response ")
+                        << de.response.second << QStringLiteral(": ") << de.response.first;
+                resp = de.response;
             }
-            qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning static response ")
-                    << de.response.second << QStringLiteral(": ") << de.response.first;
-            return de.response;
+            if (resp != FakeEwsServer::EmptyResponse) {
+                break;
+            }
         }
     }
 
     auto defaultReplyCallback = server->defaultReplyCallback();
-    if (defaultReplyCallback) {
-        auto resp = defaultReplyCallback(content);
+    if (defaultReplyCallback && (resp == FakeEwsServer::EmptyResponse)) {
+        resp = defaultReplyCallback(content);
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
                 << resp.second << QStringLiteral(": ") << resp.first;
-        return resp;
-    } else {
-        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
-        return { QStringLiteral(""), 500 };
     }
+
+    if (resp == FakeEwsServer::EmptyResponse) {
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
+        resp = { QStringLiteral(""), 500 };
+    }
+
+    return resp;
 }
 

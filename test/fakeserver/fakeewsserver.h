@@ -36,12 +36,10 @@ public:
     {
     public:
         typedef QPair<QString, ushort> HttpResponse;
-        typedef std::function<bool (const QString &)> ConditionCallback;
         typedef std::function<HttpResponse (const QString &)> ReplyCallback;
         QString expected;
         QRegularExpression expectedRe;
         HttpResponse response;
-        ConditionCallback conditionCallback;
         ReplyCallback replyCallback;
         QString description;
 
@@ -49,6 +47,7 @@ public:
     };
 
     static Q_CONSTEXPR ushort Port = 13548;
+    static const DialogEntry::HttpResponse EmptyResponse;
 
     FakeEwsServer(const DialogEntry::List &dialog, QObject *parent);
     virtual ~FakeEwsServer();

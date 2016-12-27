@@ -24,6 +24,8 @@
 #include "fakeewsconnection.h"
 #include "fakeewsserver_debug.h"
 
+const FakeEwsServer::DialogEntry::HttpResponse FakeEwsServer::EmptyResponse = {QString(), 0};
+
 FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog, QObject *parent)
     : QTcpServer(parent), mDialog(dialog)
 {

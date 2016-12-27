@@ -156,7 +156,6 @@ void UtEwsFakeSrvTest::simpleResponse()
             QStringLiteral("samplereq1"),
             QRegularExpression(),
             {QStringLiteral("sampleresp1"), 200},
-            FakeEwsServer::DialogEntry::ConditionCallback(),
             FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 1")
         }
@@ -177,7 +176,6 @@ void UtEwsFakeSrvTest::callbackResponse()
             QStringLiteral("samplereq1"),
             QRegularExpression(),
             {},
-            FakeEwsServer::DialogEntry::ConditionCallback(),
             [](const QString &) {
                 return FakeEwsServer::DialogEntry::HttpResponse("sampleresp2", 200);
             },
@@ -200,7 +198,6 @@ void UtEwsFakeSrvTest::regexpResponse()
             QString(),
             QRegularExpression(QStringLiteral("samplereq[24]")),
             {QStringLiteral("sampleresp1"), 200},
-            FakeEwsServer::DialogEntry::ConditionCallback(),
             FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 1")
         }
@@ -230,21 +227,25 @@ void UtEwsFakeSrvTest::conditionalResponse()
         {
             QString(),
             QRegularExpression("samplereq[0-9]"),
-            {QStringLiteral("sampleresp1"), 200},
+            FakeEwsServer::EmptyResponse,
             [](const QString& req) {
-                return (req[9] == '1' || req[9] == '3');
+                if (req[9] == '1' || req[9] == '3')
+                    return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("sampleresp1"), 200);
+                else
+                    return FakeEwsServer::EmptyResponse;
             },
-            FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 1")
         },
         {
             QString(),
             QRegularExpression("samplereq[0-9]"),
-            {QStringLiteral("sampleresp2"), 200},
+            FakeEwsServer::EmptyResponse,
             [](const QString& req) {
-                return (req[9] == '2' || req[9] == '3');
+            if (req[9] == '2' || req[9] == '3')
+                return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("sampleresp2"), 200);
+            else
+                return FakeEwsServer::EmptyResponse;
             },
-            FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 2")
         }
     };
