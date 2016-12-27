@@ -381,6 +381,198 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "</m:GetEventsResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>");
+
+    QTest::newRow("valid request (namespaced)")
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
+                "<soap:Body>"
+                "<m:GetEvents>"
+                "<m:SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</m:SubscriptionId>"
+                "<m:Watermark>AAAAAMAGAAAAAAAAAQ==</m:Watermark>"
+                "</m:GetEvents>"
+                "</soap:Body>"
+                "</soap:Envelope>\"")
+        << (QStringList()
+            << QStringLiteral("<NewMailEvent><Watermark>AAAAAM4GAAAAAAAAAQ==</Watermark>"
+                    "<TimeStamp>2006-08-22T00:36:29Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHR\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>")
+            << QStringLiteral("<NewMailEvent><Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
+                    "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>"))
+        << static_cast<ushort>(200)
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<m:GetEventsResponse xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<m:ResponseMessages>"
+                "<m:GetEventsResponseMessage ResponseClass=\"Success\">"
+                "<m:ResponseCode>NoError</m:ResponseCode><m:Notification>"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>"
+                "<PreviousWatermark>AAAAAMAGAAAAAAAAAQ==<PreviousWatermark>"
+                "<MoreEvents>false<MoreEvents>"
+                "<NewMailEvent>"
+                "<Watermark>AAAAAM4GAAAAAAAAAQ==</Watermark>"
+                "<TimeStamp>2006-08-22T00:36:29Z</TimeStamp>"
+                "<ItemId Id=\"AQApAHR\" ChangeKey=\"CQAAAA==\" />"
+                "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                "</NewMailEvent>"
+                "<NewMailEvent>"
+                "<Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
+                "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                "</NewMailEvent>"
+                "</m:Notification>"
+                "</m:GetEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</m:GetEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
+
+    QTest::newRow("invalid request (missing subscription id)")
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Body>"
+                "<GetEvents xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
+                "<SubscriptionId></SubscriptionId>"
+                "<Watermark>AAAAAMAGAAAAAAAAAQ==</Watermark>"
+                "</GetEvents>"
+                "</soap:Body>"
+                "</soap:Envelope>\"")
+        << (QStringList()
+            << QStringLiteral("<NewMailEvent><Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
+                    "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>"))
+        << static_cast<ushort>(200)
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<m:GetEventsResponse>"
+                "<m:ResponseMessages>"
+                "<m:GetEventsResponseMessage ResponseClass=\"Error\">"
+                "<m:MessageText>Missing subscription id or watermark.</m:MessageText>"
+                "<m:ResponseCode>ErrorInvalidPullSubscriptionId</m:ResponseCode>"
+                "<m:DescriptiveLinkKey>0</m:DescriptiveLinkKey>"
+                "</m:GetEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</m:GetEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
+
+    QTest::newRow("invalid request (missing watermark)")
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Body>"
+                "<GetEvents xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</SubscriptionId>"
+                "<Watermark></Watermark>"
+                "</GetEvents>"
+                "</soap:Body>"
+                "</soap:Envelope>\"")
+        << (QStringList()
+            << QStringLiteral("<NewMailEvent><Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
+                    "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>"))
+        << static_cast<ushort>(200)
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<m:GetEventsResponse>"
+                "<m:ResponseMessages>"
+                "<m:GetEventsResponseMessage ResponseClass=\"Error\">"
+                "<m:MessageText>Missing subscription id or watermark.</m:MessageText>"
+                "<m:ResponseCode>ErrorInvalidPullSubscriptionId</m:ResponseCode>"
+                "<m:DescriptiveLinkKey>0</m:DescriptiveLinkKey>"
+                "</m:GetEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</m:GetEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
+
+    QTest::newRow("valid request (no events)")
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Body>"
+                "<GetEvents xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</SubscriptionId>"
+                "<Watermark>AAAAAMAGAAAAAAAAAQ==</Watermark>"
+                "</GetEvents>"
+                "</soap:Body>"
+                "</soap:Envelope>\"")
+        << QStringList()
+        << static_cast<ushort>(200)
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<m:GetEventsResponse xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<m:ResponseMessages>"
+                "<m:GetEventsResponseMessage ResponseClass=\"Success\">"
+                "<m:ResponseCode>NoError</m:ResponseCode><m:Notification>"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>"
+                "<PreviousWatermark>AAAAAMAGAAAAAAAAAQ==<PreviousWatermark>"
+                "<MoreEvents>false<MoreEvents>"
+                "</m:Notification>"
+                "</m:GetEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</m:GetEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
+
+    QTest::newRow("invalid request (not a GetEvents request)")
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Body>"
+                "<m:GetStreamingEvents>"
+                "<m:SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</m:SubscriptionId>"
+                "<m:ConnectionTimeout>30</m:ConnectionTimeout>"
+                "</m:GetStreamingEvents>"
+                "</soap:Body>"
+                "</soap:Envelope>\"")
+        << QStringList()
+        << static_cast<ushort>(500)
+        << QString();
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content)
