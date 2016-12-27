@@ -349,18 +349,17 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
         << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
                 "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
                 "<soap:Header>"
-                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" "
-                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"/>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
                 "</soap:Header>"
                 "<soap:Body>"
-                "<GetEventsResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
-                "xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<m:GetEventsResponse xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
                 "<m:ResponseMessages>"
                 "<m:GetEventsResponseMessage ResponseClass=\"Success\">"
-                "<m:ResponseCode>NoError</m:ResponseCode>"
-                "<m:Notification>"
+                "<m:ResponseCode>NoError</m:ResponseCode><m:Notification>"
                 "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>"
                 "<PreviousWatermark>AAAAAMAGAAAAAAAAAQ==<PreviousWatermark>"
                 "<MoreEvents>false<MoreEvents>"
@@ -379,7 +378,9 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "</m:Notification>"
                 "</m:GetEventsResponseMessage>"
                 "</m:ResponseMessages>"
-                "</GetEventsResponse></soap:Body></soap:Envelope>");
+                "</m:GetEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content)
