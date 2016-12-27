@@ -192,8 +192,11 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsReque
 
     QRegularExpressionMatch match = re.match(content);
     if (!match.hasMatch() || match.hasPartialMatch()) {
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Not a valid GetEvents request.");
         return FakeEwsServer::EmptyResponse;
     }
+
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got valid GetEvents request.");
 
     QString resp = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
             "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
@@ -216,7 +219,9 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsReque
     resp += QStringLiteral("<MoreEvents>false<MoreEvents>");
 
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
-    Q_FOREACH(const QString &eventXml, server->retrieveEventsXml()) {
+    const QStringList events = server->retrieveEventsXml();
+    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning %1 events.").arg(events.size());
+    Q_FOREACH(const QString &eventXml, events) {
         resp += eventXml;
     }
 
