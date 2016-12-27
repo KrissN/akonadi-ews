@@ -214,6 +214,32 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsReque
             "<m:ResponseCode>NoError</m:ResponseCode>"
             "<m:Notification>");
 
+    if (match.captured("subid").isEmpty() || match.captured("watermark").isEmpty()) {
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Missing subscription id or watermark.");
+        const QString errorResp = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<m:GetEventsResponse>"
+                "<m:ResponseMessages>"
+                "<m:GetEventsResponseMessage ResponseClass=\"Error\">"
+                "<m:MessageText>Missing subscription id or watermark.</m:MessageText>"
+                "<m:ResponseCode>ErrorInvalidPullSubscriptionId</m:ResponseCode>"
+                "<m:DescriptiveLinkKey>0</m:DescriptiveLinkKey>"
+                "</m:GetEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</m:GetEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
+        return {errorResp, 200};
+    }
+
     resp += QStringLiteral("<SubscriptionId>") + match.captured("subid") + QStringLiteral("<SubscriptionId>");
     resp += QStringLiteral("<PreviousWatermark>") + match.captured("watermark") + QStringLiteral("<PreviousWatermark>");
     resp += QStringLiteral("<MoreEvents>false<MoreEvents>");
