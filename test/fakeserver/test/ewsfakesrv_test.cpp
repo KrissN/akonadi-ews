@@ -38,6 +38,7 @@ private Q_SLOTS:
     void callbackResponse();
     void regexpResponse();
     void conditionalResponse();
+    void emptyResponse();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content);
 };
@@ -267,6 +268,30 @@ void UtEwsFakeSrvTest::conditionalResponse()
 
     resp = synchronousHttpReq(QStringLiteral("samplereq4"));
     QCOMPARE(resp.second, static_cast<ushort>(500));
+}
+
+void UtEwsFakeSrvTest::emptyResponse()
+{
+    bool callbackCalled = false;
+    const FakeEwsServer::DialogEntry::List dialog = {
+        {
+            QStringLiteral("samplereq1"),
+            QRegularExpression(),
+            FakeEwsServer::EmptyResponse,
+            [&callbackCalled](const QString &) {
+                callbackCalled = true;
+                return FakeEwsServer::EmptyResponse;
+            },
+            QStringLiteral("Sample request 1")
+        }
+    };
+
+    QString receivedReq;
+    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(dialog, this));
+
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
+    QCOMPARE(resp.second, static_cast<ushort>(500));
+    QCOMPARE(callbackCalled, true);
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content)
