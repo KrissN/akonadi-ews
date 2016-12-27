@@ -42,6 +42,7 @@ private Q_SLOTS:
 private:
     void sendError(const QString &msg, ushort code = 500);
     FakeEwsServer::DialogEntry::HttpResponse parseRequest(const QString &content);
+    FakeEwsServer::DialogEntry::HttpResponse handleGetEventsRequest(const QString &content);
 
     QPointer<QTcpSocket> mSock;
     uint mContentLength;

@@ -39,6 +39,8 @@ private Q_SLOTS:
     void regexpResponse();
     void conditionalResponse();
     void emptyResponse();
+    void getEventsRequest();
+    void getEventsRequest_data();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content);
 };
@@ -292,6 +294,92 @@ void UtEwsFakeSrvTest::emptyResponse()
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
     QCOMPARE(resp.second, static_cast<ushort>(500));
     QCOMPARE(callbackCalled, true);
+}
+
+void UtEwsFakeSrvTest::getEventsRequest()
+{
+    const FakeEwsServer::DialogEntry::List emptyDialog;
+
+    const QFETCH(QString, request);
+    const QFETCH(QStringList, events);
+    const QFETCH(ushort, responseCode);
+    const QFETCH(QString, response);
+
+    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(emptyDialog, this));
+
+    srv->queueEventsXml(events);
+
+    auto resp = synchronousHttpReq(request);
+    QCOMPARE(resp.second, responseCode);
+    if (responseCode == 200) {
+        QCOMPARE(resp.first, response);
+    }
+}
+
+void UtEwsFakeSrvTest::getEventsRequest_data()
+{
+    QTest::addColumn<QString>("request");
+    QTest::addColumn<QStringList>("events");
+    QTest::addColumn<ushort>("responseCode");
+    QTest::addColumn<QString>("response");
+
+    QTest::newRow("valid request (MSDN)")
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Body>"
+                "<GetEvents xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</SubscriptionId>"
+                "<Watermark>AAAAAMAGAAAAAAAAAQ==</Watermark>"
+                "</GetEvents>"
+                "</soap:Body>"
+                "</soap:Envelope>\"")
+        << (QStringList()
+            << QStringLiteral("<NewMailEvent><Watermark>AAAAAM4GAAAAAAAAAQ==</Watermark>"
+                    "<TimeStamp>2006-08-22T00:36:29Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHR\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>")
+            << QStringLiteral("<NewMailEvent><Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
+                    "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>"))
+        << static_cast<ushort>(200)
+        << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\"/>"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<GetEventsResponse xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<m:ResponseMessages>"
+                "<m:GetEventsResponseMessage ResponseClass=\"Success\">"
+                "<m:ResponseCode>NoError</m:ResponseCode>"
+                "<m:Notification>"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>"
+                "<PreviousWatermark>AAAAAMAGAAAAAAAAAQ==<PreviousWatermark>"
+                "<MoreEvents>false<MoreEvents>"
+                "<NewMailEvent>"
+                "<Watermark>AAAAAM4GAAAAAAAAAQ==</Watermark>"
+                "<TimeStamp>2006-08-22T00:36:29Z</TimeStamp>"
+                "<ItemId Id=\"AQApAHR\" ChangeKey=\"CQAAAA==\" />"
+                "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                "</NewMailEvent>"
+                "<NewMailEvent>"
+                "<Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
+                "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                "</NewMailEvent>"
+                "</m:Notification>"
+                "</m:GetEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</GetEventsResponse></soap:Body></soap:Envelope>");
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content)

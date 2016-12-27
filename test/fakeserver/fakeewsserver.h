@@ -52,6 +52,7 @@ public:
     FakeEwsServer(const DialogEntry::List &dialog, QObject *parent);
     virtual ~FakeEwsServer();
     void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);
+    void queueEventsXml(const QStringList &events);
 private Q_SLOTS:
     void newConnectionReceived();
     //void connectionClosed(QObject *obj);
@@ -60,9 +61,12 @@ private:
     void sendError(QTcpSocket *sock, const QString &msg, ushort code = 500);
     const DialogEntry::List dialog() const;
     const DialogEntry::ReplyCallback defaultReplyCallback() const;
+    QStringList retrieveEventsXml();
 
     const DialogEntry::List &mDialog;
     DialogEntry::ReplyCallback mDefaultReplyCallback;
+    QStringList mEventQueue;
+    QPointer<FakeEwsConnection> mStreamingEventsConnection;
 
     friend class FakeEwsConnection;
 };

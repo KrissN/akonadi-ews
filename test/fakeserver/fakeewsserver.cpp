@@ -45,6 +45,23 @@ void FakeEwsServer::setDefaultReplyCallback(DialogEntry::ReplyCallback defaultRe
     mDefaultReplyCallback = defaultReplyCallback;
 }
 
+void FakeEwsServer::queueEventsXml(const QStringList &events)
+{
+    mEventQueue += events;
+
+    if (mStreamingEventsConnection) {
+        mStreamingEventsConnection->sendEvents(mEventQueue);
+        mEventQueue.clear();
+    }
+}
+
+QStringList FakeEwsServer::retrieveEventsXml()
+{
+    QStringList events = mEventQueue;
+    mEventQueue.clear();
+    return events;
+}
+
 void FakeEwsServer::newConnectionReceived()
 {
     QTcpSocket *sock = nextPendingConnection();
