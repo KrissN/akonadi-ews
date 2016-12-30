@@ -76,6 +76,7 @@ public:
     const Protocol protocol(ProtocolType type) const { return mProtocols.value(type); };
     const QString &redirectAddr() const { return mRedirectAddr; };
     const QString &redirectUrl() const { return mRedirectUrl; };
+    const QUrl &lastHttpUrl() const { return mLastUrl; };
 
 protected:
     void doSend();
@@ -85,6 +86,7 @@ protected:
 protected Q_SLOTS:
     void requestResult(KJob *job);
     void requestData(KIO::Job *job, const QByteArray &data);
+    void requestRedirect(KIO::Job *job, const QUrl &url);
 private:
     bool readAccount(QXmlStreamReader &reader);
     bool readProtocol(QXmlStreamReader &reader);
@@ -100,6 +102,7 @@ private:
     QString mRedirectUrl;
     QString mRedirectAddr;
     QHash<ProtocolType, Protocol> mProtocols;
+    QUrl mLastUrl;
 };
 
 #endif

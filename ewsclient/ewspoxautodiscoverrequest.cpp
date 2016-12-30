@@ -53,6 +53,7 @@ void EwsPoxAutodiscoverRequest::doSend()
 void EwsPoxAutodiscoverRequest::prepare(const QString body)
 {
     mBody = body;
+    mLastUrl = mUrl;
     KIO::TransferJob *job = KIO::http_post(mUrl, body.toUtf8(), KIO::HideProgressInfo);
     job->addMetaData(QStringLiteral("content-type"), QStringLiteral("text/xml"));
     job->addMetaData(QStringLiteral("no-auth-prompt"), QStringLiteral("true"));
@@ -67,6 +68,7 @@ void EwsPoxAutodiscoverRequest::prepare(const QString body)
     connect(job, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
     connect(job, SIGNAL(data(KIO::Job*, const QByteArray&)),
             SLOT(requestData(KIO::Job*, const QByteArray&)));
+    connect(job, &KIO::TransferJob::redirection, this, &EwsPoxAutodiscoverRequest::requestRedirect);
 
     addSubjob(job);
 }
@@ -269,6 +271,15 @@ bool EwsPoxAutodiscoverRequest::readProtocol(QXmlStreamReader &reader)
     mProtocols[proto.mType] = proto;
 
     return true;
+}
+
+void EwsPoxAutodiscoverRequest::requestRedirect(KIO::Job *job, const QUrl &url)
+{
+    Q_UNUSED(job);
+
+    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got HTTP redirect to: ") << mUrl;
+
+    mLastUrl = url;
 }
 
 void EwsPoxAutodiscoverRequest::dump() const
