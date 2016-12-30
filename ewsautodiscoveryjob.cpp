@@ -86,9 +86,20 @@ void EwsAutodiscoveryJob::sendNextRequest(bool useCreds)
 void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
 {
     qDebug() << "autodiscoveryRequestFinished";
-    if (job->error()) {
+    EwsPoxAutodiscoverRequest *req = qobject_cast<EwsPoxAutodiscoverRequest*>(job);
+    if (!req) {
+        setErrorMsg(QStringLiteral("Invalid EwsPoxAutodiscoverRequest job object"));
+        emitResult();
+    }
 
-        if (job->error() == 401 && !mUsedCreds) {
+    if (req->error()) {
+
+        if (req->error() == 401 && !mUsedCreds) {
+            /* The 401 error may have come from an URL different to the original one (due to
+             * redirections). When the original URL is retried with credentials KIO HTTP will issue
+             * a warning that an authenticated request is made to a host that never asked for it.
+             * To fix this restart the request using the last URL that resulted in the 401 code. */
+            mUrlQueue.head() = req->lastHttpUrl().toString();
             sendNextRequest(true);
             return;
         }
@@ -106,13 +117,6 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
         }
     }
     else {
-        EwsPoxAutodiscoverRequest *req = qobject_cast<EwsPoxAutodiscoverRequest*>(job);
-        if (!req) {
-            setErrorMsg(QStringLiteral("Invalid EwsPoxAutodiscoverRequest job object"));
-            emitResult();
-            return;
-        }
-
         switch (req->action()) {
         case EwsPoxAutodiscoverRequest::Settings:
         {
