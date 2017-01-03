@@ -334,7 +334,7 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "<Watermark>AAAAAMAGAAAAAAAAAQ==</Watermark>"
                 "</GetEvents>"
                 "</soap:Body>"
-                "</soap:Envelope>\"")
+                "</soap:Envelope>")
         << (QStringList()
             << QStringLiteral("<NewMailEvent><Watermark>AAAAAM4GAAAAAAAAAQ==</Watermark>"
                     "<TimeStamp>2006-08-22T00:36:29Z</TimeStamp>"
@@ -394,7 +394,7 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "<m:Watermark>AAAAAMAGAAAAAAAAAQ==</m:Watermark>"
                 "</m:GetEvents>"
                 "</soap:Body>"
-                "</soap:Envelope>\"")
+                "</soap:Envelope>")
         << (QStringList()
             << QStringLiteral("<NewMailEvent><Watermark>AAAAAM4GAAAAAAAAAQ==</Watermark>"
                     "<TimeStamp>2006-08-22T00:36:29Z</TimeStamp>"
@@ -453,7 +453,7 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "<Watermark>AAAAAMAGAAAAAAAAAQ==</Watermark>"
                 "</GetEvents>"
                 "</soap:Body>"
-                "</soap:Envelope>\"")
+                "</soap:Envelope>")
         << (QStringList()
             << QStringLiteral("<NewMailEvent><Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
                     "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
@@ -493,7 +493,7 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "<Watermark></Watermark>"
                 "</GetEvents>"
                 "</soap:Body>"
-                "</soap:Envelope>\"")
+                "</soap:Envelope>")
         << (QStringList()
             << QStringLiteral("<NewMailEvent><Watermark>AAAAAOQGAAAAAAAAAQ==</Watermark>"
                     "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
@@ -533,7 +533,7 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "<Watermark>AAAAAMAGAAAAAAAAAQ==</Watermark>"
                 "</GetEvents>"
                 "</soap:Body>"
-                "</soap:Envelope>\"")
+                "</soap:Envelope>")
         << QStringList()
         << static_cast<ushort>(200)
         << QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
@@ -570,7 +570,7 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
                 "<m:ConnectionTimeout>30</m:ConnectionTimeout>"
                 "</m:GetStreamingEvents>"
                 "</soap:Body>"
-                "</soap:Envelope>\"")
+                "</soap:Envelope>")
         << QStringList()
         << static_cast<ushort>(500)
         << QString();
