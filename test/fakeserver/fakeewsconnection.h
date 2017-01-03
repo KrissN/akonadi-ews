@@ -35,20 +35,30 @@ public:
 
     FakeEwsConnection(QTcpSocket *sock, FakeEwsServer *parent);
     virtual ~FakeEwsConnection();
+    void sendEvents(const QStringList &events);
 private Q_SLOTS:
     void disconnected();
     void dataAvailable();
     void dataTimeout();
+    void streamingRequestTimeout();
+    void streamingRequestHeartbeat();
+Q_SIGNALS:
+    void streamingRequestStarted(FakeEwsConnection *conn);
 private:
     void sendError(const QString &msg, ushort code = 500);
     FakeEwsServer::DialogEntry::HttpResponse parseRequest(const QString &content);
     FakeEwsServer::DialogEntry::HttpResponse handleGetEventsRequest(const QString &content);
+    FakeEwsServer::DialogEntry::HttpResponse handleGetStreamingEventsRequest(const QString &content);
+    QString prepareEventsResponse(const QStringList &events);
 
     QPointer<QTcpSocket> mSock;
     uint mContentLength;
     QByteArray mContent;
     QTimer mDataTimer;
     bool mKeepAlive;
+    QTimer mStreamingRequestHeartbeat;
+    QTimer mStreamingRequestTimeout;
+    QString mStreamingSubId;
 };
 
 #endif

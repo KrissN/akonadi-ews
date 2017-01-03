@@ -66,7 +66,8 @@ void FakeEwsServer::newConnectionReceived()
 {
     QTcpSocket *sock = nextPendingConnection();
 
-    new FakeEwsConnection(sock, this);
+    FakeEwsConnection *conn = new FakeEwsConnection(sock, this);
+    connect(conn, &FakeEwsConnection::streamingRequestStarted, this, &FakeEwsServer::streamingConnectionStarted);
 }
 
 const FakeEwsServer::DialogEntry::List FakeEwsServer::dialog() const
@@ -79,3 +80,12 @@ const FakeEwsServer::DialogEntry::ReplyCallback FakeEwsServer::defaultReplyCallb
     return mDefaultReplyCallback;
 }
 
+void FakeEwsServer::streamingConnectionStarted(FakeEwsConnection *conn)
+{
+    if (mStreamingEventsConnection) {
+        qCWarningNC(EWSFAKE_LOG) << QStringLiteral("Got new streaming connection while existing one is active - terminating existing one");
+        mStreamingEventsConnection->deleteLater();
+    }
+
+    mStreamingEventsConnection = conn;
+}

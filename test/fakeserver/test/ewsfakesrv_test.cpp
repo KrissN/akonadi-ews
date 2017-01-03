@@ -41,6 +41,7 @@ private Q_SLOTS:
     void emptyResponse();
     void getEventsRequest();
     void getEventsRequest_data();
+    void getStreamingEventsRequest();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content,
                                               std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
@@ -574,6 +575,108 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
         << QStringList()
         << static_cast<ushort>(500)
         << QString();
+}
+
+void UtEwsFakeSrvTest::getStreamingEventsRequest()
+{
+    bool callbackCalled = false;
+    const FakeEwsServer::DialogEntry::List emptyDialog;
+
+    QString receivedReq;
+    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(emptyDialog, this));
+    QDateTime startTime = QDateTime::currentDateTime();
+
+    const QString event = QStringLiteral("<NewMailEvent>"
+                "<TimeStamp>2006-08-22T01:00:10Z</TimeStamp>"
+                "<ItemId Id=\"AQApAHRx\" ChangeKey=\"CQAAAA==\" />"
+                "<ParentFolderId Id=\"AQApAc\" ChangeKey=\"AQAAAA==\" />"
+                "</NewMailEvent>");
+    const QString content = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+            "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+            "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+            "<soap:Body>"
+            "<GetStreamingEvents xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
+            "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</SubscriptionId>"
+            "<Timeout>1</Timeout>"
+            "</GetStreamingEvents>"
+            "</soap:Body>"
+            "</soap:Envelope>");
+
+    srv->queueEventsXml(QStringList() << event);
+
+    bool callbackError = false;
+    int responseNo = 0;
+    QDateTime pushEventTime;
+    auto resp = synchronousHttpReq(content, [&](const QString &chunk) {
+        const QString respHead = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+                "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
+                "xmlns:m=\"http://schemas.microsoft.com/exchange/services/2006/messages\" "
+                "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<soap:Header>"
+                "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
+                "</soap:Header>"
+                "<soap:Body>"
+                "<m:GetStreamingEventsResponse xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<m:ResponseMessages>"
+                "<m:GetStreamingEventsResponseMessage ResponseClass=\"Success\">"
+                "<m:ResponseCode>NoError</m:ResponseCode>"
+                "<m:Notification>"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>");
+        const QString respTail = QStringLiteral("</m:Notification>"
+                "</m:GetStreamingEventsResponseMessage>"
+                "</m:ResponseMessages>"
+                "</m:GetStreamingEventsResponse>"
+                "</soap:Body>"
+                "</soap:Envelope>");
+        const QString event2 = QStringLiteral("<NewMailEvent>"
+                    "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                    "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                    "</NewMailEvent>");
+        callbackCalled = true;
+
+        QString expResp = respHead;
+        if (responseNo == 0) {
+            expResp += event;
+        } else if (responseNo == 2) {
+            expResp += event2;
+        }
+        expResp += respTail;
+
+        if (chunk != expResp) {
+            qWarning() << "Unexpected GetStreamingEventsResponse";
+            callbackError = true;
+            return false;
+        }
+
+        if (responseNo == 1) {
+            srv->queueEventsXml(QStringList() << event2);
+            pushEventTime = QDateTime::currentDateTime();
+        } else if (responseNo == 2) {
+            /* Check if the response to the above event came "immediatelly" */
+            QDateTime now = QDateTime::currentDateTime();
+            if (pushEventTime.msecsTo(now) > 200) {
+                qWarning() << "Push event maximum roundtrip time exceeded";
+                callbackError = true;
+                return false;
+            }
+        }
+
+        responseNo++;
+        return true;
+    });
+
+    QCOMPARE(callbackCalled, true);
+    QCOMPARE(resp.second, static_cast<ushort>(200));
+    QCOMPARE(callbackError, false);
+
+    QDateTime now = QDateTime::currentDateTime();
+    qint64 elapsed = startTime.msecsTo(now);
+    qDebug() << elapsed;
+    QVERIFY(elapsed >= 1 * 60 * 1000 - 600);
+    QVERIFY(elapsed <= 1 * 60 * 1000 + 600);
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content,

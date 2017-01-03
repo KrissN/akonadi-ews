@@ -55,7 +55,7 @@ public:
     void queueEventsXml(const QStringList &events);
 private Q_SLOTS:
     void newConnectionReceived();
-    //void connectionClosed(QObject *obj);
+    void streamingConnectionStarted(FakeEwsConnection *conn);
 private:
     void dataAvailable(QTcpSocket *sock);
     void sendError(QTcpSocket *sock, const QString &msg, ushort code = 500);
