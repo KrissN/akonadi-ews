@@ -42,7 +42,8 @@ private Q_SLOTS:
     void getEventsRequest();
     void getEventsRequest_data();
 private:
-    QPair<QString, ushort> synchronousHttpReq(const QString &content);
+    QPair<QString, ushort> synchronousHttpReq(const QString &content,
+                                              std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
 };
 
 void UtEwsFakeSrvTest::emptyDialog()
@@ -575,7 +576,8 @@ void UtEwsFakeSrvTest::getEventsRequest_data()
         << QString();
 }
 
-QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content)
+QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content,
+                                                            std::function<bool(const QString &)> chunkFn)
 {
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:13548/EWS/Exchange.asmx"));
@@ -587,8 +589,18 @@ QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &conte
     QString resp;
     ushort respCode = 0;
 
-    connect(reply, &QNetworkReply::readyRead, this, [reply, &resp]() {
-        resp += QString::fromUtf8(reply->readAll());
+    connect(reply, &QNetworkReply::readyRead, this, [reply, &resp, &chunkFn, &loop]() {
+        QString chunk = QString::fromUtf8(reply->readAll());
+        if (chunkFn) {
+            bool cont = chunkFn(chunk);
+            if (!cont) {
+                reply->close();
+                loop.exit(200);
+                return;
+            }
+        } else {
+            resp += chunk;
+        }
     });
     connect(reply, &QNetworkReply::finished, this, [&loop, reply]() {
         loop.exit(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt());
