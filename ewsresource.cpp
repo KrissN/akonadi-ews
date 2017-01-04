@@ -162,6 +162,9 @@ EwsResource::~EwsResource()
 void EwsResource::delayedInit()
 {
     new ResourceAdaptor(this);
+    new SettingsAdaptor(mSettings.data());
+    QDBusConnection::sessionBus().registerObject(QStringLiteral("/Settings"),
+                mSettings.data(), QDBusConnection::ExportAdaptors);
 }
 
 void EwsResource::resetUrl()
