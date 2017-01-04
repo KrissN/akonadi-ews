@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -61,6 +61,7 @@
 #include "ewsclient_debug.h"
 
 #include "resourceadaptor.h"
+#include "settingsadaptor.h"
 
 using namespace Akonadi;
 
@@ -95,18 +96,19 @@ static Q_CONSTEXPR int InitialReconnectTimeout = 60;
 static Q_CONSTEXPR int ReconnectTimeout = 300;
 
 EwsResource::EwsResource(const QString &id)
-    : Akonadi::ResourceBase(id), mTagsRetrieved(false), mReconnectTimeout(InitialReconnectTimeout)
+    : Akonadi::ResourceBase(id), mTagsRetrieved(false), mReconnectTimeout(InitialReconnectTimeout),
+      mSettings(new Settings())
 {
     //setName(i18n("Microsoft Exchange"));
-    mEwsClient.setUrl(Settings::baseUrl());
+    mEwsClient.setUrl(mSettings->baseUrl());
     requestPassword(mPassword, true);
-    if (Settings::domain().isEmpty()) {
-        mEwsClient.setCredentials(Settings::username(), mPassword);
+    if (mSettings->domain().isEmpty()) {
+        mEwsClient.setCredentials(mSettings->username(), mPassword);
     } else {
-        mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), mPassword);
+        mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
     }
-    mEwsClient.setUserAgent(Settings::userAgent());
-    mEwsClient.setEnableNTLMv2(Settings::enableNTLMv2());
+    mEwsClient.setUserAgent(mSettings->userAgent());
+    mEwsClient.setEnableNTLMv2(mSettings->enableNTLMv2());
 
     changeRecorder()->fetchCollection(true);
     changeRecorder()->collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
@@ -122,7 +124,7 @@ EwsResource::EwsResource(const QString &id)
 
     setScheduleAttributeSyncBeforeItemSync(true);
 
-    if (Settings::baseUrl().isEmpty()) {
+    if (mSettings->baseUrl().isEmpty()) {
         setOnline(false);
         Q_EMIT status(NotConfigured, i18nc("@info:status", "No server configured yet."));
     } else {
@@ -130,7 +132,7 @@ EwsResource::EwsResource(const QString &id)
     }
 
     // Load the sync state
-    QByteArray data = QByteArray::fromBase64(Settings::self()->syncState().toAscii());
+    QByteArray data = QByteArray::fromBase64(mSettings->syncState().toAscii());
     if (!data.isEmpty()) {
         data = qUncompress(data);
         if (!data.isEmpty()) {
@@ -138,7 +140,7 @@ EwsResource::EwsResource(const QString &id)
             stream >> mSyncState;
         }
     }
-    data = QByteArray::fromBase64(Settings::folderSyncState().toAscii());
+    data = QByteArray::fromBase64(mSettings->folderSyncState().toAscii());
     if (!data.isEmpty()) {
         data = qUncompress(data);
         if (!data.isEmpty()) {
@@ -226,11 +228,11 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         job->setProperty("inboxId", id.id());
         connect(job, &CollectionFetchJob::result, this, &EwsResource::adjustInboxRemoteIdFetchFinished);
 
-        int inboxIdx = Settings::serverSubscriptionList().indexOf(QStringLiteral("INBOX"));
+        int inboxIdx = mSettings->serverSubscriptionList().indexOf(QStringLiteral("INBOX"));
         if (inboxIdx >= 0) {
-            QStringList subList = Settings::serverSubscriptionList();
+            QStringList subList = mSettings->serverSubscriptionList();
             subList[inboxIdx] = id.id();
-            Settings::setServerSubscriptionList(subList);
+            mSettings->setServerSubscriptionList(subList);
         }
 #endif
     }
@@ -243,8 +245,8 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
         qDebug() << "Root folder is " << id;
         Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
 
-        if (Settings::serverSubscription()) {
-            mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, this));
+        if (mSettings->serverSubscription()) {
+            mSubManager.reset(new EwsSubscriptionManager(mEwsClient, id, mSettings.data(), this));
             connect(mSubManager.data(), &EwsSubscriptionManager::foldersModified, this, &EwsResource::foldersModifiedEvent);
             connect(mSubManager.data(), &EwsSubscriptionManager::folderTreeModified, this, &EwsResource::folderTreeModifiedEvent);
             connect(mSubManager.data(), &EwsSubscriptionManager::fullSyncRequested, this, &EwsResource::fullSyncRequestedEvent);
@@ -495,13 +497,13 @@ void EwsResource::configure(WId windowId)
     ConfigDialog dlg(this, mEwsClient, windowId);
     if (dlg.exec()) {
         mSubManager.reset(Q_NULLPTR);
-        mEwsClient.setUrl(Settings::baseUrl());
-        if (Settings::domain().isEmpty()) {
-            mEwsClient.setCredentials(Settings::username(), mPassword);
+        mEwsClient.setUrl(mSettings->baseUrl());
+        if (mSettings->domain().isEmpty()) {
+            mEwsClient.setCredentials(mSettings->username(), mPassword);
         } else {
-            mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), mPassword);
+            mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
         }
-        Settings::self()->save();
+        mSettings->save();
         resetUrl();
     }
 }
@@ -1255,9 +1257,9 @@ void EwsResource::saveState()
     QByteArray str;
     QDataStream dataStream(&str, QIODevice::WriteOnly);
     dataStream << mSyncState;
-    Settings::self()->setSyncState(qCompress(str, 9).toBase64());
-    Settings::self()->setFolderSyncState(qCompress(mFolderSyncState.toAscii(), 9).toBase64());
-    Settings::self()->save();
+    mSettings->setSyncState(qCompress(str, 9).toBase64());
+    mSettings->setFolderSyncState(qCompress(mFolderSyncState.toAscii(), 9).toBase64());
+    mSettings->save();
 }
 
 void EwsResource::doSetOnline(bool online)
@@ -1300,7 +1302,7 @@ bool EwsResource::requestPassword(QString &password, bool ask)
         KPasswordDialog *dlg = new KPasswordDialog(Q_NULLPTR);
         dlg->setModal(true);
         dlg->setPrompt(i18n("Please enter password for user '%1' and Exchange account '%2'.",
-                            Settings::username(), Settings::email()));
+                            mSettings->username(), mSettings->email()));
         dlg->setAttribute(Qt::WA_DeleteOnClose);
         if (dlg->exec() == QDialog::Accepted) {
             password = dlg->password();

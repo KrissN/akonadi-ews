@@ -1,5 +1,5 @@
 #  This file is part of Akonadi EWS Resource
-#  Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+#  Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Library General Public
@@ -95,11 +95,12 @@ set(ewsresource_SRCS
     ewssubscribedfoldersjob.cpp
     ewssubscriptionmanager.cpp
     ewssubscriptionwidget.cpp
-    progressdialog.cpp)
+    progressdialog.cpp
+    settings.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 
-kconfig_add_kcfg_files(ewsresource_SRCS settings.kcfgc)
+kconfig_add_kcfg_files(ewsresource_SRCS settingsbase.kcfgc)
 kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
 qt5_add_dbus_adaptor(ewsresource_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Settings.xml settings.h Settings

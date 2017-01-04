@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -29,6 +29,7 @@
 class EwsClient;
 class KJob;
 class EwsEventRequestBase;
+class Settings;
 
 /**
  *  @brief  Mailbox update subscription manager class
@@ -68,7 +69,7 @@ class EwsSubscriptionManager : public QObject
 {
     Q_OBJECT
 public:
-    EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent);
+    EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, Settings *settings, QObject *parent);
     virtual ~EwsSubscriptionManager();
     void start();
     void queueUpdate(EwsEventType type, QString id, QString changeKey);
@@ -107,6 +108,7 @@ private:
     QMultiHash<QString, UpdateItem> mQueuedUpdates;
     QTimer mStreamingTimer;
     EwsEventRequestBase *mEventReq;
+    Settings *mSettings;
 };
 
 #endif

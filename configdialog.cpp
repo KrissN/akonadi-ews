@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -72,12 +72,12 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     mUi->setupUi(mainWidget);
     mUi->accountName->setText(parentResource->name());
 
-    mSubWidget = new EwsSubscriptionWidget(client, this);
+    mSubWidget = new EwsSubscriptionWidget(client, mParentResource->settings(), this);
     mUi->subscriptionTabLayout->addWidget(mSubWidget);
 
-    mConfigManager = new KConfigDialogManager(this, Settings::self());
+    mConfigManager = new KConfigDialogManager(this, mParentResource->settings());
     mConfigManager->updateWidgets();
-    switch (Settings::retrievalMethod()) {
+    switch (mParentResource->settings()->retrievalMethod()) {
     case 0:
         mUi->pollRadioButton->setChecked(true);
         break;
@@ -107,16 +107,16 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     int i = 0;
     Q_FOREACH(const StringPair &item, userAgents) {
         mUi->userAgentCombo->addItem(item.first, item.second);
-        if (Settings::userAgent() == item.second) {
+        if (mParentResource->settings()->userAgent() == item.second) {
             selectedIndex = i;
         }
         i++;
     }
     mUi->userAgentCombo->addItem(i18nc("User Agent", "Custom"));
-    if (!Settings::userAgent().isEmpty()) {
+    if (!mParentResource->settings()->userAgent().isEmpty()) {
         mUi->userAgentGroupBox->setChecked(true);
         mUi->userAgentCombo->setCurrentIndex(selectedIndex >= 0 ? selectedIndex : mUi->userAgentCombo->count() - 1);
-        mUi->userAgentEdit->setText(Settings::userAgent());
+        mUi->userAgentEdit->setText(mParentResource->settings()->userAgent());
     } else {
         mUi->userAgentCombo->setCurrentIndex(mUi->userAgentCombo->count());
     }
@@ -156,32 +156,32 @@ void ConfigDialog::save()
     mParentResource->setName(mUi->accountName->text());
     mConfigManager->updateSettings();
     if (mUi->pollRadioButton->isChecked()) {
-        Settings::setRetrievalMethod(0);
+        mParentResource->settings()->setRetrievalMethod(0);
     }
     else {
-        Settings::setRetrievalMethod(1);
+        mParentResource->settings()->setRetrievalMethod(1);
     }
 
     /* Erase the subscription id in case subscription is disabled or its parameters changed. This
      * fill force creation of a new subscription. */
     if (!mSubWidget->subscriptionEnabled() ||
-        (mSubWidget->subscribedList() != Settings::serverSubscriptionList())) {
-        Settings::setEventSubscriptionId(QString());
-        Settings::setEventSubscriptionWatermark(QString());
+        (mSubWidget->subscribedList() != mParentResource->settings()->serverSubscriptionList())) {
+        mParentResource->settings()->setEventSubscriptionId(QString());
+        mParentResource->settings()->setEventSubscriptionWatermark(QString());
     }
 
-    Settings::setServerSubscription(mSubWidget->subscriptionEnabled());
+    mParentResource->settings()->setServerSubscription(mSubWidget->subscriptionEnabled());
     if (mSubWidget->subscribedListValid()) {
-        Settings::setServerSubscriptionList(mSubWidget->subscribedList());
+        mParentResource->settings()->setServerSubscriptionList(mSubWidget->subscribedList());
     }
 
     if (mUi->userAgentGroupBox->isChecked()) {
-        Settings::setUserAgent(mUi->userAgentEdit->text());
+        mParentResource->settings()->setUserAgent(mUi->userAgentEdit->text());
     } else {
-        Settings::setUserAgent(QString());
+        mParentResource->settings()->setUserAgent(QString());
     }
 
-    Settings::self()->save();
+    mParentResource->settings()->save();
 
     mParentResource->setPassword(mUi->passwordEdit->text());
 }

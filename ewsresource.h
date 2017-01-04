@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -42,6 +42,7 @@ class EwsFindFolderRequest;
 class EwsFolder;
 class EwsSubscriptionManager;
 class EwsTagStore;
+class Settings;
 
 class EwsResource : public Akonadi::ResourceBase, public Akonadi::AgentBase::ObserverV4,
     public Akonadi::TransportResourceBase
@@ -85,6 +86,8 @@ public:
     void setPassword(const QString &password);
 
     const Akonadi::Collection &rootCollection() const { return mRootCollection; };
+
+    Settings *settings() { return mSettings.data(); };
 protected:
     void doSetOnline(bool online) Q_DECL_OVERRIDE;
 public Q_SLOTS:
@@ -165,6 +168,7 @@ private:
     bool mTagsRetrieved;
     int mReconnectTimeout;
     EwsTagStore *mTagStore;
+    QScopedPointer<Settings> mSettings;
 };
 
 #endif

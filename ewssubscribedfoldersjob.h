@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -24,12 +24,13 @@
 #include "ewsid.h"
 
 class EwsClient;
+class Settings;
 
 class EwsSubscribedFoldersJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsSubscribedFoldersJob(EwsClient &client, QObject *parent);
+    EwsSubscribedFoldersJob(EwsClient &client, Settings *settings, QObject *parent);
     ~EwsSubscribedFoldersJob();
 
     void start() Q_DECL_OVERRIDE;
@@ -42,6 +43,7 @@ private Q_SLOTS:
 private:
     EwsId::List mFolders;
     EwsClient &mClient;
+    Settings *mSettings;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -34,9 +34,10 @@ static Q_CONSTEXPR uint streamingTimeout = 30; /* minutes */
 
 static Q_CONSTEXPR uint streamingConnTimeout = 60; /* seconds */
 
-EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, QObject *parent)
+EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId,
+                                               Settings *settings, QObject *parent)
     : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false),
-      mEventReq(Q_NULLPTR)
+      mEventReq(Q_NULLPTR), mSettings(settings)
 {
     mStreamingEvents = mEwsClient.serverVersion().supports(EwsServerVersion::StreamingSubscription);
     mStreamingTimer.setInterval(streamingConnTimeout * 1000);
@@ -52,7 +53,7 @@ EwsSubscriptionManager::~EwsSubscriptionManager()
 void EwsSubscriptionManager::start()
 {
     // Set-up change notification subscription (if needed)
-    if (Settings::eventSubscriptionId().isEmpty()) {
+    if (mSettings->eventSubscriptionId().isEmpty()) {
         setupSubscription();
     } else {
         reset();
@@ -67,13 +68,13 @@ void EwsSubscriptionManager::start()
 
 void EwsSubscriptionManager::cancelSubscription()
 {
-    if (!Settings::eventSubscriptionId().isEmpty()) {
+    if (!mSettings->eventSubscriptionId().isEmpty()) {
         EwsUnsubscribeRequest *req = new EwsUnsubscribeRequest(mEwsClient, this);
-        req->setSubscriptionId(Settings::eventSubscriptionId());
+        req->setSubscriptionId(mSettings->eventSubscriptionId());
         req->exec();
-        Settings::setEventSubscriptionId(QString());
-        Settings::setEventSubscriptionWatermark(QString());
-        Settings::self()->save();
+        mSettings->setEventSubscriptionId(QString());
+        mSettings->setEventSubscriptionWatermark(QString());
+        mSettings->save();
     }
 }
 
@@ -81,7 +82,7 @@ void EwsSubscriptionManager::setupSubscription()
 {
     EwsId::List ids;
 
-    EwsSubscribedFoldersJob *job = new EwsSubscribedFoldersJob(mEwsClient, this);
+    EwsSubscribedFoldersJob *job = new EwsSubscribedFoldersJob(mEwsClient, mSettings, this);
     connect(job, &EwsRequest::result, this, &EwsSubscriptionManager::verifySubFoldersRequestFinished);
     job->start();
 }
@@ -143,16 +144,16 @@ void EwsSubscriptionManager::subscribeRequestFinished(KJob *job)
     if (!job->error()) {
         EwsSubscribeRequest *req = qobject_cast<EwsSubscribeRequest*>(job);
         if (req) {
-            Settings::setEventSubscriptionId(req->response().subscriptionId());
+            mSettings->setEventSubscriptionId(req->response().subscriptionId());
             if (mStreamingEvents) {
                 getEvents();
             }
             else {
-                Settings::setEventSubscriptionWatermark(req->response().watermark());
+                mSettings->setEventSubscriptionWatermark(req->response().watermark());
                 getEvents();
                 mPollTimer.start();
             }
-            Settings::self()->save();
+            mSettings->save();
         }
     } else {
         Q_EMIT connectionError();
@@ -163,7 +164,7 @@ void EwsSubscriptionManager::getEvents()
 {
     if (mStreamingEvents) {
         EwsGetStreamingEventsRequest *req = new EwsGetStreamingEventsRequest(mEwsClient, this);
-        req->setSubscriptionId(Settings::eventSubscriptionId());
+        req->setSubscriptionId(mSettings->eventSubscriptionId());
         req->setTimeout(streamingTimeout);
         connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
         connect(req, &EwsGetStreamingEventsRequest::eventsReceived, this,
@@ -174,8 +175,8 @@ void EwsSubscriptionManager::getEvents()
     }
     else {
         EwsGetEventsRequest *req = new EwsGetEventsRequest(mEwsClient, this);
-        req->setSubscriptionId(Settings::eventSubscriptionId());
-        req->setWatermark(Settings::eventSubscriptionWatermark());
+        req->setSubscriptionId(mSettings->eventSubscriptionId());
+        req->setWatermark(mSettings->eventSubscriptionWatermark());
         connect(req, &EwsRequest::result, this, &EwsSubscriptionManager::getEventsRequestFinished);
         req->start();
         mEventReq = req;
@@ -205,9 +206,9 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
         if ((!req->responses().isEmpty()) &&
             ((req->responses()[0].responseCode() == QStringLiteral("ErrorInvalidSubscription")) ||
             (req->responses()[0].responseCode() == QStringLiteral("ErrorSubscriptionNotFound")))) {
-            Settings::setEventSubscriptionId(QString());
-            Settings::setEventSubscriptionWatermark(QString());
-            Settings::self()->save();
+            mSettings->setEventSubscriptionId(QString());
+            mSettings->setEventSubscriptionWatermark(QString());
+            mSettings->save();
             resetSubscription();
         }
         reset();
@@ -261,7 +262,7 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
                     }
                 }
 
-                Settings::setEventSubscriptionWatermark(event.watermark());
+                mSettings->setEventSubscriptionWatermark(event.watermark());
                 if (!skip) {
                     switch (event.type()) {
                     case EwsCopiedEvent:
