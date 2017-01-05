@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -57,6 +57,8 @@ public:
     static bool recurrenceReader(QXmlStreamReader &reader, QVariant &val);
     static bool categoriesReader(QXmlStreamReader &reader, QVariant &val);
     static bool categoriesWriter(QXmlStreamWriter &writer, const QVariant &val);
+
+    bool operator==(const EwsItemPrivate &other) const;
 
     EwsItemType mType;
     static const Reader mStaticEwsXml;
@@ -365,6 +367,14 @@ bool EwsItemPrivate::recurrenceReader(QXmlStreamReader &reader, QVariant &val)
     return true;
 }
 
+bool EwsItemPrivate::operator==(const EwsItemPrivate &other) const
+{
+    if (!EwsItemBasePrivate::operator==(other)) {
+        return false;
+    }
+    return mType == other.mType;
+}
+
 EwsItem::EwsItem()
     : EwsItemBase(QSharedDataPointer<EwsItemBasePrivate>(new EwsItemPrivate()))
 {
@@ -523,4 +533,9 @@ bool EwsItem::write(QXmlStreamWriter &writer) const
     writer.writeEndElement();
 
     return status;
+}
+
+bool EwsItem::operator==(const EwsItem &other) const
+{
+    return *d == *other.d;
 }
