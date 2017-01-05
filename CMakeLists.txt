@@ -110,6 +110,10 @@ qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.h org.kde.A
 qt5_add_dbus_adaptor(ewsresource_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Resource.xml ewsresource.h EwsResource
 )
+qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/settings.h org.kde.Akonadi.Ews.Wallet.xml OPTIONS -a )
+qt5_add_dbus_adaptor(ewsresource_SRCS
+  ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Wallet.xml settings.h Settings
+)
 
 
 

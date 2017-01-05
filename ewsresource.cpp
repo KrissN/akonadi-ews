@@ -62,6 +62,7 @@
 
 #include "resourceadaptor.h"
 #include "settingsadaptor.h"
+#include "walletadaptor.h"
 
 using namespace Akonadi;
 
@@ -163,6 +164,7 @@ void EwsResource::delayedInit()
 {
     new ResourceAdaptor(this);
     new SettingsAdaptor(mSettings.data());
+    new WalletAdaptor(mSettings.data());
     QDBusConnection::sessionBus().registerObject(QStringLiteral("/Settings"),
                 mSettings.data(), QDBusConnection::ExportAdaptors);
 }
