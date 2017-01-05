@@ -25,10 +25,18 @@
 class Settings : public SettingsBase
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Settings.xml")
+    Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Wallet")
 public:
-    Settings();
+    Settings(WId windowId);
     virtual ~Settings();
+
+    bool requestPassword(QString &password, bool ask);
+public Q_SLOTS:
+    Q_SCRIPTABLE void setPassword(const QString &password);
+
+private:
+    WId mWindowId;
+    QString mPassword;
 };
 
 #endif

@@ -82,9 +82,6 @@ public:
 
     virtual void sendItem(const Akonadi::Item &item) Q_DECL_OVERRIDE;
 
-    bool requestPassword(QString &password, bool ask);
-    void setPassword(const QString &password);
-
     const Akonadi::Collection &rootCollection() const { return mRootCollection; };
 
     Settings *settings() { return mSettings.data(); };

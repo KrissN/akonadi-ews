@@ -100,7 +100,7 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     mTryConnectNeeded = baseUrlEmpty;
 
     QString password;
-    mParentResource->requestPassword(password, false);
+    mParentResource->settings()->requestPassword(password, false);
     mUi->passwordEdit->setText(password);
 
     int selectedIndex = -1;
@@ -181,9 +181,8 @@ void ConfigDialog::save()
         mParentResource->settings()->setUserAgent(QString());
     }
 
+    mParentResource->settings()->setPassword(mUi->passwordEdit->text());
     mParentResource->settings()->save();
-
-    mParentResource->setPassword(mUi->passwordEdit->text());
 }
 
 void ConfigDialog::performAutoDiscovery()
