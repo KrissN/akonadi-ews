@@ -478,6 +478,7 @@ void EwsItem::setType(EwsItemType type)
 {
     D_PTR
     d->mType = type;
+    d->mValid = true;
 }
 
 EwsItemType EwsItem::internalType() const
