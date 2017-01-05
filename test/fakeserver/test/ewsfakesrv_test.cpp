@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -43,7 +43,7 @@ private Q_SLOTS:
     void getEventsRequest_data();
     void getStreamingEventsRequest();
 private:
-    QPair<QString, ushort> synchronousHttpReq(const QString &content,
+    QPair<QString, ushort> synchronousHttpReq(const QString &content, ushort port,
                                               std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
 };
 
@@ -133,7 +133,7 @@ void UtEwsFakeSrvTest::emptyRequest()
 
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(emptyDialog, this));
 
-    auto resp = synchronousHttpReq(QStringLiteral(""));
+    auto resp = synchronousHttpReq(QStringLiteral(""), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
 }
 
@@ -148,7 +148,7 @@ void UtEwsFakeSrvTest::defaultCallback()
         return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("testresp"), 200);
     });
 
-    auto resp = synchronousHttpReq(QStringLiteral("testreq"));
+    auto resp = synchronousHttpReq(QStringLiteral("testreq"), srv->portNumber());
     QCOMPARE(receivedReq, QStringLiteral("testreq"));
     QCOMPARE(resp.first, QStringLiteral("testresp"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
@@ -169,7 +169,7 @@ void UtEwsFakeSrvTest::simpleResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(dialog, this));
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 }
@@ -191,7 +191,7 @@ void UtEwsFakeSrvTest::callbackResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(dialog, this));
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp2"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 }
@@ -211,17 +211,17 @@ void UtEwsFakeSrvTest::regexpResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(dialog, this));
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq2"));
+    resp = synchronousHttpReq(QStringLiteral("samplereq2"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(200));
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq3"));
+    resp = synchronousHttpReq(QStringLiteral("samplereq3"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq4"));
+    resp = synchronousHttpReq(QStringLiteral("samplereq4"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(200));
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
 }
@@ -258,19 +258,19 @@ void UtEwsFakeSrvTest::conditionalResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(dialog, this));
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq2"));
+    resp = synchronousHttpReq(QStringLiteral("samplereq2"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp2"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq3"));
+    resp = synchronousHttpReq(QStringLiteral("samplereq3"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq4"));
+    resp = synchronousHttpReq(QStringLiteral("samplereq4"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
 }
 
@@ -293,7 +293,7 @@ void UtEwsFakeSrvTest::emptyResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(dialog, this));
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"));
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
     QCOMPARE(callbackCalled, true);
 }
@@ -311,7 +311,7 @@ void UtEwsFakeSrvTest::getEventsRequest()
 
     srv->queueEventsXml(events);
 
-    auto resp = synchronousHttpReq(request);
+    auto resp = synchronousHttpReq(request, srv->portNumber());
     QCOMPARE(resp.second, responseCode);
     if (responseCode == 200) {
         QCOMPARE(resp.first, response);
@@ -607,7 +607,7 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
     bool callbackError = false;
     int responseNo = 0;
     QDateTime pushEventTime;
-    auto resp = synchronousHttpReq(content, [&](const QString &chunk) {
+    auto resp = synchronousHttpReq(content, srv->portNumber(), [&](const QString &chunk) {
         const QString respHead = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
                 "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
@@ -679,11 +679,11 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
     QVERIFY(elapsed <= 1 * 60 * 1000 + 600);
 }
 
-QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content,
+QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content, ushort port,
                                                             std::function<bool(const QString &)> chunkFn)
 {
     QNetworkAccessManager nam(this);
-    QUrl url(QStringLiteral("http://127.0.0.1:13548/EWS/Exchange.asmx"));
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(port));
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
     QNetworkReply *reply = nam.post(req, content.toUtf8());

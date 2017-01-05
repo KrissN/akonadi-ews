@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -46,13 +46,13 @@ public:
         typedef QVector<DialogEntry> List;
     };
 
-    static Q_CONSTEXPR ushort Port = 13548;
     static const DialogEntry::HttpResponse EmptyResponse;
 
     FakeEwsServer(const DialogEntry::List &dialog, QObject *parent);
     virtual ~FakeEwsServer();
     void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);
     void queueEventsXml(const QStringList &events);
+    ushort portNumber() const;
 private Q_SLOTS:
     void newConnectionReceived();
     void streamingConnectionStarted(FakeEwsConnection *conn);
@@ -67,6 +67,7 @@ private:
     DialogEntry::ReplyCallback mDefaultReplyCallback;
     QStringList mEventQueue;
     QPointer<FakeEwsConnection> mStreamingEventsConnection;
+    ushort mPortNumber;
 
     friend class FakeEwsConnection;
 };

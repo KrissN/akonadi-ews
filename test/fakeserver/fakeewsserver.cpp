@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -29,8 +29,16 @@ const FakeEwsServer::DialogEntry::HttpResponse FakeEwsServer::EmptyResponse = {Q
 FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog, QObject *parent)
     : QTcpServer(parent), mDialog(dialog)
 {
-    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Starting fake EWS server at 127.0.0.1:") << Port;
-    listen(QHostAddress::LocalHost, Port);
+    int retries = 3;
+    bool ok;
+    do {
+        mPortNumber = (qrand() % 10000) + 10000;
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Starting fake EWS server at 127.0.0.1:") << mPortNumber;
+        ok = listen(QHostAddress::LocalHost, mPortNumber);
+        if (!ok) {
+            qCWarningNC(EWSFAKE_LOG) << QStringLiteral("Failed to start server");
+        }
+    } while (!ok && --retries);
 
     connect(this, &QTcpServer::newConnection, this, &FakeEwsServer::newConnectionReceived);
 }
@@ -88,4 +96,9 @@ void FakeEwsServer::streamingConnectionStarted(FakeEwsConnection *conn)
     }
 
     mStreamingEventsConnection = conn;
+}
+
+ushort FakeEwsServer::portNumber() const
+{
+    return mPortNumber;
 }
