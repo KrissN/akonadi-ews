@@ -75,6 +75,7 @@ public:
 
     void writeFolderIds(QXmlStreamWriter &writer) const;
     void writeItemIds(QXmlStreamWriter &writer) const;
+    void writeAttributes(QXmlStreamWriter &writer) const;
 
     friend QDebug operator<<(QDebug debug, const EwsId &id);
 #ifdef HAVE_INBOX_FILTERING_WORKAROUND

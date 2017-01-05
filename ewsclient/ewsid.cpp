@@ -214,6 +214,24 @@ void EwsId::writeItemIds(QXmlStreamWriter &writer) const
     }
 }
 
+void EwsId::writeAttributes(QXmlStreamWriter &writer) const
+{
+    if (mType == Real) {
+#ifdef HAVE_INBOX_FILTERING_WORKAROUND
+        if (mId == QStringLiteral("INBOX")) {
+            writer.writeAttribute(QStringLiteral("Id"), inboxId);
+        } else {
+            writer.writeAttribute(QStringLiteral("Id"), mId);
+        }
+#else
+        writer.writeAttribute(QStringLiteral("Id"), mId);
+#endif
+        if (!mChangeKey.isEmpty()) {
+            writer.writeAttribute(QStringLiteral("ChangeKey"), mChangeKey);
+        }
+    }
+}
+
 QDebug operator<<(QDebug debug, const EwsId &id)
 {
     QDebugStateSaver saver(debug);
