@@ -26,8 +26,8 @@
 
 const FakeEwsServer::DialogEntry::HttpResponse FakeEwsServer::EmptyResponse = {QString(), 0};
 
-FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog, QObject *parent)
-    : QTcpServer(parent), mDialog(dialog)
+FakeEwsServer::FakeEwsServer(QObject *parent)
+    : QTcpServer(parent), mIsRunning(false)
 {
     int retries = 3;
     bool ok;
@@ -46,6 +46,11 @@ FakeEwsServer::FakeEwsServer(const DialogEntry::List &dialog, QObject *parent)
 FakeEwsServer::~FakeEwsServer()
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Stopping fake EWS server.");
+}
+
+void FakeEwsServer::setDialog(const DialogEntry::List &dialog)
+{
+    mDialog = dialog;
 }
 
 void FakeEwsServer::setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback)

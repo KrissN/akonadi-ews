@@ -48,10 +48,11 @@ public:
 
     static const DialogEntry::HttpResponse EmptyResponse;
 
-    FakeEwsServer(const DialogEntry::List &dialog, QObject *parent);
+    FakeEwsServer(QObject *parent);
     virtual ~FakeEwsServer();
     void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);
     void queueEventsXml(const QStringList &events);
+    void setDialog(const DialogEntry::List &dialog);
     ushort portNumber() const;
 private Q_SLOTS:
     void newConnectionReceived();
@@ -63,7 +64,7 @@ private:
     const DialogEntry::ReplyCallback defaultReplyCallback() const;
     QStringList retrieveEventsXml();
 
-    const DialogEntry::List &mDialog;
+    DialogEntry::List mDialog;
     DialogEntry::ReplyCallback mDefaultReplyCallback;
     QStringList mEventQueue;
     QPointer<FakeEwsConnection> mStreamingEventsConnection;
