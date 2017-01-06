@@ -54,7 +54,7 @@ void UtEwsFakeSrvTest::emptyDialog()
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(emptyDialog, this));
 
     QNetworkAccessManager nam(this);
-    QUrl url(QStringLiteral("http://127.0.0.1:13548/EWS/Exchange.asmx"));
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
     QNetworkReply *reply = nam.post(req, "test");
@@ -81,7 +81,7 @@ void UtEwsFakeSrvTest::invalidURL()
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(emptyDialog, this));
 
     QNetworkAccessManager nam(this);
-    QUrl url(QStringLiteral("http://127.0.0.1:13548/some/url"));
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
     QNetworkReply *reply = nam.post(req, "test");
@@ -108,7 +108,7 @@ void UtEwsFakeSrvTest::invalidMethod()
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(emptyDialog, this));
 
     QNetworkAccessManager nam(this);
-    QUrl url(QStringLiteral("http://127.0.0.1:13548/some/url"));
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/some/url").arg(srv->portNumber()));
     QNetworkRequest req(url);
     QNetworkReply *reply = nam.get(req);
 
