@@ -50,6 +50,7 @@ private:
 void UtEwsFakeSrvTest::emptyDialog()
 {
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
@@ -75,6 +76,7 @@ void UtEwsFakeSrvTest::emptyDialog()
 void UtEwsFakeSrvTest::invalidURL()
 {
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
@@ -100,6 +102,7 @@ void UtEwsFakeSrvTest::invalidURL()
 void UtEwsFakeSrvTest::invalidMethod()
 {
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/some/url").arg(srv->portNumber()));
@@ -124,6 +127,7 @@ void UtEwsFakeSrvTest::invalidMethod()
 void UtEwsFakeSrvTest::emptyRequest()
 {
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral(""), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
@@ -137,6 +141,7 @@ void UtEwsFakeSrvTest::defaultCallback()
         receivedReq = req;
         return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("testresp"), 200);
     });
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral("testreq"), srv->portNumber());
     QCOMPARE(receivedReq, QStringLiteral("testreq"));
@@ -159,6 +164,7 @@ void UtEwsFakeSrvTest::simpleResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
     srv->setDialog(dialog);
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
@@ -182,6 +188,7 @@ void UtEwsFakeSrvTest::callbackResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
     srv->setDialog(dialog);
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp2"));
@@ -203,6 +210,7 @@ void UtEwsFakeSrvTest::regexpResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
     srv->setDialog(dialog);
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
@@ -251,6 +259,7 @@ void UtEwsFakeSrvTest::conditionalResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
     srv->setDialog(dialog);
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
@@ -287,6 +296,7 @@ void UtEwsFakeSrvTest::emptyResponse()
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
     srv->setDialog(dialog);
+    QVERIFY(srv->start());
 
     auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
@@ -303,6 +313,7 @@ void UtEwsFakeSrvTest::getEventsRequest()
     const QFETCH(QString, response);
 
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
 
     srv->queueEventsXml(events);
 
@@ -579,6 +590,7 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
 
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
     QDateTime startTime = QDateTime::currentDateTime();
 
     const QString event = QStringLiteral("<NewMailEvent>"

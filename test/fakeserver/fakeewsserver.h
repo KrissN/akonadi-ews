@@ -50,6 +50,7 @@ public:
 
     FakeEwsServer(QObject *parent);
     virtual ~FakeEwsServer();
+    bool start();
     void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);
     void queueEventsXml(const QStringList &events);
     void setDialog(const DialogEntry::List &dialog);
