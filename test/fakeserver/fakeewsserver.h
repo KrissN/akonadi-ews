@@ -21,6 +21,7 @@
 #define FAKEEWSSERVER_H
 
 #include <functional>
+#include <QtCore/QMutex>
 #include <QtCore/QPointer>
 #include <QtCore/QRegularExpression>
 #include <QtNetwork/QTcpServer>
@@ -70,6 +71,7 @@ private:
     QStringList mEventQueue;
     QPointer<FakeEwsConnection> mStreamingEventsConnection;
     ushort mPortNumber;
+    mutable QMutex mMutex;
 
     friend class FakeEwsConnection;
 };

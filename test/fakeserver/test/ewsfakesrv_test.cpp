@@ -24,6 +24,7 @@
 #include <QtNetwork/QNetworkReply>
 
 #include "fakeewsserver.h"
+#include "fakeewsserverthread.h"
 
 class UtEwsFakeSrvTest : public QObject
 {
@@ -42,6 +43,7 @@ private Q_SLOTS:
     void getEventsRequest();
     void getEventsRequest_data();
     void getStreamingEventsRequest();
+    void serverThread();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content, ushort port,
                                               std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
@@ -684,6 +686,32 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
     qDebug() << elapsed;
     QVERIFY(elapsed >= 1 * 60 * 1000 - 600);
     QVERIFY(elapsed <= 1 * 60 * 1000 + 600);
+}
+
+void UtEwsFakeSrvTest::serverThread()
+{
+    const FakeEwsServer::DialogEntry::List dialog = {
+        {
+            QStringLiteral("samplereq1"),
+            QRegularExpression(),
+            {QStringLiteral("sampleresp1"), 200},
+            FakeEwsServer::DialogEntry::ReplyCallback(),
+            QStringLiteral("Sample request 1")
+        }
+    };
+
+    QString receivedReq;
+    FakeEwsServerThread thread;
+    thread.start();
+    QVERIFY(thread.waitServerStarted());
+    thread.setDialog(dialog);
+
+    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), thread.portNumber());
+    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
+    QCOMPARE(resp.second, static_cast<ushort>(200));
+
+    thread.exit();
+    thread.wait();
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content, ushort port,

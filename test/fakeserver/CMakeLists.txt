@@ -19,7 +19,8 @@
 set(fakeewsserver_SRCS
     fakeewsconnection.cpp
     fakeewsserver_debug.cpp
-    fakeewsserver.cpp)
+    fakeewsserver.cpp
+    fakeewsserverthread.cpp)
 
 add_library(fakeewsserver ${fakeewsserver_SRCS})
 

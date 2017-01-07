@@ -20,6 +20,7 @@
 #include "fakeewsserver.h"
 
 #include <QtCore/QCoreApplication>
+#include <QtCore/QThread>
 
 #include "fakeewsconnection.h"
 #include "fakeewsserver_debug.h"
@@ -37,11 +38,13 @@ FakeEwsServer::~FakeEwsServer()
 
 bool FakeEwsServer::start()
 {
+    QMutexLocker lock(&mMutex);
+
     int retries = 3;
     bool ok;
     do {
         mPortNumber = (qrand() % 10000) + 10000;
-        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Starting fake EWS server at 127.0.0.1:") << mPortNumber;
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Starting fake EWS server at 127.0.0.1:%1").arg(mPortNumber);
         ok = listen(QHostAddress::LocalHost, mPortNumber);
         if (!ok) {
             qCWarningNC(EWSFAKE_LOG) << QStringLiteral("Failed to start server");
@@ -57,16 +60,26 @@ bool FakeEwsServer::start()
 
 void FakeEwsServer::setDialog(const DialogEntry::List &dialog)
 {
+    QMutexLocker lock(&mMutex);
+
     mDialog = dialog;
 }
 
 void FakeEwsServer::setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback)
 {
+    QMutexLocker lock(&mMutex);
+
     mDefaultReplyCallback = defaultReplyCallback;
 }
 
 void FakeEwsServer::queueEventsXml(const QStringList &events)
 {
+    if (QThread::currentThread() != thread()) {
+        qCWarningNC(EWSFAKE_LOG) << QStringLiteral("queueEventsXml called from wrong thread "
+                "(called from ") << QThread::currentThread() << QStringLiteral(", should be ")
+                << thread() << QStringLiteral(")");
+        return;
+    }
     mEventQueue += events;
 
     if (mStreamingEventsConnection) {
@@ -92,11 +105,15 @@ void FakeEwsServer::newConnectionReceived()
 
 const FakeEwsServer::DialogEntry::List FakeEwsServer::dialog() const
 {
+    QMutexLocker lock(&mMutex);
+
     return mDialog;
 }
 
 const FakeEwsServer::DialogEntry::ReplyCallback FakeEwsServer::defaultReplyCallback() const
 {
+    QMutexLocker lock(&mMutex);
+
     return mDefaultReplyCallback;
 }
 
@@ -112,5 +129,7 @@ void FakeEwsServer::streamingConnectionStarted(FakeEwsConnection *conn)
 
 ushort FakeEwsServer::portNumber() const
 {
+    QMutexLocker lock(&mMutex);
+
     return mPortNumber;
 }
