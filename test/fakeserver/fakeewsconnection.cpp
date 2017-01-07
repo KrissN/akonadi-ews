@@ -37,7 +37,7 @@ static const QHash<uint, QLatin1String> responseCodes = {
 static Q_CONSTEXPR int streamingEventsHeartbeatIntervalSeconds = 5;
 
 FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock, FakeEwsServer* parent)
-    : QObject(parent), mSock(sock), mContentLength(0), mKeepAlive(false)
+    : QObject(parent), mSock(sock), mContentLength(0), mKeepAlive(false), mState(Initial)
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got new EWS connection.");
     connect(mSock.data(), &QTcpSocket::disconnected, this, &FakeEwsConnection::disconnected);
@@ -59,7 +59,7 @@ void FakeEwsConnection::disconnected()
 
 void FakeEwsConnection::dataAvailable()
 {
-    if (mContentLength == 0) {
+    if (mState == Initial) {
         QByteArray line = mSock->readLine();
         QList<QByteArray> tokens = line.split(' ');
         mKeepAlive = false;
@@ -76,74 +76,85 @@ void FakeEwsConnection::dataAvailable()
             sendError(QLatin1String("Invalid EWS URL"));
             return;
         }
+        mState = RequestReceived;
+    }
 
+    if (mState == RequestReceived) {
+        QByteArray line;
         do {
-            line = mSock->readLine().trimmed();
+            line = mSock->readLine();
             if (line.toLower().startsWith("content-length: ")) {
                 bool ok;
-                mContentLength = line.mid(16).toUInt(&ok);
+                mContentLength = line.trimmed().mid(16).toUInt(&ok);
                 if (!ok) {
                     sendError(QLatin1String("Failed to parse content length."));
                     return;
                 }
-            } else if (line.toLower() == "connection: keep-alive") {
+            } else if (line.toLower() == "connection: keep-alive\r\n") {
                 mKeepAlive = true;
             }
-        } while (!line.isEmpty());
+        } while (!line.trimmed().isEmpty());
 
+        if (line == "\r\n") {
+            mState = HeadersReceived;
+        }
+    }
+
+    if (mState == HeadersReceived) {
         if (mContentLength == 0) {
             sendError(QLatin1String("Expected content"));
             return;
         }
-    }
 
-    mContent = mSock->read(mContentLength - mContent.size());
+        mContent = mSock->read(mContentLength - mContent.size());
 
-    if (mContent.size() >= static_cast<int>(mContentLength)) {
-        mDataTimer.stop();
+        if (mContent.size() >= static_cast<int>(mContentLength)) {
+            mDataTimer.stop();
 
-        FakeEwsServer::DialogEntry::HttpResponse resp = parseRequest(QString::fromUtf8(mContent));
-        bool chunked = false;
+            FakeEwsServer::DialogEntry::HttpResponse resp = parseRequest(QString::fromUtf8(mContent));
+            bool chunked = false;
 
-        if (resp == FakeEwsServer::EmptyResponse) {
-            resp = handleGetEventsRequest(mContent);
-        }
-
-        if (resp == FakeEwsServer::EmptyResponse) {
-            resp = handleGetStreamingEventsRequest(mContent);
-            if (resp.second > 1000) {
-                chunked = true;
-                resp.second %= 1000;
+            if (resp == FakeEwsServer::EmptyResponse) {
+                resp = handleGetEventsRequest(mContent);
             }
-        }
 
-        if (resp == FakeEwsServer::EmptyResponse) {
-            qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
-            resp = { QStringLiteral(""), 500 };
-        }
+            if (resp == FakeEwsServer::EmptyResponse) {
+                resp = handleGetStreamingEventsRequest(mContent);
+                if (resp.second > 1000) {
+                    chunked = true;
+                    resp.second %= 1000;
+                }
+            }
 
-        QByteArray buffer;
-        QLatin1String codeStr = responseCodes.value(resp.second);
-        QByteArray respContent = resp.first.toUtf8();
-        buffer += QStringLiteral("HTTP/1.1 %1 %2\r\n").arg(resp.second).arg(codeStr).toLatin1();
-        if (chunked) {
-            buffer += "Transfer-Encoding: chunked\r\n";
-            buffer += "\r\n";
-            buffer += QByteArray::number(respContent.size(), 16) + "\r\n";
-            buffer += respContent + "\r\n";
+            if (resp == FakeEwsServer::EmptyResponse) {
+                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
+                resp = { QStringLiteral(""), 500 };
+            }
+
+            QByteArray buffer;
+            QLatin1String codeStr = responseCodes.value(resp.second);
+            QByteArray respContent = resp.first.toUtf8();
+            buffer += QStringLiteral("HTTP/1.1 %1 %2\r\n").arg(resp.second).arg(codeStr).toLatin1();
+            if (chunked) {
+                buffer += "Transfer-Encoding: chunked\r\n";
+                buffer += "\r\n";
+                buffer += QByteArray::number(respContent.size(), 16) + "\r\n";
+                buffer += respContent + "\r\n";
+            } else {
+                buffer += "Content-Length: " + QByteArray::number(respContent.size()) + "\r\n";
+                buffer += mKeepAlive ? "Connection: Keep-Alive\n" : "Connection: Close\r\n";
+                buffer += "\r\n";
+                buffer += respContent;
+            }
+            mSock->write(buffer);
+
+            if (!mKeepAlive && !chunked) {
+                mSock->disconnectFromHost();
+            }
+            mState = Initial;
         } else {
-            buffer += "Content-Length: " + QByteArray::number(respContent.size()) + "\r\n";
-            buffer += mKeepAlive ? "Connection: Keep-Alive\n" : "Connection: Close\r\n";
-            buffer += "\r\n";
-            buffer += respContent;
+            mDataTimer.start(3000);
         }
-        mSock->write(buffer);
-
-        if (!mKeepAlive && !chunked) {
-            mSock->disconnectFromHost();
-        }
-    } else {
-        mDataTimer.start(3000);
     }
 }
 

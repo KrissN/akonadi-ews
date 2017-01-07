@@ -51,6 +51,12 @@ private:
     FakeEwsServer::DialogEntry::HttpResponse handleGetStreamingEventsRequest(const QString &content);
     QString prepareEventsResponse(const QStringList &events);
 
+    enum HttpConnectionState {
+        Initial,
+        RequestReceived,
+        HeadersReceived
+    };
+
     QPointer<QTcpSocket> mSock;
     uint mContentLength;
     QByteArray mContent;
@@ -59,6 +65,7 @@ private:
     QTimer mStreamingRequestHeartbeat;
     QTimer mStreamingRequestTimeout;
     QString mStreamingSubId;
+    HttpConnectionState mState;
 };
 
 #endif

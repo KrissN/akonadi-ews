@@ -19,6 +19,7 @@
 
 #include <QtTest/QtTest>
 #include <QtCore/QEventLoop>
+#include <QtNetwork/QHostAddress>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -44,6 +45,7 @@ private Q_SLOTS:
     void getEventsRequest_data();
     void getStreamingEventsRequest();
     void serverThread();
+    void delayedContentSize();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content, ushort port,
                                               std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
@@ -712,6 +714,60 @@ void UtEwsFakeSrvTest::serverThread()
 
     thread.exit();
     thread.wait();
+}
+
+void UtEwsFakeSrvTest::delayedContentSize()
+{
+    /* This test case simulates the behaviour of KIO HTTP, which sends the data in three chunks:
+     *  - initial headers
+     *  - Content-Length header + end of headers
+     *  - content
+     */
+
+    const FakeEwsServer::DialogEntry::List dialog = {
+        {
+            QStringLiteral("samplereq1"),
+            QRegularExpression(),
+            {QStringLiteral("sampleresp1"), 200},
+            FakeEwsServer::DialogEntry::ReplyCallback(),
+            QStringLiteral("Sample request 1")
+        }
+    };
+
+    QString receivedReq;
+    FakeEwsServerThread thread;
+    thread.start();
+    QVERIFY(thread.waitServerStarted());
+    thread.setDialog(dialog);
+
+    QTcpSocket sock;
+    sock.connectToHost(QHostAddress(QHostAddress::LocalHost), thread.portNumber());
+    QVERIFY(sock.waitForConnected(1000));
+    sock.write(QStringLiteral("POST /EWS/Exchange.asmx HTTP/1.1\r\n"
+            "Host: 127.0.0.1:%1\r\n"
+            "Connection: keep-alive\r\n"
+            "User-Agent: Mozilla/5.0 (X11; Linux x86_64) KHTML/5.26.0 (like Gecko) Konqueror/5.26\r\n"
+            "Pragma: no-cache\r\n"
+            "Cache-control: no-cache\r\n"
+            "Accept: text/html, text/*;q=0.9, image/jpeg;q=0.9, image/png;q=0.9, image/*;q=0.9, */*;q=0.8\r\n"
+            "Accept-Charset: utf-8,*;q=0.5\r\n"
+            "Accept-Language: pl-PL,en;q=0.9\r\n"
+            "Content-Type: text/xml\r\n").arg(thread.portNumber()).toAscii());
+    sock.waitForBytesWritten(100);
+    QThread::msleep(100);
+    sock.write("Content-Length: 10\r\n\r\n");
+    sock.waitForBytesWritten(100);
+    QThread::msleep(100);
+    sock.write("samplereq1");
+    sock.waitForBytesWritten(100);
+    sock.waitForReadyRead(300);
+
+    QByteArray data = sock.readAll();
+
+    thread.exit();
+    thread.wait();
+
+    QCOMPARE(data, QByteArray("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nConnection: Keep-Alive\n\r\nsampleresp1"));
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content, ushort port,
