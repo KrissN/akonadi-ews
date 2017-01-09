@@ -154,6 +154,8 @@ EwsResource::EwsResource(const QString &id)
     mTagStore = new EwsTagStore(this);
 
     QMetaObject::invokeMethod(this, "delayedInit", Qt::QueuedConnection);
+
+    connect(this, &AgentBase::reloadConfiguration, this, &EwsResource::reloadConfig);
 }
 
 EwsResource::~EwsResource()
@@ -497,19 +499,26 @@ void EwsResource::getItemRequestFinished(KJob *job)
 }
 #endif
 
+void EwsResource::reloadConfig()
+{
+    mSubManager.reset(Q_NULLPTR);
+    qDebug() << QUrl(mSettings->baseUrl());
+    mEwsClient.setUrl(mSettings->baseUrl());
+    mSettings->requestPassword(mPassword, false);
+    if (mSettings->domain().isEmpty()) {
+        mEwsClient.setCredentials(mSettings->username(), mPassword);
+    } else {
+        mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
+    }
+    mSettings->save();
+    resetUrl();
+}
+
 void EwsResource::configure(WId windowId)
 {
     ConfigDialog dlg(this, mEwsClient, windowId);
     if (dlg.exec()) {
-        mSubManager.reset(Q_NULLPTR);
-        mEwsClient.setUrl(mSettings->baseUrl());
-        if (mSettings->domain().isEmpty()) {
-            mEwsClient.setCredentials(mSettings->username(), mPassword);
-        } else {
-            mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
-        }
-        mSettings->save();
-        resetUrl();
+        reloadConfig();
     }
 }
 

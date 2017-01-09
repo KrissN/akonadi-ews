@@ -133,6 +133,7 @@ private Q_SLOTS:
     void adjustInboxRemoteIdFetchFinished(KJob *job);
     void rootCollectionFetched(KJob *job);
     void connectionError();
+    void reloadConfig();
 public Q_SLOTS:
     Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);
 Q_SIGNALS:
