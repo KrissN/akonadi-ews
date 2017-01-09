@@ -89,3 +89,8 @@ void Settings::setPassword(const QString &password)
     }
 }
 
+void Settings::setTestPassword(const QString &password)
+{
+    mPassword = password;
+}
+

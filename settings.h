@@ -33,6 +33,7 @@ public:
     bool requestPassword(QString &password, bool ask);
 public Q_SLOTS:
     Q_SCRIPTABLE void setPassword(const QString &password);
+    Q_SCRIPTABLE void setTestPassword(const QString &password);
 
 private:
     WId mWindowId;
