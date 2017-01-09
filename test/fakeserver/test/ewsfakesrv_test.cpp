@@ -23,6 +23,9 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
+#include <QtXmlPatterns/QXmlItem>
+#include <QtXmlPatterns/QXmlNamePool>
+#include <QtXmlPatterns/QXmlResultItems>
 
 #include "fakeewsserver.h"
 #include "fakeewsserverthread.h"
@@ -38,14 +41,16 @@ private Q_SLOTS:
     void defaultCallback();
     void simpleResponse();
     void callbackResponse();
-    void regexpResponse();
-    void conditionalResponse();
+    void multipleResponses();
     void emptyResponse();
     void getEventsRequest();
     void getEventsRequest_data();
     void getStreamingEventsRequest();
     void serverThread();
     void delayedContentSize();
+    void notAuthenticated();
+    void badAuthentication();
+    void xqueryResultsInCallback();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content, ushort port,
                                               std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
@@ -58,6 +63,8 @@ void UtEwsFakeSrvTest::emptyDialog()
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
+    url.setUserName("test");
+    url.setPassword("test");
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
     QNetworkReply *reply = nam.post(req, "test");
@@ -83,7 +90,9 @@ void UtEwsFakeSrvTest::invalidURL()
     QVERIFY(srv->start());
 
     QNetworkAccessManager nam(this);
-    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/some/url").arg(srv->portNumber()));
+    url.setUserName("test");
+    url.setPassword("test");
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
     QNetworkReply *reply = nam.post(req, "test");
@@ -109,7 +118,9 @@ void UtEwsFakeSrvTest::invalidMethod()
     QVERIFY(srv->start());
 
     QNetworkAccessManager nam(this);
-    QUrl url(QStringLiteral("http://127.0.0.1:%1/some/url").arg(srv->portNumber()));
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
+    url.setUserName("test");
+    url.setPassword("test");
     QNetworkRequest req(url);
     QNetworkReply *reply = nam.get(req);
 
@@ -141,7 +152,7 @@ void UtEwsFakeSrvTest::defaultCallback()
 {
     QString receivedReq;
     QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
-    srv->setDefaultReplyCallback([&receivedReq](const QString &req) {
+    srv->setDefaultReplyCallback([&receivedReq](const QString &req, QXmlResultItems &, const QXmlNamePool &) {
         receivedReq = req;
         return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("testresp"), 200);
     });
@@ -157,9 +168,7 @@ void UtEwsFakeSrvTest::simpleResponse()
 {
     const FakeEwsServer::DialogEntry::List dialog = {
         {
-            QStringLiteral("samplereq1"),
-            QRegularExpression(),
-            {QStringLiteral("sampleresp1"), 200},
+            QStringLiteral("if (//test1/a = <a />) then (<b/>) else ()"),
             FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 1")
         }
@@ -170,8 +179,8 @@ void UtEwsFakeSrvTest::simpleResponse()
     srv->setDialog(dialog);
     QVERIFY(srv->start());
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
-    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
+    auto resp = synchronousHttpReq(QStringLiteral("<test1><a /></test1>"), srv->portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<b/>"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 }
 
@@ -179,11 +188,9 @@ void UtEwsFakeSrvTest::callbackResponse()
 {
     const FakeEwsServer::DialogEntry::List dialog = {
         {
-            QStringLiteral("samplereq1"),
-            QRegularExpression(),
-            {},
-            [](const QString &) {
-                return FakeEwsServer::DialogEntry::HttpResponse("sampleresp2", 200);
+            QStringLiteral("if (//test1/a = <a />) then (<b/>) else ()"),
+            [](const QString &, QXmlResultItems &, const QXmlNamePool &) {
+                return FakeEwsServer::DialogEntry::HttpResponse("<a/>", 200);
             },
             QStringLiteral("Sample request 1")
         }
@@ -194,68 +201,22 @@ void UtEwsFakeSrvTest::callbackResponse()
     srv->setDialog(dialog);
     QVERIFY(srv->start());
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
-    QCOMPARE(resp.first, QStringLiteral("sampleresp2"));
+    auto resp = synchronousHttpReq(QStringLiteral("<test1><a /></test1>"), srv->portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<a/>"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 }
 
-void UtEwsFakeSrvTest::regexpResponse()
+void UtEwsFakeSrvTest::multipleResponses()
 {
     const FakeEwsServer::DialogEntry::List dialog = {
         {
-            QString(),
-            QRegularExpression(QStringLiteral("samplereq[24]")),
-            {QStringLiteral("sampleresp1"), 200},
+            QStringLiteral("if (//test1/a = <a /> or //test1/b = <b />) then (<aresult/>) else ()"),
             FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("Sample request 1")
-        }
-    };
-
-    QString receivedReq;
-    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
-    srv->setDialog(dialog);
-    QVERIFY(srv->start());
-
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
-    QCOMPARE(resp.second, static_cast<ushort>(500));
-
-    resp = synchronousHttpReq(QStringLiteral("samplereq2"), srv->portNumber());
-    QCOMPARE(resp.second, static_cast<ushort>(200));
-    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
-
-    resp = synchronousHttpReq(QStringLiteral("samplereq3"), srv->portNumber());
-    QCOMPARE(resp.second, static_cast<ushort>(500));
-
-    resp = synchronousHttpReq(QStringLiteral("samplereq4"), srv->portNumber());
-    QCOMPARE(resp.second, static_cast<ushort>(200));
-    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
-}
-
-void UtEwsFakeSrvTest::conditionalResponse()
-{
-    const FakeEwsServer::DialogEntry::List dialog = {
-        {
-            QString(),
-            QRegularExpression("samplereq[0-9]"),
-            FakeEwsServer::EmptyResponse,
-            [](const QString& req) {
-                if (req[9] == '1' || req[9] == '3')
-                    return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("sampleresp1"), 200);
-                else
-                    return FakeEwsServer::EmptyResponse;
-            },
             QStringLiteral("Sample request 1")
         },
         {
-            QString(),
-            QRegularExpression("samplereq[0-9]"),
-            FakeEwsServer::EmptyResponse,
-            [](const QString& req) {
-            if (req[9] == '2' || req[9] == '3')
-                return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("sampleresp2"), 200);
-            else
-                return FakeEwsServer::EmptyResponse;
-            },
+            QStringLiteral("if (//test1/b = <b /> or //test1/c = <c />) then (<bresult/>) else ()"),
+            FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 2")
         }
     };
@@ -265,19 +226,19 @@ void UtEwsFakeSrvTest::conditionalResponse()
     srv->setDialog(dialog);
     QVERIFY(srv->start());
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
-    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
+    auto resp = synchronousHttpReq(QStringLiteral("<test1><a /></test1>"), srv->portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<aresult/>"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq2"), srv->portNumber());
-    QCOMPARE(resp.first, QStringLiteral("sampleresp2"));
+    resp = synchronousHttpReq(QStringLiteral("<test1><b /></test1>"), srv->portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<aresult/>"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq3"), srv->portNumber());
-    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
+    resp = synchronousHttpReq(QStringLiteral("<test1><c /></test1>"), srv->portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<bresult/>"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
-    resp = synchronousHttpReq(QStringLiteral("samplereq4"), srv->portNumber());
+    resp = synchronousHttpReq(QStringLiteral("<test1><d /></test1>"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
 }
 
@@ -286,10 +247,8 @@ void UtEwsFakeSrvTest::emptyResponse()
     bool callbackCalled = false;
     const FakeEwsServer::DialogEntry::List dialog = {
         {
-            QStringLiteral("samplereq1"),
-            QRegularExpression(),
-            FakeEwsServer::EmptyResponse,
-            [&callbackCalled](const QString &) {
+            QStringLiteral("if (//test1/a = <a />) then (<b/>) else ()"),
+            [&callbackCalled](const QString &, QXmlResultItems &, const QXmlNamePool &) {
                 callbackCalled = true;
                 return FakeEwsServer::EmptyResponse;
             },
@@ -302,7 +261,7 @@ void UtEwsFakeSrvTest::emptyResponse()
     srv->setDialog(dialog);
     QVERIFY(srv->start());
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), srv->portNumber());
+    auto resp = synchronousHttpReq(QStringLiteral("<test1><a /></test1>"), srv->portNumber());
     QCOMPARE(resp.second, static_cast<ushort>(500));
     QCOMPARE(callbackCalled, true);
 }
@@ -694,11 +653,9 @@ void UtEwsFakeSrvTest::serverThread()
 {
     const FakeEwsServer::DialogEntry::List dialog = {
         {
-            QStringLiteral("samplereq1"),
-            QRegularExpression(),
-            {QStringLiteral("sampleresp1"), 200},
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("Sample request 1")
+             QStringLiteral("if (//test1/a = <a />) then (<b/>) else ()"),
+             FakeEwsServer::DialogEntry::ReplyCallback(),
+             QStringLiteral("Sample request 1")
         }
     };
 
@@ -708,8 +665,8 @@ void UtEwsFakeSrvTest::serverThread()
     QVERIFY(thread.waitServerStarted());
     thread.setDialog(dialog);
 
-    auto resp = synchronousHttpReq(QStringLiteral("samplereq1"), thread.portNumber());
-    QCOMPARE(resp.first, QStringLiteral("sampleresp1"));
+    auto resp = synchronousHttpReq(QStringLiteral("<test1><a /></test1>"), thread.portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<b/>"));
     QCOMPARE(resp.second, static_cast<ushort>(200));
 
     thread.exit();
@@ -726,9 +683,7 @@ void UtEwsFakeSrvTest::delayedContentSize()
 
     const FakeEwsServer::DialogEntry::List dialog = {
         {
-            QStringLiteral("samplereq1"),
-            QRegularExpression(),
-            {QStringLiteral("sampleresp1"), 200},
+            QStringLiteral("if (//test1/a = <a />) then (<b/>) else ()"),
             FakeEwsServer::DialogEntry::ReplyCallback(),
             QStringLiteral("Sample request 1")
         }
@@ -752,13 +707,14 @@ void UtEwsFakeSrvTest::delayedContentSize()
             "Accept: text/html, text/*;q=0.9, image/jpeg;q=0.9, image/png;q=0.9, image/*;q=0.9, */*;q=0.8\r\n"
             "Accept-Charset: utf-8,*;q=0.5\r\n"
             "Accept-Language: pl-PL,en;q=0.9\r\n"
+            "Authorization: Basic dGVzdDp0ZXN0\r\n"
             "Content-Type: text/xml\r\n").arg(thread.portNumber()).toAscii());
     sock.waitForBytesWritten(100);
     QThread::msleep(100);
-    sock.write("Content-Length: 10\r\n\r\n");
+    sock.write("Content-Length: 20\r\n\r\n");
     sock.waitForBytesWritten(100);
     QThread::msleep(100);
-    sock.write("samplereq1");
+    sock.write("<test1><a /></test1>");
     sock.waitForBytesWritten(100);
     sock.waitForReadyRead(300);
 
@@ -767,7 +723,106 @@ void UtEwsFakeSrvTest::delayedContentSize()
     thread.exit();
     thread.wait();
 
-    QCOMPARE(data, QByteArray("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nConnection: Keep-Alive\n\r\nsampleresp1"));
+    QCOMPARE(data, QByteArray("HTTP/1.1 200 OK\r\nContent-Length: 4\r\nConnection: Keep-Alive\n\r\n<b/>"));
+}
+
+void UtEwsFakeSrvTest::notAuthenticated()
+{
+    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
+
+    QNetworkAccessManager nam(this);
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    QNetworkReply *reply = nam.post(req, "test");
+
+    QEventLoop loop;
+    QString resp;
+    ushort respCode = 0;
+
+    connect(reply, &QNetworkReply::readyRead, this, [reply, &resp]() {
+        resp += QString::fromUtf8(reply->readAll());
+    });
+    connect(reply, &QNetworkReply::finished, this, [&loop, reply]() {
+        loop.exit(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt());
+    });
+    respCode = loop.exec();
+
+    QCOMPARE(respCode, static_cast<ushort>(401));
+}
+
+void UtEwsFakeSrvTest::badAuthentication()
+{
+    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    QVERIFY(srv->start());
+
+    QNetworkAccessManager nam(this);
+    QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
+    url.setUserName("foo");
+    url.setPassword("bar");
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    QNetworkReply *reply = nam.post(req, "test");
+
+    QEventLoop loop;
+    QString resp;
+    ushort respCode = 0;
+
+    connect(reply, &QNetworkReply::readyRead, this, [reply, &resp]() {
+        resp += QString::fromUtf8(reply->readAll());
+    });
+    connect(reply, &QNetworkReply::finished, this, [&loop, reply]() {
+        loop.exit(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toUInt());
+    });
+    respCode = loop.exec();
+
+    QCOMPARE(respCode, static_cast<ushort>(401));
+}
+
+void UtEwsFakeSrvTest::xqueryResultsInCallback()
+{
+    bool callbackOk = false;
+    const FakeEwsServer::DialogEntry::List dialog = {
+        {
+            QStringLiteral("if (//test1/a = <a />) then (<b>test</b>) else ()"),
+            [&callbackOk](const QString &, QXmlResultItems &ri, const QXmlNamePool &) {
+                if (ri.hasError()) {
+                    qDebug() << "XQuery result has errors.";
+                    return FakeEwsServer::EmptyResponse;
+                }
+                QXmlItem item = ri.next();
+                if (item.isNull()) {
+                    qDebug() << "XQuery result has no items.";
+                    return FakeEwsServer::EmptyResponse;
+                }
+                if (!item.isNode()) {
+                    qDebug() << "XQuery result is not a XML node.";
+                    return FakeEwsServer::EmptyResponse;
+                }
+                QXmlNodeModelIndex index = item.toNodeModelIndex();
+                if (index.isNull()) {
+                    qDebug() << "XQuery XML node is NULL.";
+                    return FakeEwsServer::EmptyResponse;
+                }
+                if (index.model()->stringValue(index) != QStringLiteral("test")) {
+                    qDebug() << "Unexpected item value:" << index.model()->stringValue(index);
+                    return FakeEwsServer::EmptyResponse;
+                }
+                return FakeEwsServer::DialogEntry::HttpResponse("<b/>", 200);
+            },
+            QStringLiteral("Sample request 1")
+        }
+    };
+
+    QString receivedReq;
+    QScopedPointer<FakeEwsServer> srv(new FakeEwsServer(this));
+    srv->setDialog(dialog);
+    QVERIFY(srv->start());
+
+    auto resp = synchronousHttpReq(QStringLiteral("<test1><a /></test1>"), srv->portNumber());
+    QCOMPARE(resp.first, QStringLiteral("<b/>"));
+    QCOMPARE(resp.second, static_cast<ushort>(200));
 }
 
 QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &content, ushort port,
@@ -775,6 +830,8 @@ QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &conte
 {
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(port));
+    url.setUserName("test");
+    url.setPassword("test");
     QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
     QNetworkReply *reply = nam.post(req, content.toUtf8());

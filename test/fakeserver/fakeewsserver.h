@@ -28,6 +28,8 @@
 #include <QtNetwork/QTcpSocket>
 
 class FakeEwsConnection;
+class QXmlResultItems;
+class QXmlNamePool;
 
 class Q_DECL_EXPORT FakeEwsServer : public QTcpServer
 {
@@ -37,10 +39,8 @@ public:
     {
     public:
         typedef QPair<QString, ushort> HttpResponse;
-        typedef std::function<HttpResponse (const QString &)> ReplyCallback;
-        QString expected;
-        QRegularExpression expectedRe;
-        HttpResponse response;
+        typedef std::function<HttpResponse (const QString &, QXmlResultItems &, const QXmlNamePool &)> ReplyCallback;
+        QString xQuery;
         ReplyCallback replyCallback;
         QString description;
 

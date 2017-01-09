@@ -20,6 +20,9 @@
 #include "fakeewsconnection.h"
 
 #include <QtNetwork/QTcpSocket>
+#include <QtXmlPatterns/QXmlNamePool>
+#include <QtXmlPatterns/QXmlQuery>
+#include <QtXmlPatterns/QXmlResultItems>
 
 #include "fakeewsserver.h"
 #include "fakeewsserver_debug.h"
@@ -37,7 +40,8 @@ static const QHash<uint, QLatin1String> responseCodes = {
 static Q_CONSTEXPR int streamingEventsHeartbeatIntervalSeconds = 5;
 
 FakeEwsConnection::FakeEwsConnection(QTcpSocket *sock, FakeEwsServer* parent)
-    : QObject(parent), mSock(sock), mContentLength(0), mKeepAlive(false), mState(Initial)
+    : QObject(parent), mSock(sock), mContentLength(0), mKeepAlive(false), mState(Initial),
+      mAuthenticated(false)
 {
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got new EWS connection.");
     connect(mSock.data(), &QTcpSocket::disconnected, this, &FakeEwsConnection::disconnected);
@@ -90,6 +94,10 @@ void FakeEwsConnection::dataAvailable()
                     sendError(QLatin1String("Failed to parse content length."));
                     return;
                 }
+            } else if (line.toLower().startsWith("authorization: basic ")) {
+                if (line.trimmed().mid(21) == "dGVzdDp0ZXN0") {
+                    mAuthenticated = true;
+                }
             } else if (line.toLower() == "connection: keep-alive\r\n") {
                 mKeepAlive = true;
             }
@@ -110,6 +118,18 @@ void FakeEwsConnection::dataAvailable()
 
         if (mContent.size() >= static_cast<int>(mContentLength)) {
             mDataTimer.stop();
+
+            if (!mAuthenticated) {
+                QLatin1String codeStr = responseCodes.value(401);
+                QByteArray response(QStringLiteral("HTTP/1.1 %1 %2\r\n"
+                        "WWW-Authenticate: Basic realm=\"Fake EWS Server\"\r\n"
+                        "Connection: close\r\n"
+                        "\r\n").arg(401).arg(codeStr).toAscii());
+                response += codeStr;
+                mSock->write(response);
+                mSock->disconnectFromHost();
+                return;
+            }
 
             FakeEwsServer::DialogEntry::HttpResponse resp = parseRequest(QString::fromUtf8(mContent));
             bool chunked = false;
@@ -181,35 +201,41 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
     FakeEwsServer::DialogEntry::HttpResponse resp = FakeEwsServer::EmptyResponse;
     Q_FOREACH(const FakeEwsServer::DialogEntry &de, server->dialog()) {
-        if ((!de.expected.isNull() && content == de.expected) ||
-            (de.expectedRe.isValid() && de.expectedRe.match(content).hasMatch())) {
-            if (EWSFAKE_LOG().isDebugEnabled()) {
-                if (!de.expected.isNull() && content == de.expected) {
-                    qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Matched entry \"") << de.description
-                            << QStringLiteral("\" by expected string");
-                } else {
-                    qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Matched entry \"") << de.description
-                            << QStringLiteral("\" by regular expression");
-                }
+        qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Trying \"") << de.description << QStringLiteral("\"");
+        QXmlResultItems ri;
+        QString result;
+        QXmlQuery query;
+        if (!de.xQuery.isNull()) {
+            query.setFocus(content);
+            query.setQuery(de.xQuery);
+            query.evaluateTo(&result);
+            query.evaluateTo(&ri);
+            if (ri.hasError()) {
+                qCDebugNC(EWSFAKE_LOG) << QStringLiteral("XQuery failed due to errors - skipping");
+                continue;
             }
+        }
+
+        if (!result.trimmed().isEmpty()) {
+            qCDebugNC(EWSFAKE_LOG) << QStringLiteral("XQuery evaluated to non-empty response.");
             if (de.replyCallback) {
-                resp = de.replyCallback(content);
+                resp = de.replyCallback(content, ri, query.namePool());
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from callback ")
                         << resp.second << QStringLiteral(": ") << resp.first;
             } else {
-                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning static response ")
-                        << de.response.second << QStringLiteral(": ") << de.response.first;
-                resp = de.response;
+                resp = {result.trimmed(), 200};
+                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from XQuery ")
+                        << resp.second << QStringLiteral(": ") << resp.first;
             }
-            if (resp != FakeEwsServer::EmptyResponse) {
-                break;
-            }
+            break;
         }
     }
 
     auto defaultReplyCallback = server->defaultReplyCallback();
     if (defaultReplyCallback && (resp == FakeEwsServer::EmptyResponse)) {
-        resp = defaultReplyCallback(content);
+        QXmlResultItems ri;
+        QXmlNamePool namePool;
+        resp = defaultReplyCallback(content, ri, namePool);
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
                 << resp.second << QStringLiteral(": ") << resp.first;
     }

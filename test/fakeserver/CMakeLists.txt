@@ -24,6 +24,6 @@ set(fakeewsserver_SRCS
 
 add_library(fakeewsserver ${fakeewsserver_SRCS})
 
-target_link_libraries(fakeewsserver Qt5::Core Qt5::Network)
+target_link_libraries(fakeewsserver Qt5::Core Qt5::Network Qt5::XmlPatterns)
 
 add_subdirectory(test)

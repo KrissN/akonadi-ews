@@ -66,6 +66,7 @@ private:
     QTimer mStreamingRequestTimeout;
     QString mStreamingSubId;
     HttpConnectionState mState;
+    bool mAuthenticated;
 };
 
 #endif
