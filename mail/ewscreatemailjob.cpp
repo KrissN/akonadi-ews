@@ -56,6 +56,21 @@ void EwsCreateMailJob::doStart()
     EwsCreateItemRequest *req = new EwsCreateItemRequest(mClient, this);
 
     KMime::Message::Ptr msg = mItem.payload<KMime::Message::Ptr>();
+    /* Exchange doesn't just store whatever MIME content that was sent to it - it will parse it and send
+     * further the version assembled back from the parsed parts. It seems that this parsing doesn't work well
+     * with the quoted-printable encoding, which KMail prefers. This results in malformed encoding, which the
+     * sender doesn't even see.
+     * As a workaround force encoding of the body (or in case of multipart - all parts) to Base64. */
+    if (msg->contents().isEmpty()) {
+        msg->changeEncoding(KMime::Headers::CEbase64);
+        msg->contentTransferEncoding(true)->setEncoding(KMime::Headers::CEbase64);
+    } else {
+        Q_FOREACH (KMime::Content *content, msg->contents()) {
+            content->changeEncoding(KMime::Headers::CEbase64);
+            content->contentTransferEncoding(true)->setEncoding(KMime::Headers::CEbase64);
+        }
+    }
+    msg->assemble();
     QByteArray mimeContent = msg->encodedContent(true);
     bool sentItemsCreateWorkaround = false;
     EwsItem item;
