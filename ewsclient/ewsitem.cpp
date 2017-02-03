@@ -23,6 +23,7 @@
 #include <QtCore/QXmlStreamWriter>
 #include <KCodecs/KCodecs>
 
+#include "ewsattachment.h"
 #include "ewsitembase_p.h"
 #include "ewsmailbox.h"
 #include "ewsattendee.h"
@@ -57,6 +58,7 @@ public:
     static bool recurrenceReader(QXmlStreamReader &reader, QVariant &val);
     static bool categoriesReader(QXmlStreamReader &reader, QVariant &val);
     static bool categoriesWriter(QXmlStreamWriter &writer, const QVariant &val);
+    static bool attachmentsReader(QXmlStreamReader &reader, QVariant &val);
 
     bool operator==(const EwsItemPrivate &other) const;
 
@@ -68,12 +70,13 @@ public:
 static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
     // Item fields
     {EwsItemFieldMimeContent, QStringLiteral("MimeContent"), &ewsXmlBase64Reader, &ewsXmlBase64Writer},
-    {EwsItemFieldItemId, QStringLiteral("ItemId"), &ewsXmlIdReader},
+    {EwsItemFieldItemId, QStringLiteral("ItemId"), &ewsXmlIdReader, &ewsXmlIdWriter},
     {EwsItemFieldParentFolderId, QStringLiteral("ParentFolderId"), &ewsXmlIdReader, &ewsXmlIdWriter},
     {EwsItemFieldItemClass, QStringLiteral("ItemClass"), &ewsXmlTextReader, &ewsXmlTextWriter},
     {EwsItemFieldSubject, QStringLiteral("Subject"), &ewsXmlTextReader, &ewsXmlTextWriter},
     {EwsItemFieldSensitivity, QStringLiteral("Sensitivity"), &ewsXmlSensitivityReader},
     {EwsItemFieldBody, QStringLiteral("Body"), &EwsItemPrivate::bodyReader},
+    {EwsItemFieldAttachments, QStringLiteral("Attachments"), &EwsItemPrivate::attachmentsReader},
     {EwsItemFieldDateTimeReceived, QStringLiteral("DateTimeReceived"), &ewsXmlDateTimeReader},
     {EwsItemFieldSize, QStringLiteral("Size"), &ewsXmlUIntReader},
     {EwsItemFieldCategories, QStringLiteral("Categories"), &EwsItemPrivate::categoriesReader,
@@ -364,6 +367,28 @@ bool EwsItemPrivate::recurrenceReader(QXmlStreamReader &reader, QVariant &val)
 {
     EwsRecurrence recurrence(reader);
     val = QVariant::fromValue<EwsRecurrence>(recurrence);
+    return true;
+}
+
+bool EwsItemPrivate::attachmentsReader(QXmlStreamReader &reader, QVariant &val)
+{
+    EwsAttachment::List attList;
+
+    while (reader.readNextStartElement()) {
+        if (reader.namespaceUri() != ewsTypeNsUri) {
+            qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
+                            << reader.namespaceUri();
+            return false;
+        }
+        EwsAttachment att(reader);
+        if (!att.isValid()) {
+            return false;
+        }
+        attList.append(att);
+    }
+
+    val = QVariant::fromValue<EwsAttachment::List>(attList);
+
     return true;
 }
 
