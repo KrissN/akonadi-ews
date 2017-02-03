@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -148,6 +148,9 @@ private:
     }
 };
 
+template <typename T>
+T readXmlElementValue(QXmlStreamReader &reader, bool &ok, const QString &parentElement);
+
 extern bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlBoolWriter(QXmlStreamWriter &writer, const QVariant &val);
 extern bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val);
@@ -168,6 +171,5 @@ extern bool ewsXmlImportanceReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlCalendarItemTypeReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlLegacyFreeBusyStatusReader(QXmlStreamReader &reader, QVariant &val);
 extern bool ewsXmlResponseTypeReader(QXmlStreamReader &reader, QVariant &val);
-
 
 #endif
