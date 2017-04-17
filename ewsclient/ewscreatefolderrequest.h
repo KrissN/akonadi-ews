@@ -52,11 +52,11 @@ public:
     void setFolders(const EwsFolder::List &folders) { mFolders = folders; };
     void setParentFolderId(const EwsId &id) { mParentFolderId = id; };
 
-    virtual void start();
+    virtual void start() Q_DECL_OVERRIDE;
 
     const QList<Response> &responses() const { return mResponses; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsFolder::List mFolders;

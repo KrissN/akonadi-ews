@@ -47,11 +47,11 @@ public:
     void setItemIds(const EwsId::List &ids);
     void setItemShape(const EwsItemShape &shape);
 
-    virtual void start();
+    virtual void start() Q_DECL_OVERRIDE;
 
     const QList<Response> &responses() const { return mResponses; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsId::List mIds;

@@ -40,7 +40,7 @@ public:
 
     void setWatermark(const QString &watermark) { mWatermark = watermark; };
 
-    virtual void start();
+    virtual void start() Q_DECL_OVERRIDE;
 
 protected:
     QString mWatermark;

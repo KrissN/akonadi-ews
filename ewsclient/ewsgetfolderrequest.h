@@ -46,11 +46,11 @@ public:
     void setFolderIds(const EwsId::List &ids);
     void setFolderShape(const EwsFolderShape &shape);
 
-    virtual void start();
+    virtual void start() Q_DECL_OVERRIDE;
 
     const QList<Response> &responses() const { return mResponses; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
     EwsId::List mIds;

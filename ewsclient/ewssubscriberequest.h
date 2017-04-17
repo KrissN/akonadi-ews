@@ -66,9 +66,9 @@ public:
 
     const Response &response() const { return *mResponse; };
 
-    virtual void start();
+    virtual void start() Q_DECL_OVERRIDE;
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseSubscribeResponse(QXmlStreamReader &reader);
 private:
     //QSharedPointer<EwsSubscription> mSubscription;

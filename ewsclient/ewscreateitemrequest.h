@@ -54,11 +54,11 @@ public:
     void setMeetingDisposition(EwsMeetingDisposition disp) { mMeetingDisp = disp; };
     void setSavedFolderId(const EwsId &id) { mSavedFolderId = id; };
 
-    virtual void start();
+    virtual void start() Q_DECL_OVERRIDE;
 
     const QList<Response> &responses() const { return mResponses; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsItem::List mItems;

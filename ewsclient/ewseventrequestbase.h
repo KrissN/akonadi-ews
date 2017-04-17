@@ -113,7 +113,7 @@ public:
     const QList<Response> &responses() const { return mResponses; };
 protected:
     EwsEventRequestBase(EwsClient &client, const QString &reqName, QObject *parent);
-    virtual bool parseResult(QXmlStreamReader &reader);
+    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
     bool parseNotificationsResponse(QXmlStreamReader &reader);
 
     QString mSubscriptionId;
