@@ -60,6 +60,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ewsclient)
 add_definitions(-DTRANSLATION_DOMAIN=\"akonadi_ews_resource\")
 
 set(ewsresource_SRCS
+    abchperson/ewsabchpersonhandler.cpp
+    abchperson/ewscreateabchpersonjob.cpp
+    abchperson/ewsfetchabchpersondetailjob.cpp
+    abchperson/ewsmodifyabchpersonjob.cpp
     calendar/ewscalendarhandler.cpp
     calendar/ewscreatecalendarjob.cpp
     calendar/ewsfetchcalendardetailjob.cpp

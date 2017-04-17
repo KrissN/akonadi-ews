@@ -138,6 +138,7 @@ typedef enum {
     EwsItemTypeMeetingResponse,
     EwsItemTypeMeetingCancellation,
     EwsItemTypeTask,
+    EwsItemTypeAbchPerson,
     EwsItemTypeUnknown
 } EwsItemType;
 
@@ -380,6 +381,7 @@ typedef enum {
     // Additional fields not in EWS specification
     EwsItemFieldBodyIsHtml,
     EwsItemFieldExtendedProperties,
+    EwsItemFieldExchangePersonIdGuid,
 } EwsItemFields;
 
 typedef enum {

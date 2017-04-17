@@ -130,6 +130,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
     {EwsItemFieldDeletedOccurrences, QStringLiteral("DeletedOccurrences"),
         &EwsItemPrivate::occurrencesReader},
     {EwsItemFieldTimeZone, QStringLiteral("TimeZone"), &ewsXmlTextReader},
+    {EwsItemFieldExchangePersonIdGuid, QStringLiteral("ExchangePersonIdGuid"), &ewsXmlTextReader},
 };
 
 const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsXml(ewsItemItems);
@@ -422,6 +423,14 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
     // Check what item type are we
     if (reader.name() == QStringLiteral("Item")) {
         d->mType = EwsItemTypeItem;
+        QStringRef subtype = reader.attributes().value(QStringLiteral("xsi:type"));
+        if (!subtype.isEmpty()) {
+            auto tokens = subtype.split(':');
+            QStringRef type = tokens.size() == 1 ? tokens[0] : tokens[1];
+            if (type == QStringLiteral("AbchPersonItemType")) {
+                d->mType = EwsItemTypeAbchPerson;
+            }
+        }
     }
     else if (reader.name() == QStringLiteral("Message")) {
         d->mType = EwsItemTypeMessage;
