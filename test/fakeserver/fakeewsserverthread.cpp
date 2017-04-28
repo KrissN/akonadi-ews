@@ -40,15 +40,15 @@ void FakeEwsServerThread::run()
     bool ok = mServer->start();
     mMutex.unlock();
 
-    Q_EMIT serverStarted(ok);
-
     if (ok) {
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Fake server thread started.");
         mPortNumber = mServer->portNumber();
+        Q_EMIT serverStarted(ok);
         mIsRunning = 1;
         exec();
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Fake server thread terminating.");
     } else {
+        Q_EMIT serverStarted(ok);
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Fake server thread start failed.");
     }
 
