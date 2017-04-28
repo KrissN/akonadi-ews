@@ -204,7 +204,6 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
     FakeEwsServer::DialogEntry::HttpResponse resp = FakeEwsServer::EmptyResponse;
     Q_FOREACH(const FakeEwsServer::DialogEntry &de, server->dialog()) {
-        qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Trying \"") << de.description << QStringLiteral("\"");
         QXmlResultItems ri;
         QByteArray resultBytes;
         QString result;
@@ -225,7 +224,7 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
         }
 
         if (!result.trimmed().isEmpty()) {
-            qCDebugNC(EWSFAKE_LOG) << QStringLiteral("XQuery evaluated to non-empty response.");
+            qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Got match for \"") << de.description << QStringLiteral("\"");
             if (de.replyCallback) {
                 resp = de.replyCallback(content, ri, query.namePool());
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from callback ")
@@ -248,7 +247,10 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
                 << resp.second << QStringLiteral(": ") << resp.first;
     }
 
-    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning empty response.");
+    if (resp == FakeEwsServer::EmptyResponse) {
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning empty response.");
+        qCInfoNC(EWSFAKE_LOG) << content;
+    }
 
     return resp;
 }
