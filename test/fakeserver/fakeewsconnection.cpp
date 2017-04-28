@@ -114,7 +114,7 @@ void FakeEwsConnection::dataAvailable()
             return;
         }
 
-        mContent = mSock->read(mContentLength - mContent.size());
+        mContent += mSock->read(mContentLength - mContent.size());
 
         if (mContent.size() >= static_cast<int>(mContentLength)) {
             mDataTimer.stop();
@@ -171,6 +171,7 @@ void FakeEwsConnection::dataAvailable()
             if (!mKeepAlive && !chunked) {
                 mSock->disconnectFromHost();
             }
+            mContent.clear();
             mState = Initial;
         } else {
             mDataTimer.start(3000);
