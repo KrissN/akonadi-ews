@@ -566,8 +566,8 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
             "xmlns:t=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
             "<soap:Body>"
             "<GetStreamingEvents xmlns=\"http://schemas.microsoft.com/exchange/services/2006/messages\">"
-            "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</SubscriptionId>"
-            "<Timeout>1</Timeout>"
+            "<SubscriptionIds><SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d</SubscriptionId></SubscriptionIds>"
+            "<ConnectionTimeout>1</ConnectionTimeout>"
             "</GetStreamingEvents>"
             "</soap:Body>"
             "</soap:Envelope>");
@@ -588,30 +588,32 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
                 "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
                 "</soap:Header>"
                 "<soap:Body>"
-                "<m:GetStreamingEventsResponse xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+                "<m:GetStreamingEventsResponse>"
                 "<m:ResponseMessages>"
                 "<m:GetStreamingEventsResponseMessage ResponseClass=\"Success\">"
                 "<m:ResponseCode>NoError</m:ResponseCode>"
-                "<m:Notification>"
-                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>");
-        const QString respTail = QStringLiteral("</m:Notification>"
-                "</m:GetStreamingEventsResponseMessage>"
+                "<m:ConnectionStatus>OK</m:ConnectionStatus>");
+        const QString respTail = QStringLiteral("</m:GetStreamingEventsResponseMessage>"
                 "</m:ResponseMessages>"
                 "</m:GetStreamingEventsResponse>"
                 "</soap:Body>"
                 "</soap:Envelope>");
+        const QString eventHead = QStringLiteral("<m:Notifications>"
+                "<m:Notification>"
+                "<SubscriptionId>f6bc657d-dde1-4f94-952d-143b95d6483d<SubscriptionId>");
+        const QString eventTail = QStringLiteral("</m:Notification></m:Notifications>");
         const QString event2 = QStringLiteral("<NewMailEvent>"
-                    "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
-                    "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
-                    "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
-                    "</NewMailEvent>");
+                "<TimeStamp>2006-08-22T01:00:50Z</TimeStamp>"
+                "<ItemId Id=\"AQApAHRw\" ChangeKey=\"CQAAAA==\" />"
+                "<ParentFolderId Id=\"AQApAH\" ChangeKey=\"AQAAAA==\" />"
+                "</NewMailEvent>");
         callbackCalled = true;
 
         QString expResp = respHead;
         if (responseNo == 0) {
-            expResp += event;
+            expResp += eventHead + event + eventTail;
         } else if (responseNo == 2) {
-            expResp += event2;
+            expResp += eventHead + event2 + eventTail;
         }
         expResp += respTail;
 

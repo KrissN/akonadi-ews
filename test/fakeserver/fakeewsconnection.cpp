@@ -339,20 +339,23 @@ QString FakeEwsConnection::prepareEventsResponse(const QStringList &events)
             "<t:ServerVersionInfo MajorVersion=\"8\" MinorVersion=\"0\" MajorBuildNumber=\"628\" MinorBuildNumber=\"0\" />"
             "</soap:Header>"
             "<soap:Body>"
-            "<m:GetStreamingEventsResponse xmlns=\"http://schemas.microsoft.com/exchange/services/2006/types\">"
+            "<m:GetStreamingEventsResponse>"
             "<m:ResponseMessages>"
             "<m:GetStreamingEventsResponseMessage ResponseClass=\"Success\">"
             "<m:ResponseCode>NoError</m:ResponseCode>"
-            "<m:Notification>");
+            "<m:ConnectionStatus>OK</m:ConnectionStatus>");
 
-    resp += QStringLiteral("<SubscriptionId>") + mStreamingSubId + QStringLiteral("<SubscriptionId>");
+    if (!events.isEmpty()) {
+        resp += QStringLiteral("<m:Notifications><m:Notification><SubscriptionId>") + mStreamingSubId + QStringLiteral("<SubscriptionId>");
 
-    qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning %1 events.").arg(events.size());
-    Q_FOREACH(const QString &eventXml, events) {
-        resp += eventXml;
+        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning %1 events.").arg(events.size());
+        Q_FOREACH(const QString &eventXml, events) {
+            resp += eventXml;
+        }
+
+        resp += QStringLiteral("</m:Notification></m:Notifications>");
     }
-
-    resp += QStringLiteral("</m:Notification></m:GetStreamingEventsResponseMessage></m:ResponseMessages>"
+    resp += QStringLiteral("</m:GetStreamingEventsResponseMessage></m:ResponseMessages>"
             "</m:GetStreamingEventsResponse></soap:Body></soap:Envelope>");
 
     return resp;
@@ -360,7 +363,7 @@ QString FakeEwsConnection::prepareEventsResponse(const QStringList &events)
 
 FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetStreamingEventsRequest(const QString &content)
 {
-    const QRegularExpression re(QStringLiteral("<?xml .*<\\w*:?GetStreamingEvents[ >].*<\\w*:?SubscriptionId>(?<subid>[^<]*)</\\w*:?SubscriptionId><\\w*:?Timeout>(?<timeout>[^<]*)</\\w*:?Timeout></\\w*:?GetStreamingEvents>.*"));
+    const QRegularExpression re(QStringLiteral("<?xml .*<\\w*:?GetStreamingEvents[ >].*<\\w*:?SubscriptionIds><\\w*:?SubscriptionId>(?<subid>[^<]*)</\\w*:?SubscriptionId></\\w*:?SubscriptionIds>.*<\\w*:?ConnectionTimeout>(?<timeout>[^<]*)</\\w*:?ConnectionTimeout></\\w*:?GetStreamingEvents>.*"));
 
     QRegularExpressionMatch match = re.match(content);
     if (!match.hasMatch() || match.hasPartialMatch()) {
