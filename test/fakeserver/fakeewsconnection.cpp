@@ -19,10 +19,12 @@
 
 #include "fakeewsconnection.h"
 
+#include <QtCore/QBuffer>
 #include <QtNetwork/QTcpSocket>
 #include <QtXmlPatterns/QXmlNamePool>
 #include <QtXmlPatterns/QXmlQuery>
 #include <QtXmlPatterns/QXmlResultItems>
+#include <QtXmlPatterns/QXmlSerializer>
 
 #include "fakeewsserver.h"
 #include "fakeewsserver_debug.h"
@@ -204,17 +206,22 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
     Q_FOREACH(const FakeEwsServer::DialogEntry &de, server->dialog()) {
         qCDebugNC(EWSFAKE_LOG) << QStringLiteral("Trying \"") << de.description << QStringLiteral("\"");
         QXmlResultItems ri;
+        QByteArray resultBytes;
         QString result;
+        QBuffer resultBuffer(&resultBytes);
+        resultBuffer.open(QIODevice::WriteOnly);
         QXmlQuery query;
+        QXmlSerializer xser(query, &resultBuffer);
         if (!de.xQuery.isNull()) {
             query.setFocus(content);
             query.setQuery(de.xQuery);
-            query.evaluateTo(&result);
+            query.evaluateTo(&xser);
             query.evaluateTo(&ri);
             if (ri.hasError()) {
                 qCDebugNC(EWSFAKE_LOG) << QStringLiteral("XQuery failed due to errors - skipping");
                 continue;
             }
+            result = QString::fromUtf8(resultBytes);
         }
 
         if (!result.trimmed().isEmpty()) {
