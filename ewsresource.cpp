@@ -100,7 +100,7 @@ EwsResource::EwsResource(const QString &id)
     //setName(i18n("Microsoft Exchange"));
     mEwsClient.setUrl(Settings::baseUrl());
     requestPassword(mPassword, true);
-    if (Settings::domain().isEmpty()) {
+    if (!Settings::hasDomain()) {
         mEwsClient.setCredentials(Settings::username(), mPassword);
     } else {
         mEwsClient.setCredentials(Settings::domain() + '\\' + Settings::username(), mPassword);
