@@ -96,6 +96,7 @@ set(ewsresource_SRCS
     ewsmodifyitemjob.cpp
     ewsmodifyitemflagsjob.cpp
     ewsresource.cpp
+    ewsresource_debug.cpp
     ewssubscribedfoldersjob.cpp
     ewssubscriptionmanager.cpp
     ewssubscriptionwidget.cpp
