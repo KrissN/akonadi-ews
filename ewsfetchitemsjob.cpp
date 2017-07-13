@@ -231,11 +231,11 @@ void EwsFetchItemsJob::checkedItemsFetchFinished(KJob *job)
         Q_FOREACH(const EwsGetItemRequest::Response &resp, req->responses())
         {
             if (resp.isSuccess()) {
-                qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 found - readding").arg(it->id());
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 found - readding").arg(ewsHash(it->id()));
                 mRemoteAddedItems.append(resp.item());
             }
             else {
-                qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 not found - removing").arg(it->id());
+                qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 not found - removing").arg(ewsHash(it->id()));
                 mRemoteDeletedIds.append(*it);
             }
             it++;
@@ -313,7 +313,7 @@ void EwsFetchItemsJob::compareItemLists()
             QHash<QString, Item>::iterator it = itemHash.find(id.id());
             if (it == itemHash.end()) {
                 setErrorMsg(QStringLiteral("Got update for item %1, but item not found in local store.")
-                                .arg(id.id()));
+                                .arg(ewsHash(id.id())));
                 emitResult();
                 return;
             }
@@ -340,11 +340,11 @@ void EwsFetchItemsJob::compareItemLists()
             if (it == itemHash.end()) {
                 QHash<QString, QString>::iterator qit = mQueuedUpdates[EwsDeletedEvent].find(id.id());
                 if (EWSRES_LOG().isDebugEnabled() && qit != mQueuedUpdates[EwsDeletedEvent].end()) {
-                    qCDebugNC(EWSRES_LOG) << QStringLiteral("Match for queued deletion of item %1").arg(id.id());
+                    qCDebugNC(EWSRES_LOG) << QStringLiteral("Match for queued deletion of item %1").arg(ewsHash(id.id()));
                 }
                 if (!mItemsToCheck.contains(id) && qit == mQueuedUpdates[EwsDeletedEvent].end()) {
                     setErrorMsg(QStringLiteral("Got delete for item %1, but item not found in local store.")
-                                    .arg(id.id()));
+                                    .arg(ewsHash(id.id())));
                     emitResult();
                     return;
                 }
@@ -435,7 +435,7 @@ void EwsFetchItemsJob::setQueuedUpdates(const QueuedUpdateList &updates)
     mQueuedUpdates.clear();
     Q_FOREACH(const QueuedUpdate &upd, updates) {
         mQueuedUpdates[upd.type].insert(upd.id, upd.changeKey);
-        qCDebugNC(EWSRES_LOG) << QStringLiteral("Queued update %1 for item %2").arg(upd.type).arg(upd.id);
+        qCDebugNC(EWSRES_LOG) << QStringLiteral("Queued update %1 for item %2").arg(upd.type).arg(ewsHash(upd.id));
     }
 }
 

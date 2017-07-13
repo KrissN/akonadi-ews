@@ -1246,7 +1246,7 @@ void EwsResource::specialFoldersFetchFinished(KJob *job)
             QMap<QString, Collection>::iterator mapIt = map.find(fid.id());
             if (mapIt != map.end()) {
                 qCDebugNC(EWSRES_LOG) << QStringLiteral("Registering folder %1(%2) as special collection %3")
-                                .arg(mapIt->remoteId()).arg(mapIt->id()).arg(it->type);
+                                .arg(ewsHash(mapIt->remoteId())).arg(mapIt->id()).arg(it->type);
                 SpecialMailCollections::self()->registerCollection(it->type, *mapIt);
                 if (!mapIt->hasAttribute<EntityDisplayAttribute>()) {
                     EntityDisplayAttribute *attr = mapIt->attribute<EntityDisplayAttribute>(Collection::AddIfMissing);

@@ -25,6 +25,7 @@
 #include <QtCore/QDebug>
 
 #include "ewsclient.h"
+#include "ewsclient_debug.h"
 
 static const QString distinguishedIdNames[] = {
     QStringLiteral("calendar"),
@@ -245,11 +246,8 @@ QDebug operator<<(QDebug debug, const EwsId &id)
         break;
     case EwsId::Real:
     {
-        QString name = EwsClient::folderHash.value(id.mId);
-        if (name.isNull()) {
-            name = id.mId;
-        }
-        d << name << QStringLiteral(", changeKey: ") << id.mChangeKey;
+        QString name = EwsClient::folderHash.value(id.mId, ewsHash(id.mId));
+        d << name << QStringLiteral(", ") << ewsHash(id.mChangeKey);
         break;
     }
     default:
