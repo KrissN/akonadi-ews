@@ -19,7 +19,9 @@
 
 #include <AkonadiCore/AgentInstanceCreateJob>
 #include <AkonadiCore/AgentManager>
+#include <AkonadiCore/CollectionFetchScope>
 #include <AkonadiCore/Control>
+#include <AkonadiCore/Monitor>
 #include <qtest_akonadi.h>
 
 #include "fakeewsserverthread.h"
@@ -76,7 +78,30 @@ void BasicTest::testBasic()
 
     mFakeServerThread->setDialog(dialog);
 
+    // TODO: List them explicitly instead of blindly relay on total count.
+    int numFoldersExpected = 5;
+    QEventLoop loop;
+
+    Monitor monitor(this);
+    connect(&monitor, &Monitor::collectionAdded, this,
+            [&](const Akonadi::Collection &, const Akonadi::Collection &){
+        if (--numFoldersExpected == 0) {
+            loop.exit(0);
+        }
+    });
+
+    monitor.setResourceMonitored(mEwsInstance->identifier().toAscii(), true);
+
     QVERIFY(setEwsResOnline(true, true));
+
+    QTimer timer;
+    timer.setSingleShot(true);
+    connect(&timer, &QTimer::timeout, this, [&]() {
+        qDebug() << "Timeout waiting for desired resource online state.";
+        loop.exit(1);
+    });
+    timer.start(5000);
+    QCOMPARE(loop.exec(), 0);
 
     QVERIFY(setEwsResOnline(false, true));
 }
