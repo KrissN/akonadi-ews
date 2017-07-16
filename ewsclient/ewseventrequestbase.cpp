@@ -255,10 +255,10 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
     mUnreadCount = values[UnreadCount].toUInt();
 
     if (mType == EwsStatusEvent) {
-        qCDebugNC(EWSRES_LOG) << QStringLiteral(" %1").arg(evName);
+        qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1").arg(evName);
     }
     else {
-        qCDebugNC(EWSRES_LOG) << QStringLiteral(" %1, %2, parent: ").arg(evName).arg(mIsFolder ? 'F' : 'I')
+        qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1, %2, parent: ").arg(evName).arg(mIsFolder ? 'F' : 'I')
                         << mParentFolderId << QStringLiteral(", id: ") << mId;
     }
 }

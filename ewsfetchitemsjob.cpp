@@ -138,6 +138,7 @@ void EwsFetchItemsJob::localItemFetchDone(KJob *job)
 {
     ItemFetchJob *fetchJob = qobject_cast<ItemFetchJob*>(job);
 
+    qCDebug(EWSRES_LOG) << "EwsFetchItemsJob::localItemFetchDone";
     if (!fetchJob) {
         setErrorMsg(QStringLiteral("Invalid item fetch job pointer."));
         doKill();
@@ -159,7 +160,7 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
 {
     EwsSyncFolderItemsRequest *itemReq = qobject_cast<EwsSyncFolderItemsRequest*>(job);
 
-    qDebug() << "remoteItemFetchDone";
+    qCDebug(EWSRES_LOG) << "EwsFetchItemsJob::remoteItemFetchDone";
     if (!itemReq) {
         setErrorMsg(QStringLiteral("Invalid find item request pointer."));
         doKill();

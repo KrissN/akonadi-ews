@@ -159,12 +159,12 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         Q_FOREACH(const QByteArray &flag, EwsMailHandler::readFlags(ewsItem)) {
             item.setFlag(flag);
         }
-        qDebug() << "processItems:" << item.flags();
+        qCDebugNC(EWSRES_LOG) << "EwsFetchMailDetailJob::processItems:" << ewsHash(item.remoteId()) << item.flags();
 
         it++;
     }
 
-    qDebug() << __FUNCTION__ << "done";
+    qCDebugNC(EWSRES_LOG) << "EwsFetchMailDetailJob::processItems: done";
 
     emitResult();
 }

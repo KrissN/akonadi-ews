@@ -59,6 +59,7 @@
 #include "tags/ewsglobaltagswritejob.h"
 #include "tags/ewsglobaltagsreadjob.h"
 #include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 #include "resourceadaptor.h"
 
@@ -240,7 +241,7 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
     if (id.type() == EwsId::Real) {
         mRootCollection.setRemoteId(id.id());
         mRootCollection.setRemoteRevision(id.changeKey());
-        qDebug() << "Root folder is " << id;
+        qCDebug(EWSRES_LOG) << "Root folder is " << id;
         Q_EMIT status(Idle, i18nc("@info:status", "Ready"));
 
         if (Settings::serverSubscription()) {
@@ -369,9 +370,8 @@ void EwsResource::retrieveItems(const Collection &collection)
 #if (AKONADI_VERSION > 0x50328)
 bool EwsResource::retrieveItems(const Item::List &items, const QSet<QByteArray> &parts)
 {
-    Q_UNUSED(parts)
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItems: start " << items << parts;
 
-    qDebug() << "retrieveItems";
     EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
     EwsId::List ids;
     Q_FOREACH(const Item &item, items) {
@@ -411,13 +411,13 @@ void EwsResource::getItemsRequestFinished(KJob *job)
 
     const EwsGetItemRequest::Response &resp = req->responses()[0];
     if (!resp.isSuccess()) {
-        qWarning() << QStringLiteral("Item fetch failed!");
+        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItems: Item fetch failed!");
         cancelTask(QStringLiteral("Item fetch failed!"));
         return;
     }
 
     if (items.size() != req->responses().size()) {
-        qWarning() << QStringLiteral("Item fetch failed - incorrect number of responses!");
+        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItems: incorrect number of responses!");
         cancelTask(QStringLiteral("Item fetch failed - incorrect number of responses!"));
         return;
 
@@ -428,30 +428,31 @@ void EwsResource::getItemsRequestFinished(KJob *job)
         EwsId id = ewsItem[EwsItemFieldItemId].value<EwsId>();
         auto it = itemHash.find(id.id());
         if (it == itemHash.end()) {
-            qWarning() << QStringLiteral("Item fetch failed - Akonadi item not found for item %s!").arg(id.id());
+            qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItems: Akonadi item not found for item %s!").arg(id.id());
             cancelTask(QStringLiteral("Item fetch failed - Akonadi item not found for item %s!").arg(id.id()));
             return;
         }
         EwsItemType type = ewsItem.internalType();
         if (type == EwsItemTypeUnknown) {
-            qWarning() << QStringLiteral("Item fetch failed - Unknown item type for item %s!").arg(id.id());
+            qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItems: Unknown item type for item %s!").arg(id.id());
             cancelTask(QStringLiteral("Item fetch failed - Unknown item type for item %s!").arg(id.id()));
             return;
         }
         if (!EwsItemHandler::itemHandler(type)->setItemPayload(*it, ewsItem)) {
+            qCWarningNC(EWSRES_AGENTIF_LOG) << "retrieveItems: Failed to fetch item payload";
             cancelTask(QStringLiteral("Failed to fetch item payload."));
             return;
         }
     }
 
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItems: done";
     itemsRetrieved(itemHash.values().toVector());
 }
 #else
 bool EwsResource::retrieveItem(const Item &item, const QSet<QByteArray> &parts)
 {
-    Q_UNUSED(parts)
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItem: start " << item << parts;
 
-    qDebug() << "retrieveItem";
     EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
     EwsId::List ids;
     ids << EwsId(item.remoteId(), item.remoteRevision());
@@ -482,22 +483,24 @@ void EwsResource::getItemRequestFinished(KJob *job)
     Item item = req->property("item").value<Item>();
     const EwsGetItemRequest::Response &resp = req->responses()[0];
     if (!resp.isSuccess()) {
-        qWarning() << QStringLiteral("Item fetch failed!");
+        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Item fetch failed!");
         cancelTask(QStringLiteral("Item fetch failed!"));
         return;
     }
     const EwsItem &ewsItem = resp.item();
     EwsItemType type = ewsItem.internalType();
     if (type == EwsItemTypeUnknown) {
-        qWarning() << QStringLiteral("Item fetch failed - Unknown item type!");
+        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Unknown item type!");
         cancelTask(QStringLiteral("Item fetch failed - Unknown item type!"));
         return;
     }
     if (!EwsItemHandler::itemHandler(type)->setItemPayload(item, ewsItem)) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Failed to fetch item payload.");
         cancelTask(QStringLiteral("Failed to fetch item payload."));
         return;
     }
 
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItem: done";
     itemRetrieved(item);
 }
 #endif
@@ -599,8 +602,11 @@ void EwsResource::itemFetchJobFinished(KJob *job)
 
 void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers)
 {
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "itemChanged: start " << item << partIdentifiers;
+
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
     if (type == EwsItemTypeItem) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: Item type not supported for changing";
         cancelTask("Item type not supported for changing");
     }
     else {
@@ -614,6 +620,8 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
 void EwsResource::itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
                                    const QSet<QByteArray> &removedFlags)
 {
+    qCDebug(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged: start" << items << addedFlags << removedFlags;
+
     EwsModifyItemFlagsJob *job = new EwsModifyItemFlagsJob(mEwsClient, this, items, addedFlags, removedFlags);
     connect(job, &EwsModifyItemFlagsJob::result, this, &EwsResource::itemModifyFlagsRequestFinished);
     job->start();
@@ -622,38 +630,46 @@ void EwsResource::itemsFlagsChanged(const Akonadi::Item::List &items, const QSet
 void EwsResource::itemModifyFlagsRequestFinished(KJob *job)
 {
     if (job->error()) {
+        qCWarning(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged:" << job->errorString();
         cancelTask(job->errorString());
         return;
     }
 
     EwsModifyItemFlagsJob *req = qobject_cast<EwsModifyItemFlagsJob*>(job);
     if (!req) {
+        qCWarning(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged: Invalid EwsModifyItemFlagsJob job object";
         cancelTask(QStringLiteral("Invalid EwsModifyItemFlagsJob job object"));
         return;
     }
 
+    qCDebug(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged: done";
     changesCommitted(req->items());
 }
 
 void EwsResource::itemChangeRequestFinished(KJob *job)
 {
     if (job->error()) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: " << job->errorString();
         cancelTask(job->errorString());
         return;
     }
 
     EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
     if (!req) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: Invalid EwsModifyItemJob job object";
         cancelTask(QStringLiteral("Invalid EwsModifyItemJob job object"));
         return;
     }
 
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "itemChanged: done";
     changesCommitted(req->items());
 }
 
 void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCollection,
                              const Collection &destinationCollection)
 {
+    qCDebug(EWSRES_AGENTIF_LOG) << "itemsMoved: start" << items << sourceCollection << destinationCollection;
+
     EwsId::List ids;
 
     Q_FOREACH(const Item &item, items) {
@@ -675,18 +691,21 @@ void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCo
 void EwsResource::itemMoveRequestFinished(KJob *job)
 {
     if (job->error()) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsMoved: " << job->errorString();
         cancelTask(job->errorString());
         return;
     }
 
     EwsMoveItemRequest *req = qobject_cast<EwsMoveItemRequest*>(job);
     if (!req) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsMoved: Invalid EwsMoveItemRequest job object";
         cancelTask(QStringLiteral("Invalid EwsMoveItemRequest job object"));
         return;
     }
     Item::List items = job->property("items").value<Item::List>();
 
     if (items.count() != req->responses().count()) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsMoved: Invalid number of responses received from server";
         cancelTask(QStringLiteral("Invalid number of responses received from server."));
         return;
     }
@@ -707,7 +726,8 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
     Q_FOREACH(const EwsMoveItemRequest::Response &resp, req->responses()) {
         Item &item = *it;
         if (resp.isSuccess()) {
-            qCDebugNC(EWSRES_LOG) << QStringLiteral("Move succeeded for item %1 %2").arg(resp.itemId().id()).arg(item.remoteId());
+            qCDebugNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsMoved: succeeded for item %1 (new id: %2)")
+                .arg(ewsHash(item.remoteId())).arg(ewsHash(resp.itemId().id()));
             if (item.isValid()) {
                 /* Log item deletion in the source folder so that the next sync doesn't trip over
                  * non-existent items. Use old remote ids for that. */
@@ -723,7 +743,7 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
         }
         else {
             warning(QStringLiteral("Move failed for item %1").arg(item.remoteId()));
-            qCDebugNC(EWSRES_LOG) << QStringLiteral("Move failed for item %1").arg(item.remoteId());
+            qCDebugNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsMoved: failed for item %1").arg(ewsHash(item.remoteId()));
             failedIds.append(EwsId(item.remoteId(), QString()));
         }
         it++;
@@ -738,11 +758,14 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
         foldersModifiedEvent(EwsId::List({EwsId(dstCol.remoteId(), QString())}));
     }
 
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "itemsMoved: done";
     changesCommitted(movedItems);
 }
 
 void EwsResource::itemsRemoved(const Item::List &items)
 {
+    qCDebugNC(EWSRES_AGENTIF_LOG) << "itemsRemoved: start" << items;
+
     EwsId::List ids;
 
     Q_FOREACH(const Item &item, items) {
@@ -761,18 +784,21 @@ void EwsResource::itemsRemoved(const Item::List &items)
 void EwsResource::itemDeleteRequestFinished(KJob *job)
 {
     if (job->error()) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsRemoved: " << job->errorString();
         cancelTask(job->errorString());
         return;
     }
 
     EwsDeleteItemRequest *req = qobject_cast<EwsDeleteItemRequest*>(job);
     if (!req) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsRemoved: Invalid EwsDeleteItemRequest job object";
         cancelTask(QStringLiteral("Invalid EwsDeleteItemRequest job object"));
         return;
     }
     Item::List items = job->property("items").value<Item::List>();
 
     if (items.count() != req->responses().count()) {
+        qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsRemoved: Invalid number of responses received from server";
         cancelTask(QStringLiteral("Invalid number of responses received from server."));
         return;
     }
@@ -790,7 +816,7 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
     Q_FOREACH(const EwsDeleteItemRequest::Response &resp, req->responses()) {
         Item &item = *it;
         if (resp.isSuccess()) {
-            qCDebugNC(EWSRES_LOG) << QStringLiteral("Delete succeeded for item %1").arg(item.remoteId());
+            qCDebugNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsRemoved: succeeded for item %1").arg(ewsHash(item.remoteId()));
             if (mSubManager) {
                 mSubManager->queueUpdate(EwsDeletedEvent, item.remoteId(), QString());
             }
@@ -798,7 +824,7 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
         }
         else {
             warning(QStringLiteral("Delete failed for item %1").arg(item.remoteId()));
-            qCDebugNC(EWSRES_LOG) << QStringLiteral("Delere failed for item %1").arg(item.remoteId());
+            qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsRemoved: failed for item %1").arg(ewsHash(item.remoteId()));
             EwsId colId = EwsId(item.parentCollection().remoteId(), QString());
             mItemsToCheck[colId.id()].append(EwsId(item.remoteId(), QString()));
             if (!foldersToSync.contains(colId)) {
@@ -814,13 +840,14 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
         foldersModifiedEvent(foldersToSync);
     }
 
+    qCDebug(EWSRES_AGENTIF_LOG) << "itemsRemoved: done";
     changeProcessed();
 }
 
 void EwsResource::itemAdded(const Item &item, const Collection &collection)
 {
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
-    if (type == EwsItemTypeItem) {
+    if (isEwsMessageItemType(type)) {
         cancelTask("Item type not supported for creation");
     }
     else {

@@ -110,7 +110,7 @@ void EwsSyncFolderItemsRequest::start()
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         QString st = mSyncState.isNull() ? QStringLiteral("none") : ewsHash(mSyncState);
         QString folder;
-        qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
+        qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
                         << mFolderId << QStringLiteral(", state: %1").arg(st);
     }
 
