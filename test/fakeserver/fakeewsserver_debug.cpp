@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,31 +17,7 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSSUBSCRIPTIONWIDGET_H
-#define EWSSUBSCRIPTIONWIDGET_H
+#include "fakeewsserver_debug.h"
 
-#include <QtWidgets/QWidget>
-#include <QtCore/QScopedPointer>
+Q_LOGGING_CATEGORY(EWSFAKE_LOG, "log_ews_fakeserver")
 
-#include "ewsid.h"
-
-class EwsSubscriptionWidgetPrivate;
-class EwsClient;
-class Settings;
-
-class EwsSubscriptionWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    EwsSubscriptionWidget(EwsClient &client, Settings *settings, QWidget *parent);
-    ~EwsSubscriptionWidget();
-
-    QStringList subscribedList() const;
-    bool subscribedListValid() const;
-    bool subscriptionEnabled() const;
-private:
-    QScopedPointer<EwsSubscriptionWidgetPrivate> d_ptr;
-    Q_DECLARE_PRIVATE(EwsSubscriptionWidget)
-};
-
-#endif

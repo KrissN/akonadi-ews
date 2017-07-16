@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -55,7 +55,7 @@ class EwsSubscriptionWidgetPrivate : public QObject
 {
     Q_OBJECT
 public:
-    EwsSubscriptionWidgetPrivate(EwsClient &client, QObject *parent);
+    EwsSubscriptionWidgetPrivate(EwsClient &client, Settings *settings, QObject *parent);
     ~EwsSubscriptionWidgetPrivate();
 
     enum TreeModelRoles {
@@ -88,6 +88,7 @@ public:
     EwsId::List mOrigSubscribedIds;
     bool mSubscribedIdsRetrieved;
     EwsSubscriptionFilterModel *mFilterModel;
+    Settings *mSettings;
 
     EwsSubscriptionWidget *q_ptr;
     Q_DECLARE_PUBLIC(EwsSubscriptionWidget)
@@ -144,8 +145,9 @@ void EwsSubscriptionFilterModel::setFilterSelected(bool enabled)
     invalidateFilter();
 }
 
-EwsSubscriptionWidgetPrivate::EwsSubscriptionWidgetPrivate(EwsClient &client, QObject *parent)
-        : QObject(parent), mClient(client), mSubscribedIdsRetrieved(false)
+EwsSubscriptionWidgetPrivate::EwsSubscriptionWidgetPrivate(EwsClient &client, Settings *settings,
+                                                           QObject *parent)
+        : QObject(parent), mClient(client), mSubscribedIdsRetrieved(false), mSettings(settings)
 {
 }
 
@@ -171,7 +173,7 @@ void EwsSubscriptionWidgetPrivate::reloadFolderList(bool)
         req->start();
         mFolderListPendingRequests = 1;
         if (!mSubscribedIdsRetrieved) {
-            EwsSubscribedFoldersJob *job = new EwsSubscribedFoldersJob(mClient, this);
+            EwsSubscribedFoldersJob *job = new EwsSubscribedFoldersJob(mClient, mSettings, this);
             connect(job, &EwsRequest::result, this, &EwsSubscriptionWidgetPrivate::subscribedFoldersJobFinished);
             job->start();
             mFolderListPendingRequests++;
@@ -284,12 +286,12 @@ void EwsSubscriptionWidgetPrivate::resetSelection(bool)
     populateFolderTree();
 }
 
-EwsSubscriptionWidget::EwsSubscriptionWidget(EwsClient &client, QWidget *parent)
-    : QWidget(parent), d_ptr(new EwsSubscriptionWidgetPrivate(client, this))
+EwsSubscriptionWidget::EwsSubscriptionWidget(EwsClient &client, Settings *settings, QWidget *parent)
+    : QWidget(parent), d_ptr(new EwsSubscriptionWidgetPrivate(client, settings, this))
 {
     Q_D(EwsSubscriptionWidget);
 
-    d->mEnabled = Settings::serverSubscription();
+    d->mEnabled = d->mSettings->serverSubscription();
 
     QVBoxLayout *topLayout = new QVBoxLayout(this);
 
