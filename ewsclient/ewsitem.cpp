@@ -456,6 +456,9 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
     else if (reader.name() == QStringLiteral("MeetingCancellation")) {
         d->mType = EwsItemTypeMeetingCancellation;
     }
+    else if (reader.name() == QStringLiteral("PostItem")) {
+        d->mType = EwsItemTypePostItem;
+    }
     else if (reader.name() == QStringLiteral("Task")) {
         d->mType = EwsItemTypeTask;
     }

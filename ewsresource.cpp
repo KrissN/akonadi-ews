@@ -605,7 +605,7 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
     qCDebugNC(EWSRES_AGENTIF_LOG) << "itemChanged: start " << item << partIdentifiers;
 
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
-    if (type == EwsItemTypeItem) {
+    if (isEwsMessageItemType(type)) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: Item type not supported for changing";
         cancelTask("Item type not supported for changing");
     }
@@ -1076,7 +1076,7 @@ void EwsResource::folderDeleteRequestFinished(KJob *job)
 void EwsResource::sendItem(const Akonadi::Item &item)
 {
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
-    if (type == EwsItemTypeItem) {
+    if (isEwsMessageItemType(type)) {
         itemSent(item, TransportFailed, QStringLiteral("Item type not supported for creation"));
     }
     else {

@@ -139,6 +139,7 @@ typedef enum {
     EwsItemTypeMeetingCancellation,
     EwsItemTypeTask,
     EwsItemTypeAbchPerson,
+    EwsItemTypePostItem,
     EwsItemTypeUnknown
 } EwsItemType;
 
@@ -464,6 +465,11 @@ template <typename T> T decodeEnumString(QString str, const QString* table, unsi
     }
     *ok = (i < count);
     return enumVal;
+}
+
+inline bool isEwsMessageItemType(EwsItemType type)
+{
+    return (type == EwsItemTypeItem) || (type == EwsItemTypePostItem);
 }
 
 extern const QVector<QString> ewsItemTypeNames;

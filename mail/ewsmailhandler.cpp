@@ -185,3 +185,4 @@ QList<EwsPropertyField> EwsMailHandler::flagsProperties()
 }
 
 EWS_DECLARE_ITEM_HANDLER(EwsMailHandler, EwsItemTypeMessage)
+EWS_DECLARE_ITEM_HANDLER(EwsMailHandler, EwsItemTypePostItem)
