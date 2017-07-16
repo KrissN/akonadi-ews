@@ -3,7 +3,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/fakeserver)
 
 macro(add_akonadi_isolated_test _source)
   get_filename_component(_targetName ${_source} NAME_WE)
-  set(_srcList ${_source})
+  set(_srcList ${_source} isolatedtestbase.cpp)
   qt5_add_resources(_srcList ${_targetName}.qrc)
 
   kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/../ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
