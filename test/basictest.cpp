@@ -64,38 +64,14 @@ void BasicTest::cleanupTestCase()
 
 void BasicTest::testBasic()
 {
-    FakeEwsServer::DialogEntry::List dialog = {
-        {
-            loadResourceAsString(":/xquery/getfolder-inbox-msgroot"),
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("GetFolder request for inbox and msgroot")
-        },
-        {
-            loadResourceAsString(":/xquery/getfolder-specialfolders"),
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("GetFolder request for special folders")
-        },
-        {
-            loadResourceAsString(":/xquery/getfolder-tags"),
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("GetFolder request for tags")
-        },
-        {
-            loadResourceAsString(":/xquery/subscribe-streaming"),
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("Subscribe request for streaming events")
-        },
-        {
-            loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate"),
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("SyncFolderHierarchy request with empty state")
-        },
-        {
-            loadResourceAsString(":/xquery/unsubscribe"),
-            FakeEwsServer::DialogEntry::ReplyCallback(),
-            QStringLiteral("Unsubscribe request")
-        }
-
+    FakeEwsServer::DialogEntry::List dialog =
+    {
+        dialogEntryMsgRootInbox(),
+        dialogEntrySpecialFolders(),
+        dialogEntryGetTagsEmpty(),
+        dialogEntrySubscribeStreaming(),
+        dialogEntrySyncFolderHierarchyEmptyState(),
+        dialogEntryUnsubscribe()
     };
 
     mFakeServerThread->setDialog(dialog);

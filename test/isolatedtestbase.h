@@ -21,6 +21,7 @@
 #define TEST_ISOLATEDTESTBASE_H_
 
 #include <QObject>
+#include "fakeewsserver.h"
 
 namespace Akonadi {
 class AgentInstance;
@@ -42,6 +43,13 @@ protected:
     virtual void cleanup();
 
     bool setEwsResOnline(bool online, bool wait);
+
+    static FakeEwsServer::DialogEntry dialogEntryMsgRootInbox();
+    static FakeEwsServer::DialogEntry dialogEntrySpecialFolders();
+    static FakeEwsServer::DialogEntry dialogEntryGetTagsEmpty();
+    static FakeEwsServer::DialogEntry dialogEntrySubscribeStreaming();
+    static FakeEwsServer::DialogEntry dialogEntrySyncFolderHierarchyEmptyState();
+    static FakeEwsServer::DialogEntry dialogEntryUnsubscribe();
 protected:
     QString mEwsResIdentifier;
     QString mAkonadiInstanceIdentifier;

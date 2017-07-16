@@ -145,3 +145,57 @@ bool IsolatedTestBase::setEwsResOnline(bool online, bool wait)
     }
 }
 
+FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntryMsgRootInbox()
+{
+    return FakeEwsServer::DialogEntry({
+        loadResourceAsString(":/xquery/getfolder-inbox-msgroot"),
+        FakeEwsServer::DialogEntry::ReplyCallback(),
+        QStringLiteral("GetFolder request for inbox and msgroot")
+    });
+}
+
+FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntrySpecialFolders()
+{
+    return FakeEwsServer::DialogEntry({
+        loadResourceAsString(":/xquery/getfolder-specialfolders"),
+        FakeEwsServer::DialogEntry::ReplyCallback(),
+        QStringLiteral("GetFolder request for special folders")
+    });
+}
+
+FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntryGetTagsEmpty()
+{
+    return FakeEwsServer::DialogEntry({
+        loadResourceAsString(":/xquery/getfolder-tags"),
+        FakeEwsServer::DialogEntry::ReplyCallback(),
+        QStringLiteral("GetFolder request for tags")
+    });
+}
+
+FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntrySubscribeStreaming()
+{
+    return FakeEwsServer::DialogEntry({
+        loadResourceAsString(":/xquery/subscribe-streaming"),
+        FakeEwsServer::DialogEntry::ReplyCallback(),
+        QStringLiteral("Subscribe request for streaming events")
+    });
+}
+
+FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntrySyncFolderHierarchyEmptyState()
+{
+    return FakeEwsServer::DialogEntry({
+        loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate"),
+        FakeEwsServer::DialogEntry::ReplyCallback(),
+        QStringLiteral("SyncFolderHierarchy request with empty state")
+    });
+}
+
+FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntryUnsubscribe()
+{
+    return FakeEwsServer::DialogEntry({
+        loadResourceAsString(":/xquery/unsubscribe"),
+        FakeEwsServer::DialogEntry::ReplyCallback(),
+        QStringLiteral("Unsubscribe request")
+    });
+}
+
