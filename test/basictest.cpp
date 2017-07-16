@@ -100,13 +100,9 @@ void BasicTest::testBasic()
 
     mFakeServerThread->setDialog(dialog);
 
-    mEwsInstance->setIsOnline(true);
+    QVERIFY(setEwsResOnline(true, true));
 
-    QThread::sleep(15);
-
-    mEwsInstance->setIsOnline(false);
-
-    QThread::sleep(1);
+    QVERIFY(setEwsResOnline(false, true));
 }
 
 #include "basictest.moc"

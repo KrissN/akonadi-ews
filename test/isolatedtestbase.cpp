@@ -117,3 +117,31 @@ QString IsolatedTestBase::loadResourceAsString(const QString &path)
     return QString();
 }
 
+bool IsolatedTestBase::setEwsResOnline(bool online, bool wait)
+{
+    if (wait) {
+        QEventLoop loop;
+        auto conn = connect(AgentManager::self(), &AgentManager::instanceOnline, this,
+                [&](const AgentInstance &instance, bool state) {
+            if (instance == *mEwsInstance && state == online) {
+                qDebug() << "is online" << state;
+                loop.exit(0);
+            }
+        }, Qt::QueuedConnection);
+        QTimer timer;
+        timer.setSingleShot(true);
+        connect(&timer, &QTimer::timeout, this, [&]() {
+            qDebug() << "Timeout waiting for desired resource online state.";
+            loop.exit(1);
+        });
+        timer.start(3000);
+        mEwsInstance->setIsOnline(online);
+        bool status = (loop.exec() == 0);
+        disconnect(conn);
+        return status;
+    } else {
+        mEwsInstance->setIsOnline(online);
+        return true;
+    }
+}
+

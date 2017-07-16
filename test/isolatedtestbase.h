@@ -40,6 +40,8 @@ public:
 protected:
     virtual void init();
     virtual void cleanup();
+
+    bool setEwsResOnline(bool online, bool wait);
 protected:
     QString mEwsResIdentifier;
     QString mAkonadiInstanceIdentifier;
