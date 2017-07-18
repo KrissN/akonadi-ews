@@ -200,10 +200,51 @@ SubscribeStreamingDialogEntry::SubscribeStreamingDialogEntry(const QString &desc
     xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/subscribe-streaming");
 }
 
-SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const QString &descr, const ReplyCallback &callback)
+SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const IsolatedTestBase::FolderList &list,
+                                                                   const QString &syncState,
+                                                                   const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate");
+    QHash<QString, int> childCount;
+    for (const auto &folder : list) {
+        ++childCount[folder.parentId];
+    }
+
+    QString xml;
+    for (const auto &folder : list) {
+        if (folder.type == IsolatedTestBase::Folder::Root) {
+            continue;
+        }
+        xml += QStringLiteral("<t:Create>");
+        xml += QStringLiteral("<t:Folder>");
+        xml += QStringLiteral("<t:FolderId Id=\"%1\" ChangeKey=\"MDAx\" />").arg(folder.id);
+        xml += QStringLiteral("<t:ParentFolderId Id=\"%1\" ChangeKey=\"MDAx\" />").arg(folder.parentId);
+        QString folderClass;
+        QString extraXml;
+        switch (folder.type) {
+            case IsolatedTestBase::Folder::Calendar:
+                folderClass = QStringLiteral("IPF.Calendar");
+                break;
+            case IsolatedTestBase::Folder::Contacts:
+                folderClass = QStringLiteral("IPF.Contacts");
+                break;
+            case IsolatedTestBase::Folder::Tasks:
+                folderClass = QStringLiteral("IPF.Tasks");
+                break;
+            default:
+                folderClass = QStringLiteral("IPF.Note");
+                extraXml = QStringLiteral("<t:UnreadCount>0</t:UnreadCount>");
+        }
+        xml += QStringLiteral("<t:FolderClass>%1</t:FolderClass>").arg(folderClass);
+        xml += QStringLiteral("<t:TotalCount>0</t:TotalCount>");
+        xml += QStringLiteral("<t:DisplayName>%1</t:DisplayName>").arg(folder.name);
+        xml += QStringLiteral("<t:ChildFolderCount>%1</t:ChildFolderCount>").arg(childCount[folder.id]);
+        xml += extraXml;
+        xml += QStringLiteral("</t:Folder>");
+        xml += QStringLiteral("</t:Create>");
+
+    }
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate").arg(syncState).arg(xml);
 }
 
 UnsubscribeDialogEntry::UnsubscribeDialogEntry(const QString &descr, const ReplyCallback &callback)

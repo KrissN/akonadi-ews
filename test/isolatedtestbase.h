@@ -121,7 +121,9 @@ public:
 class SyncFolderHierInitialDialogEntry : public DialogEntryBase
 {
 public:
-    SyncFolderHierInitialDialogEntry(const QString &descr = QString(),
+    SyncFolderHierInitialDialogEntry(const IsolatedTestBase::FolderList &folders,
+                                     const QString &syncState,
+                                     const QString &descr = QString(),
                                      const ReplyCallback &callback = ReplyCallback());
 };
 

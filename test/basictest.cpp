@@ -85,7 +85,8 @@ void BasicTest::testBasic()
         GetTagsEmptyDialogEntry(rootId,
                                 QStringLiteral("GetFolder request for tags")),
         SubscribeStreamingDialogEntry(QStringLiteral("Subscribe request for streaming events")),
-        SyncFolderHierInitialDialogEntry(QStringLiteral("SyncFolderHierarchy request with empty state")),
+        SyncFolderHierInitialDialogEntry(folderList, "bNUUPDWHTvuG9p57NGZdhjREdZXDt48a0E1F22yThko=",
+                                         QStringLiteral("SyncFolderHierarchy request with empty state")),
         UnsubscribeDialogEntry(QStringLiteral("Unsubscribe request"))
     };
 
