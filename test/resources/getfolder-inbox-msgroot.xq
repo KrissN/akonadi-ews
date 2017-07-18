@@ -25,7 +25,7 @@ if (/soap:Envelope/soap:Body/m:GetFolder and
     <m:ResponseCode>NoError</m:ResponseCode>
     <m:Folders>
     <t:Folder>
-    <t:FolderId Id="cm9vdA==" ChangeKey="MDAx" />
+    <t:FolderId Id="%1" ChangeKey="MDAx" />
     <t:DisplayName>Root</t:DisplayName>
     </t:Folder>
     </m:Folders>
@@ -34,7 +34,7 @@ if (/soap:Envelope/soap:Body/m:GetFolder and
     <m:ResponseCode>NoError</m:ResponseCode>
     <m:Folders>
     <t:Folder>
-    <t:FolderId Id="aW5ib3g=" ChangeKey="MDAx" />
+    <t:FolderId Id="%2" ChangeKey="MDAx" />
     <t:DisplayName>Inbox</t:DisplayName>
     </t:Folder>
     </m:Folders>

@@ -23,7 +23,7 @@ if (/soap:Envelope/soap:Body/m:GetFolder and
     <m:ResponseCode>NoError</m:ResponseCode>
     <m:Folders>
     <t:Folder>
-    <t:FolderId Id="cm9vdA==" ChangeKey="MDAx" />
+    <t:FolderId Id="%1" ChangeKey="MDAx" />
     </t:Folder>
     </m:Folders>
     </m:GetFolderResponseMessage>

@@ -20,8 +20,10 @@
 #ifndef TEST_ISOLATEDTESTBASE_H_
 #define TEST_ISOLATEDTESTBASE_H_
 
-#include <QObject>
 #include "fakeewsserver.h"
+#include <Akonadi/KMime/SpecialMailCollections>
+#include <QObject>
+#include <QString>
 
 namespace Akonadi {
 class AgentInstance;
@@ -34,6 +36,30 @@ class IsolatedTestBase : public QObject
 {
     Q_OBJECT
 public:
+    class Folder {
+    public:
+        enum DistinguishedType {
+            None,
+            Root,
+            Inbox,
+            Outbox,
+            Sent,
+            Trash,
+            Drafts,
+            Templates,
+            Calendar,
+            Tasks,
+            Contacts
+        };
+
+        QString id;
+        QString name;
+        DistinguishedType type;
+        QString parentId;
+    };
+
+    typedef QVector<Folder> FolderList;
+
     IsolatedTestBase(QObject *parent = 0);
     virtual ~IsolatedTestBase();
 
@@ -43,13 +69,6 @@ protected:
     virtual void cleanup();
 
     bool setEwsResOnline(bool online, bool wait);
-
-    static FakeEwsServer::DialogEntry dialogEntryMsgRootInbox();
-    static FakeEwsServer::DialogEntry dialogEntrySpecialFolders();
-    static FakeEwsServer::DialogEntry dialogEntryGetTagsEmpty();
-    static FakeEwsServer::DialogEntry dialogEntrySubscribeStreaming();
-    static FakeEwsServer::DialogEntry dialogEntrySyncFolderHierarchyEmptyState();
-    static FakeEwsServer::DialogEntry dialogEntryUnsubscribe();
 protected:
     QString mEwsResIdentifier;
     QString mAkonadiInstanceIdentifier;
@@ -57,6 +76,60 @@ protected:
     QScopedPointer<Akonadi::AgentInstance> mEwsInstance;
     QScopedPointer<OrgKdeAkonadiEwsSettingsInterface> mEwsSettingsInterface;
     QScopedPointer<OrgKdeAkonadiEwsWalletInterface> mEwsWalletInterface;
+};
+
+class DialogEntryBase : public FakeEwsServer::DialogEntry
+{
+public:
+    DialogEntryBase(const QString &descr = QString(), const ReplyCallback &callback = ReplyCallback())
+    {
+        replyCallback = callback;
+        description = descr;
+    };
+};
+
+class MsgRootInboxDialogEntry : public DialogEntryBase
+{
+public:
+    MsgRootInboxDialogEntry(const QString &rootId, const QString &inboxId,
+                            const QString &descr = QString(),
+                            const ReplyCallback &callback = ReplyCallback());
+};
+
+class SpecialFoldersDialogEntry : public DialogEntryBase
+{
+public:
+    SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &folders,
+                              const QString &descr = QString(),
+                              const ReplyCallback &callback = ReplyCallback());
+};
+
+class GetTagsEmptyDialogEntry : public DialogEntryBase
+{
+public:
+    GetTagsEmptyDialogEntry(const QString &rootId, const QString &descr = QString(),
+                            const ReplyCallback &callback = ReplyCallback());
+};
+
+class SubscribeStreamingDialogEntry : public DialogEntryBase
+{
+public:
+    SubscribeStreamingDialogEntry(const QString &descr = QString(),
+                                  const ReplyCallback &callback = ReplyCallback());
+};
+
+class SyncFolderHierInitialDialogEntry : public DialogEntryBase
+{
+public:
+    SyncFolderHierInitialDialogEntry(const QString &descr = QString(),
+                                     const ReplyCallback &callback = ReplyCallback());
+};
+
+class UnsubscribeDialogEntry : public DialogEntryBase
+{
+public:
+    UnsubscribeDialogEntry(const QString &descr = QString(),
+                           const ReplyCallback &callback = ReplyCallback());
 };
 
 #endif

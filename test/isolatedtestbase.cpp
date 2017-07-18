@@ -145,57 +145,70 @@ bool IsolatedTestBase::setEwsResOnline(bool online, bool wait)
     }
 }
 
-FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntryMsgRootInbox()
+
+MsgRootInboxDialogEntry::MsgRootInboxDialogEntry(const QString &rootId, const QString &inboxId,
+                                                 const QString &descr, const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
 {
-    return FakeEwsServer::DialogEntry({
-        loadResourceAsString(":/xquery/getfolder-inbox-msgroot"),
-        FakeEwsServer::DialogEntry::ReplyCallback(),
-        QStringLiteral("GetFolder request for inbox and msgroot")
-    });
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-inbox-msgroot").arg(rootId).arg(inboxId);
+    description = QStringLiteral("GetFolder request for inbox and msgroot");
 }
 
-FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntrySpecialFolders()
+SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
+                                                     const QString &descr, const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
 {
-    return FakeEwsServer::DialogEntry({
-        loadResourceAsString(":/xquery/getfolder-specialfolders"),
-        FakeEwsServer::DialogEntry::ReplyCallback(),
-        QStringLiteral("GetFolder request for special folders")
-    });
+    static const QVector<IsolatedTestBase::Folder::DistinguishedType> specialFolders = {
+        IsolatedTestBase::Folder::Inbox,
+        IsolatedTestBase::Folder::Calendar,
+        IsolatedTestBase::Folder::Tasks,
+        IsolatedTestBase::Folder::Contacts
+    };
+    QHash<IsolatedTestBase::Folder::DistinguishedType, const IsolatedTestBase::Folder*> folderHash;
+    for (const auto &folder : list) {
+        if (specialFolders.contains(folder.type)) {
+            folderHash.insert(folder.type, &folder);
+        }
+    }
+
+    QString xml;
+    for (auto special : specialFolders) {
+        const IsolatedTestBase::Folder *folder = folderHash[special];
+        if (QTest::qVerify(folder != nullptr, "folder != nullptr", "", __FILE__, __LINE__)) {
+            xml += QStringLiteral("<m:GetFolderResponseMessage ResponseClass=\"Success\">");
+            xml += QStringLiteral("<m:ResponseCode>NoError</m:ResponseCode>");
+            xml += QStringLiteral("<m:Folders><t:Folder>");
+            xml += QStringLiteral("<t:FolderId Id=\"%1\" ChangeKey=\"MDAx\" />").arg(folder->id);
+            xml += QStringLiteral("</t:Folder></m:Folders>");
+            xml += QStringLiteral("</m:GetFolderResponseMessage>");
+        }
+    }
+
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-specialfolders").arg(xml);
 }
 
-FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntryGetTagsEmpty()
+GetTagsEmptyDialogEntry::GetTagsEmptyDialogEntry(const QString &rootId, const QString &descr,
+                                                 const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
 {
-    return FakeEwsServer::DialogEntry({
-        loadResourceAsString(":/xquery/getfolder-tags"),
-        FakeEwsServer::DialogEntry::ReplyCallback(),
-        QStringLiteral("GetFolder request for tags")
-    });
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-tags").arg(rootId);
 }
 
-FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntrySubscribeStreaming()
+SubscribeStreamingDialogEntry::SubscribeStreamingDialogEntry(const QString &descr, const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
 {
-    return FakeEwsServer::DialogEntry({
-        loadResourceAsString(":/xquery/subscribe-streaming"),
-        FakeEwsServer::DialogEntry::ReplyCallback(),
-        QStringLiteral("Subscribe request for streaming events")
-    });
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/subscribe-streaming");
 }
 
-FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntrySyncFolderHierarchyEmptyState()
+SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const QString &descr, const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
 {
-    return FakeEwsServer::DialogEntry({
-        loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate"),
-        FakeEwsServer::DialogEntry::ReplyCallback(),
-        QStringLiteral("SyncFolderHierarchy request with empty state")
-    });
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate");
 }
 
-FakeEwsServer::DialogEntry IsolatedTestBase::dialogEntryUnsubscribe()
+UnsubscribeDialogEntry::UnsubscribeDialogEntry(const QString &descr, const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
 {
-    return FakeEwsServer::DialogEntry({
-        loadResourceAsString(":/xquery/unsubscribe"),
-        FakeEwsServer::DialogEntry::ReplyCallback(),
-        QStringLiteral("Unsubscribe request")
-    });
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/unsubscribe");
 }
 

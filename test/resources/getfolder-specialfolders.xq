@@ -16,38 +16,7 @@ if (/soap:Envelope/soap:Body/m:GetFolder and
     </soap:Header><soap:Body>
     <m:GetFolderResponse>
     <m:ResponseMessages>
-    <m:GetFolderResponseMessage ResponseClass="Success">
-    <m:ResponseCode>NoError</m:ResponseCode>
-    <m:Folders>
-    <t:Folder>
-    <t:FolderId Id="aW5ib3g=" ChangeKey="MDAx" />
-    </t:Folder>
-    </m:Folders>
-    </m:GetFolderResponseMessage>
-    <m:GetFolderResponseMessage ResponseClass="Success">
-    <m:ResponseCode>NoError</m:ResponseCode>
-    <m:Folders>
-    <t:Folder>
-    <t:FolderId Id="Y2FsZW5kYXI=" ChangeKey="MDAx" />
-    </t:Folder>
-    </m:Folders>
-    </m:GetFolderResponseMessage>
-    <m:GetFolderResponseMessage ResponseClass="Success">
-    <m:ResponseCode>NoError</m:ResponseCode>
-    <m:Folders>
-    <t:Folder>
-    <t:FolderId Id="dGFza3M=" ChangeKey="MDAx" />
-    </t:Folder>
-    </m:Folders>
-    </m:GetFolderResponseMessage>
-    <m:GetFolderResponseMessage ResponseClass="Success">
-    <m:ResponseCode>NoError</m:ResponseCode>
-    <m:Folders>
-    <t:Folder>
-    <t:FolderId Id="Y29udGFjdHM=" ChangeKey="MDAx" />
-    </t:Folder>
-    </m:Folders>
-    </m:GetFolderResponseMessage>
+    %1
     </m:ResponseMessages>
     </m:GetFolderResponse></soap:Body></soap:Envelope>
 ) else ()
