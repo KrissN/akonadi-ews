@@ -1230,14 +1230,6 @@ void EwsResource::fetchSpecialFolders()
 
 void EwsResource::specialFoldersCollectionsRetrieved(const Collection::List &folders)
 {
-    QHash<qint64, Collection> map;
-
-    Q_FOREACH(const Collection &col, folders) {
-        if (col.id() != -1) {
-            map.insert(col.id(), col);
-        }
-    }
-
     QStringList queryItemNames;
     EwsId::List queryItems;
 
