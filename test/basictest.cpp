@@ -73,7 +73,11 @@ void BasicTest::testBasic()
         {"aW5ib3g=", "Inbox", Folder::Inbox, rootId},
         {"Y2FsZW5kYXI=", "Calendar", Folder::Calendar, rootId},
         {"dGFza3M=", "Tasks", Folder::Tasks, rootId},
-        {"Y29udGFjdHM=", "Contacts", Folder::Contacts, rootId}
+        {"Y29udGFjdHM=", "Contacts", Folder::Contacts, rootId},
+        {"b3V0Ym94", "Outbox", Folder::Outbox, rootId},
+        {"c2VudCBpdGVtcw==", "Sent Items", Folder::Sent, rootId},
+        {"ZGVsZXRlZCBpdGVtcw==", "Deleted Items", Folder::Trash, rootId},
+        {"ZHJhZnRz", "Drafts", Folder::Drafts, rootId}
     };
 
     FakeEwsServer::DialogEntry::List dialog =
@@ -82,6 +86,8 @@ void BasicTest::testBasic()
                                 QStringLiteral("GetFolder request for inbox and msgroot")),
         SubscribedFoldersDialogEntry(folderList,
                                      QStringLiteral("GetFolder request for subscribed folders")),
+        SpecialFoldersDialogEntry(folderList,
+                                  QStringLiteral("GetFolder request for special folders")),
         GetTagsEmptyDialogEntry(rootId,
                                 QStringLiteral("GetFolder request for tags")),
         SubscribeStreamingDialogEntry(QStringLiteral("Subscribe request for streaming events")),
@@ -99,7 +105,7 @@ void BasicTest::testBasic()
     });
 
     // TODO: List them explicitly instead of blindly relay on total count.
-    int numFoldersExpected = 5;
+    int numFoldersExpected = folderList.size();
     QEventLoop loop;
 
     Monitor monitor(this);
