@@ -148,6 +148,16 @@ void FakeEwsConnection::dataAvailable()
                 }
             }
 
+            FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
+            auto defaultReplyCallback = server->defaultReplyCallback();
+            if (defaultReplyCallback && (resp == FakeEwsServer::EmptyResponse)) {
+                QXmlResultItems ri;
+                QXmlNamePool namePool;
+                resp = defaultReplyCallback(QString::fromUtf8(mContent), ri, namePool);
+                qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
+                        << resp.second << QStringLiteral(": ") << resp.first;
+            }
+
             if (resp == FakeEwsServer::EmptyResponse) {
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning default response 500.");
                 resp = { QStringLiteral(""), 500 };
@@ -236,15 +246,6 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
             }
             break;
         }
-    }
-
-    auto defaultReplyCallback = server->defaultReplyCallback();
-    if (defaultReplyCallback && (resp == FakeEwsServer::EmptyResponse)) {
-        QXmlResultItems ri;
-        QXmlNamePool namePool;
-        resp = defaultReplyCallback(content, ri, namePool);
-        qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
-                << resp.second << QStringLiteral(": ") << resp.first;
     }
 
     if (resp == FakeEwsServer::EmptyResponse) {

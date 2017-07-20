@@ -574,6 +574,13 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
 
     srv->queueEventsXml(QStringList() << event);
 
+    bool unknownRequestEncountered = false;
+    srv->setDefaultReplyCallback([&](const QString &req, QXmlResultItems &, const QXmlNamePool &) {
+        qDebug() << "Unknown EWS request encountered." << req;
+        unknownRequestEncountered = true;
+        return FakeEwsServer::EmptyResponse;
+    });
+
     bool callbackError = false;
     int responseNo = 0;
     QDateTime pushEventTime;
@@ -643,6 +650,8 @@ void UtEwsFakeSrvTest::getStreamingEventsRequest()
     QCOMPARE(callbackCalled, true);
     QCOMPARE(resp.second, static_cast<ushort>(200));
     QCOMPARE(callbackError, false);
+
+    QCOMPARE(unknownRequestEncountered, false);
 
     QDateTime now = QDateTime::currentDateTime();
     qint64 elapsed = startTime.msecsTo(now);
