@@ -90,7 +90,13 @@ void BasicTest::testBasic()
         UnsubscribeDialogEntry(QStringLiteral("Unsubscribe request"))
     };
 
+    bool unknownRequestEncountered = false;
     mFakeServerThread->setDialog(dialog);
+    mFakeServerThread->setDefaultReplyCallback([&](const QString &req, QXmlResultItems &, const QXmlNamePool &) {
+        qDebug() << "Unknown EWS request encountered." << req;
+        unknownRequestEncountered = true;
+        return FakeEwsServer::EmptyResponse;
+    });
 
     // TODO: List them explicitly instead of blindly relay on total count.
     int numFoldersExpected = 5;
@@ -117,6 +123,7 @@ void BasicTest::testBasic()
     timer.start(5000);
     QCOMPARE(loop.exec(), 0);
 
+    QVERIFY(!unknownRequestEncountered);
     QVERIFY(setEwsResOnline(false, true));
 }
 
