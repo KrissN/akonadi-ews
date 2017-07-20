@@ -266,8 +266,6 @@ void EwsResource::rootFolderFetchFinished(KJob *job)
             mSubManager->start();
         }
 
-        fetchSpecialFolders();
-
         synchronizeCollectionTree();
 
         mTagStore->readTags(folder[globalTagsProperty].toStringList(), folder[globalTagsVersionProperty].toInt());
@@ -556,6 +554,8 @@ void EwsResource::fetchFoldersJobFinished(KJob *job)
     mFolderSyncState = req->syncState();
     saveState();
     collectionsRetrieved(req->folders());
+
+    fetchSpecialFolders();
 }
 
 void EwsResource::fetchFoldersIncrJobFinished(KJob *job)
@@ -581,6 +581,8 @@ void EwsResource::fetchFoldersIncrJobFinished(KJob *job)
     mFolderSyncState = req->syncState();
     saveState();
     collectionsRetrievedIncremental(req->changedFolders(), req->deletedFolders());
+
+    fetchSpecialFolders();
 }
 
 void EwsResource::itemFetchJobFinished(KJob *job)
@@ -1225,6 +1227,11 @@ void EwsResource::fetchSpecialFolders()
 {
     CollectionFetchJob *job = new CollectionFetchJob(mRootCollection, CollectionFetchJob::Recursive, this);
     connect(job, &CollectionFetchJob::collectionsReceived, this, &EwsResource::specialFoldersCollectionsRetrieved);
+    connect(job, &CollectionFetchJob::result, this, [this](KJob *job) {
+        if (job->error()) {
+            qCWarningNC(EWSRES_LOG) << "Special folders fetch failed:" << job->errorString();
+        }
+    });
     job->start();
 }
 
