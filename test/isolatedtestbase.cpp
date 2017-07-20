@@ -154,8 +154,8 @@ MsgRootInboxDialogEntry::MsgRootInboxDialogEntry(const QString &rootId, const QS
     description = QStringLiteral("GetFolder request for inbox and msgroot");
 }
 
-SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
-                                                     const QString &descr, const ReplyCallback &callback)
+SubscribedFoldersDialogEntry::SubscribedFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
+                                                           const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
     static const QVector<IsolatedTestBase::Folder::DistinguishedType> specialFolders = {
@@ -184,7 +184,7 @@ SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::Fol
         }
     }
 
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-specialfolders").arg(xml);
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-subscribedfolders").arg(xml);
 }
 
 GetTagsEmptyDialogEntry::GetTagsEmptyDialogEntry(const QString &rootId, const QString &descr,

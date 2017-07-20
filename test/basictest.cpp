@@ -80,8 +80,8 @@ void BasicTest::testBasic()
     {
         MsgRootInboxDialogEntry(rootId, inboxId,
                                 QStringLiteral("GetFolder request for inbox and msgroot")),
-        SpecialFoldersDialogEntry(folderList,
-                                  QStringLiteral("GetFolder request for special folders")),
+        SubscribedFoldersDialogEntry(folderList,
+                                     QStringLiteral("GetFolder request for subscribed folders")),
         GetTagsEmptyDialogEntry(rootId,
                                 QStringLiteral("GetFolder request for tags")),
         SubscribeStreamingDialogEntry(QStringLiteral("Subscribe request for streaming events")),
