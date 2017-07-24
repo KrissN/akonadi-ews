@@ -21,6 +21,7 @@
 #include <AkonadiCore/AgentManager>
 #include <AkonadiCore/CollectionFetchScope>
 #include <AkonadiCore/Control>
+#include <AkonadiCore/EntityDisplayAttribute>
 #include <AkonadiCore/Monitor>
 #include <qtest_akonadi.h>
 
@@ -70,7 +71,7 @@ void BasicTest::testBasic()
     static const auto inboxId = QStringLiteral("aW5ib3g=");
     FolderList folderList = {
         {rootId, mEwsInstance->identifier(), Folder::Root, QString()},
-        {"aW5ib3g=", "Inbox", Folder::Inbox, rootId},
+        {inboxId, "Inbox", Folder::Inbox, rootId},
         {"Y2FsZW5kYXI=", "Calendar", Folder::Calendar, rootId},
         {"dGFza3M=", "Tasks", Folder::Tasks, rootId},
         {"Y29udGFjdHM=", "Contacts", Folder::Contacts, rootId},
@@ -78,6 +79,26 @@ void BasicTest::testBasic()
         {"c2VudCBpdGVtcw==", "Sent Items", Folder::Sent, rootId},
         {"ZGVsZXRlZCBpdGVtcw==", "Deleted Items", Folder::Trash, rootId},
         {"ZHJhZnRz", "Drafts", Folder::Drafts, rootId}
+    };
+
+    struct DesiredState {
+        QString parentId;
+        QString iconName;
+    };
+    QHash<QString, DesiredState> desiredStates = {
+        {rootId, {QString(), QString()}},
+        {inboxId, {rootId, "mail-folder-inbox"}},
+        {"Y2FsZW5kYXI=", {rootId, QString()}},
+        {"dGFza3M=", {rootId, QString()}},
+        {"Y29udGFjdHM=", {rootId, QString()}},
+        {"b3V0Ym94", {rootId, "mail-folder-outbox"}},
+        {"c2VudCBpdGVtcw==", {rootId, "mail-folder-sent"}},
+        {"ZGVsZXRlZCBpdGVtcw==", {rootId, "user-trash"}},
+        {"ZHJhZnRz", {rootId, "document-properties"}}
+    };
+    QSet<QString> desiredStatePending = {
+        rootId, inboxId, "Y2FsZW5kYXI=", "dGFza3M=", "Y29udGFjdHM=", "b3V0Ym94",
+        "c2VudCBpdGVtcw==", "ZGVsZXRlZCBpdGVtcw==", "ZHJhZnRz"
     };
 
     FakeEwsServer::DialogEntry::List dialog =
@@ -104,19 +125,45 @@ void BasicTest::testBasic()
         return FakeEwsServer::EmptyResponse;
     });
 
-    // TODO: List them explicitly instead of blindly relay on total count.
-    int numFoldersExpected = folderList.size();
     QEventLoop loop;
 
     Monitor monitor(this);
-    connect(&monitor, &Monitor::collectionAdded, this,
-            [&](const Akonadi::Collection &, const Akonadi::Collection &){
-        if (--numFoldersExpected == 0) {
-            loop.exit(0);
-        }
-    });
 
+    auto desiredStateMonitor = [&](const Collection& col) {
+        auto remoteId = col.remoteId() == "INBOX" ? inboxId : col.remoteId();
+        auto attr = col.attribute<EntityDisplayAttribute>();
+        QString iconName;
+        if (attr) {
+            iconName = attr->iconName();
+        }
+        auto state = desiredStates.find(remoteId);
+        if (state != desiredStates.end()) {
+            if (col.parentCollection().remoteId() == state->parentId && iconName == state->iconName) {
+                desiredStatePending.remove(remoteId);
+            } else {
+                desiredStatePending.insert(remoteId);
+            }
+            if (desiredStatePending.isEmpty()) {
+                loop.exit(0);
+            }
+        } else {
+            qDebug() << "Found unexpected folder changed:" << col;
+            loop.exit(1);
+        }
+    };
+
+    connect(&monitor, &Monitor::collectionAdded, this,
+            [&](const Akonadi::Collection &col, const Akonadi::Collection &) {
+        desiredStateMonitor(col);
+    });
+    connect(&monitor, QOverload<const Collection&>::of(&Monitor::collectionChanged), this,
+            desiredStateMonitor);
+
+    monitor.fetchCollection(true);
+    monitor.collectionFetchScope().fetchAttribute<EntityDisplayAttribute>();
+    monitor.collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
     monitor.setResourceMonitored(mEwsInstance->identifier().toAscii(), true);
+    qDebug() << "resourcesMonitored" << monitor.resourcesMonitored();
 
     QVERIFY(setEwsResOnline(true, true));
 
