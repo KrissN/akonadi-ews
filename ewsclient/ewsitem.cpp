@@ -131,6 +131,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
         &EwsItemPrivate::occurrencesReader},
     {EwsItemFieldTimeZone, QStringLiteral("TimeZone"), &ewsXmlTextReader},
     {EwsItemFieldExchangePersonIdGuid, QStringLiteral("ExchangePersonIdGuid"), &ewsXmlTextReader},
+    {EwsItemFieldDoNotForwardMeeting, QStringLiteral("DoNotForwardMeeting"), &ewsXmlBoolReader},
 };
 
 const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsXml(ewsItemItems);
