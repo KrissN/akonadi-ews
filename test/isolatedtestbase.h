@@ -104,6 +104,14 @@ public:
                                  const ReplyCallback &callback = ReplyCallback());
 };
 
+class SpecialFoldersDialogEntry : public DialogEntryBase
+{
+public:
+    SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &folders,
+                              const QString &descr = QString(),
+                              const ReplyCallback &callback = ReplyCallback());
+};
+
 class GetTagsEmptyDialogEntry : public DialogEntryBase
 {
 public:

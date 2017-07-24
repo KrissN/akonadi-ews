@@ -187,6 +187,40 @@ SubscribedFoldersDialogEntry::SubscribedFoldersDialogEntry(const IsolatedTestBas
     xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-subscribedfolders").arg(xml);
 }
 
+SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
+                                                     const QString &descr, const ReplyCallback &callback)
+    : DialogEntryBase(descr, callback)
+{
+    static const QVector<IsolatedTestBase::Folder::DistinguishedType> specialFolders = {
+        IsolatedTestBase::Folder::Inbox,
+        IsolatedTestBase::Folder::Outbox,
+        IsolatedTestBase::Folder::Sent,
+        IsolatedTestBase::Folder::Trash,
+        IsolatedTestBase::Folder::Drafts
+    };
+    QHash<IsolatedTestBase::Folder::DistinguishedType, const IsolatedTestBase::Folder*> folderHash;
+    for (const auto &folder : list) {
+        if (specialFolders.contains(folder.type)) {
+            folderHash.insert(folder.type, &folder);
+        }
+    }
+
+    QString xml;
+    for (auto special : specialFolders) {
+        const IsolatedTestBase::Folder *folder = folderHash[special];
+        if (QTest::qVerify(folder != nullptr, "folder != nullptr", "", __FILE__, __LINE__)) {
+            xml += QStringLiteral("<m:GetFolderResponseMessage ResponseClass=\"Success\">");
+            xml += QStringLiteral("<m:ResponseCode>NoError</m:ResponseCode>");
+            xml += QStringLiteral("<m:Folders><t:Folder>");
+            xml += QStringLiteral("<t:FolderId Id=\"%1\" ChangeKey=\"MDAx\" />").arg(folder->id);
+            xml += QStringLiteral("</t:Folder></m:Folders>");
+            xml += QStringLiteral("</m:GetFolderResponseMessage>");
+        }
+    }
+
+    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-specialfolders").arg(xml);
+}
+
 GetTagsEmptyDialogEntry::GetTagsEmptyDialogEntry(const QString &rootId, const QString &descr,
                                                  const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
