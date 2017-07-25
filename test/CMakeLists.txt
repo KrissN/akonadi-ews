@@ -1,9 +1,15 @@
 include_directories(../)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/fakeserver)
 
+add_library(isolatedtestcommon STATIC isolatedtestbase.cpp statemonitor.cpp)
+ target_link_libraries(isolatedtestcommon
+   KF5::AkonadiCore
+   Qt5::Core
+ )
+
 macro(add_akonadi_isolated_test _source)
   get_filename_component(_targetName ${_source} NAME_WE)
-  set(_srcList ${_source} isolatedtestbase.cpp)
+  set(_srcList ${_source})
   qt5_add_resources(_srcList ${_targetName}.qrc)
 
   kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/../ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
@@ -23,6 +29,7 @@ macro(add_akonadi_isolated_test _source)
     Qt5::Widgets
     Qt5::DBus
     fakeewsserver
+    isolatedtestcommon
   )
 
   # based on kde4_add_unit_test

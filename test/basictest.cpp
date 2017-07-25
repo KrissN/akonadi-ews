@@ -29,6 +29,7 @@
 #include "ewssettings.h"
 #include "ewswallet.h"
 #include "isolatedtestbase.h"
+#include "statemonitor.h"
 
 class BasicTest : public IsolatedTestBase
 {
@@ -96,10 +97,6 @@ void BasicTest::testBasic()
         {"ZGVsZXRlZCBpdGVtcw==", {rootId, "user-trash"}},
         {"ZHJhZnRz", {rootId, "document-properties"}}
     };
-    QSet<QString> desiredStatePending = {
-        rootId, inboxId, "Y2FsZW5kYXI=", "dGFza3M=", "Y29udGFjdHM=", "b3V0Ym94",
-        "c2VudCBpdGVtcw==", "ZGVsZXRlZCBpdGVtcw==", "ZHJhZnRz"
-    };
 
     FakeEwsServer::DialogEntry::List dialog =
     {
@@ -127,43 +124,26 @@ void BasicTest::testBasic()
 
     QEventLoop loop;
 
-    Monitor monitor(this);
-
-    auto desiredStateMonitor = [&](const Collection& col) {
-        auto remoteId = col.remoteId() == "INBOX" ? inboxId : col.remoteId();
+    CollectionStateMonitor<DesiredState> stateMonitor(this, desiredStates, inboxId,
+                                                      [](const Collection &col, const DesiredState &state) {
         auto attr = col.attribute<EntityDisplayAttribute>();
         QString iconName;
         if (attr) {
             iconName = attr->iconName();
         }
-        auto state = desiredStates.find(remoteId);
-        if (state != desiredStates.end()) {
-            if (col.parentCollection().remoteId() == state->parentId && iconName == state->iconName) {
-                desiredStatePending.remove(remoteId);
-            } else {
-                desiredStatePending.insert(remoteId);
-            }
-            if (desiredStatePending.isEmpty()) {
-                loop.exit(0);
-            }
-        } else {
-            qDebug() << "Found unexpected folder changed:" << col;
-            loop.exit(1);
-        }
-    };
-
-    connect(&monitor, &Monitor::collectionAdded, this,
-            [&](const Akonadi::Collection &col, const Akonadi::Collection &) {
-        desiredStateMonitor(col);
+        return col.parentCollection().remoteId() == state.parentId && iconName == state.iconName;
     });
-    connect(&monitor, QOverload<const Collection&>::of(&Monitor::collectionChanged), this,
-            desiredStateMonitor);
 
-    monitor.fetchCollection(true);
-    monitor.collectionFetchScope().fetchAttribute<EntityDisplayAttribute>();
-    monitor.collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
-    monitor.setResourceMonitored(mEwsInstance->identifier().toAscii(), true);
-    qDebug() << "resourcesMonitored" << monitor.resourcesMonitored();
+    stateMonitor.monitor().fetchCollection(true);
+    stateMonitor.monitor().collectionFetchScope().fetchAttribute<EntityDisplayAttribute>();
+    stateMonitor.monitor().collectionFetchScope().setAncestorRetrieval(CollectionFetchScope::Parent);
+    stateMonitor.monitor().setResourceMonitored(mEwsInstance->identifier().toAscii(), true);
+    connect(&stateMonitor, &CollectionStateMonitor<DesiredState>::stateReached, this, [&]() {
+        loop.exit(0);
+    });
+    connect(&stateMonitor, &CollectionStateMonitor<DesiredState>::errorOccurred, this, [&]() {
+        loop.exit(1);
+    });
 
     QVERIFY(setEwsResOnline(true, true));
 
