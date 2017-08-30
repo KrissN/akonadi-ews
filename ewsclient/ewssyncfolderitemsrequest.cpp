@@ -108,9 +108,9 @@ void EwsSyncFolderItemsRequest::start()
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
-        QString st = mSyncState.isNull() ? QStringLiteral("none") : QString::number(qHash(mSyncState), 36);
+        QString st = mSyncState.isNull() ? QStringLiteral("none") : ewsHash(mSyncState);
         QString folder;
-        qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
+        qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
                         << mFolderId << QStringLiteral(", state: %1").arg(st);
     }
 
@@ -251,7 +251,7 @@ EwsSyncFolderItemsRequest::Change::Change(QXmlStreamReader &reader)
         break;
     case ReadFlagChange:
         mIsRead = values[IsRead].toBool();
-        /* no break */
+        /* fall through */
     case Delete:
         mId = values[ItemId].value<EwsId>();
         break;

@@ -62,7 +62,7 @@ void EwsGetStreamingEventsRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetStreamingEvents request (subId: %1, timeout: %2)")
-                    .arg(mSubscriptionId).arg(mTimeout);
+                    .arg(ewsHash(mSubscriptionId)).arg(mTimeout);
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 

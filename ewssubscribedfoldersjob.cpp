@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -24,8 +24,8 @@
 #include "settings.h"
 #include "ewsclient_debug.h"
 
-EwsSubscribedFoldersJob::EwsSubscribedFoldersJob(EwsClient &client, QObject *parent)
-    : EwsJob(parent), mClient(client)
+EwsSubscribedFoldersJob::EwsSubscribedFoldersJob(EwsClient &client, Settings *settings, QObject *parent)
+    : EwsJob(parent), mClient(client), mSettings(settings)
 {
 
 }
@@ -40,10 +40,10 @@ void EwsSubscribedFoldersJob::start()
 
     // Before subscribing make sure the subscription list doesn't contain invalid folders.
     // Do this also for the default list in order to transform the distinguished IDs into real ones.
-    if (Settings::serverSubscriptionList() == QStringList() << "default") {
+    if (mSettings->serverSubscriptionList() == QStringList() << "default") {
         ids = defaultSubscriptionFolders();
     } else {
-        Q_FOREACH(const QString &id, Settings::serverSubscriptionList()) {
+        Q_FOREACH(const QString &id, mSettings->serverSubscriptionList()) {
             ids << EwsId(id);
         }
     }
@@ -84,7 +84,7 @@ void EwsSubscribedFoldersJob::verifySubFoldersRequestFinished(KJob *job)
         }
 
         // Once verified write the final list back to the configuration.
-        Settings::setServerSubscriptionList(idList);
+        mSettings->setServerSubscriptionList(idList);
     } else {
         setErrorMsg(job->errorString(), job->error());
     }

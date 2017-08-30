@@ -1,5 +1,5 @@
 #  This file is part of Akonadi EWS Resource
-#  Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+#  Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 #
 #  This library is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Library General Public
@@ -24,7 +24,10 @@ find_package(ECM 5.16.0 NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
 set(REQUIRED_QT_VERSION 5.4.0)
-find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Test)
+if(ENABLE_TESTS)
+  set(EXTRA_QT_PACKAGES Test XmlPatterns)
+endif(ENABLE_TESTS)
+find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Core ${EXTRA_QT_PACKAGES})
 #set(CMAKE_AUTOMOC ON)
 #set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -96,14 +99,16 @@ set(ewsresource_SRCS
     ewsmodifyitemjob.cpp
     ewsmodifyitemflagsjob.cpp
     ewsresource.cpp
+    ewsresource_debug.cpp
     ewssubscribedfoldersjob.cpp
     ewssubscriptionmanager.cpp
     ewssubscriptionwidget.cpp
-    progressdialog.cpp)
+    progressdialog.cpp
+    settings.cpp)
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 
-kconfig_add_kcfg_files(ewsresource_SRCS settings.kcfgc)
+kconfig_add_kcfg_files(ewsresource_SRCS settingsbase.kcfgc)
 kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
 qt5_add_dbus_adaptor(ewsresource_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Settings.xml settings.h Settings
@@ -112,6 +117,10 @@ qt5_add_dbus_adaptor(ewsresource_SRCS
 qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.h org.kde.Akonadi.Ews.Resource.xml OPTIONS -a )
 qt5_add_dbus_adaptor(ewsresource_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Resource.xml ewsresource.h EwsResource
+)
+qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/settings.h org.kde.Akonadi.Ews.Wallet.xml OPTIONS -a )
+qt5_add_dbus_adaptor(ewsresource_SRCS
+  ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Wallet.xml settings.h Settings
 )
 
 

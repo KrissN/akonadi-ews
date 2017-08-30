@@ -131,6 +131,7 @@ static const QVector<EwsItemPrivate::Reader::Item> ewsItemItems = {
         &EwsItemPrivate::occurrencesReader},
     {EwsItemFieldTimeZone, QStringLiteral("TimeZone"), &ewsXmlTextReader},
     {EwsItemFieldExchangePersonIdGuid, QStringLiteral("ExchangePersonIdGuid"), &ewsXmlTextReader},
+    {EwsItemFieldDoNotForwardMeeting, QStringLiteral("DoNotForwardMeeting"), &ewsXmlBoolReader},
 };
 
 const EwsItemPrivate::Reader EwsItemPrivate::mStaticEwsXml(ewsItemItems);
@@ -455,6 +456,9 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
     }
     else if (reader.name() == QStringLiteral("MeetingCancellation")) {
         d->mType = EwsItemTypeMeetingCancellation;
+    }
+    else if (reader.name() == QStringLiteral("PostItem")) {
+        d->mType = EwsItemTypePostItem;
     }
     else if (reader.name() == QStringLiteral("Task")) {
         d->mType = EwsItemTypeTask;

@@ -102,7 +102,7 @@ void EwsSyncFolderHierarchyRequest::start()
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         QString st = mSyncState.isNull() ? QStringLiteral("none") : QString::number(qHash(mSyncState), 36);
         QString folder;
-        qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderHierarchy request (folder: ")
+        qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderHierarchy request (folder: ")
                         << mFolderId << QStringLiteral(", state: %1").arg(st);
     }
 

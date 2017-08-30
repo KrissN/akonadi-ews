@@ -139,6 +139,7 @@ typedef enum {
     EwsItemTypeMeetingCancellation,
     EwsItemTypeTask,
     EwsItemTypeAbchPerson,
+    EwsItemTypePostItem,
     EwsItemTypeUnknown
 } EwsItemType;
 
@@ -210,6 +211,42 @@ typedef enum {
     EwsItemFieldEffectiveRights,
     EwsItemFieldLastModifiedName,
     EwsItemFieldLastModifiedTime,
+    EwsItemFieldIsAssociated,
+    EwsItemFieldWebClientReadFormQueryString,
+    EwsItemFieldWebClientEditFormQueryString,
+    EwsItemFieldConversationId,
+    EwsItemFieldUniqueBody,
+    EwsItemFieldFlag,
+    EwsItemFieldStoreEntryId,
+    EwsItemFieldInstanceKey,
+    EwsItemFieldNormalizedBody,
+    EwsItemFieldEntityExtractionResult,
+    EwsItemFieldPolicyTag,
+    EwsItemFieldArchiveTag,
+    EwsItemFieldRetentionDate,
+    EwsItemFieldPreview,
+    EwsItemFieldRightsManagementLicenseData,
+    EwsItemFieldPredictedActionReasons,
+    EwsItemFieldIsClutter,
+    EwsItemFieldBlockStatus,
+    EwsItemFieldHasBlockedImages,
+    EwsItemFieldTextBody,
+    EwsItemFieldIconIndex,
+    EwsItemFieldSearchKey,
+    EwsItemFieldSortKey,
+    EwsItemFieldHashtags,
+    EwsItemFieldMentions,
+    EwsItemFieldMentionedMe,
+    EwsItemFieldMentionsPreview,
+    EwsItemFieldMentionsEx,
+    EwsItemFieldAppliedHashtags,
+    EwsItemFieldAppliedHashtagsPreview,
+    EwsItemFieldLikes,
+    EwsItemFieldLikesPreview,
+    EwsItemFieldPendingSocialActivityTagIds,
+    EwsItemFieldAtAllMention,
+    EwsItemFieldCanDelete,
+    EwsItemFieldInferenceClassification,
     // Message
     EwsItemFieldSender,
     EwsItemFieldToRecipients,
@@ -294,6 +331,17 @@ typedef enum {
     EwsItemFieldIsOnlineMeeting,
     EwsItemFieldMeetingWorkspaceUrl,
     EwsItemFieldNetShowUrl,
+    EwsItemFieldEnhancedLocation,
+    EwsItemFieldStartWallClock,
+    EwsItemFieldEndWallClock,
+    EwsItemFieldStartTimeZoneId,
+    EwsItemFieldEndTimeZoneId,
+    EwsItemFieldIntendedFreeBusyStatus,
+    EwsItemFieldJoinOnlineMeetingUrl,
+    EwsItemFieldOnlineMeetingSettings,
+    EwsItemFieldIsOrganizer,
+    EwsItemFieldCalendarActivityData,
+    EwsItemFieldDoNotForwardMeeting,
     // MeetingMessage
     EwsItemFieldAssociatedCalendarItemId,
     EwsItemFieldIsDelegated,
@@ -305,7 +353,7 @@ typedef enum {
     //EwsItemFieldDateTimeStamp,            DUPLICATE
     // MeetingRequestMessage
     EwsItemFieldMeetingRequestType,
-    EwsItemFieldIntendedFreeBusyStatus,
+    //EwsItemFieldIntendedFreeBusyStatus,   DUPLICATE
     //EwsItemFieldStart,                    DUPLICATE
     //EwsItemFieldEnd,                      DUPLICATE
     //EwsItemFieldOriginalStart,            DUPLICATE
@@ -464,6 +512,11 @@ template <typename T> T decodeEnumString(QString str, const QString* table, unsi
     }
     *ok = (i < count);
     return enumVal;
+}
+
+inline bool isEwsMessageItemType(EwsItemType type)
+{
+    return (type == EwsItemTypeItem) || (type == EwsItemTypePostItem);
 }
 
 extern const QVector<QString> ewsItemTypeNames;

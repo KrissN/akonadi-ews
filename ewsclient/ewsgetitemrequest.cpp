@@ -62,7 +62,7 @@ void EwsGetItemRequest::start()
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetItem request (%1 items)").arg(mIds.size());
+    qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetItem request (") << mIds << ")";
 
     prepare(reqString);
 
@@ -86,11 +86,11 @@ bool EwsGetItemRequest::parseItemsResponse(QXmlStreamReader &reader)
         if (resp.isSuccess()) {
             const EwsItem &item = resp.item();
             const EwsId &id = item[EwsItemFieldItemId].value<EwsId>();
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetItem response (id: %1, subject: %2)")
-                .arg(id.id()).arg(item[EwsItemFieldSubject].toString());
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetItem response (id: %1, subject: %2)")
+                .arg(ewsHash(id.id())).arg(item[EwsItemFieldSubject].toString());
         }
         else {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetItem response - %1")
+            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got GetItem response - %1")
                             .arg(resp.responseMessage());
         }
     }

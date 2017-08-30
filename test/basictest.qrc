@@ -1,0 +1,13 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource prefix="/xquery">
+    <file alias="getfolder-inbox-msgroot">resources/getfolder-inbox-msgroot.xq</file>
+    <file alias="getfolder-specialfolders">resources/getfolder-specialfolders.xq</file>
+    <file alias="getfolder-subscribedfolders">resources/getfolder-subscribedfolders.xq</file>
+    <file alias="getfolder-tags">resources/getfolder-tags.xq</file>
+    <file alias="subscribe-streaming">resources/subscribe-streaming.xq</file>
+    <file alias="syncfolderhierarhy-emptystate">resources/syncfolderhierarhy-emptystate.xq</file>
+    <file alias="unsubscribe">resources/unsubscribe.xq</file>
+</qresource>
+</RCC>
+ 

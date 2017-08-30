@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -27,12 +27,13 @@
 
 class EwsSubscriptionWidgetPrivate;
 class EwsClient;
+class Settings;
 
 class EwsSubscriptionWidget : public QWidget
 {
     Q_OBJECT
 public:
-    EwsSubscriptionWidget(EwsClient &client, QWidget *parent);
+    EwsSubscriptionWidget(EwsClient &client, Settings *settings, QWidget *parent);
     ~EwsSubscriptionWidget();
 
     QStringList subscribedList() const;
