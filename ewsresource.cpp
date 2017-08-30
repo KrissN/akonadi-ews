@@ -102,10 +102,10 @@ EwsResource::EwsResource(const QString &id)
       mSettings(new Settings(winIdForDialogs()))
 {
     //setName(i18n("Microsoft Exchange"));
-    mEwsClient.setUrl(Settings::baseUrl());
+    mEwsClient.setUrl(mSettings->baseUrl());
     mSettings->requestPassword(mPassword, true);
-    if (!Settings::hasDomain()) {
-        mEwsClient.setCredentials(Settings::username(), mPassword);
+    if (!mSettings->hasDomain()) {
+        mEwsClient.setCredentials(mSettings->username(), mPassword);
     } else {
         mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
     }
