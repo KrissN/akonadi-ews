@@ -1,24 +1,32 @@
 include_directories(../)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/fakeserver)
 
-add_library(isolatedtestcommon STATIC isolatedtestbase.cpp statemonitor.cpp)
- target_link_libraries(isolatedtestcommon
-   KF5::AkonadiCore
-   Qt5::Core
- )
+set(isolatestestcommon_SRCS isolatedtestbase.cpp statemonitor.cpp)
+
+kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/../ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
+set(ewssettingsinterface_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Settings.xml)
+qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/../settings.h org.kde.Akonadi.Ews.Wallet.xml OPTIONS -a )
+set(ewswalletinterface_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Wallet.xml)
+
+qt5_add_dbus_interface(isolatestestcommon_SRCS ${ewssettingsinterface_xml} ewssettings)
+qt5_add_dbus_interface(isolatestestcommon_SRCS ${ewswalletinterface_xml} ewswallet)
+
+qt5_add_resources(_srcList isolatestestcommon.qrc)
+
+add_library(isolatedtestcommon STATIC ${isolatestestcommon_SRCS})
+target_link_libraries(isolatedtestcommon
+  KF5::AkonadiCore
+  Qt5::Core
+  Qt5::Network
+)
 
 macro(add_akonadi_isolated_test _source)
   get_filename_component(_targetName ${_source} NAME_WE)
   set(_srcList ${_source})
-  qt5_add_resources(_srcList ${_targetName}.qrc)
-
-  kcfg_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/../ewsresource.kcfg org.kde.Akonadi.Ews.Settings)
-  set(ewssettingsinterface_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Settings.xml)
-  qt5_generate_dbus_interface( ${CMAKE_CURRENT_SOURCE_DIR}/../settings.h org.kde.Akonadi.Ews.Wallet.xml OPTIONS -a )
-  set(ewswalletinterface_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Wallet.xml)
-
-  qt5_add_dbus_interface(_srcList ${ewssettingsinterface_xml} ewssettings)
-  qt5_add_dbus_interface(_srcList ${ewswalletinterface_xml} ewswallet)
+  if(EXISTS ${_targetName}.qrc)
+    qt5_add_resources(_srcList ${_targetName}.qrc)
+  endif(EXISTS ${_targetName}.qrc)
 
   add_executable(${_targetName} ${_srcList})
   target_link_libraries(${_targetName}
@@ -51,11 +59,6 @@ macro(add_akonadi_isolated_test _source)
 
   add_test( ${_targetName} ${_testrunner} -c ${CMAKE_CURRENT_BINARY_DIR}/config.xml ${_executable} )
 endmacro(add_akonadi_isolated_test)
-
-
-add_executable(ewstest ewstest.cpp)
-
-target_link_libraries(ewstest Qt5::Core ewsclient)
 
 add_subdirectory(unittests)
 add_subdirectory(fakeserver)
