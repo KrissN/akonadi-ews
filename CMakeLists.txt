@@ -28,8 +28,6 @@ if(ENABLE_TESTS)
   set(EXTRA_QT_PACKAGES Test XmlPatterns)
 endif(ENABLE_TESTS)
 find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Core ${EXTRA_QT_PACKAGES})
-#set(CMAKE_AUTOMOC ON)
-#set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include(KDEInstallDirs)
 include(KDEFrameworkCompilerSettings)
