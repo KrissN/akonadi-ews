@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,15 +19,14 @@
 
 #include "ewstagstore.h"
 
-#include <QtCore/QDataStream>
+#include <QDataStream>
 
-#include <AkonadiCore/TagAttribute>
 #include <AkonadiCore/AttributeFactory>
-
-#include "ewsresource.h"
-#include "ewsitem.h"
+#include <AkonadiCore/TagAttribute>
 
 #include "ewsclient_debug.h"
+#include "ewsitem.h"
+#include "ewsresource.h"
 
 using namespace Akonadi;
 
@@ -86,7 +85,7 @@ bool EwsTagStore::unserializeTag(const QByteArray &data, Akonadi::Tag &tag) cons
             return false;
         }
 
-        for (int i = 0; i < numAttrs; i++) {
+        for (int i = 0; i < numAttrs; ++i) {
             QByteArray attrType, attrData;
             stream >> attrType >> attrData;
             if (stream.status() != QDataStream::Ok) {
@@ -126,7 +125,7 @@ bool EwsTagStore::readTags(const QStringList &taglist, int version)
 
     mTagData.clear();
 
-    Q_FOREACH(const QString tag, taglist) {
+    Q_FOREACH(const QString &tag, taglist) {
         QByteArray tagdata = qUncompress(QByteArray::fromBase64(tag.toAscii()));
         if (tagdata.isNull()) {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Incorrect tag data");
@@ -154,7 +153,7 @@ QStringList EwsTagStore::serialize() const
 {
     QStringList tagList;
 
-    for (auto it = mTagData.cbegin(); it != mTagData.cend(); it++) {
+    for (auto it = mTagData.cbegin(); it != mTagData.cend(); ++it) {
         QByteArray data;
         QDataStream stream(&data, QIODevice::WriteOnly);
         stream.setVersion(QDataStream::Qt_5_4);
@@ -170,7 +169,7 @@ Tag::List EwsTagStore::tags() const
 {
     Tag::List tagList;
 
-    for (auto it = mTagData.cbegin(); it != mTagData.cend(); it++) {
+    for (auto it = mTagData.cbegin(); it != mTagData.cend(); ++it) {
         Tag tag(-1);
         if (unserializeTag(it.value(), tag)) {
             tagList.append(tag);
@@ -242,7 +241,7 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
     }
 
     if (changed) {
-        mVersion++;
+        ++mVersion;
     }
 
     return changed;
@@ -255,7 +254,7 @@ void EwsTagStore::removeTag(const Akonadi::Tag &tag)
     mTagNameMap.remove(tag.id());
     mTagData.remove(rid);
 
-    mVersion++;
+    ++mVersion;
 }
 
 QByteArray EwsTagStore::tagRemoteId(Akonadi::Tag::Id id) const

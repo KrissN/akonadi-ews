@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtTest/QtTest>
-#include <QtCore/QEventLoop>
+#include <QEventLoop>
+#include <QtTest>
 
 #include "fakehttppost.h"
 
@@ -83,7 +83,7 @@ void UtEwsGetItemRequest::twoFailures()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsGetItemRequest *req = new EwsGetItemRequest(mClient, this);
+    QScopedPointer<EwsGetItemRequest> req(new EwsGetItemRequest(mClient, this));
     EwsId::List ids;
     ids << EwsId("DdBTBAvLHI8OyQ3K", "6yDDqXl+");
     ids << EwsId("CgIdfZGT3QJrWZHi", "wPjRsOpg");
@@ -96,7 +96,7 @@ void UtEwsGetItemRequest::twoFailures()
     ids << EwsId("UrNr/v4HynI062u/", "WMjq6rUe");
     req->setItemIds(ids);
 
-    req->setItemShape(EwsShapeIdOnly);
+    req->setItemShape(EwsItemShape(EwsShapeIdOnly));
 
     req->exec();
 

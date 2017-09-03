@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,10 +19,10 @@
 
 #include "ewsgetstreamingeventsrequest.h"
 
-#include <QtCore/QTemporaryFile>
+#include <QTemporaryFile>
 
-#include "ewsxml.h"
 #include "ewsclient_debug.h"
+#include "ewsxml.h"
 
 static Q_CONSTEXPR uint respChunkTimeout = 250; /* ms */
 

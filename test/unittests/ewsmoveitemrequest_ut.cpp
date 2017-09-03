@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtTest/QtTest>
-#include <QtCore/QEventLoop>
+#include <QEventLoop>
+#include <QtTest>
 
 #include "fakehttppost.h"
 
@@ -83,7 +83,7 @@ void UtEwsMoveItemRequest::singleItem()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsMoveItemRequest *req = new EwsMoveItemRequest(mClient, this);
+    QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     EwsId::List ids;
     ids << EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG");
     req->setItemIds(ids);
@@ -151,7 +151,7 @@ void UtEwsMoveItemRequest::twoItems()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsMoveItemRequest *req = new EwsMoveItemRequest(mClient, this);
+    QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     static const EwsId::List ids = {
         EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG"),
         EwsId("ntTNOncESwiyAXog", "EDHu5rwK")
@@ -227,7 +227,7 @@ void UtEwsMoveItemRequest::twoItemsOneFailed()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsMoveItemRequest *req = new EwsMoveItemRequest(mClient, this);
+    QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     static const EwsId::List ids = {
         EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG"),
         EwsId("ntTNOncESwiyAXog", "EDHu5rwK")
@@ -316,7 +316,7 @@ void UtEwsMoveItemRequest::twoItemsSecondFailed()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsMoveItemRequest *req = new EwsMoveItemRequest(mClient, this);
+    QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     static const EwsId::List ids = {
         EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG"),
         EwsId("ntTNOncESwiyAXog", "EDHu5rwK")

@@ -17,15 +17,15 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtTest/QtTest>
-#include <QtCore/QEventLoop>
-#include <QtNetwork/QHostAddress>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QtXmlPatterns/QXmlItem>
-#include <QtXmlPatterns/QXmlNamePool>
-#include <QtXmlPatterns/QXmlResultItems>
+#include <QEventLoop>
+#include <QHostAddress>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QXmlItem>
+#include <QXmlNamePool>
+#include <QXmlResultItems>
+#include <QtTest>
 
 #include "fakeewsserver.h"
 #include "fakeewsserverthread.h"

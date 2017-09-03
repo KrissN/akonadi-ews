@@ -49,7 +49,7 @@ EwsItemHandler *EwsItemHandler::itemHandler(EwsItemType type)
     }
     else {
         HandlerList::const_iterator it;
-        for (it = handlerFactories->cbegin(); it != handlerFactories->cend(); it++) {
+        for (it = handlerFactories->cbegin(); it != handlerFactories->cend(); ++it) {
             if (it->type == type) {
                 EwsItemHandler *handler = it->factory();
                 (*handlers)[type].reset(handler);
@@ -89,7 +89,7 @@ QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(QSet<QByteArray> fl
         propertyHash.insert(EwsResource::flagsProperty, QVariant());
     } else {
         QStringList flagList;
-        Q_FOREACH(const QByteArray flag, flags) {
+        Q_FOREACH(const QByteArray &flag, flags) {
             flagList.append(flag);
         }
         propertyHash.insert(EwsResource::flagsProperty, flagList);

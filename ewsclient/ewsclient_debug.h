@@ -20,8 +20,9 @@
 #ifndef EWSCLIENT_DEBUG_H
 #define EWSCLIENT_DEBUG_H
 
-#include <QtCore/QTemporaryDir>
-#include <QtCore/QLoggingCategory>
+#include <QLoggingCategory>
+#include <QTemporaryDir>
+
 Q_DECLARE_LOGGING_CATEGORY(EWSRES_LOG)
 
 Q_DECLARE_LOGGING_CATEGORY(EWSRES_PROTO_LOG)

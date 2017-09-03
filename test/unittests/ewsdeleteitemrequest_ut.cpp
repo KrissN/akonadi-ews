@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtTest/QtTest>
-#include <QtCore/QEventLoop>
+#include <QEventLoop>
+#include <QtTest>
 
 #include "fakehttppost.h"
 
@@ -77,7 +77,7 @@ void UtEwsDeleteItemRequest::singleItem()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsDeleteItemRequest *req = new EwsDeleteItemRequest(mClient, this);
+    QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     EwsId::List ids;
     ids << EwsId("+IRgnMJ8x+J6MQAZ", "1iQt/At9");
     req->setItemIds(ids);
@@ -133,7 +133,7 @@ void UtEwsDeleteItemRequest::twoItems()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsDeleteItemRequest *req = new EwsDeleteItemRequest(mClient, this);
+    QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     static const EwsId::List ids = {
         EwsId("9LB1MiL3cOYUjmYy", "TBjl3rnU"),
         EwsId("rZ0sc7Gfn9+XHVgv", "pHTEe9nY")
@@ -194,7 +194,7 @@ void UtEwsDeleteItemRequest::twoItemsOneFailed()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsDeleteItemRequest *req = new EwsDeleteItemRequest(mClient, this);
+    QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     static const EwsId::List ids = {
         EwsId("9LB1MiL3cOYUjmYy", "TBjl3rnU"),
         EwsId("rZ0sc7Gfn9+XHVgv", "pHTEe9nY")
@@ -263,7 +263,7 @@ void UtEwsDeleteItemRequest::twoItemsSecondFailed()
     FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
         verifier(job, req, request, response);
     });
-    EwsDeleteItemRequest *req = new EwsDeleteItemRequest(mClient, this);
+    QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     static const EwsId::List ids = {
         EwsId("9LB1MiL3cOYUjmYy", "TBjl3rnU"),
         EwsId("rZ0sc7Gfn9+XHVgv", "pHTEe9nY")

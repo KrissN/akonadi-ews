@@ -21,11 +21,11 @@
 #define EWSXMLREADER_H
 
 #include <functional>
-#include <QtCore/QVector>
-#include <QtCore/QXmlStreamReader>
+
+#include <QVector>
+#include <QXmlStreamReader>
 
 #include "ewsclient_debug.h"
-
 
 template <typename T> class EwsXml
 {

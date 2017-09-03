@@ -27,7 +27,7 @@ class Settings : public SettingsBase
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Wallet")
 public:
-    Settings(WId windowId);
+    explicit Settings(WId windowId);
     virtual ~Settings();
 
     bool requestPassword(QString &password, bool ask);

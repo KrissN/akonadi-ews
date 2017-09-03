@@ -17,12 +17,11 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtTest/QtTest>
-#include <QtCore/QXmlStreamReader>
-
-#include "fakehttppost.h"
+#include <QXmlStreamReader>
+#include <QtTest>
 
 #include "ewsattachment.h"
+#include "fakehttppost.h"
 
 class UtEwsAttachment : public QObject
 {

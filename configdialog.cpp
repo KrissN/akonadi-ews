@@ -17,15 +17,17 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QProgressBar>
+#include "configdialog.h"
+
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QProgressBar>
 
 #include <KWindowSystem/KWindowSystem>
+#include <KWidgetsAddons/KMessageBox>
 
-#include "configdialog.h"
 #include "ui_configdialog.h"
 #include "settings.h"
 #include "ewsresource.h"
@@ -126,18 +128,18 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     mUi->aboutIconLabel->setPixmap(ewsIcon.pixmap(96, 96, QIcon::Normal, QIcon::On));
     mUi->aboutTextLabel->setText(i18nc("@info", "Akonadi Resource for Microsoft Exchange Web Services (EWS)"));
     mUi->aboutCopyrightLabel->setText(i18nc("@info", "Copyright (c) Krzysztof Nowicki 2015-2016"));
-    mUi->aboutVersionLabel->setText(i18nc("@info", "Version %1").arg(AKONADI_EWS_VERSION));
+    mUi->aboutVersionLabel->setText(i18nc("@info", "Version %1", AKONADI_EWS_VERSION));
     mUi->aboutLicenseLabel->setText(i18nc("@info", "Distributed under the GNU Library General Public License version 2.0 or later."));
     mUi->aboutUrlLabel->setText(QStringLiteral("<a href=\"https://github.com/KrissN/akonadi-ews\">https://github.com/KrissN/akonadi-ews</a>"));
 
     connect(okButton, &QPushButton::clicked, this, &ConfigDialog::save);
     connect(mUi->autodiscoverButton, &QPushButton::clicked, this, &ConfigDialog::performAutoDiscovery);
-    connect(mUi->kcfg_Username, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
-    connect(mUi->passwordEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
-    connect(mUi->kcfg_Domain, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
+    connect(mUi->kcfg_Username, SIGNAL(textChanged(QString)), this, SLOT(setAutoDiscoveryNeeded()));
+    connect(mUi->passwordEdit, SIGNAL(textChanged(QString)), this, SLOT(setAutoDiscoveryNeeded()));
+    connect(mUi->kcfg_Domain, SIGNAL(textChanged(QString)), this, SLOT(setAutoDiscoveryNeeded()));
     connect(mUi->kcfg_HasDomain, SIGNAL(toggled(bool)), this, SLOT(setAutoDiscoveryNeeded()));
-    connect(mUi->kcfg_Email, SIGNAL(textChanged(const QString&)), this, SLOT(setAutoDiscoveryNeeded()));
-    connect(mUi->kcfg_BaseUrl, SIGNAL(textChanged(const QString&)), this, SLOT(enableTryConnect()));
+    connect(mUi->kcfg_Email, SIGNAL(textChanged(QString)), this, SLOT(setAutoDiscoveryNeeded()));
+    connect(mUi->kcfg_BaseUrl, SIGNAL(textChanged(QString)), this, SLOT(enableTryConnect()));
     connect(mUi->tryConnectButton, &QPushButton::clicked, this, &ConfigDialog::tryConnect);
     connect(mUi->userAgentCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(userAgentChanged(int)));
     connect(mUi->clearFolderTreeSyncStateButton, &QPushButton::clicked, mParentResource,
@@ -201,7 +203,7 @@ void ConfigDialog::performAutoDiscovery()
 void ConfigDialog::autoDiscoveryFinished(KJob *job)
 {
     if (job->error() || job != mAutoDiscoveryJob) {
-        QMessageBox::critical(this, i18n("Autodiscovery failed"), job->errorText());
+        KMessageBox::error(this, job->errorText(), i18nc("Exchange server autodiscovery", "Autodiscovery failed"));
         mProgressDialog->reject();
     }
     else {
@@ -217,13 +219,13 @@ void ConfigDialog::autoDiscoveryFinished(KJob *job)
 void ConfigDialog::tryConnectFinished(KJob *job)
 {
     if (job->error() || job != mTryConnectJob) {
-        QMessageBox::critical(this, i18n("Connection failed"), job->errorText());
-        mUi->serverStatusText->setText(i18nc("Server status", "Failed"));
-        mUi->serverVersionText->setText(i18n("Unknown"));
+        KMessageBox::error(this, job->errorText(), i18nc("Exchange server connection", "Connection failed"));
+        mUi->serverStatusText->setText(i18nc("Exchange server status", "Failed"));
+        mUi->serverVersionText->setText(i18nc("Exchange server version", "Unknown"));
         mProgressDialog->reject();
     }
     else {
-        mUi->serverStatusText->setText(i18nc("Server status", "OK"));
+        mUi->serverStatusText->setText(i18nc("Exchange server status", "OK"));
         mUi->serverVersionText->setText(mTryConnectJob->serverVersion().toString());
         mProgressDialog->accept();
     }
@@ -286,8 +288,9 @@ void ConfigDialog::dialogAccepted()
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
         mAutoDiscoveryJob->start();
         if (!mProgressDialog->exec()) {
-            if (QMessageBox::question(this, i18n("Exchange server autodiscovery"),
-                i18n("Autodiscovery failed. This can be caused by incorrect parameters. Do you still want to save your settings?")) == QMessageBox::Yes) {
+            if (KMessageBox::questionYesNo(this,
+                                           i18n("Autodiscovery failed. This can be caused by incorrect parameters. Do you still want to save your settings?"),
+                                           i18n("Exchange server autodiscovery")) == KMessageBox::Yes) {
                 accept();
                 return;
             }
@@ -306,15 +309,16 @@ void ConfigDialog::dialogAccepted()
         }
         cli.setEnableNTLMv2(mUi->kcfg_EnableNTLMv2->isChecked());
         mTryConnectJob = new EwsGetFolderRequest(cli, this);
-        mTryConnectJob->setFolderShape(EwsShapeIdOnly);
+        mTryConnectJob->setFolderShape(EwsFolderShape(EwsShapeIdOnly));
         mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
         connect(mTryConnectJob, &EwsGetFolderRequest::result, this, &ConfigDialog::tryConnectFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::TryConnect);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::tryConnectCancelled);
         mTryConnectJob->start();
         if (!mProgressDialog->exec()) {
-            if (QMessageBox::question(this, i18n("Exchange server connection"),
-                i18n("Connecting to Exchange failed. This can be caused by incorrect parameters. Do you still want to save your settings?")) == QMessageBox::Yes) {
+            if (KMessageBox::questionYesNo(this,
+                                           i18n("Connecting to Exchange failed. This can be caused by incorrect parameters. Do you still want to save your settings?"),
+                                           i18n("Exchange server connection")) == KMessageBox::Yes) {
                 accept();
                 return;
             }
@@ -357,18 +361,18 @@ void ConfigDialog::tryConnect()
     }
     cli.setEnableNTLMv2(mUi->kcfg_EnableNTLMv2->isChecked());
     mTryConnectJob = new EwsGetFolderRequest(cli, this);
-    mTryConnectJob->setFolderShape(EwsShapeIdOnly);
+    mTryConnectJob->setFolderShape(EwsFolderShape(EwsShapeIdOnly));
     mTryConnectJob->setFolderIds(EwsId::List() << EwsId(EwsDIdInbox));
     mProgressDialog = new ProgressDialog(this, ProgressDialog::TryConnect);
     connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::tryConnectCancelled);
     mProgressDialog->show();
     if (!mTryConnectJob->exec()) {
-        mUi->serverStatusText->setText(i18nc("Server status", "Failed"));
-        mUi->serverVersionText->setText(i18n("Unknown"));
-        QMessageBox::critical(this, i18n("Connection failed"), mTryConnectJob->errorText());
+        mUi->serverStatusText->setText(i18nc("Exchange server status", "Failed"));
+        mUi->serverVersionText->setText(i18nc("Exchange server version", "Unknown"));
+        KMessageBox::error(this, mTryConnectJob->errorText(), i18n("Connection failed"));
     }
     else {
-        mUi->serverStatusText->setText(i18nc("Server status", "OK"));
+        mUi->serverStatusText->setText(i18nc("Exchange server status", "OK"));
         mUi->serverVersionText->setText(mTryConnectJob->serverVersion().toString());
     }
     mProgressDialog->hide();

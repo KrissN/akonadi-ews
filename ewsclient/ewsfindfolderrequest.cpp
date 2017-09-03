@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,10 +17,12 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <memory>
-#include <QtCore/QXmlStreamWriter>
-
 #include "ewsfindfolderrequest.h"
+
+#include <memory>
+
+#include <QXmlStreamWriter>
+
 #include "ewsclient_debug.h"
 
 static const QString traversalTypeNames[] = {
@@ -165,7 +167,7 @@ bool EwsFindFolderResponse::parseRootFolder(QXmlStreamReader &reader)
     }
 
     unsigned i = 0;
-    for (i = 0; i < totalItems; i++) {
+    for (i = 0; i < totalItems; ++i) {
         EwsFolder *folder = readFolder(reader);
         reader.readNextStartElement();
         if (folder) {
@@ -220,7 +222,7 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
 unsigned EwsFindFolderResponse::readChildFolders(EwsFolder &parent, unsigned count, QXmlStreamReader &reader)
 {
     unsigned readCount = 0;
-    for (unsigned i = 0; i < count; i++) {
+    for (unsigned i = 0; i < count; ++i) {
         EwsFolder *folder = readFolder(reader);
         reader.readNextStartElement();
         if (folder) {
@@ -234,7 +236,7 @@ unsigned EwsFindFolderResponse::readChildFolders(EwsFolder &parent, unsigned cou
             }
             parent.addChild(*folder);
         }
-        readCount++;
+        ++readCount;
     }
     return readCount;
 }

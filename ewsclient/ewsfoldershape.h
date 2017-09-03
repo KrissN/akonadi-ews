@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -20,17 +20,17 @@
 #ifndef EWSFOLDERSHAPE_H
 #define EWSFOLDERSHAPE_H
 
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
-#include <QtCore/QVector>
+#include <QVector>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
-#include "ewstypes.h"
 #include "ewspropertyfield.h"
+#include "ewstypes.h"
 
 class EwsFolderShape
 {
 public:
-    EwsFolderShape(EwsBaseShape shape = EwsShapeDefault) : mBaseShape(shape) {};
+    explicit EwsFolderShape(EwsBaseShape shape = EwsShapeDefault) : mBaseShape(shape) {};
     ~EwsFolderShape() {};
     EwsFolderShape(const EwsFolderShape &other)
         : mBaseShape(other.mBaseShape), mProps(other.mProps) {};

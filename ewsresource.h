@@ -20,16 +20,17 @@
 #ifndef EWSRESOURCE_H
 #define EWSRESOURCE_H
 
-#include <akonadi_version.h>
-#include <QtCore/QScopedPointer>
+#include <QScopedPointer>
+
 #include <AkonadiAgentBase/ResourceBase>
 #include <AkonadiAgentBase/TransportResourceBase>
+#include <akonadi_version.h>
 
 #include "ewsclient.h"
-#include "ewsid.h"
 #include "ewsfetchitemsjob.h"
+#include "ewsid.h"
 
-#include "config.h"
+#include <config.h>
 
 // Some older variants of akonadi_version.h use a different name
 #ifndef AKONADI_VERSION

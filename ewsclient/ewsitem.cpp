@@ -19,18 +19,19 @@
 
 #include "ewsitem.h"
 
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+
 #include <KCodecs/KCodecs>
 
 #include "ewsattachment.h"
+#include "ewsattendee.h"
+#include "ewsclient_debug.h"
 #include "ewsitembase_p.h"
 #include "ewsmailbox.h"
-#include "ewsattendee.h"
-#include "ewsrecurrence.h"
 #include "ewsoccurrence.h"
+#include "ewsrecurrence.h"
 #include "ewsxml.h"
-#include "ewsclient_debug.h"
 
 #define D_PTR EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
 #define D_CPTR const EwsItemPrivate *d = reinterpret_cast<const EwsItemPrivate*>(this->d.data());

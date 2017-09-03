@@ -18,20 +18,22 @@
 */
 
 #include "mtaconfigdialog.h"
+
+#include <QAbstractItemView>
 #include <QDebug>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QAbstractItemView>
-#include <AkonadiWidgets/AgentInstanceWidget>
-#include <AkonadiCore/AgentFilterProxyModel>
-#include <AkonadiCore/AgentInstanceModel>
-#include <AkonadiCore/AgentInstance>
+#include <QDialogButtonBox>
+#include <QPushButton>
 
 #include <KWindowSystem/KWindowSystem>
 
-#include "ui_mtaconfigdialog.h"
-#include "mtasettings.h"
+#include <AkonadiCore/AgentFilterProxyModel>
+#include <AkonadiCore/AgentInstance>
+#include <AkonadiCore/AgentInstanceModel>
+#include <AkonadiWidgets/AgentInstanceWidget>
+
 #include "ewsmtaresource.h"
+#include "mtasettings.h"
+#include "ui_mtaconfigdialog.h"
 
 MtaConfigDialog::MtaConfigDialog(EwsMtaResource *parentResource, WId wId)
     : QDialog(), mParentResource(parentResource)

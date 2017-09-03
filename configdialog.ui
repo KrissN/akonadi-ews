@@ -21,7 +21,7 @@
      </property>
      <widget class="QWidget" name="generalTab">
       <attribute name="title">
-       <string>General</string>
+       <string comment="General settings tab">General</string>
       </attribute>
       <layout class="QVBoxLayout" name="generalTabLayout">
        <item>
@@ -65,7 +65,7 @@
              <item row="1" column="0">
               <widget class="QLabel" name="emailLabel">
                <property name="text">
-                <string>Email:</string>
+                <string comment="Exchange account e-mail address">Email:</string>
                </property>
               </widget>
              </item>
@@ -89,7 +89,7 @@
              <item row="3" column="0">
               <widget class="QLabel" name="usernameLabel">
                <property name="text">
-                <string>Username:</string>
+                <string comment="Exchange account username/login">Username:</string>
                </property>
               </widget>
              </item>
@@ -240,7 +240,7 @@
      </widget>
      <widget class="QWidget" name="advancedTab">
       <attribute name="title">
-       <string>Advanced</string>
+       <string comment="Advanced settings tab">Advanced</string>
       </attribute>
       <layout class="QVBoxLayout" name="advancedTabLayout">
        <item>
@@ -372,13 +372,13 @@
        <item>
         <widget class="QGroupBox" name="clearSyncStateGroupBox">
          <property name="title">
-          <string>Clear Synchronisation State</string>
+          <string>Clear Synchronization State</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QLabel" name="clearSyncStateLabel">
             <property name="text">
-             <string>Resets synchronisation state between Exchange and Akonadi. Use in case some items or folders are not showing up despite existing in Exchange.</string>
+             <string>Resets synchronization state between Exchange and Akonadi. Use in case some items or folders are not showing up despite existing in Exchange.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -456,7 +456,7 @@
           <item row="0" column="1">
            <widget class="QLabel" name="serverStatusText">
             <property name="text">
-             <string>Unknown</string>
+             <string comment="Unknown server status">Unknown</string>
             </property>
             <property name="textInteractionFlags">
              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -473,7 +473,7 @@
           <item row="1" column="1">
            <widget class="QLabel" name="serverVersionText">
             <property name="text">
-             <string>Unknown</string>
+             <string comment="Unknown server version">Unknown</string>
             </property>
            </widget>
           </item>

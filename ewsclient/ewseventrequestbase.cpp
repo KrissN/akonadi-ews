@@ -263,18 +263,18 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
     }
 }
 
-bool EwsEventRequestBase::Response::operator==(const Response &other)
+bool EwsEventRequestBase::Response::operator==(const Response &other) const
 {
     return mNotifications == other.mNotifications;
 }
 
-bool EwsEventRequestBase::Notification::operator==(const Notification &other)
+bool EwsEventRequestBase::Notification::operator==(const Notification &other) const
 {
     return (mSubscriptionId == other.mSubscriptionId) && (mWatermark == other.mWatermark) &&
                     (mMoreEvents == other.mMoreEvents) && (mEvents == other.mEvents);
 }
 
-bool EwsEventRequestBase::Event::operator==(const Event &other)
+bool EwsEventRequestBase::Event::operator==(const Event &other) const
 {
     return (mType == other.mType) && (mWatermark == other.mWatermark) &&
                     (mTimestamp == other.mTimestamp) && (mId == other.mId) &&

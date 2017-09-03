@@ -26,7 +26,7 @@
       <default>true</default>
     </entry>
     <entry name="Email" type="String">
-      <label>E-mail</label>
+      <label context="Account e-mail address">E-mail</label>
       <tooltip>The primary e-mail address of this account</tooltip>
       <whatsthis>The primary e-mail address of this account</whatsthis>
     </entry>

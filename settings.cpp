@@ -19,6 +19,8 @@
 
 #include "settings.h"
 
+#include <QPointer>
+
 #include <KWallet/KWallet>
 #include <KWidgetsAddons/KPasswordDialog>
 #include <KI18n/KLocalizedString>
@@ -59,7 +61,7 @@ bool Settings::requestPassword(QString &password, bool ask)
             return false;
         }
 
-        KPasswordDialog *dlg = new KPasswordDialog(Q_NULLPTR);
+        QPointer<KPasswordDialog> dlg = new KPasswordDialog(Q_NULLPTR);
         dlg->setModal(true);
         dlg->setPrompt(i18n("Please enter password for user '%1' and Exchange account '%2'.",
                             username(), email()));
@@ -68,8 +70,10 @@ bool Settings::requestPassword(QString &password, bool ask)
             password = dlg->password();
             setPassword(password);
         } else {
+            delete dlg;
             return false;
         }
+        delete dlg;
     }
 
     return true;

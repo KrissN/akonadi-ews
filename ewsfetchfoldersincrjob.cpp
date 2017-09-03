@@ -68,7 +68,7 @@ using namespace Akonadi;
  * folder descriptors in the folder hash.
  *
  * Having information about all remote changed folders and their local Akonadi collections the main
- * part of the synchronisation process can be started.
+ * part of the synchronization process can be started.
  *
  * In the first pass the processRemoteFolders() method looks at all folders in the hash table.
  * Setting the parent-child relationships is performed at this stage only when the relevant parent
@@ -102,7 +102,7 @@ using namespace Akonadi;
  * The pass also processes any delayed collection moves in case executing them was impossible in the
  * first pass.
  *
- * The final stage of the synchronisation process builds a list of changed and deleted collections
+ * The final stage of the synchronization process builds a list of changed and deleted collections
  * for Akonadi. At this stage all collections must be processed, otherwise an error is raised. If
  * no collection moves have been executed the job is completed. Otherwise the completion is
  * singalled once all moves are done.
@@ -324,7 +324,7 @@ bool EwsFetchFoldersIncrJobPrivate::processRemoteFolders()
     bool reparentPassNeeded = false;
 
     /* Iterate over all changed folders. */
-    for (auto it = mFolderHash.begin(); it != mFolderHash.end(); it++) {
+    for (auto it = mFolderHash.begin(); it != mFolderHash.end(); ++it) {
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Processing: ") << it.key();
 
         if (it->isModified()) {
@@ -413,7 +413,7 @@ bool EwsFetchFoldersIncrJobPrivate::processRemoteFolders()
     }
 
     /* Build the resulting collection list. */
-    for (auto it = mFolderHash.begin(); it != mFolderHash.end(); it++) {
+    for (auto it = mFolderHash.begin(); it != mFolderHash.end(); ++it) {
         if (it->isRemoved()) {
             q->mDeletedFolders.append(it->collection);
         } else if (it->isProcessed()) {

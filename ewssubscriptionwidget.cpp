@@ -19,17 +19,18 @@
 
 #include "ewssubscriptionwidget.h"
 
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QTreeView>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QHeaderView>
-#include <QtGui/QStandardItemModel>
+#include <QCheckBox>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QStandardItemModel>
+#include <QTreeView>
+#include <QVBoxLayout>
+
+#include <KItemModels/KRecursiveFilterProxyModel>
 #include <KLocalizedString>
 #include <KWidgetsAddons/KMessageWidget>
-#include <KItemModels/KRecursiveFilterProxyModel>
 
 #include "ewsclient.h"
 #include "ewsfindfolderrequest.h"
@@ -181,7 +182,7 @@ void EwsSubscriptionWidgetPrivate::reloadFolderList(bool)
         mRefreshButton->setEnabled(false);
 
     } else {
-        mMsgWidget->setText(i18nc("@info:warning", "Exchange server not configured."));
+        mMsgWidget->setText(i18nc("@info", "Exchange server not configured."));
         mMsgWidget->setMessageType(KMessageWidget::Error);
         mMsgWidget->animatedShow();
     }
@@ -190,7 +191,7 @@ void EwsSubscriptionWidgetPrivate::reloadFolderList(bool)
 void EwsSubscriptionWidgetPrivate::readFolderListFinished(KJob *job)
 {
     if (job->error()) {
-        mMsgWidget->setText(i18nc("@info:warning", "Failed to retrieve folder list."));
+        mMsgWidget->setText(i18nc("@info", "Failed to retrieve folder list."));
         mMsgWidget->setMessageType(KMessageWidget::Error);
         mMsgWidget->animatedShow();
         mRefreshButton->setEnabled(true);
@@ -211,7 +212,7 @@ void EwsSubscriptionWidgetPrivate::readFolderListFinished(KJob *job)
 void EwsSubscriptionWidgetPrivate::subscribedFoldersJobFinished(KJob *job)
 {
     if (job->error()) {
-        mMsgWidget->setText(i18nc("@info:warning", "Failed to retrieve folder list."));
+        mMsgWidget->setText(i18nc("@info", "Failed to retrieve folder list."));
         mMsgWidget->setMessageType(KMessageWidget::Error);
         mMsgWidget->animatedShow();
         mRefreshButton->setEnabled(true);
@@ -243,7 +244,7 @@ void EwsSubscriptionWidgetPrivate::populateFolderTree()
         item->setCheckable(true);
         EwsId id = folder[EwsFolderFieldFolderId].value<EwsId>();
         item->setData(id.id(), ItemIdRole);
-        if (mSubscribedIds.contains(id.id())) {
+        if (mSubscribedIds.contains(EwsId(id.id()))) {
             item->setCheckState(Qt::Checked);
         }
         EwsId parentId = folder[EwsFolderFieldParentFolderId].value<EwsId>();
@@ -306,7 +307,7 @@ EwsSubscriptionWidget::EwsSubscriptionWidget(EwsClient &client, Settings *settin
     subContainerLayout->setMargin(0);
 
     QLineEdit *filterLineEdit = new QLineEdit(this);
-    filterLineEdit->setPlaceholderText(i18nc("@label:placeholder", "Filter folders"));
+    filterLineEdit->setPlaceholderText(i18nc("@label:textbox", "Filter folders"));
 
     QWidget *treeContainer = new QWidget(this);
     QHBoxLayout *treeContainerLayout = new QHBoxLayout(treeContainer);

@@ -20,9 +20,9 @@
 #ifndef EWSSUBSCRIPTIONMANAGER_H
 #define EWSSUBSCRIPTIONMANAGER_H
 
-#include <QtCore/QString>
-#include <QtCore/QTimer>
-#include <QtCore/QSet>
+#include <QSet>
+#include <QString>
+#include <QTimer>
 
 #include "ewsid.h"
 
@@ -50,7 +50,7 @@ class Settings;
  *
  *  The responsibility of this class is to retrieve and act upon change events from the Exchange
  *  server. The current implementation is simplified:
- *   - when an item update is received the folder containing the update is asked to synchronise
+ *   - when an item update is received the folder containing the update is asked to synchronize
  *     itself.
  *   - when a folder update is received a full collection tree sync is performed.
  *

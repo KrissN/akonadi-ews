@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,13 +19,13 @@
 
 #include "ewspoxautodiscoverrequest.h"
 
-#include "ewsclient_debug.h"
+#include <QTemporaryFile>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
 #include <KIO/TransferJob>
 
+#include "ewsclient_debug.h"
 
 static const QString poxAdOuReqNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/autodiscover/outlook/requestschema/2006");
 static const QString poxAdRespNsUri = QStringLiteral("http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006");
@@ -65,9 +65,8 @@ void EwsPoxAutodiscoverRequest::prepare(const QString body)
     }
     //config->readEntry("no-spoof-check", false)
 
-    connect(job, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
-    connect(job, SIGNAL(data(KIO::Job*, const QByteArray&)),
-            SLOT(requestData(KIO::Job*, const QByteArray&)));
+    connect(job, &KIO::TransferJob::result, this, &EwsPoxAutodiscoverRequest::requestResult);
+    connect(job, &KIO::TransferJob::data, this, &EwsPoxAutodiscoverRequest::requestData);
     connect(job, &KIO::TransferJob::redirection, this, &EwsPoxAutodiscoverRequest::requestRedirect);
 
     addSubjob(job);

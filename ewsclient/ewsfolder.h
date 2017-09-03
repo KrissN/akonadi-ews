@@ -33,7 +33,7 @@ public:
     typedef QList<EwsFolder> List;
 
     EwsFolder();
-    EwsFolder(QXmlStreamReader &reader);
+    explicit EwsFolder(QXmlStreamReader &reader);
     EwsFolder(const EwsFolder &other);
     EwsFolder(EwsFolder &&other);
     virtual ~EwsFolder();

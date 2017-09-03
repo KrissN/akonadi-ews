@@ -19,12 +19,12 @@
 
 #include "ewsattendee.h"
 
-#include <QtCore/QSharedData>
-#include <QtCore/QXmlStreamReader>
+#include <QSharedData>
+#include <QXmlStreamReader>
 
+#include "ewsclient_debug.h"
 #include "ewsmailbox.h"
 #include "ewstypes.h"
-#include "ewsclient_debug.h"
 
 class EwsAttendeePrivate : public QSharedData
 {

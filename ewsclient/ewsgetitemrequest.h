@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -20,12 +20,12 @@
 #ifndef EWSGETITEMREQUEST_H
 #define EWSGETITEMREQUEST_H
 
-#include <QtCore/QList>
+#include <QList>
 
 #include "ewsitem.h"
+#include "ewsitemshape.h"
 #include "ewsrequest.h"
 #include "ewstypes.h"
-#include "ewsitemshape.h"
 
 class EwsGetItemRequest : public EwsRequest
 {
@@ -34,7 +34,7 @@ public:
     class Response : public EwsRequest::Response
     {
     public:
-        Response(QXmlStreamReader &reader);
+        explicit Response(QXmlStreamReader &reader);
         bool parseItems(QXmlStreamReader &reader);
         const EwsItem &item() const { return mItem; };
     private:

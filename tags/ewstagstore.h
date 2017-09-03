@@ -65,9 +65,9 @@ class EwsItem;
  *
  *  Tags for items are also stored in a private property. The list contains an array of tag unique
  *  identifiers. In parallel to this any update of item tag also populates the category list with
- *  the tag names. This provides a one-way synchronisation of tags from Akonadi to Outlook.
+ *  the tag names. This provides a one-way synchronization of tags from Akonadi to Outlook.
  *
- *  @section tags_akonadi_sync Synchronisation with Akonadi tags
+ *  @section tags_akonadi_sync Synchronization with Akonadi tags
  *
  *  In the current version of Akonadi tag support is partially broken. One of the problematic issues
  *  is that Akonadi doesn't always tell the resource about the tags it has. This means that the list
@@ -78,15 +78,15 @@ class EwsItem;
  *  resource doesn't know the Akonadi tag ID. In order to add such a tag to the Akonadi item the
  *  resource needs to fetch the tags in order to learn their ID.
  *
- *  The EwsAkonadiTagSyncJob job can be used to force a synchronisation of Akonadi tags to Exchange.
+ *  The EwsAkonadiTagSyncJob job can be used to force a synchronization of Akonadi tags to Exchange.
  *
- *  In future once Akonadi tag support is fixed the explicit synchronisation will become obsolete.
+ *  In future once Akonadi tag support is fixed the explicit synchronization will become obsolete.
  */
 class EwsTagStore : public QObject
 {
     Q_OBJECT
 public:
-    EwsTagStore(QObject *parent);
+    explicit EwsTagStore(QObject *parent);
     virtual ~EwsTagStore();
 
     /**
@@ -182,12 +182,12 @@ public:
     Akonadi::Tag::Id tagIdForRid(const QByteArray &rid) const;
 
     /**
-     *  @brief  Synchronise the store with tag list from Akonadi
+     *  @brief  Synchronize the store with tag list from Akonadi
      *
      *  This function is an extension to addTags() in that for each tag it checks whether it already
      *  exists in the store and whether it has changed.
      *
-     *  The return value indicates if the store was modified during the synchronisation. If at least
+     *  The return value indicates if the store was modified during the synchronization. If at least
      *  one new or changed tag was found the return value is TRUE. Otherwise the method returns FALSE.
      *  The return value serves as information as to whether the tags should be pushed to Exchange.
      */

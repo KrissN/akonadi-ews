@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,12 +19,12 @@
 
 #include "fakeewsconnection.h"
 
-#include <QtCore/QBuffer>
-#include <QtNetwork/QTcpSocket>
-#include <QtXmlPatterns/QXmlNamePool>
-#include <QtXmlPatterns/QXmlQuery>
-#include <QtXmlPatterns/QXmlResultItems>
-#include <QtXmlPatterns/QXmlSerializer>
+#include <QBuffer>
+#include <QTcpSocket>
+#include <QXmlNamePool>
+#include <QXmlQuery>
+#include <QXmlResultItems>
+#include <QXmlSerializer>
 
 #include "fakeewsserver.h"
 #include "fakeewsserver_debug.h"
@@ -89,14 +89,14 @@ void FakeEwsConnection::dataAvailable()
         QByteArray line;
         do {
             line = mSock->readLine();
-            if (line.toLower().startsWith("content-length: ")) {
+            if (line.toLower().startsWith(QLatin1String("content-length: "))) {
                 bool ok;
                 mContentLength = line.trimmed().mid(16).toUInt(&ok);
                 if (!ok) {
                     sendError(QLatin1String("Failed to parse content length."));
                     return;
                 }
-            } else if (line.toLower().startsWith("authorization: basic ")) {
+            } else if (line.toLower().startsWith(QLatin1String("authorization: basic "))) {
                 if (line.trimmed().mid(21) == "dGVzdDp0ZXN0") {
                     mAuthenticated = true;
                 }

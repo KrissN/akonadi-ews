@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -20,9 +20,9 @@
 #ifndef EWSEVENTREQUESTBASE_H
 #define EWSEVENTREQUESTBASE_H
 
-#include <QtCore/QList>
-#include <QtCore/QSharedPointer>
-#include <QtCore/QDateTime>
+#include <QDateTime>
+#include <QList>
+#include <QSharedPointer>
 
 #include "ewsid.h"
 #include "ewsrequest.h"
@@ -52,10 +52,10 @@ public:
         const EwsId &oldItemId() const { return mOldId; };
         const EwsId &oldParentFolderId() const { return mOldParentFolderId; };
         bool itemIsFolder() const { return mIsFolder; };
-        bool operator==(const Event &other);
+        bool operator==(const Event &other) const;
     protected:
         Event(QXmlStreamReader &reader);
-        bool isValid() { return mType != EwsUnknownEvent; };
+        bool isValid() const { return mType != EwsUnknownEvent; };
 
         EwsEventType mType;
         QString mWatermark;
@@ -79,10 +79,10 @@ public:
         const QString &previousWatermark() const { return mWatermark; };
         bool hasMoreEvents() const { return mMoreEvents; };
         const Event::List &events() const { return mEvents; };
-        bool operator==(const Notification &other);
+        bool operator==(const Notification &other) const;
     protected:
         Notification(QXmlStreamReader &reader);
-        bool isValid() { return !mSubscriptionId.isNull(); };
+        bool isValid() const { return !mSubscriptionId.isNull(); };
         static bool eventsReader(QXmlStreamReader &reader, QVariant &val);
 
         QString mSubscriptionId;
@@ -97,7 +97,7 @@ public:
     {
     public:
         const Notification::List &notifications() const { return mNotifications; };
-        bool operator==(const Response &other);
+        bool operator==(const Response &other) const;
     protected:
         Response(QXmlStreamReader &reader);
 

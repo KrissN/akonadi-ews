@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -20,12 +20,12 @@
 #ifndef EWSGETSTREAMINGEVENTSREQUEST_H
 #define EWSGETSTREAMINGEVENTSREQUEST_H
 
-#include <QtCore/QList>
-#include <QtCore/QSharedPointer>
-#include <QtCore/QTimer>
+#include <QList>
+#include <QSharedPointer>
+#include <QTimer>
 
-#include "ewsid.h"
 #include "ewseventrequestbase.h"
+#include "ewsid.h"
 #include "ewstypes.h"
 
 class QXmlStreamReader;

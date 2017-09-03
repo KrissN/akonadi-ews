@@ -20,7 +20,7 @@
 #ifndef EWSAUTODISCOVERYJOB_H
 #define EWSAUTODISCOVERYJOB_H
 
-#include <QtCore/QQueue>
+#include <QQueue>
 
 #include "ewsjob.h"
 

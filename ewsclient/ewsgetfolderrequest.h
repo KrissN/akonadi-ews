@@ -32,7 +32,7 @@ public:
     class Response : public EwsRequest::Response
     {
     public:
-        Response(QXmlStreamReader &reader);
+        explicit Response(QXmlStreamReader &reader);
         bool parseFolders(QXmlStreamReader &reader);
 
         const EwsFolder &folder() const { return mFolder; };

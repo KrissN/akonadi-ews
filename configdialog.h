@@ -20,7 +20,7 @@
 #ifndef CONFIGDIALOG_H
 #define CONFIGDIALOG_H
 
-#include <QtWidgets/QDialog>
+#include <QDialog>
 
 #include <KConfigWidgets/KConfigDialogManager>
 

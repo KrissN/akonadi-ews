@@ -20,15 +20,15 @@
 #ifndef EWSATTACHMENT_H
 #define EWSATTACHMENT_H
 
-#include <QtCore/QDateTime>
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QVector>
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
+#include <QDateTime>
+#include <QSharedDataPointer>
+#include <QVector>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 #include "ewsitem.h"
-#include "ewstypes.h"
 #include "ewspropertyfield.h"
+#include "ewstypes.h"
 
 class EwsAttachmentPrivate;
 
@@ -46,7 +46,7 @@ public:
 
     EwsAttachment();
     ~EwsAttachment();
-    EwsAttachment(QXmlStreamReader &reader);
+    explicit EwsAttachment(QXmlStreamReader &reader);
     EwsAttachment(const EwsAttachment &other);
     EwsAttachment(EwsAttachment &&other);
     EwsAttachment& operator=(EwsAttachment &&other);

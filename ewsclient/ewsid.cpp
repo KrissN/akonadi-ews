@@ -19,10 +19,10 @@
 
 #include "ewsid.h"
 
-#include <QtCore/QString>
-#include <QtCore/QXmlStreamReader>
-#include <QtCore/QXmlStreamWriter>
-#include <QtCore/QDebug>
+#include <QString>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+#include <QDebug>
 
 #include "ewsclient.h"
 #include "ewsclient_debug.h"

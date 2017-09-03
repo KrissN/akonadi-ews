@@ -19,7 +19,8 @@
 
 #include "fakeewsserverthread.h"
 
-#include <QtCore/QEventLoop>
+#include <QEventLoop>
+
 #include "fakeewsserver.h"
 #include "fakeewsserver_debug.h"
 

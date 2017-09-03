@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef TEST_STATEMONITOR_H_
-#define TEST_STATEMONITOR_H_
+#ifndef TEST_STATEMONITOR_H
+#define TEST_STATEMONITOR_H
 
 #include <functional>
 
@@ -31,7 +31,7 @@ class StateMonitorBase : public QObject
 {
     Q_OBJECT
 public:
-    StateMonitorBase(QObject *parent) : QObject(parent) {};
+    explicit StateMonitorBase(QObject *parent) : QObject(parent) {};
     virtual ~StateMonitorBase() = default;
 Q_SIGNALS:
     void stateReached();
@@ -90,7 +90,5 @@ void CollectionStateMonitor<T>::stateChanged(const Akonadi::Collection &col)
         Q_EMIT stateReached();
     }
 }
-
-
 
 #endif

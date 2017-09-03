@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,11 +19,11 @@
 
 #include "ewsrequest.h"
 
-#include "ewsclient.h"
-#include "ewsserverversion.h"
-#include "ewsclient_debug.h"
+#include <QTemporaryFile>
 
-#include <QtCore/QTemporaryFile>
+#include "ewsclient.h"
+#include "ewsclient_debug.h"
+#include "ewsserverversion.h"
 
 EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
     : EwsJob(parent), mClient(client), mServerVersion(EwsServerVersion::ewsVersion2007Sp1)
@@ -89,9 +89,8 @@ void EwsRequest::prepare(const QString body)
     }
     job->addMetaData(mMd);
 
-    connect(job, SIGNAL(result(KJob*)), SLOT(requestResult(KJob*)));
-    connect(job, SIGNAL(data(KIO::Job*, const QByteArray&)),
-            SLOT(requestData(KIO::Job*, const QByteArray&)));
+    connect(job, &KIO::TransferJob::result, this, &EwsRequest::requestResult);
+    connect(job, &KIO::TransferJob::data, this, &EwsRequest::requestData);
 
     addSubjob(job);
 }
@@ -272,7 +271,7 @@ EwsRequest::Response::Response(QXmlStreamReader &reader)
     }
 
     unsigned i;
-    for (i = 0; i < sizeof(respClasses) / sizeof(respClasses[0]); i++) {
+    for (i = 0; i < sizeof(respClasses) / sizeof(respClasses[0]); ++i) {
         if (respClassRef == respClasses[i]) {
             mClass = static_cast<EwsResponseClass>(i);
             break;

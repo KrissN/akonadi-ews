@@ -20,10 +20,12 @@
 #ifndef EWSRESOURCE_DEBUG_H
 #define EWSRESOURCE_DEBUG_H
 
+#include <QLoggingCategory>
+
 #include <AkonadiCore/Collection>
 #include <AkonadiCore/Item>
-#include <QtCore/QLoggingCategory>
 
+#include "ewsclient.h"
 #include "ewsclient_debug.h"
 
 Q_DECLARE_LOGGING_CATEGORY(EWSRES_AGENTIF_LOG)

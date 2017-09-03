@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -98,7 +98,7 @@ void EwsCreateMailJob::doStart()
     }
     // Set flags
     QHash<EwsPropertyField, QVariant> propertyHash = EwsMailHandler::writeFlags(mItem.flags());
-    for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); it++) {
+    for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); ++it) {
         if (!it.value().isNull()) {
             if (it.key().type() == EwsPropertyField::ExtendedField) {
                 item.setProperty(it.key(), it.value());
@@ -189,7 +189,7 @@ void EwsCreateMailJob::mailCreateWorkaroundFinished(KJob *job)
         EwsId id = resp.itemId();
         EwsMoveItemRequest *req = new EwsMoveItemRequest(mClient, this);
         req->setItemIds(EwsId::List() << id);
-        req->setDestinationFolderId(mCollection.remoteId());
+        req->setDestinationFolderId(EwsId(mCollection.remoteId()));
         connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailMoveWorkaroundFinished);
         addSubjob(req);
         req->start();

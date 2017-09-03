@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -20,7 +20,7 @@
 #ifndef EWSSERVERVERSION_H
 #define EWSSERVERVERSION_H
 
-#include <QtCore/QString>
+#include <QString>
 
 class QXmlStreamReader;
 class QXmlStreamWriter;
@@ -37,7 +37,7 @@ public:
     EwsServerVersion(uint major, uint minor, QString name, QString friendlyName)
         : mMajor(major), mMinor(minor), mMajorBuild(0), mMinorBuild(0), mName(name),
           mFriendlyName(friendlyName) {};
-    EwsServerVersion(QXmlStreamReader &reader);
+    explicit EwsServerVersion(QXmlStreamReader &reader);
     EwsServerVersion(const EwsServerVersion &other)
         : mMajor(other.mMajor), mMinor(other.mMinor), mMajorBuild(other.mMajorBuild),
           mMinorBuild(other.mMinorBuild), mName(other.mName), mFriendlyName(other.mFriendlyName) {};

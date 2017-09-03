@@ -127,9 +127,9 @@ void EwsFetchItemsJob::start()
     if (!mItemsToCheck.isEmpty()) {
         EwsGetItemRequest *getItemReq = new EwsGetItemRequest(mClient, this);
         getItemReq->setItemIds(mItemsToCheck);
-        getItemReq->setItemShape(EwsShapeIdOnly);
+        getItemReq->setItemShape(EwsItemShape(EwsShapeIdOnly));
         connect(getItemReq, &EwsGetItemRequest::result, this, &EwsFetchItemsJob::checkedItemsFetchFinished);
-        mPendingJobs++;
+        ++mPendingJobs;
         getItemReq->start();
     }
 }
@@ -149,7 +149,7 @@ void EwsFetchItemsJob::localItemFetchDone(KJob *job)
     if (!fetchJob->error()) {
         removeSubjob(job);
         mLocalItems = fetchJob->items();
-        mPendingJobs--;
+        --mPendingJobs;
         if (mPendingJobs == 0) {
             compareItemLists();
         }
@@ -204,7 +204,7 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
         }
         else {
             mSyncState = itemReq->syncState();
-            mPendingJobs--;
+            --mPendingJobs;
             if (mPendingJobs == 0) {
                 compareItemLists();
             }
@@ -239,9 +239,9 @@ void EwsFetchItemsJob::checkedItemsFetchFinished(KJob *job)
                 qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 not found - removing").arg(ewsHash(it->id()));
                 mRemoteDeletedIds.append(*it);
             }
-            it++;
+            ++it;
         }
-        mPendingJobs--;
+        --mPendingJobs;
         if (mPendingJobs == 0) {
             compareItemLists();
         }
@@ -304,7 +304,7 @@ void EwsFetchItemsJob::compareItemLists()
         /* In case of a full sync all items that are still on the local item list do not exist
          * remotely and need to be deleted locally. */
         QHash<QString, Item>::iterator it;
-        for (it = itemHash.begin(); it != itemHash.end(); it++) {
+        for (it = itemHash.begin(); it != itemHash.end(); ++it) {
             mDeletedItems.append(it.value());
         }
     }
@@ -356,7 +356,7 @@ void EwsFetchItemsJob::compareItemLists()
 
         QHash<EwsId, bool>::const_iterator it;
         EwsItemHandler *handler = EwsItemHandler::itemHandler(EwsItemTypeMessage);
-        for (it = mRemoteFlagChangedIds.cbegin(); it != mRemoteFlagChangedIds.cend(); it++) {
+        for (it = mRemoteFlagChangedIds.cbegin(); it != mRemoteFlagChangedIds.cend(); ++it) {
             QHash<QString, Item>::iterator iit = itemHash.find(it.key().id());
             if (iit == itemHash.end()) {
                 setErrorMsg(QStringLiteral("Got read flag change for item %1, but item not found in local store.")
@@ -376,7 +376,7 @@ void EwsFetchItemsJob::compareItemLists()
                     .arg(mDeletedItems.size()).arg(mRemoteAddedItems.size());
 
     bool fetch = false;
-    for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); iType++) {
+    for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); ++iType) {
         if (!toFetchItems[iType].isEmpty()) {
             qDebug() << "compareItemLists: fetching" << iType;
             for (int i = 0; i < toFetchItems[iType].size(); i += fetchBatchSize) {

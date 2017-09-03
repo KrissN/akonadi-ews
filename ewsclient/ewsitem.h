@@ -20,7 +20,7 @@
 #ifndef EWSITEM_H
 #define EWSITEM_H
 
-#include <QtCore/QList>
+#include <QList>
 
 #include "ewsitembase.h"
 
@@ -35,7 +35,7 @@ public:
     typedef QMultiMap<QString, QString> HeaderMap;
 
     EwsItem();
-    EwsItem(QXmlStreamReader &reader);
+    explicit EwsItem(QXmlStreamReader &reader);
     EwsItem(const EwsItem &other);
     EwsItem(EwsItem &&other);
     virtual ~EwsItem();

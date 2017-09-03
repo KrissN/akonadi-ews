@@ -26,7 +26,7 @@ class EwsJob : public KCompositeJob
 {
     Q_OBJECT
 public:
-    EwsJob(QObject *parent);
+    explicit EwsJob(QObject *parent);
     virtual ~EwsJob();
 protected:
     virtual bool doKill() Q_DECL_OVERRIDE;

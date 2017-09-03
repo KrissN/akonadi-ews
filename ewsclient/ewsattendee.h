@@ -20,9 +20,9 @@
 #ifndef EWSATTENDEE_H
 #define EWSATTENDEE_H
 
-#include <QtCore/QSharedDataPointer>
-#include <QtCore/QMetaType>
-#include <QtCore/QDateTime>
+#include <QDateTime>
+#include <QMetaType>
+#include <QSharedDataPointer>
 
 #include "ewstypes.h"
 
@@ -36,7 +36,7 @@ public:
     typedef QList<EwsAttendee> List;
 
     EwsAttendee();
-    EwsAttendee(QXmlStreamReader &reader);
+    explicit EwsAttendee(QXmlStreamReader &reader);
     EwsAttendee(const EwsAttendee &other);
     EwsAttendee(EwsAttendee &&other);
     virtual ~EwsAttendee();

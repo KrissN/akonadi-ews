@@ -20,10 +20,10 @@
 #ifndef EWSCLIENT_H
 #define EWSCLIENT_H
 
-#include <QtCore/QString>
-#include <QtCore/QVector>
-#include <QtCore/QPointer>
-#include <QtCore/QUrl>
+#include <QPointer>
+#include <QString>
+#include <QUrl>
+#include <QVector>
 
 #include "ewsserverversion.h"
 
@@ -31,7 +31,7 @@ class EwsClient : public QObject
 {
     Q_OBJECT
 public:
-    EwsClient(QObject *parent = 0);
+    explicit EwsClient(QObject *parent = 0);
     ~EwsClient();
 
     void setUrl(QString url)

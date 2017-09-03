@@ -20,12 +20,13 @@
 #ifndef EWSID_H
 #define EWSID_H
 
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QString>
+#include <QList>
+#include <QMetaType>
+#include <QString>
 
 #include "ewstypes.h"
-#include "../config.h"
+
+#include <config.h>
 
 class QXmlStreamWriter;
 class QXmlStreamReader;
@@ -56,12 +57,12 @@ public:
 
     typedef QList<EwsId> List;
 
-    EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
-    EwsId(QString id, QString changeKey = QString());
+    explicit EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
+    explicit EwsId(QString id, QString changeKey = QString());
     EwsId(const EwsId &id) { *this = id; };
     EwsId(EwsId &&id) { *this = std::move(id); };
     EwsId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
-    EwsId(QXmlStreamReader &reader);
+    explicit EwsId(QXmlStreamReader &reader);
 
     Type type() const { return mType; };
     QString id() const { return mId; };

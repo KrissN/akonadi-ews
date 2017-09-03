@@ -51,7 +51,7 @@ void EwsModifyMailJob::start()
             qDebug() << "Item flags" << item.flags();
             QHash<EwsPropertyField, QVariant> propertyHash = EwsMailHandler::writeFlags(item.flags());
 
-            for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); it++) {
+            for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); ++it) {
                 EwsUpdateItemRequest::Update *upd;
                 if (it.value().isNull()) {
                     upd = new EwsUpdateItemRequest::DeleteUpdate(it.key());

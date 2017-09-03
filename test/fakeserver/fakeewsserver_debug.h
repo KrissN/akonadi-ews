@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,11 +17,12 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFAKESERVER_DEBUG_H
-#define EWSFAKESERVER_DEBUG_H
+#ifndef FAKEEWSSERVER_DEBUG_H
+#define FAKEEWSSERVER_DEBUG_H
 
-#include <QtCore/QTemporaryDir>
-#include <QtCore/QLoggingCategory>
+#include <QTemporaryDir>
+#include <QLoggingCategory>
+
 Q_DECLARE_LOGGING_CATEGORY(EWSFAKE_LOG)
 
 #define qCDebugNC(cat) qCDebug(cat).noquote()

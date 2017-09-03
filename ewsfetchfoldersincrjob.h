@@ -17,11 +17,12 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef EWSFETCHIFOLDERSINCRJOB_H
-#define EWSFETCHIFOLDERSINCRJOB_H
+#ifndef EWSFETCHFOLDERSINCRJOB_H
+#define EWSFETCHFOLDERSINCRJOB_H
+
+#include <QScopedPointer>
 
 #include <AkonadiCore/Collection>
-#include <QtCore/QScopedPointer>
 
 #include "ewsjob.h"
 #include "ewsfolder.h"

@@ -21,11 +21,12 @@
 #define FAKEEWSSERVER_H
 
 #include <functional>
-#include <QtCore/QMutex>
-#include <QtCore/QPointer>
-#include <QtCore/QRegularExpression>
-#include <QtNetwork/QTcpServer>
-#include <QtNetwork/QTcpSocket>
+
+#include <QMutex>
+#include <QPointer>
+#include <QRegularExpression>
+#include <QTcpServer>
+#include <QTcpSocket>
 
 class FakeEwsConnection;
 class QXmlResultItems;
@@ -49,7 +50,7 @@ public:
 
     static const DialogEntry::HttpResponse EmptyResponse;
 
-    FakeEwsServer(QObject *parent);
+    explicit FakeEwsServer(QObject *parent);
     virtual ~FakeEwsServer();
     bool start();
     void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);

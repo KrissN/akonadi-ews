@@ -20,16 +20,18 @@
 #ifndef EWSFETCHITEMDETAILJOB_H
 #define EWSFETCHITEMDETAILJOB_H
 
-#include <QtCore/QPointer>
+#include <QPointer>
+
 #include <KCoreAddons/KCompositeJob>
+
 #include <AkonadiCore/Item>
 #include <AkonadiCore/Collection>
 
-#include "ewstypes.h"
 #include "ewsclient.h"
+#include "ewsgetitemrequest.h"
 #include "ewsid.h"
 #include "ewsitem.h"
-#include "ewsgetitemrequest.h"
+#include "ewstypes.h"
 
 class EwsFetchItemDetailJob : public KCompositeJob
 {

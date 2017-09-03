@@ -17,15 +17,17 @@
     Boston, MA 02110-1301, USA.
 */
 
+#include "isolatedtestbase.h"
+
+#include <QTest>
+
 #include <AkonadiCore/AgentInstanceCreateJob>
 #include <AkonadiCore/AgentManager>
 #include <AkonadiCore/Control>
-#include <QtTest/QTest>
 
-#include "isolatedtestbase.h"
-#include "fakeewsserverthread.h"
 #include "ewssettings.h"
 #include "ewswallet.h"
+#include "fakeewsserverthread.h"
 
 using namespace Akonadi;
 

@@ -16,6 +16,8 @@
 #  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110-1301, USA.
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
+
 set(EWSCLIENT_SRCS
   ewsattachment.cpp
   ewsattendee.cpp

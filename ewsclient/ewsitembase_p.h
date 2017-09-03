@@ -20,7 +20,7 @@
 #ifndef EWSITEMBASE_P_H
 #define EWSITEMBASE_P_H
 
-#include <QtCore/QSharedData>
+#include <QSharedData>
 
 #include "ewsid.h"
 

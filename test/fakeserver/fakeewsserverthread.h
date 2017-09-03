@@ -17,11 +17,11 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef FAKEEWSSEVERTHREAD_H
-#define FAKEEWSSEVERTHREAD_H
+#ifndef FAKEEWSSERVERTHREAD_H
+#define FAKEEWSSERVERTHREAD_H
 
-#include <QtCore/QMutex>
-#include <QtCore/QThread>
+#include <QMutex>
+#include <QThread>
 
 #include "fakeewsserver.h"
 
@@ -29,7 +29,7 @@ class Q_DECL_EXPORT FakeEwsServerThread : public QThread
 {
     Q_OBJECT
 public:
-    FakeEwsServerThread(QObject *parent = 0);
+    explicit FakeEwsServerThread(QObject *parent = 0);
     virtual ~FakeEwsServerThread();
 
 //    FakeEwsServer *server() const;

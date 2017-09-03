@@ -19,8 +19,8 @@
 
 #include "fakeewsserver.h"
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QThread>
+#include <QCoreApplication>
+#include <QThread>
 
 #include "fakeewsconnection.h"
 #include "fakeewsserver_debug.h"

@@ -17,8 +17,9 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "ewsclient.h"
 #include "ewsresource_debug.h"
+
+#include "ewsclient.h"
 
 Q_LOGGING_CATEGORY(EWSRES_AGENTIF_LOG, "log_ews_resource_agentif", QtWarningMsg)
 

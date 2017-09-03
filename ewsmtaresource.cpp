@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,16 +19,15 @@
 
 #include "ewsmtaresource.h"
 
-#include <QtCore/QDebug>
-#include <QtDBus/QDBusConnection>
+#include <QDBusConnection>
+#include <QDebug>
 
 #include <KI18n/KLocalizedString>
 #include <KMime/Message>
 
+#include "ewsclient_debug.h"
 #include "mtaconfigdialog.h"
 #include "mtasettings.h"
-#include "ewsclient_debug.h"
-
 #include "resourceinterface.h"
 
 using namespace Akonadi;
@@ -48,8 +47,9 @@ bool EwsMtaResource::connectEws()
     if (mEwsResource) {
         return true;
     }
-    mEwsResource = new OrgKdeAkonadiEwsResourceInterface(QStringLiteral("org.freedesktop.Akonadi.Resource.") + MtaSettings::ewsResource(),
-                                                         QStringLiteral("/"), QDBusConnection::sessionBus(), this);
+    mEwsResource = new OrgKdeAkonadiEwsResourceInterface(
+        QStringLiteral("org.freedesktop.Akonadi.Resource.") + MtaSettings::ewsResource(),
+        QStringLiteral("/"), QDBusConnection::sessionBus(), this);
     qDebug() << QStringLiteral("org.freedesktop.akonadi.Resource.") + MtaSettings::ewsResource() << mEwsResource->isValid();
     if (!mEwsResource->isValid()) {
         delete mEwsResource;
@@ -63,10 +63,11 @@ bool EwsMtaResource::connectEws()
 
 void EwsMtaResource::configure(WId windowId)
 {
-    MtaConfigDialog dlg(this, windowId);
-    if (dlg.exec()) {
+    QPointer<MtaConfigDialog> dlg = new MtaConfigDialog(this, windowId);
+    if (dlg->exec()) {
         MtaSettings::self()->save();
     }
+    delete dlg;
 }
 
 void EwsMtaResource::sendItem(const Akonadi::Item &item)

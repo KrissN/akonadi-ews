@@ -19,10 +19,10 @@
 
 #include "ewsattachment.h"
 
-#include <QtCore/QBitArray>
-#include "ewsxml.h"
+#include <QBitArray>
 
 #include "ewsclient_debug.h"
+#include "ewsxml.h"
 
 class EwsAttachmentPrivate : public QSharedData
 {

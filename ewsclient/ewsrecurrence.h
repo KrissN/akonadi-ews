@@ -28,7 +28,7 @@ class EwsRecurrence : public KCalCore::Recurrence
 {
 public:
     EwsRecurrence();
-    EwsRecurrence(QXmlStreamReader &reader);
+    explicit EwsRecurrence(QXmlStreamReader &reader);
     EwsRecurrence(const EwsRecurrence &other);
     EwsRecurrence &operator=(const EwsRecurrence &other);
 private:

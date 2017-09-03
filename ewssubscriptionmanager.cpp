@@ -18,16 +18,17 @@
 */
 
 #include "ewssubscriptionmanager.h"
+
+#include "ewsclient_debug.h"
+#include "ewsgeteventsrequest.h"
+#include "ewsgetfolderrequest.h"
+#include "ewsgetstreamingeventsrequest.h"
+#include "ewssubscribedfoldersjob.h"
 #include "ewssubscriberequest.h"
 #include "ewsunsubscriberequest.h"
-#include "ewsgeteventsrequest.h"
-#include "ewsgetstreamingeventsrequest.h"
-#include "ewsgetfolderrequest.h"
 #include "settings.h"
-#include "ewssubscribedfoldersjob.h"
-#include "ewsclient_debug.h"
 
-// TODO: Allow customisation
+// TODO: Allow customization
 static Q_CONSTEXPR uint pollInterval = 10; /* seconds */
 
 static Q_CONSTEXPR uint streamingTimeout = 30; /* minutes */
@@ -69,7 +70,7 @@ void EwsSubscriptionManager::start()
 void EwsSubscriptionManager::cancelSubscription()
 {
     if (!mSettings->eventSubscriptionId().isEmpty()) {
-        EwsUnsubscribeRequest *req = new EwsUnsubscribeRequest(mEwsClient, this);
+        QPointer<EwsUnsubscribeRequest> req = new EwsUnsubscribeRequest(mEwsClient, this);
         req->setSubscriptionId(mSettings->eventSubscriptionId());
         req->exec();
         mSettings->setEventSubscriptionId(QString());
@@ -254,7 +255,7 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
 
                 bool skip = false;
                 EwsId id = event.itemId();
-                for (auto it = mQueuedUpdates.find(id.id()); it != mQueuedUpdates.end(); it++) {
+                for (auto it = mQueuedUpdates.find(id.id()); it != mQueuedUpdates.end(); ++it) {
                     if (it->type == event.type()
                         && (it->type == EwsDeletedEvent || it->changeKey == id.changeKey())) {
                         qCDebugNC(EWSRES_LOG) << QStringLiteral("Skipped queued update type %1 for item %2");

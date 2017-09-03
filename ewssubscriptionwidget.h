@@ -20,8 +20,8 @@
 #ifndef EWSSUBSCRIPTIONWIDGET_H
 #define EWSSUBSCRIPTIONWIDGET_H
 
-#include <QtWidgets/QWidget>
-#include <QtCore/QScopedPointer>
+#include <QScopedPointer>
+#include <QWidget>
 
 #include "ewsid.h"
 

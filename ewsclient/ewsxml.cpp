@@ -17,15 +17,16 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <ewsxml.h>
-#include <QtCore/QDateTime>
+#include "ewsxml.h"
+
+#include <QDateTime>
+
 #include <KCodecs/KCodecs>
 
+#include "ewsclient_debug.h"
+#include "ewsfolder.h"
 #include "ewsid.h"
 #include "ewsitem.h"
-#include "ewsfolder.h"
-
-#include "ewsclient_debug.h"
 
 static const QVector<QString> messageSensitivityNames = {
     QStringLiteral("Normal"),

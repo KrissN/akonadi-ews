@@ -1,5 +1,5 @@
 /*  This file is part of Akonadi EWS Resource
-    Copyright (C) 2015-2016 Krzysztof Nowicki <krissn@op.pl>
+    Copyright (C) 2015-2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -17,9 +17,10 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtCore/QString>
-
 #include "ewspropertyfield.h"
+
+#include <QString>
+
 #include "ewsclient_debug.h"
 
 static const QString distinguishedPropSetIdNames[] = {
@@ -417,7 +418,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
         QStringRef propTypeText = attrs.value(QStringLiteral("PropertyType"));
         unsigned i;
         EwsPropertyType propType;
-        for (i = 0; i < sizeof(propertyTypeNames) / sizeof(propertyTypeNames[0]); i++) {
+        for (i = 0; i < sizeof(propertyTypeNames) / sizeof(propertyTypeNames[0]); ++i) {
             if (propTypeText == propertyTypeNames[i]) {
                 propType = static_cast<EwsPropertyType>(i);
                 break;
@@ -470,7 +471,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
             if (attrs.hasAttribute(QStringLiteral("DistinguishedPropertySetId"))) {
                 QStringRef didText = attrs.value(QStringLiteral("DistinguishedPropertySetId"));
                 unsigned i;
-                for (i = 0; i < sizeof(distinguishedPropSetIdNames) / sizeof(distinguishedPropSetIdNames[0]); i++) {
+                for (i = 0; i < sizeof(distinguishedPropSetIdNames) / sizeof(distinguishedPropSetIdNames[0]); ++i) {
                     if (didText == distinguishedPropSetIdNames[i]) {
                         psDid = static_cast<EwsDistinguishedPropSetId>(i);
                         break;

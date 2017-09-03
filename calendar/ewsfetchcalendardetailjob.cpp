@@ -19,19 +19,20 @@
 
 #include "ewsfetchcalendardetailjob.h"
 
-#include <QtCore/QTimeZone>
+#include <QTimeZone>
+
 #include <KCalCore/Event>
-#include <KDE/KDateTime>
-#include <KDE/KTimeZone>
-#include <KDE/KSystemTimeZones>
 #include <KCalCore/ICalFormat>
 #include <KCalCore/MemoryCalendar>
+#include <KDE/KDateTime>
+#include <KDE/KSystemTimeZones>
+#include <KDE/KTimeZone>
 
-#include "ewsitemshape.h"
-#include "ewsgetitemrequest.h"
-#include "ewsoccurrence.h"
-#include "ewsmailbox.h"
 #include "ewsclient_debug.h"
+#include "ewsgetitemrequest.h"
+#include "ewsitemshape.h"
+#include "ewsmailbox.h"
+#include "ewsoccurrence.h"
 
 using namespace Akonadi;
 
