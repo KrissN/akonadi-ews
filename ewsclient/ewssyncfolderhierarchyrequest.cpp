@@ -26,13 +26,13 @@
 #include "ewsclient_debug.h"
 #include "ewsxml.h"
 
-enum SyncResponseElementType {
+enum SyncFolderHierarchyResponseElementType {
     SyncState,
     IncludesLastFolderInRange,
     Changes
 };
 
-enum ChangeElementType {
+enum SyncFolderHierarchyChangeElementType {
     Folder,
     FolderId,
     IsRead
@@ -151,14 +151,14 @@ EwsSyncFolderHierarchyRequest::Response::Response(QXmlStreamReader &reader)
         return;
     }
 
-    static const QVector<EwsXml<SyncResponseElementType>::Item> items = {
+    static const QVector<EwsXml<SyncFolderHierarchyResponseElementType>::Item> items = {
         {SyncState, QStringLiteral("SyncState"), &ewsXmlTextReader},
         {IncludesLastFolderInRange, QStringLiteral("IncludesLastFolderInRange"), &ewsXmlBoolReader},
         {Changes, QStringLiteral("Changes"), &EwsSyncFolderHierarchyRequest::Response::changeReader},
     };
-    static const EwsXml<SyncResponseElementType> staticReader(items);
+    static const EwsXml<SyncFolderHierarchyResponseElementType> staticReader(items);
 
-    EwsXml<SyncResponseElementType> ewsReader(staticReader);
+    EwsXml<SyncFolderHierarchyResponseElementType> ewsReader(staticReader);
 
     if (!ewsReader.readItems(reader, ewsMsgNsUri,
         [this](QXmlStreamReader &reader, const QString &) {
@@ -173,7 +173,7 @@ EwsSyncFolderHierarchyRequest::Response::Response(QXmlStreamReader &reader)
         return;
     }
 
-    QHash<SyncResponseElementType, QVariant> values = ewsReader.values();
+    QHash<SyncFolderHierarchyResponseElementType, QVariant> values = ewsReader.values();
 
     mSyncState = values[SyncState].toString();
     mIncludesLastFolder = values[IncludesLastFolderInRange].toBool();
@@ -200,7 +200,7 @@ bool EwsSyncFolderHierarchyRequest::Response::changeReader(QXmlStreamReader &rea
 
 EwsSyncFolderHierarchyRequest::Change::Change(QXmlStreamReader &reader)
 {
-    static const QVector<EwsXml<ChangeElementType>::Item> items = {
+    static const QVector<EwsXml<SyncFolderHierarchyChangeElementType>::Item> items = {
         {Folder, QStringLiteral("Folder"), &ewsXmlFolderReader},
         {Folder, QStringLiteral("CalendarFolder"), &ewsXmlFolderReader},
         {Folder, QStringLiteral("ContactsFolder"), &ewsXmlFolderReader},
@@ -209,9 +209,9 @@ EwsSyncFolderHierarchyRequest::Change::Change(QXmlStreamReader &reader)
         {FolderId, QStringLiteral("FolderId"), &ewsXmlIdReader},
         {IsRead, QStringLiteral("IsRead"), &ewsXmlBoolReader}
     };
-    static const EwsXml<ChangeElementType> staticReader(items);
+    static const EwsXml<SyncFolderHierarchyChangeElementType> staticReader(items);
 
-    EwsXml<ChangeElementType> ewsReader(staticReader);
+    EwsXml<SyncFolderHierarchyChangeElementType> ewsReader(staticReader);
 
     if (reader.name() == QStringLiteral("Create")) {
         mType = Create;
@@ -226,7 +226,7 @@ EwsSyncFolderHierarchyRequest::Change::Change(QXmlStreamReader &reader)
         return;
     }
 
-    QHash<ChangeElementType, QVariant> values = ewsReader.values();
+    QHash<SyncFolderHierarchyChangeElementType, QVariant> values = ewsReader.values();
 
     switch (mType) {
     case Create:

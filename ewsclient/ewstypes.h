@@ -503,7 +503,7 @@ typedef enum {
 template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
 {
     unsigned i;
-    T enumVal;
+    T enumVal = T();
     for (i = 0; i < count; i++) {
         if (str == table[i]) {
             enumVal = static_cast<T>(i);
