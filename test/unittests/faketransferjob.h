@@ -63,8 +63,8 @@ public Q_SLOTS:
 private Q_SLOTS:
     void callVerifier();
     void doEmitResult();
+    void doData(const QByteArray &resp);
 Q_SIGNALS:
-    void data(KIO::Job *job, const QByteArray &data);
     void requestReceived(FakeTransferJob *job, const QByteArray &req);
 private:
     QByteArray mPostData;
