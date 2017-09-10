@@ -50,11 +50,11 @@ void EwsFetchTaskDetailJob::processItems(const QList<EwsGetItemRequest::Response
             continue;
         }
 
-        const EwsItem &ewsItem = resp.item();
+        //const EwsItem &ewsItem = resp.item();
 
         // TODO: Implement
 
-        it++;
+        ++it;
     }
 
     emitResult();

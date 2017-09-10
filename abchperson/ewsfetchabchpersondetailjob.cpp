@@ -50,11 +50,11 @@ void EwsFetchAbchContactDetailsJob::processItems(const QList<EwsGetItemRequest::
             continue;
         }
 
-        const EwsItem &ewsItem = resp.item();
+        //const EwsItem &ewsItem = resp.item();
 
         // TODO: Implement
 
-        it++;
+        ++it;
     }
 
     emitResult();
