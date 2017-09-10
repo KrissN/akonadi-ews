@@ -37,6 +37,7 @@ target_link_libraries(isolatedtestcommon
   KF5::AkonadiCore
   Qt5::Core
   Qt5::Network
+  Qt5::Test
 )
 
 macro(add_akonadi_isolated_test _source)

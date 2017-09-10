@@ -89,14 +89,14 @@ void FakeEwsConnection::dataAvailable()
         QByteArray line;
         do {
             line = mSock->readLine();
-            if (line.toLower().startsWith(QLatin1String("content-length: "))) {
+            if (line.toLower().startsWith("content-length: ")) {
                 bool ok;
                 mContentLength = line.trimmed().mid(16).toUInt(&ok);
                 if (!ok) {
                     sendError(QLatin1String("Failed to parse content length."));
                     return;
                 }
-            } else if (line.toLower().startsWith(QLatin1String("authorization: basic "))) {
+            } else if (line.toLower().startsWith("authorization: basic ")) {
                 if (line.trimmed().mid(21) == "dGVzdDp0ZXN0") {
                     mAuthenticated = true;
                 }
