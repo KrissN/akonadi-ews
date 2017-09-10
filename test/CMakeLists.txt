@@ -30,7 +30,7 @@ set(ewswalletinterface_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Akonadi.Ews.Walle
 qt5_add_dbus_interface(isolatestestcommon_SRCS ${ewssettingsinterface_xml} ewssettings)
 qt5_add_dbus_interface(isolatestestcommon_SRCS ${ewswalletinterface_xml} ewswallet)
 
-qt5_add_resources(_srcList isolatestestcommon.qrc)
+qt5_add_resources(isolatestestcommon_RSRCS isolatedtestcommon.qrc)
 
 add_library(isolatedtestcommon STATIC ${isolatestestcommon_SRCS})
 target_link_libraries(isolatedtestcommon
@@ -47,7 +47,7 @@ macro(add_akonadi_isolated_test _source)
     qt5_add_resources(_srcList ${_targetName}.qrc)
   endif(EXISTS ${_targetName}.qrc)
 
-  add_executable(${_targetName} ${_srcList})
+  add_executable(${_targetName} ${_srcList} ${isolatestestcommon_RSRCS})
   target_link_libraries(${_targetName}
     Qt5::Test
     KF5::AkonadiCore
