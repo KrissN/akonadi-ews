@@ -1,4 +1,4 @@
-/*  This file is part of Akonadi EWS Resource
+/*
     Copyright (C) 2017 Krzysztof Nowicki <krissn@op.pl>
 
     This library is free software; you can redistribute it and/or
