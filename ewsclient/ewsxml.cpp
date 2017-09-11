@@ -21,8 +21,6 @@
 
 #include <QDateTime>
 
-#include <KCodecs/KCodecs>
-
 #include "ewsclient_debug.h"
 #include "ewsfolder.h"
 #include "ewsid.h"
@@ -100,7 +98,7 @@ bool ewsXmlBoolWriter(QXmlStreamWriter &writer, const QVariant &val)
 bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
 {
     QString elmName = reader.name().toString();
-    val = KCodecs::base64Decode(reader.readElementText().toLatin1());
+    val = QByteArray::fromBase64(reader.readElementText().toLatin1());
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
                         .arg(elmName);
@@ -113,7 +111,7 @@ bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
 
 bool ewsXmlBase64Writer(QXmlStreamWriter &writer, const QVariant &val)
 {
-    writer.writeCharacters(KCodecs::base64Encode(val.toByteArray()));
+    writer.writeCharacters(QString::fromLatin1(val.toByteArray().toBase64()));
 
     return true;
 }
