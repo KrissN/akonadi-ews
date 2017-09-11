@@ -133,7 +133,7 @@ QString EwsMailbox::emailWithName() const
         return d->mEmail;
     }
     else {
-        return QString("%1 <%2>").arg(d->mName).arg(d->mEmail);
+        return QStringLiteral("%1 <%2>").arg(d->mName).arg(d->mEmail);
     }
 }
 

@@ -85,15 +85,15 @@ void UtEwsGetItemRequest::twoFailures()
     });
     QScopedPointer<EwsGetItemRequest> req(new EwsGetItemRequest(mClient, this));
     EwsId::List ids;
-    ids << EwsId("DdBTBAvLHI8OyQ3K", "6yDDqXl+");
-    ids << EwsId("CgIdfZGT3QJrWZHi", "wPjRsOpg");
-    ids << EwsId("Enxw15n4imIERH4w", "82pEQQIj");
-    ids << EwsId("yV1OhxPOinZ7mxpK", "B22tdkME");
-    ids << EwsId("j1ptydBqXKJLuCiB", "z0u+e6/Z");
-    ids << EwsId("ogM0ejAHml/og1tZ", "f2t/ou/g");
-    ids << EwsId("ZqDVkG1gIrUkJDGB", "0LOh2uE+");
-    ids << EwsId("SFYgXaYm1DK+0TCs", "Zbkp+aB4");
-    ids << EwsId("UrNr/v4HynI062u/", "WMjq6rUe");
+    ids << EwsId(QStringLiteral("DdBTBAvLHI8OyQ3K"), QStringLiteral("6yDDqXl+"));
+    ids << EwsId(QStringLiteral("CgIdfZGT3QJrWZHi"), QStringLiteral("wPjRsOpg"));
+    ids << EwsId(QStringLiteral("Enxw15n4imIERH4w"), QStringLiteral("82pEQQIj"));
+    ids << EwsId(QStringLiteral("yV1OhxPOinZ7mxpK"), QStringLiteral("B22tdkME"));
+    ids << EwsId(QStringLiteral("j1ptydBqXKJLuCiB"), QStringLiteral("z0u+e6/Z"));
+    ids << EwsId(QStringLiteral("ogM0ejAHml/og1tZ"), QStringLiteral("f2t/ou/g"));
+    ids << EwsId(QStringLiteral("ZqDVkG1gIrUkJDGB"), QStringLiteral("0LOh2uE+"));
+    ids << EwsId(QStringLiteral("SFYgXaYm1DK+0TCs"), QStringLiteral("Zbkp+aB4"));
+    ids << EwsId(QStringLiteral("UrNr/v4HynI062u/"), QStringLiteral("WMjq6rUe"));
     req->setItemIds(ids);
 
     req->setItemShape(EwsItemShape(EwsShapeIdOnly));

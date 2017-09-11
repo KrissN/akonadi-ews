@@ -641,7 +641,7 @@ void UtEwsAttachment::read_data()
 
     EwsItem item1;
     item1.setType(EwsItemTypeItem);
-    item1.setField(EwsItemFieldItemId, QVariant::fromValue<EwsId>(EwsId("VGhpcyBpcyBhIHRlc3Q=", "muKls0n8pUM=")));
+    item1.setField(EwsItemFieldItemId, QVariant::fromValue<EwsId>(EwsId(QStringLiteral("VGhpcyBpcyBhIHRlc3Q="), QStringLiteral("muKls0n8pUM="))));
     QTest::newRow("valid item")
         << xmlItemAttHead + QStringLiteral("<Item><ItemId Id=\"VGhpcyBpcyBhIHRlc3Q=\" ChangeKey=\"muKls0n8pUM=\" /></Item>") + xmlItemAttTail
         << true
@@ -892,7 +892,7 @@ void UtEwsAttachment::write_data()
 
     EwsItem item1;
     item1.setType(EwsItemTypeItem);
-    item1.setField(EwsItemFieldItemId, QVariant::fromValue<EwsId>(EwsId("VGhpcyBpcyBhIHRlc3Q=", "muKls0n8pUM=")));
+    item1.setField(EwsItemFieldItemId, QVariant::fromValue<EwsId>(EwsId(QStringLiteral("VGhpcyBpcyBhIHRlc3Q="), QStringLiteral("muKls0n8pUM="))));
 
     QTest::newRow("non-empty item attachment")
         << xmlHead + QStringLiteral("<ItemAttachment xmlns=\"") + xmlTypeNsUri + QStringLiteral("\">"
@@ -908,7 +908,7 @@ void UtEwsAttachment::write_data()
         << false << QStringLiteral("Test attachment")
         << true << QStringLiteral("application/x-test")
         << false << QStringLiteral("FE938BD618330B9DA0C965A6077BB3FF20415531@1")
-        << true << QString("file:///foo/bar")
+        << true << QStringLiteral("file:///foo/bar")
         << false << 123l
         << true << QDateTime::fromTime_t(1483621243)
         << false << true
@@ -931,7 +931,7 @@ void UtEwsAttachment::write_data()
         << true << QStringLiteral("Test attachment")
         << false << QStringLiteral("application/x-test")
         << true << QStringLiteral("FE938BD618330B9DA0C965A6077BB3FF20415531@1")
-        << false << QString("file:///foo/bar")
+        << false << QStringLiteral("file:///foo/bar")
         << true << 123l
         << false << QDateTime::fromTime_t(1483621243)
         << true << true

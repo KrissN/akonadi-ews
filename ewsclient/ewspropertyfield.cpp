@@ -325,7 +325,7 @@ void EwsPropertyField::write(QXmlStreamWriter &writer) const
     {
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("IndexedFieldURI"));
         writer.writeAttribute(QStringLiteral("FieldURI"), d->mUri);
-        QStringList tokens = d->mUri.split(':');
+        QStringList tokens = d->mUri.split(QChar::fromLatin1(':'));
         writer.writeAttribute(QStringLiteral("FieldIndex"), tokens[1] + QString::number(d->mIndex));
         writer.writeEndElement();
         break;
@@ -392,7 +392,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
             return false;
         }
         QString uri = attrs.value(QStringLiteral("FieldURI")).toString();
-        QStringList tokens = uri.split(':');
+        QStringList tokens = uri.split(QChar::fromLatin1(':'));
         QString indexStr = attrs.value(QStringLiteral("FieldIndex")).toString();
         if (!indexStr.startsWith(tokens[1])) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading property field - malformed %1 attribute.")
@@ -444,7 +444,7 @@ bool EwsPropertyField::read(QXmlStreamReader &reader)
         else {
             EwsPropertyFieldPrivate::PropSetIdType psIdType = EwsPropertyFieldPrivate::DistinguishedPropSet;
             EwsDistinguishedPropSetId psDid = EwsPropSetMeeting;
-            QString psId = 0;
+            QString psId;
 
             EwsPropertyFieldPrivate::PropIdType idType = EwsPropertyFieldPrivate::PropName;
             unsigned id = 0;
@@ -564,7 +564,7 @@ bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &
     {
     case Field:
     {
-        QStringList tokens = d->mUri.split(':');
+        QStringList tokens = d->mUri.split(QChar::fromLatin1(':'));
         if (tokens.size() != 2) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid field URI: %1").arg(d->mUri);
             return false;
@@ -576,7 +576,7 @@ bool EwsPropertyField::writeWithValue(QXmlStreamWriter &writer, const QVariant &
     }
     case IndexedField:
     {
-        QStringList tokens = d->mUri.split(':');
+        QStringList tokens = d->mUri.split(QChar::fromLatin1(':'));
         if (tokens.size() != 2) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Invalid field URI: %1").arg(d->mUri);
             return false;
@@ -617,7 +617,8 @@ void EwsPropertyField::writeValue(QXmlStreamWriter &writer, const QVariant &valu
         writer.writeCharacters(value.toString());
         break;
     default:
-        qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1").arg(value.typeName());
+        qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1")
+            .arg(QString::fromLatin1(value.typeName()));
     }
 }
 
@@ -640,7 +641,8 @@ void EwsPropertyField::writeExtendedValue(QXmlStreamWriter &writer, const QVaria
         writer.writeEndElement();
         break;
     default:
-        qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1").arg(value.typeName());
+        qCWarning(EWSRES_LOG) << QStringLiteral("Unknown variant type to write: %1")
+            .arg(QString::fromLatin1(value.typeName()));
     }
 }
 

@@ -45,7 +45,7 @@ void EwsAutodiscoveryJob::start()
 
 void EwsAutodiscoveryJob::parseEmail()
 {
-    int atIndex = mEmail.indexOf('@');
+    int atIndex = mEmail.indexOf(QChar::fromLatin1('@'));
     if (atIndex < 0) {
         setErrorMsg(i18n("Incorrect email address"));
         emitResult();
@@ -97,7 +97,7 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
     if (req->error()) {
 
         if (req->error() == 401 && !mUsedCreds &&
-            req->lastHttpUrl().scheme() != "http") { // Don't try authentication over HTTP
+            req->lastHttpUrl().scheme() != QStringLiteral("http")) { // Don't try authentication over HTTP
 
             /* The 401 error may have come from an URL different to the original one (due to
              * redirections). When the original URL is retried with credentials KIO HTTP will issue

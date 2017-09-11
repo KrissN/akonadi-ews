@@ -75,7 +75,7 @@ CollectionStateMonitor<T>::CollectionStateMonitor(QObject *parent, const QHash<Q
 template <typename T>
 void CollectionStateMonitor<T>::stateChanged(const Akonadi::Collection &col)
 {
-    auto remoteId = col.remoteId() == "INBOX" ? mInboxId : col.remoteId();
+    auto remoteId = col.remoteId() == QStringLiteral("INBOX") ? mInboxId : col.remoteId();
     auto state = mStateHash.find(remoteId);
     if (state == mStateHash.end()) {
         qDebug() << "Cannot find state for collection" << remoteId;

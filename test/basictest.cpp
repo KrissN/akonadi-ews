@@ -72,14 +72,14 @@ void BasicTest::testBasic()
     static const auto inboxId = QStringLiteral("aW5ib3g=");
     FolderList folderList = {
         {rootId, mEwsInstance->identifier(), Folder::Root, QString()},
-        {inboxId, "Inbox", Folder::Inbox, rootId},
-        {"Y2FsZW5kYXI=", "Calendar", Folder::Calendar, rootId},
-        {"dGFza3M=", "Tasks", Folder::Tasks, rootId},
-        {"Y29udGFjdHM=", "Contacts", Folder::Contacts, rootId},
-        {"b3V0Ym94", "Outbox", Folder::Outbox, rootId},
-        {"c2VudCBpdGVtcw==", "Sent Items", Folder::Sent, rootId},
-        {"ZGVsZXRlZCBpdGVtcw==", "Deleted Items", Folder::Trash, rootId},
-        {"ZHJhZnRz", "Drafts", Folder::Drafts, rootId}
+        {inboxId, QStringLiteral("Inbox"), Folder::Inbox, rootId},
+        {QStringLiteral("Y2FsZW5kYXI="), QStringLiteral("Calendar"), Folder::Calendar, rootId},
+        {QStringLiteral("dGFza3M="), QStringLiteral("Tasks"), Folder::Tasks, rootId},
+        {QStringLiteral("Y29udGFjdHM="), QStringLiteral("Contacts"), Folder::Contacts, rootId},
+        {QStringLiteral("b3V0Ym94"), QStringLiteral("Outbox"), Folder::Outbox, rootId},
+        {QStringLiteral("c2VudCBpdGVtcw=="), QStringLiteral("Sent Items"), Folder::Sent, rootId},
+        {QStringLiteral("ZGVsZXRlZCBpdGVtcw=="), QStringLiteral("Deleted Items"), Folder::Trash, rootId},
+        {QStringLiteral("ZHJhZnRz"), QStringLiteral("Drafts"), Folder::Drafts, rootId}
     };
 
     struct DesiredState {
@@ -88,14 +88,14 @@ void BasicTest::testBasic()
     };
     QHash<QString, DesiredState> desiredStates = {
         {rootId, {QString(), QString()}},
-        {inboxId, {rootId, "mail-folder-inbox"}},
-        {"Y2FsZW5kYXI=", {rootId, QString()}},
-        {"dGFza3M=", {rootId, QString()}},
-        {"Y29udGFjdHM=", {rootId, QString()}},
-        {"b3V0Ym94", {rootId, "mail-folder-outbox"}},
-        {"c2VudCBpdGVtcw==", {rootId, "mail-folder-sent"}},
-        {"ZGVsZXRlZCBpdGVtcw==", {rootId, "user-trash"}},
-        {"ZHJhZnRz", {rootId, "document-properties"}}
+        {inboxId, {rootId, QStringLiteral("mail-folder-inbox")}},
+        {QStringLiteral("Y2FsZW5kYXI="), {rootId, QString()}},
+        {QStringLiteral("dGFza3M="), {rootId, QString()}},
+        {QStringLiteral("Y29udGFjdHM="), {rootId, QString()}},
+        {QStringLiteral("b3V0Ym94"), {rootId, QStringLiteral("mail-folder-outbox")}},
+        {QStringLiteral("c2VudCBpdGVtcw=="), {rootId, QStringLiteral("mail-folder-sent")}},
+        {QStringLiteral("ZGVsZXRlZCBpdGVtcw=="), {rootId, QStringLiteral("user-trash")}},
+        {QStringLiteral("ZHJhZnRz"), {rootId, QStringLiteral("document-properties")}}
     };
 
     FakeEwsServer::DialogEntry::List dialog =
@@ -109,7 +109,7 @@ void BasicTest::testBasic()
         GetTagsEmptyDialogEntry(rootId,
                                 QStringLiteral("GetFolder request for tags")),
         SubscribeStreamingDialogEntry(QStringLiteral("Subscribe request for streaming events")),
-        SyncFolderHierInitialDialogEntry(folderList, "bNUUPDWHTvuG9p57NGZdhjREdZXDt48a0E1F22yThko=",
+        SyncFolderHierInitialDialogEntry(folderList, QStringLiteral("bNUUPDWHTvuG9p57NGZdhjREdZXDt48a0E1F22yThko="),
                                          QStringLiteral("SyncFolderHierarchy request with empty state")),
         UnsubscribeDialogEntry(QStringLiteral("Unsubscribe request"))
     };

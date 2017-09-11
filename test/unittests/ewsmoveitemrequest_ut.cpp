@@ -85,16 +85,16 @@ void UtEwsMoveItemRequest::singleItem()
     });
     QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     EwsId::List ids;
-    ids << EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG");
+    ids << EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("rqs77HkG"));
     req->setItemIds(ids);
-    req->setDestinationFolderId(EwsId("R70cDGNT1SqOk2pn", "1DjfJ3dT"));
+    req->setDestinationFolderId(EwsId(QStringLiteral("R70cDGNT1SqOk2pn"), QStringLiteral("1DjfJ3dT")));
     req->exec();
 
     QCOMPARE(req->error(), 0);
     QCOMPARE(req->responses().size(), 1);
     EwsMoveItemRequest::Response resp = req->responses().first();
     QCOMPARE(resp.responseClass(), EwsResponseSuccess);
-    QCOMPARE(resp.itemId(), EwsId("Xnn2DwwaXQUhbn7U", "JoFvRwDP"));
+    QCOMPARE(resp.itemId(), EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("JoFvRwDP")));
 }
 
 void UtEwsMoveItemRequest::twoItems()
@@ -153,18 +153,18 @@ void UtEwsMoveItemRequest::twoItems()
     });
     QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     static const EwsId::List ids = {
-        EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG"),
-        EwsId("ntTNOncESwiyAXog", "EDHu5rwK")
+        EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("rqs77HkG")),
+        EwsId(QStringLiteral("ntTNOncESwiyAXog"), QStringLiteral("EDHu5rwK"))
     };
     req->setItemIds(ids);
-    req->setDestinationFolderId(EwsId("R70cDGNT1SqOk2pn", "1DjfJ3dT"));
+    req->setDestinationFolderId(EwsId(QStringLiteral("R70cDGNT1SqOk2pn"), QStringLiteral("1DjfJ3dT")));
     req->exec();
 
     QCOMPARE(req->error(), 0);
     QCOMPARE(req->responses().size(), 2);
     static const EwsId::List newIds = {
-        EwsId("Xnn2DwwaXQUhbn7U", "JoFvRwDP"),
-        EwsId("ntTNOncESwiyAXog", "4qbAwd3y")
+        EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("JoFvRwDP")),
+        EwsId(QStringLiteral("ntTNOncESwiyAXog"), QStringLiteral("4qbAwd3y"))
     };
     EwsId::List::const_iterator newIdsIt = newIds.begin();
     Q_FOREACH(const EwsMoveItemRequest::Response &resp, req->responses()) {
@@ -229,11 +229,11 @@ void UtEwsMoveItemRequest::twoItemsOneFailed()
     });
     QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     static const EwsId::List ids = {
-        EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG"),
-        EwsId("ntTNOncESwiyAXog", "EDHu5rwK")
+        EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("rqs77HkG")),
+        EwsId(QStringLiteral("ntTNOncESwiyAXog"), QStringLiteral("EDHu5rwK"))
     };
     req->setItemIds(ids);
-    req->setDestinationFolderId(EwsId("R70cDGNT1SqOk2pn", "1DjfJ3dT"));
+    req->setDestinationFolderId(EwsId(QStringLiteral("R70cDGNT1SqOk2pn"), QStringLiteral("1DjfJ3dT")));
     req->exec();
 
     QCOMPARE(req->error(), 0);
@@ -243,8 +243,8 @@ void UtEwsMoveItemRequest::twoItemsOneFailed()
         EwsResponseError
     };
     static const EwsId::List newIds = {
-        EwsId("Xnn2DwwaXQUhbn7U", "JoFvRwDP"),
-        EwsId("ntTNOncESwiyAXog", "EDHu5rwK")
+        EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("JoFvRwDP")),
+        EwsId(QStringLiteral("ntTNOncESwiyAXog"), QStringLiteral("EDHu5rwK"))
     };
     EwsId::List::const_iterator newIdsIt = newIds.begin();
     QList<EwsResponseClass>::const_iterator respClassesIt = respClasses.begin();
@@ -318,11 +318,11 @@ void UtEwsMoveItemRequest::twoItemsSecondFailed()
     });
     QScopedPointer<EwsMoveItemRequest> req(new EwsMoveItemRequest(mClient, this));
     static const EwsId::List ids = {
-        EwsId("Xnn2DwwaXQUhbn7U", "rqs77HkG"),
-        EwsId("ntTNOncESwiyAXog", "EDHu5rwK")
+        EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("rqs77HkG")),
+        EwsId(QStringLiteral("ntTNOncESwiyAXog"), QStringLiteral("EDHu5rwK"))
     };
     req->setItemIds(ids);
-    req->setDestinationFolderId(EwsId("R70cDGNT1SqOk2pn", "1DjfJ3dT"));
+    req->setDestinationFolderId(EwsId(QStringLiteral("R70cDGNT1SqOk2pn"), QStringLiteral("1DjfJ3dT")));
     req->exec();
 
     QCOMPARE(req->error(), 0);
@@ -332,8 +332,8 @@ void UtEwsMoveItemRequest::twoItemsSecondFailed()
         EwsResponseSuccess
     };
     static const EwsId::List newIds = {
-        EwsId("Xnn2DwwaXQUhbn7U", "JoFvRwDP"),
-        EwsId("ntTNOncESwiyAXog", "4qbAwd3y")
+        EwsId(QStringLiteral("Xnn2DwwaXQUhbn7U"), QStringLiteral("JoFvRwDP")),
+        EwsId(QStringLiteral("ntTNOncESwiyAXog"), QStringLiteral("4qbAwd3y"))
     };
     EwsId::List::const_iterator newIdsIt = newIds.begin();
     QList<EwsResponseClass>::const_iterator respClassesIt = respClasses.begin();

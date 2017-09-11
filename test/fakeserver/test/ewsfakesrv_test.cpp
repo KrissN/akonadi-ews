@@ -63,10 +63,10 @@ void UtEwsFakeSrvTest::emptyDialog()
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
-    url.setUserName("test");
-    url.setPassword("test");
+    url.setUserName(QStringLiteral("test"));
+    url.setPassword(QStringLiteral("test"));
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("text/xml"));
     QNetworkReply *reply = nam.post(req, "test");
 
     QEventLoop loop;
@@ -91,10 +91,10 @@ void UtEwsFakeSrvTest::invalidURL()
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/some/url").arg(srv->portNumber()));
-    url.setUserName("test");
-    url.setPassword("test");
+    url.setUserName(QStringLiteral("test"));
+    url.setPassword(QStringLiteral("test"));
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("text/xml"));
     QNetworkReply *reply = nam.post(req, "test");
 
     QEventLoop loop;
@@ -119,8 +119,8 @@ void UtEwsFakeSrvTest::invalidMethod()
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
-    url.setUserName("test");
-    url.setPassword("test");
+    url.setUserName(QStringLiteral("test"));
+    url.setPassword(QStringLiteral("test"));
     QNetworkRequest req(url);
     QNetworkReply *reply = nam.get(req);
 
@@ -190,7 +190,7 @@ void UtEwsFakeSrvTest::callbackResponse()
         {
             QStringLiteral("if (//test1/a = <a />) then (<b/>) else ()"),
             [](const QString &, QXmlResultItems &, const QXmlNamePool &) {
-                return FakeEwsServer::DialogEntry::HttpResponse("<a/>", 200);
+                return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("<a/>"), 200);
             },
             QStringLiteral("Sample request 1")
         }
@@ -745,7 +745,7 @@ void UtEwsFakeSrvTest::notAuthenticated()
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("text/xml"));
     QNetworkReply *reply = nam.post(req, "test");
 
     QEventLoop loop;
@@ -770,10 +770,10 @@ void UtEwsFakeSrvTest::badAuthentication()
 
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(srv->portNumber()));
-    url.setUserName("foo");
-    url.setPassword("bar");
+    url.setUserName(QStringLiteral("foo"));
+    url.setPassword(QStringLiteral("bar"));
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("text/xml"));
     QNetworkReply *reply = nam.post(req, "test");
 
     QEventLoop loop;
@@ -820,7 +820,7 @@ void UtEwsFakeSrvTest::xqueryResultsInCallback()
                     qDebug() << "Unexpected item value:" << index.model()->stringValue(index);
                     return FakeEwsServer::EmptyResponse;
                 }
-                return FakeEwsServer::DialogEntry::HttpResponse("<b/>", 200);
+                return FakeEwsServer::DialogEntry::HttpResponse(QStringLiteral("<b/>"), 200);
             },
             QStringLiteral("Sample request 1")
         }
@@ -841,10 +841,10 @@ QPair<QString, ushort> UtEwsFakeSrvTest::synchronousHttpReq(const QString &conte
 {
     QNetworkAccessManager nam(this);
     QUrl url(QStringLiteral("http://127.0.0.1:%1/EWS/Exchange.asmx").arg(port));
-    url.setUserName("test");
-    url.setPassword("test");
+    url.setUserName(QStringLiteral("test"));
+    url.setPassword(QStringLiteral("test"));
     QNetworkRequest req(url);
-    req.setHeader(QNetworkRequest::ContentTypeHeader, "text/xml");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("text/xml"));
     QNetworkReply *reply = nam.post(req, content.toUtf8());
 
     QEventLoop loop;

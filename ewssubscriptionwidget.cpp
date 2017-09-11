@@ -166,8 +166,8 @@ void EwsSubscriptionWidgetPrivate::reloadFolderList(bool)
     if (mClient.isConfigured()) {
         EwsFindFolderRequest *req = new EwsFindFolderRequest(mClient, this);
         EwsFolderShape shape(EwsShapeIdOnly);
-        shape << EwsPropertyField("folder:DisplayName");
-        shape << EwsPropertyField("folder:ParentFolderId");
+        shape << EwsPropertyField(QStringLiteral("folder:DisplayName"));
+        shape << EwsPropertyField(QStringLiteral("folder:ParentFolderId"));
         req->setFolderShape(shape);
         req->setParentFolderId(EwsId(EwsDIdMsgFolderRoot));
         connect(req, &EwsRequest::result, this, &EwsSubscriptionWidgetPrivate::readFolderListFinished);

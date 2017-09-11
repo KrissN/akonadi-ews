@@ -108,7 +108,7 @@ EwsResource::EwsResource(const QString &id)
     if (!mSettings->hasDomain()) {
         mEwsClient.setCredentials(mSettings->username(), mPassword);
     } else {
-        mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
+        mEwsClient.setCredentials(mSettings->domain() + QChar::fromLatin1('\\') + mSettings->username(), mPassword);
     }
     mEwsClient.setUserAgent(mSettings->userAgent());
     mEwsClient.setEnableNTLMv2(mSettings->enableNTLMv2());
@@ -391,7 +391,7 @@ bool EwsResource::retrieveItems(const Item::List &items, const QSet<QByteArray> 
     }
     req->setItemIds(ids);
     EwsItemShape shape(EwsShapeIdOnly);
-    shape << EwsPropertyField("item:MimeContent");
+    shape << EwsPropertyField(QStringLiteral("item:MimeContent"));
     req->setItemShape(shape);
     req->setProperty("items", QVariant::fromValue<Item::List>(items));
     connect(req, &EwsGetItemRequest::result, this, &EwsResource::getItemsRequestFinished);
@@ -526,7 +526,7 @@ void EwsResource::reloadConfig()
     if (mSettings->domain().isEmpty()) {
         mEwsClient.setCredentials(mSettings->username(), mPassword);
     } else {
-        mEwsClient.setCredentials(mSettings->domain() + '\\' + mSettings->username(), mPassword);
+        mEwsClient.setCredentials(mSettings->domain() + QChar::fromLatin1('\\') + mSettings->username(), mPassword);
     }
     mSettings->save();
     resetUrl();
@@ -631,7 +631,7 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
     if (isEwsMessageItemType(type)) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: Item type not supported for changing";
-        cancelTask("Item type not supported for changing");
+        cancelTask(i18nc("@info:status", "Item type not supported for changing"));
     }
     else {
         EwsModifyItemJob *job = EwsItemHandler::itemHandler(type)->modifyItemJob(mEwsClient,
@@ -872,7 +872,7 @@ void EwsResource::itemAdded(const Item &item, const Collection &collection)
 {
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
     if (isEwsMessageItemType(type)) {
-        cancelTask("Item type not supported for creation");
+        cancelTask(i18nc("@info:status", "Item type not supported for creation"));
     }
     else {
         EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
@@ -1313,8 +1313,8 @@ void EwsResource::saveState()
     QByteArray str;
     QDataStream dataStream(&str, QIODevice::WriteOnly);
     dataStream << mSyncState;
-    mSettings->setSyncState(qCompress(str, 9).toBase64());
-    mSettings->setFolderSyncState(qCompress(mFolderSyncState.toAscii(), 9).toBase64());
+    mSettings->setSyncState(QString::fromLatin1(qCompress(str, 9).toBase64()));
+    mSettings->setFolderSyncState(QString::fromLatin1(qCompress(mFolderSyncState.toAscii(), 9).toBase64()));
     mSettings->save();
 }
 

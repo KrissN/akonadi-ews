@@ -37,7 +37,7 @@ inline QDebug operator<<(QDebug debug, const Akonadi::Item::List &items)
     Q_FOREACH(const Akonadi::Item &item, items) {
         itemStrs.append(ewsHash(item.remoteId()));
     }
-    debug.nospace().noquote() << "Akonadi::Item::List(" << itemStrs.join(',') << ")";
+    debug.nospace().noquote() << "Akonadi::Item::List(" << itemStrs.join(QChar::fromLatin1(',')) << ")";
     return debug.maybeSpace();
 }
 
@@ -55,7 +55,7 @@ inline QDebug operator<<(QDebug debug, const Akonadi::Collection::List &cols)
     Q_FOREACH(const Akonadi::Collection &col, cols) {
         itemStrs.append(EwsClient::folderHash.value(col.remoteId(), ewsHash(col.remoteId())));
     }
-    debug.nospace().noquote() << "Akonadi::Collection::List(" << itemStrs.join(',') << ")";
+    debug.nospace().noquote() << "Akonadi::Collection::List(" << itemStrs.join(QChar::fromLatin1(',')) << ")";
     return debug.maybeSpace();
 }
 
@@ -71,9 +71,9 @@ inline QDebug operator<<(QDebug debug, const QSet<QByteArray> &items)
     QDebugStateSaver saver(debug);
     QStringList itemStrs;
     Q_FOREACH(const QByteArray &item, items) {
-        itemStrs.append(item);
+        itemStrs.append(QString::fromLatin1(item));
     }
-    debug.nospace().noquote() << "QSet<QByteArray>(" << itemStrs.join(',') << ")";
+    debug.nospace().noquote() << "QSet<QByteArray>(" << itemStrs.join(QChar::fromLatin1(',')) << ")";
     return debug.maybeSpace();
 }
 

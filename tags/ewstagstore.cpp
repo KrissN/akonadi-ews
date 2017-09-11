@@ -159,7 +159,7 @@ QStringList EwsTagStore::serialize() const
         stream.setVersion(QDataStream::Qt_5_4);
         stream << it.key();
         stream << it.value();
-        tagList.append(qCompress(data, 9).toBase64());
+        tagList.append(QString::fromLatin1(qCompress(data, 9).toBase64()));
     }
 
     return tagList;
@@ -306,7 +306,7 @@ bool EwsTagStore::writeEwsProperties(const Akonadi::Item &item, EwsItem &ewsItem
             if (!containsId(tag.id())) {
                 return false;
             }
-            tagList.append(tagRemoteId(tag.id()));
+            tagList.append(QString::fromLatin1(tagRemoteId(tag.id())));
             QString name = tagName(tag.id());
             if (!name.isEmpty()) {
                 categoryList.append(name);

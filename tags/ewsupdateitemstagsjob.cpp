@@ -123,7 +123,7 @@ void EwsUpdateItemsTagsJob::doUpdateItemsTags()
             QStringList categoryList;
             Q_FOREACH(const Tag &tag, item.tags()) {
                 Q_ASSERT(mTagStore->containsId(tag.id()));
-                tagList.append(mTagStore->tagRemoteId(tag.id()));
+                tagList.append(QString::fromLatin1(mTagStore->tagRemoteId(tag.id())));
                 QString name = mTagStore->tagName(tag.id());
                 if (!name.isEmpty()) {
                     categoryList.append(name);
@@ -132,13 +132,13 @@ void EwsUpdateItemsTagsJob::doUpdateItemsTags()
             EwsUpdateItemRequest::Update *upd
                 = new EwsUpdateItemRequest::SetUpdate(EwsResource::tagsProperty, tagList);
             ic.addUpdate(upd);
-            upd = new EwsUpdateItemRequest::SetUpdate(EwsPropertyField("item:Categories"), categoryList);
+            upd = new EwsUpdateItemRequest::SetUpdate(EwsPropertyField(QStringLiteral("item:Categories")), categoryList);
             ic.addUpdate(upd);
         } else {
             EwsUpdateItemRequest::Update *upd
                             = new EwsUpdateItemRequest::DeleteUpdate(EwsResource::tagsProperty);
             ic.addUpdate(upd);
-            upd = new EwsUpdateItemRequest::DeleteUpdate(EwsPropertyField("item:Categories"));
+            upd = new EwsUpdateItemRequest::DeleteUpdate(EwsPropertyField(QStringLiteral("item:Categories")));
             ic.addUpdate(upd);
         }
         req->addItemChange(ic);

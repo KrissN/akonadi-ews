@@ -272,7 +272,7 @@ void EwsAttachment::write(QXmlStreamWriter &writer) const
                 d->mIsContactPhoto ? QStringLiteral("true") : QStringLiteral("false"));
         }
         if (d->mValidFields[EwsAttachmentPrivate::Content]) {
-            writer.writeTextElement(ewsTypeNsUri, QStringLiteral("Content"), d->mContent.toBase64());
+            writer.writeTextElement(ewsTypeNsUri, QStringLiteral("Content"), QString::fromLatin1(d->mContent.toBase64()));
         }
     } else if (d->mType == ItemAttachment) {
         if (d->mValidFields[EwsAttachmentPrivate::Item]) {

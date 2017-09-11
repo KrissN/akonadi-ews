@@ -166,7 +166,7 @@ bool EwsFolder::readBaseFolderElement(QXmlStreamReader &reader)
 {
     D_PTR
 
-    if (!d->mEwsXml.readItem(reader, "Folder", ewsTypeNsUri)) {
+    if (!d->mEwsXml.readItem(reader, QStringLiteral("Folder"), ewsTypeNsUri)) {
         return false;
     }
 

@@ -114,7 +114,7 @@ QString IsolatedTestBase::loadResourceAsString(const QString &path)
 {
     QFile f(path);
     if (f.open(QIODevice::ReadOnly)) {
-        return QString(f.readAll());
+        return QString::fromUtf8(f.readAll());
     }
     return QString();
 }
@@ -152,7 +152,8 @@ MsgRootInboxDialogEntry::MsgRootInboxDialogEntry(const QString &rootId, const QS
                                                  const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-inbox-msgroot").arg(rootId).arg(inboxId);
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/getfolder-inbox-msgroot"))
+        .arg(rootId).arg(inboxId);
     description = QStringLiteral("GetFolder request for inbox and msgroot");
 }
 
@@ -186,7 +187,7 @@ SubscribedFoldersDialogEntry::SubscribedFoldersDialogEntry(const IsolatedTestBas
         }
     }
 
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-subscribedfolders").arg(xml);
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/getfolder-subscribedfolders")).arg(xml);
 }
 
 SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
@@ -220,20 +221,20 @@ SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::Fol
         }
     }
 
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-specialfolders").arg(xml);
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/getfolder-specialfolders")).arg(xml);
 }
 
 GetTagsEmptyDialogEntry::GetTagsEmptyDialogEntry(const QString &rootId, const QString &descr,
                                                  const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/getfolder-tags").arg(rootId);
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/getfolder-tags")).arg(rootId);
 }
 
 SubscribeStreamingDialogEntry::SubscribeStreamingDialogEntry(const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/subscribe-streaming");
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/subscribe-streaming"));
 }
 
 SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const IsolatedTestBase::FolderList &list,
@@ -280,12 +281,13 @@ SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const Isolate
         xml += QStringLiteral("</t:Create>");
 
     }
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/syncfolderhierarhy-emptystate").arg(syncState).arg(xml);
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/syncfolderhierarhy-emptystate"))
+        .arg(syncState).arg(xml);
 }
 
 UnsubscribeDialogEntry::UnsubscribeDialogEntry(const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
-    xQuery = IsolatedTestBase::loadResourceAsString(":/xquery/unsubscribe");
+    xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/unsubscribe"));
 }
 

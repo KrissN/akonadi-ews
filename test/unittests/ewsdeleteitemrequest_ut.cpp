@@ -79,7 +79,7 @@ void UtEwsDeleteItemRequest::singleItem()
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     EwsId::List ids;
-    ids << EwsId("+IRgnMJ8x+J6MQAZ", "1iQt/At9");
+    ids << EwsId(QStringLiteral("+IRgnMJ8x+J6MQAZ"), QStringLiteral("1iQt/At9"));
     req->setItemIds(ids);
     req->exec();
 
@@ -135,8 +135,8 @@ void UtEwsDeleteItemRequest::twoItems()
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     static const EwsId::List ids = {
-        EwsId("9LB1MiL3cOYUjmYy", "TBjl3rnU"),
-        EwsId("rZ0sc7Gfn9+XHVgv", "pHTEe9nY")
+        EwsId(QStringLiteral("9LB1MiL3cOYUjmYy"), QStringLiteral("TBjl3rnU")),
+        EwsId(QStringLiteral("rZ0sc7Gfn9+XHVgv"), QStringLiteral("pHTEe9nY"))
     };
     req->setItemIds(ids);
     req->exec();
@@ -196,8 +196,8 @@ void UtEwsDeleteItemRequest::twoItemsOneFailed()
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     static const EwsId::List ids = {
-        EwsId("9LB1MiL3cOYUjmYy", "TBjl3rnU"),
-        EwsId("rZ0sc7Gfn9+XHVgv", "pHTEe9nY")
+        EwsId(QStringLiteral("9LB1MiL3cOYUjmYy"), QStringLiteral("TBjl3rnU")),
+        EwsId(QStringLiteral("rZ0sc7Gfn9+XHVgv"), QStringLiteral("pHTEe9nY"))
     };
     req->setItemIds(ids);
     req->exec();
@@ -265,8 +265,8 @@ void UtEwsDeleteItemRequest::twoItemsSecondFailed()
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
     static const EwsId::List ids = {
-        EwsId("9LB1MiL3cOYUjmYy", "TBjl3rnU"),
-        EwsId("rZ0sc7Gfn9+XHVgv", "pHTEe9nY")
+        EwsId(QStringLiteral("9LB1MiL3cOYUjmYy"), QStringLiteral("TBjl3rnU")),
+        EwsId(QStringLiteral("rZ0sc7Gfn9+XHVgv"), QStringLiteral("pHTEe9nY"))
     };
     req->setItemIds(ids);
     req->exec();

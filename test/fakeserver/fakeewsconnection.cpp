@@ -29,14 +29,14 @@
 #include "fakeewsserver.h"
 #include "fakeewsserver_debug.h"
 
-static const QHash<uint, QLatin1String> responseCodes = {
-    {200, QLatin1String("OK")},
-    {400, QLatin1String("Bad Request")},
-    {401, QLatin1String("Unauthorized")},
-    {403, QLatin1String("Forbidden")},
-    {404, QLatin1String("Not Found")},
-    {405, QLatin1String("Method Not Allowed")},
-    {500, QLatin1String("Internal Server Error")}
+static const QHash<uint, QString> responseCodes = {
+    {200, QStringLiteral("OK")},
+    {400, QStringLiteral("Bad Request")},
+    {401, QStringLiteral("Unauthorized")},
+    {403, QStringLiteral("Forbidden")},
+    {404, QStringLiteral("Not Found")},
+    {405, QStringLiteral("Method Not Allowed")},
+    {500, QStringLiteral("Internal Server Error")}
 };
 
 static Q_CONSTEXPR int streamingEventsHeartbeatIntervalSeconds = 5;
@@ -89,14 +89,14 @@ void FakeEwsConnection::dataAvailable()
         QByteArray line;
         do {
             line = mSock->readLine();
-            if (line.toLower().startsWith("content-length: ")) {
+            if (line.toLower().startsWith(QByteArray("content-length: "))) {
                 bool ok;
                 mContentLength = line.trimmed().mid(16).toUInt(&ok);
                 if (!ok) {
                     sendError(QLatin1String("Failed to parse content length."));
                     return;
                 }
-            } else if (line.toLower().startsWith("authorization: basic ")) {
+            } else if (line.toLower().startsWith(QByteArray("authorization: basic "))) {
                 if (line.trimmed().mid(21) == "dGVzdDp0ZXN0") {
                     mAuthenticated = true;
                 }
@@ -122,13 +122,13 @@ void FakeEwsConnection::dataAvailable()
             mDataTimer.stop();
 
             if (!mAuthenticated) {
-                QLatin1String codeStr = responseCodes.value(401);
-                QByteArray response(QStringLiteral("HTTP/1.1 %1 %2\r\n"
+                QString codeStr = responseCodes.value(401);
+                QString response(QStringLiteral("HTTP/1.1 %1 %2\r\n"
                         "WWW-Authenticate: Basic realm=\"Fake EWS Server\"\r\n"
                         "Connection: close\r\n"
-                        "\r\n").arg(401).arg(codeStr).toAscii());
+                        "\r\n").arg(401).arg(codeStr));
                 response += codeStr;
-                mSock->write(response);
+                mSock->write(response.toLatin1());
                 mSock->disconnectFromHost();
                 return;
             }
@@ -137,11 +137,11 @@ void FakeEwsConnection::dataAvailable()
             bool chunked = false;
 
             if (resp == FakeEwsServer::EmptyResponse) {
-                resp = handleGetEventsRequest(mContent);
+                resp = handleGetEventsRequest(QString::fromUtf8(mContent));
             }
 
             if (resp == FakeEwsServer::EmptyResponse) {
-                resp = handleGetStreamingEventsRequest(mContent);
+                resp = handleGetStreamingEventsRequest(QString::fromUtf8(mContent));
                 if (resp.second > 1000) {
                     chunked = true;
                     resp.second %= 1000;
@@ -164,7 +164,7 @@ void FakeEwsConnection::dataAvailable()
             }
 
             QByteArray buffer;
-            QLatin1String codeStr = responseCodes.value(resp.second);
+            QString codeStr = responseCodes.value(resp.second);
             QByteArray respContent = resp.first.toUtf8();
             buffer += QStringLiteral("HTTP/1.1 %1 %2\r\n").arg(resp.second).arg(codeStr).toLatin1();
             if (chunked) {
@@ -194,7 +194,7 @@ void FakeEwsConnection::dataAvailable()
 void FakeEwsConnection::sendError(const QString &msg, ushort code)
 {
     qCWarningNC(EWSFAKE_LOG) << msg;
-    QLatin1String codeStr = responseCodes.value(code);
+    QString codeStr = responseCodes.value(code);
     QByteArray response(QStringLiteral("HTTP/1.1 %1 %2\nConnection: close\n\n").arg(code).arg(codeStr).toLatin1());
     response += msg.toLatin1();
     mSock->write(response);
@@ -284,7 +284,7 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsReque
             "<m:ResponseCode>NoError</m:ResponseCode>"
             "<m:Notification>");
 
-    if (match.captured("subid").isEmpty() || match.captured("watermark").isEmpty()) {
+    if (match.captured(QStringLiteral("subid")).isEmpty() || match.captured(QStringLiteral("watermark")).isEmpty()) {
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Missing subscription id or watermark.");
         const QString errorResp = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
                 "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
@@ -310,8 +310,8 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsReque
         return {errorResp, 200};
     }
 
-    resp += QStringLiteral("<SubscriptionId>") + match.captured("subid") + QStringLiteral("<SubscriptionId>");
-    resp += QStringLiteral("<PreviousWatermark>") + match.captured("watermark") + QStringLiteral("<PreviousWatermark>");
+    resp += QStringLiteral("<SubscriptionId>") + match.captured(QStringLiteral("subid")) + QStringLiteral("<SubscriptionId>");
+    resp += QStringLiteral("<PreviousWatermark>") + match.captured(QStringLiteral("watermark")) + QStringLiteral("<PreviousWatermark>");
     resp += QStringLiteral("<MoreEvents>false<MoreEvents>");
 
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
@@ -374,7 +374,7 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetStreamingEv
 
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Got valid GetStreamingEvents request.");
 
-    if (match.captured("subid").isEmpty() || match.captured("timeout").isEmpty()) {
+    if (match.captured(QStringLiteral("subid")).isEmpty() || match.captured(QStringLiteral("timeout")).isEmpty()) {
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Missing subscription id or timeout.");
         const QString errorResp = QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
                 "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" "
@@ -400,14 +400,14 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetStreamingEv
         return {errorResp, 200};
     }
 
-    mStreamingSubId = match.captured("subid");
+    mStreamingSubId = match.captured(QStringLiteral("subid"));
 
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
     const QStringList events = server->retrieveEventsXml();
 
     QString resp = prepareEventsResponse(events);
 
-    mStreamingRequestTimeout.start(match.captured("timeout").toInt() * 1000 * 60);
+    mStreamingRequestTimeout.start(match.captured(QStringLiteral("timeout")).toInt() * 1000 * 60);
     mStreamingRequestHeartbeat.setSingleShot(false);
     mStreamingRequestHeartbeat.start(streamingEventsHeartbeatIntervalSeconds * 1000);
 

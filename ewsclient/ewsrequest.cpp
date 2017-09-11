@@ -110,7 +110,7 @@ void EwsRequest::requestResult(KJob *job)
     if (EWSRES_PROTO_LOG().isDebugEnabled()) {
         ewsLogDir.setAutoRemove(false);
         if (ewsLogDir.isValid()) {
-            QTemporaryFile dumpFile(ewsLogDir.path() + "/ews_xmldump_XXXXXXX.xml");
+            QTemporaryFile dumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmldump_XXXXXXX.xml"));
             dumpFile.open();
             dumpFile.setAutoRemove(false);
             dumpFile.write(mResponseData.toUtf8());
@@ -120,7 +120,7 @@ void EwsRequest::requestResult(KJob *job)
     }
 
     KIO::TransferJob *trJob = qobject_cast<KIO::TransferJob*>(job);
-    int resp = trJob->metaData()["responsecode"].toUInt();
+    int resp = trJob->metaData()[QStringLiteral("responsecode")].toUInt();
 
     if (job->error() != 0) {
         setErrorMsg(QStringLiteral("Failed to process EWS request: ") + job->errorString(), job->error());
@@ -339,12 +339,12 @@ void EwsRequest::dump() const
 {
     ewsLogDir.setAutoRemove(false);
     if (ewsLogDir.isValid()) {
-        QTemporaryFile reqDumpFile(ewsLogDir.path() + "/ews_xmlreqdump_XXXXXXX.xml");
+        QTemporaryFile reqDumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmlreqdump_XXXXXXX.xml"));
         reqDumpFile.open();
         reqDumpFile.setAutoRemove(false);
         reqDumpFile.write(mBody.toUtf8());
         reqDumpFile.close();
-        QTemporaryFile resDumpFile(ewsLogDir.path() + "/ews_xmlresdump_XXXXXXX.xml");
+        QTemporaryFile resDumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmlresdump_XXXXXXX.xml"));
         resDumpFile.open();
         resDumpFile.setAutoRemove(false);
         resDumpFile.write(mResponseData.toUtf8());

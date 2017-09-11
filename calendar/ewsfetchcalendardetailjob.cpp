@@ -41,38 +41,38 @@ EwsFetchCalendarDetailJob::EwsFetchCalendarDetailJob(EwsClient &client, QObject 
     : EwsFetchItemDetailJob(client, parent, collection)
 {
     EwsItemShape shape(EwsShapeIdOnly);
-/*    shape << EwsPropertyField("calendar:UID");
-    shape << EwsPropertyField("item:Subject");
-    shape << EwsPropertyField("item:Body");
-    shape << EwsPropertyField("calendar:Organizer");
-    shape << EwsPropertyField("calendar:RequiredAttendees");
-    shape << EwsPropertyField("calendar:OptionalAttendees");
-    shape << EwsPropertyField("calendar:Resources");
-    shape << EwsPropertyField("calendar:Start");
-    shape << EwsPropertyField("calendar:End");
-    shape << EwsPropertyField("calendar:IsAllDayEvent");
-    shape << EwsPropertyField("calendar:LegacyFreeBusyStatus");
-    shape << EwsPropertyField("calendar:AppointmentSequenceNumber");
-    shape << EwsPropertyField("calendar:IsRecurring");
-    shape << EwsPropertyField("calendar:Recurrence");
-    shape << EwsPropertyField("calendar:FirstOccurrence");
-    shape << EwsPropertyField("calendar:LastOccurrence");
-    shape << EwsPropertyField("calendar:ModifiedOccurrences");
-    shape << EwsPropertyField("calendar:DeletedOccurrences");
-    shape << EwsPropertyField("calendar:StartTimeZone");
-    shape << EwsPropertyField("calendar:EndTimeZone");
-    shape << EwsPropertyField("calendar:MyResponseType");
-    shape << EwsPropertyField("item:HasAttachments");
-    shape << EwsPropertyField("item:Attachments");*/
+/*    shape << EwsPropertyField(QStringLiteral("calendar:UID"));
+    shape << EwsPropertyField(QStringLiteral("item:Subject"));
+    shape << EwsPropertyField(QStringLiteral("item:Body"));
+    shape << EwsPropertyField(QStringLiteral("calendar:Organizer"));
+    shape << EwsPropertyField(QStringLiteral("calendar:RequiredAttendees"));
+    shape << EwsPropertyField(QStringLiteral("calendar:OptionalAttendees"));
+    shape << EwsPropertyField(QStringLiteral("calendar:Resources"));
+    shape << EwsPropertyField(QStringLiteral("calendar:Start"));
+    shape << EwsPropertyField(QStringLiteral("calendar:End"));
+    shape << EwsPropertyField(QStringLiteral("calendar:IsAllDayEvent"));
+    shape << EwsPropertyField(QStringLiteral("calendar:LegacyFreeBusyStatus"));
+    shape << EwsPropertyField(QStringLiteral("calendar:AppointmentSequenceNumber"));
+    shape << EwsPropertyField(QStringLiteral("calendar:IsRecurring"));
+    shape << EwsPropertyField(QStringLiteral("calendar:Recurrence"));
+    shape << EwsPropertyField(QStringLiteral("calendar:FirstOccurrence"));
+    shape << EwsPropertyField(QStringLiteral("calendar:LastOccurrence"));
+    shape << EwsPropertyField(QStringLiteral("calendar:ModifiedOccurrences"));
+    shape << EwsPropertyField(QStringLiteral("calendar:DeletedOccurrences"));
+    shape << EwsPropertyField(QStringLiteral("calendar:StartTimeZone"));
+    shape << EwsPropertyField(QStringLiteral("calendar:EndTimeZone"));
+    shape << EwsPropertyField(QStringLiteral("calendar:MyResponseType"));
+    shape << EwsPropertyField(QStringLiteral("item:HasAttachments"));
+    shape << EwsPropertyField(QStringLiteral("item:Attachments"));*/
 
-//    shape << EwsPropertyField("item:Attachments");
-    shape << EwsPropertyField("calendar:ModifiedOccurrences");
-    shape << EwsPropertyField("calendar:DeletedOccurrences");
-    shape << EwsPropertyField("item:Body");
-    shape << EwsPropertyField("item:Culture");
-    shape << EwsPropertyField("item:MimeContent");
-    shape << EwsPropertyField("item:Subject");
-    shape << EwsPropertyField("calendar:TimeZone");
+//    shape << EwsPropertyField(QStringLiteral("item:Attachments"));
+    shape << EwsPropertyField(QStringLiteral("calendar:ModifiedOccurrences"));
+    shape << EwsPropertyField(QStringLiteral("calendar:DeletedOccurrences"));
+    shape << EwsPropertyField(QStringLiteral("item:Body"));
+    shape << EwsPropertyField(QStringLiteral("item:Culture"));
+    shape << EwsPropertyField(QStringLiteral("item:MimeContent"));
+    shape << EwsPropertyField(QStringLiteral("item:Subject"));
+    shape << EwsPropertyField(QStringLiteral("calendar:TimeZone"));
     mRequest->setItemShape(shape);
 }
 
@@ -100,7 +100,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
 
         const EwsItem &ewsItem = resp.item();
         QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
-        KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar("GMT"));
+        KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar(QStringLiteral("GMT")));
         format.fromString(memcal, mimeContent);
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Found %1 events").arg(memcal->events().count());
         KCalCore::Incidence::Ptr incidence;
@@ -157,11 +157,11 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
     else {
         EwsGetItemRequest *req = new EwsGetItemRequest(mClient, this);
         EwsItemShape shape(EwsShapeIdOnly);
-//        shape << EwsPropertyField("item:Attachments");
-        shape << EwsPropertyField("item:Body");
-        shape << EwsPropertyField("item:MimeContent");
-        shape << EwsPropertyField("calendar:TimeZone");
-        shape << EwsPropertyField("item:Culture");
+//        shape << EwsPropertyField(QStringLiteral("item:Attachments"));
+        shape << EwsPropertyField(QStringLiteral("item:Body"));
+        shape << EwsPropertyField(QStringLiteral("item:MimeContent"));
+        shape << EwsPropertyField(QStringLiteral("calendar:TimeZone"));
+        shape << EwsPropertyField(QStringLiteral("item:Culture"));
         req->setItemShape(shape);
 
         req->setItemIds(addItems);
@@ -203,7 +203,7 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
         item.setRemoteRevision(id.changeKey());
 
         QString mimeContent = ewsItem[EwsItemFieldMimeContent].toString();
-        KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar("GMT"));
+        KCalCore::Calendar::Ptr memcal(new KCalCore::MemoryCalendar(QStringLiteral("GMT")));
         format.fromString(memcal, mimeContent);
         KCalCore::Incidence::Ptr incidence(memcal->events().last());
         incidence->clearRecurrence();
@@ -270,16 +270,16 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Time zone '%1' not found on IANA list. Trying to convert with country '%2'")
                             .arg(currentTime.timeZone().name()).arg(QLocale::countryToString(locale.country()));
             qCDebugNC(EWSRES_LOG) << "MSTZ: " << msTimezone;
-            ianaTz = QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1(), locale.country());
+            ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1(), locale.country()));
             if (ianaTz.isEmpty()) {
                 // Give it one more try with the default country.
-                ianaTz = QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1());
+                ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1()));
                 if (ianaTz.isEmpty()) {
                     // Give it two more tries with the timezone name from the event.
-                    ianaTz = QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1(), locale.country());
+                    ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1(), locale.country()));
                     if (ianaTz.isEmpty()) {
                         // Give it one more try with the default country.
-                        ianaTz = QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1());
+                        ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1()));
                         qCWarningNC(EWSRES_LOG)
                             << QStringLiteral("Failed to convert time zone '%1' or '%2' to IANA id").arg(msTimezone).arg(currentTime.timeZone().name());
                     }

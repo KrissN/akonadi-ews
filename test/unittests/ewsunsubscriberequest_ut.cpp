@@ -71,7 +71,7 @@ void UtEwsUnsibscribeRequest::simple()
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsUnsubscribeRequest> req(new EwsUnsubscribeRequest(mClient, this));
-    req->setSubscriptionId("dwzVKTlwXxBZtQRMucP5Mg==");
+    req->setSubscriptionId(QStringLiteral("dwzVKTlwXxBZtQRMucP5Mg=="));
 
     req->exec();
 

@@ -543,8 +543,8 @@ void EwsFetchFoldersIncrJob::start()
     syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
     EwsFolderShape shape;
     shape << propPidTagContainerClass;
-    shape << EwsPropertyField("folder:EffectiveRights");
-    shape << EwsPropertyField("folder:ParentFolderId");
+    shape << EwsPropertyField(QStringLiteral("folder:EffectiveRights"));
+    shape << EwsPropertyField(QStringLiteral("folder:ParentFolderId"));
     syncFoldersReq->setFolderShape(shape);
     if (!mSyncState.isNull()) {
         syncFoldersReq->setSyncState(mSyncState);

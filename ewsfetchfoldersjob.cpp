@@ -139,8 +139,8 @@ void EwsFetchFoldersJobPrivate::remoteFolderFullFetchDone(KJob *job)
         syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
         EwsFolderShape shape;
         shape << propPidTagContainerClass;
-        shape << EwsPropertyField("folder:EffectiveRights");
-        shape << EwsPropertyField("folder:ParentFolderId");
+        shape << EwsPropertyField(QStringLiteral("folder:EffectiveRights"));
+        shape << EwsPropertyField(QStringLiteral("folder:ParentFolderId"));
         syncFoldersReq->setFolderShape(shape);
         syncFoldersReq->setSyncState(req->syncState());
         connect(syncFoldersReq, &EwsSyncFolderHierarchyRequest::result, this,
@@ -178,8 +178,8 @@ void EwsFetchFoldersJobPrivate::remoteFolderIdFullFetchDone(KJob *job)
     if (req->includesLastItem()) {
         EwsFolderShape shape(EwsShapeDefault);
         shape << propPidTagContainerClass;
-        shape << EwsPropertyField("folder:EffectiveRights");
-        shape << EwsPropertyField("folder:ParentFolderId");
+        shape << EwsPropertyField(QStringLiteral("folder:EffectiveRights"));
+        shape << EwsPropertyField(QStringLiteral("folder:ParentFolderId"));
         mPendingFetchJobs = 0;
 
         for (int i = 0; i < mRemoteFolderIds.size(); i += fetchBatchSize) {
@@ -370,8 +370,8 @@ void EwsFetchFoldersJob::start()
     syncFoldersReq->setFolderId(EwsId(EwsDIdMsgFolderRoot));
     EwsFolderShape shape;
     shape << propPidTagContainerClass;
-    shape << EwsPropertyField("folder:EffectiveRights");
-    shape << EwsPropertyField("folder:ParentFolderId");
+    shape << EwsPropertyField(QStringLiteral("folder:EffectiveRights"));
+    shape << EwsPropertyField(QStringLiteral("folder:ParentFolderId"));
     syncFoldersReq->setFolderShape(shape);
     if (!mSyncState.isNull()) {
         syncFoldersReq->setSyncState(mSyncState);

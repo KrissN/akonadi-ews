@@ -90,7 +90,7 @@ QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(QSet<QByteArray> fl
     } else {
         QStringList flagList;
         Q_FOREACH(const QByteArray &flag, flags) {
-            flagList.append(flag);
+            flagList.append(QString::fromLatin1(flag));
         }
         propertyHash.insert(EwsResource::flagsProperty, flagList);
     }

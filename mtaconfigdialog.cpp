@@ -61,7 +61,7 @@ MtaConfigDialog::MtaConfigDialog(EwsMtaResource *parentResource, WId wId)
     mUi->accountName->setText(parentResource->name());
 
     Akonadi::AgentFilterProxyModel *model = mUi->resourceWidget->agentFilterProxyModel();
-    model->addCapabilityFilter("X-EwsMailTransport");
+    model->addCapabilityFilter(QStringLiteral("X-EwsMailTransport"));
     mUi->resourceWidget->view()->setSelectionMode(QAbstractItemView::SingleSelection);
 
     for (int i = 0; i < model->rowCount(); i++) {

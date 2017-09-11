@@ -35,19 +35,19 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     : EwsFetchItemDetailJob(client, parent, collection)
 {
     EwsItemShape shape(EwsShapeIdOnly);
-    shape << EwsPropertyField("item:Subject");
-    shape << EwsPropertyField("item:Importance");
-    shape << EwsPropertyField("message:From");
-    shape << EwsPropertyField("message:ToRecipients");
-    shape << EwsPropertyField("message:CcRecipients");
-    shape << EwsPropertyField("message:BccRecipients");
-    shape << EwsPropertyField("item:Categories");
-    shape << EwsPropertyField("item:DateTimeReceived");
-    shape << EwsPropertyField("item:InReplyTo");
-    shape << EwsPropertyField("message:References");
-    shape << EwsPropertyField("message:ReplyTo");
-    shape << EwsPropertyField("message:InternetMessageId");
-    shape << EwsPropertyField("item:Size");
+    shape << EwsPropertyField(QStringLiteral("item:Subject"));
+    shape << EwsPropertyField(QStringLiteral("item:Importance"));
+    shape << EwsPropertyField(QStringLiteral("message:From"));
+    shape << EwsPropertyField(QStringLiteral("message:ToRecipients"));
+    shape << EwsPropertyField(QStringLiteral("message:CcRecipients"));
+    shape << EwsPropertyField(QStringLiteral("message:BccRecipients"));
+    shape << EwsPropertyField(QStringLiteral("item:Categories"));
+    shape << EwsPropertyField(QStringLiteral("item:DateTimeReceived"));
+    shape << EwsPropertyField(QStringLiteral("item:InReplyTo"));
+    shape << EwsPropertyField(QStringLiteral("message:References"));
+    shape << EwsPropertyField(QStringLiteral("message:ReplyTo"));
+    shape << EwsPropertyField(QStringLiteral("message:InternetMessageId"));
+    shape << EwsPropertyField(QStringLiteral("item:Size"));
     Q_FOREACH(const EwsPropertyField &field, EwsMailHandler::flagsProperties()) {
         shape << field;
     }

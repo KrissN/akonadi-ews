@@ -19,7 +19,7 @@
 
 #include "ewsclient_debug.h"
 
-QTemporaryDir ewsLogDir("/tmp/akonadi-ews-XXXXXXX");
+QTemporaryDir ewsLogDir(QStringLiteral("/tmp/akonadi-ews-XXXXXXX"));
 
 Q_LOGGING_CATEGORY(EWSRES_LOG, "log_ews_resource")
 

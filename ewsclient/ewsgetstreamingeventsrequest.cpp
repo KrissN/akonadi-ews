@@ -89,7 +89,7 @@ void EwsGetStreamingEventsRequest::requestDataTimeout()
     if (EWSRES_PROTO_LOG().isDebugEnabled()) {
         ewsLogDir.setAutoRemove(false);
         if (ewsLogDir.isValid()) {
-            QTemporaryFile dumpFile(ewsLogDir.path() + "/ews_xmldump_XXXXXXX.xml");
+            QTemporaryFile dumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmldump_XXXXXXX.xml"));
             dumpFile.open();
             dumpFile.setAutoRemove(false);
             dumpFile.write(mResponseData.toUtf8());

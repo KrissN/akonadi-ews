@@ -427,7 +427,7 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
         d->mType = EwsItemTypeItem;
         QStringRef subtype = reader.attributes().value(QStringLiteral("xsi:type"));
         if (!subtype.isEmpty()) {
-            auto tokens = subtype.split(':');
+            auto tokens = subtype.split(QChar::fromLatin1(':'));
             QStringRef type = tokens.size() == 1 ? tokens[0] : tokens[1];
             if (type == QStringLiteral("AbchPersonItemType")) {
                 d->mType = EwsItemTypeAbchPerson;
@@ -545,7 +545,7 @@ bool EwsItem::readBaseItemElement(QXmlStreamReader &reader)
 {
     D_PTR
 
-    if (!d->mEwsXml.readItem(reader, "Item", ewsTypeNsUri)) {
+    if (!d->mEwsXml.readItem(reader, QStringLiteral("Item"), ewsTypeNsUri)) {
         return false;
     }
 
