@@ -107,7 +107,6 @@ target_link_libraries(akonadi_ews_resource
     KF5::Mime
     KF5::CalendarCore
     KF5::Contacts
-    KF5::KDELibs4Support
     KF5::Wallet
     KF5::WidgetsAddons
     ewsclient)
