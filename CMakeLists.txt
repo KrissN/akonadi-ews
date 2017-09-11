@@ -16,41 +16,15 @@
 #  the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 #  Boston, MA 02110-1301, USA.
 
-cmake_minimum_required(VERSION 3.1.0)
+# Build a separate resource for sending e-mail. This is needed for KMail which assumes that
+# a single resource is not able to both send and receive e-mail.
+set(HAVE_SEPARATE_MTA_RESOURCE TRUE)
 
-project(akonadi-ews)
+# Pretend the inbox folder remote identifier is "INBOX" in order to satisfy the assumption
+# that only such named folders should be monitored for filtering rules.
+set(HAVE_INBOX_FILTERING_WORKAROUND TRUE)
 
-find_package(ECM 5.16.0 NO_MODULE)
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
-
-set(REQUIRED_QT_VERSION 5.4.0)
-if(ENABLE_TESTS)
-  set(EXTRA_QT_PACKAGES Test XmlPatterns)
-endif(ENABLE_TESTS)
-find_package(Qt5 ${REQUIRED_QT_VERSION} CONFIG REQUIRED Core ${EXTRA_QT_PACKAGES})
-
-include(KDEInstallDirs)
-include(KDEFrameworkCompilerSettings)
-include(KDECMakeSettings)
-include(FeatureSummary)
-
-find_package(KF5KIO)
-find_package(KF5Akonadi)
-find_package(KF5AkonadiMime)
-find_package(Xsltproc)
-find_package(KF5Mime)
-find_package(KF5CalendarCore)
-find_package(KF5Contacts)
-find_package(KF5Codecs)
-find_package(KF5KDELibs4Support)
-find_package(KF5Wallet)
-find_package(KF5WidgetsAddons)
-
-option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail." TRUE)
-option(HAVE_INBOX_FILTERING_WORKAROUND "Include inbox filtering workaround." TRUE)
-option(ENABLE_TESTS "Build the test suite." FALSE)
-
-set(AKONADI_EWS_VERSION "0.8.1-dev")
+set(AKONADI_EWS_VERSION ${KDEPIM_RUNTIME_VERSION})
 
 add_subdirectory(ewsclient)
 
@@ -167,10 +141,9 @@ endif (HAVE_SEPARATE_MTA_RESOURCE)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ewsresource.desktop.cmake ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.desktop)
 
-if (ENABLE_TESTS)
-  enable_testing()
+if (BUILD_TESTING)
   add_subdirectory(test)
-endif (ENABLE_TESTS)
+endif (BUILD_TESTING)
 
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ewsresource.desktop
@@ -179,12 +152,12 @@ install(TARGETS akonadi_ews_resource ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 if (HAVE_SEPARATE_MTA_RESOURCE)
   install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ewsmtaresource.desktop
-	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/akonadi/agents" )
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/akonadi/agents" )
   install(TARGETS akonadi_ewsmta_resource ${INSTALL_TARGETS_DEFAULT_ARGS})
 endif (HAVE_SEPARATE_MTA_RESOURCE)
 
 foreach(icon_resolution 16 22 24 32 48 64 72 96 128)
   install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/akonadi-ews-${icon_resolution}.png
-	DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/${icon_resolution}x${icon_resolution}/apps/"
-	RENAME "akonadi-ews.png")
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/${icon_resolution}x${icon_resolution}/apps/"
+    RENAME "akonadi-ews.png")
 endforeach(icon_resolution)
