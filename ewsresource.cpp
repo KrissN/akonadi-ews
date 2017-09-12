@@ -519,7 +519,7 @@ void EwsResource::getItemRequestFinished(KJob *job)
 
 void EwsResource::reloadConfig()
 {
-    mSubManager.reset(Q_NULLPTR);
+    mSubManager.reset(nullptr);
     qDebug() << QUrl(mSettings->baseUrl());
     mEwsClient.setUrl(mSettings->baseUrl());
     mSettings->requestPassword(mPassword, false);
@@ -1323,7 +1323,7 @@ void EwsResource::doSetOnline(bool online)
     if (online) {
         resetUrl();
     } else {
-        mSubManager.reset(Q_NULLPTR);
+        mSubManager.reset(nullptr);
     }
 }
 

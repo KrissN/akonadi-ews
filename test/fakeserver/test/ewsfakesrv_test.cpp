@@ -53,7 +53,7 @@ private Q_SLOTS:
     void xqueryResultsInCallback();
 private:
     QPair<QString, ushort> synchronousHttpReq(const QString &content, ushort port,
-                                              std::function<bool(const QString &)> chunkFn = Q_NULLPTR);
+                                              std::function<bool(const QString &)> chunkFn = nullptr);
 };
 
 void UtEwsFakeSrvTest::emptyDialog()

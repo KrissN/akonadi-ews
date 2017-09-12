@@ -38,7 +38,7 @@ static Q_CONSTEXPR uint streamingConnTimeout = 60; /* seconds */
 EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId,
                                                Settings *settings, QObject *parent)
     : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false),
-      mEventReq(Q_NULLPTR), mSettings(settings)
+      mEventReq(nullptr), mSettings(settings)
 {
     mStreamingEvents = mEwsClient.serverVersion().supports(EwsServerVersion::StreamingSubscription);
     mStreamingTimer.setInterval(streamingConnTimeout * 1000);
@@ -189,7 +189,7 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
     mStreamingTimer.stop();
 
     mEventReq->deleteLater();
-    mEventReq = Q_NULLPTR;
+    mEventReq = nullptr;
 
     EwsEventRequestBase *req = qobject_cast<EwsEventRequestBase*>(job);
     if (!req) {
@@ -240,7 +240,7 @@ void EwsSubscriptionManager::streamingConnectionTimeout()
     if (mEventReq) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Streaming request timeout - restarting");
         mEventReq->deleteLater();
-        mEventReq = Q_NULLPTR;
+        mEventReq = nullptr;
         getEvents();
     }
 }

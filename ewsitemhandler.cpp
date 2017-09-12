@@ -58,7 +58,7 @@ EwsItemHandler *EwsItemHandler::itemHandler(EwsItemType type)
         }
         qCWarning(EWSRES_LOG) << QStringLiteral("Could not find handler for item type %1").arg(type);
 
-        return Q_NULLPTR;
+        return nullptr;
     }
 }
 

@@ -61,7 +61,7 @@ bool Settings::requestPassword(QString &password, bool ask)
             return false;
         }
 
-        QPointer<KPasswordDialog> dlg = new KPasswordDialog(Q_NULLPTR);
+        QPointer<KPasswordDialog> dlg = new KPasswordDialog(nullptr);
         dlg->setModal(true);
         dlg->setPrompt(i18n("Please enter password for user '%1' and Exchange account '%2'.",
                             username(), email()));

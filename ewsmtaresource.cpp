@@ -33,7 +33,7 @@
 using namespace Akonadi;
 
 EwsMtaResource::EwsMtaResource(const QString &id)
-    : Akonadi::ResourceBase(id), mEwsResource(Q_NULLPTR)
+    : Akonadi::ResourceBase(id), mEwsResource(nullptr)
 {
     qDebug() << "EwsMtaResource";
 }
@@ -53,12 +53,12 @@ bool EwsMtaResource::connectEws()
     qDebug() << QStringLiteral("org.freedesktop.akonadi.Resource.") + MtaSettings::ewsResource() << mEwsResource->isValid();
     if (!mEwsResource->isValid()) {
         delete mEwsResource;
-        mEwsResource = Q_NULLPTR;
+        mEwsResource = nullptr;
     } else {
         connect(mEwsResource, &OrgKdeAkonadiEwsResourceInterface::messageSent, this, &EwsMtaResource::messageSent);
     }
 
-    return mEwsResource != Q_NULLPTR;
+    return mEwsResource != nullptr;
 }
 
 void EwsMtaResource::configure(WId windowId)

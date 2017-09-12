@@ -50,7 +50,7 @@ static const QVector<StringPair> userAgents = {
 
 ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId wId)
     : QDialog(), mParentResource(parentResource), mAutoDiscoveryNeeded(false), mTryConnectNeeded(false),
-      mProgressDialog(Q_NULLPTR)
+      mProgressDialog(nullptr)
 {
     if (wId) {
         KWindowSystem::setMainWindow(this, wId);
@@ -211,9 +211,9 @@ void ConfigDialog::autoDiscoveryFinished(KJob *job)
         mUi->kcfg_BaseUrl->setText(mAutoDiscoveryJob->ewsUrl());
     }
     mAutoDiscoveryJob->deleteLater();
-    mAutoDiscoveryJob = Q_NULLPTR;
+    mAutoDiscoveryJob = nullptr;
     mProgressDialog->deleteLater();
-    mProgressDialog = Q_NULLPTR;
+    mProgressDialog = nullptr;
 }
 
 void ConfigDialog::tryConnectFinished(KJob *job)
@@ -230,9 +230,9 @@ void ConfigDialog::tryConnectFinished(KJob *job)
         mProgressDialog->accept();
     }
     //mTryConnectJob->deleteLater();
-    mTryConnectJob = Q_NULLPTR;
+    mTryConnectJob = nullptr;
     //mProgressDialog->deleteLater();
-    mProgressDialog = Q_NULLPTR;
+    mProgressDialog = nullptr;
 }
 
 void ConfigDialog::autoDiscoveryCancelled()
@@ -241,7 +241,7 @@ void ConfigDialog::autoDiscoveryCancelled()
         mAutoDiscoveryJob->kill();
     }
     mProgressDialog->deleteLater();
-    mProgressDialog = Q_NULLPTR;
+    mProgressDialog = nullptr;
 }
 
 void ConfigDialog::tryConnectCancelled()
@@ -250,7 +250,7 @@ void ConfigDialog::tryConnectCancelled()
         mTryConnectJob->kill();
     }
     //mTryConnectJob->deleteLater();
-    mTryConnectJob = Q_NULLPTR;
+    mTryConnectJob = nullptr;
 }
 
 void ConfigDialog::setAutoDiscoveryNeeded()

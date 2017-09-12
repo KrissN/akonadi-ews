@@ -22,7 +22,7 @@
 #include "ewsgetitemrequest.h"
 
 EwsFetchItemDetailJob::EwsFetchItemDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection)
-    : KCompositeJob(parent), mDeletedItems(Q_NULLPTR), mClient(client), mCollection(collection)
+    : KCompositeJob(parent), mDeletedItems(nullptr), mClient(client), mCollection(collection)
 {
     mRequest = new EwsGetItemRequest(client, this);
     connect(mRequest, SIGNAL(result(KJob*)), SLOT(itemDetailFetched(KJob*)));
