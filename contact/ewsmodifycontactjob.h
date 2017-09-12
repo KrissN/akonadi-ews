@@ -29,7 +29,7 @@ public:
     EwsModifyContactJob(EwsClient& client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
                          QObject *parent);
     virtual ~EwsModifyContactJob();
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 };
 
 #endif

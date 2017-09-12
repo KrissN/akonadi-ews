@@ -42,7 +42,7 @@ public:
     Akonadi::Collection::List deletedFolders() const { return mDeletedFolders; };
     const QString &syncState() const { return mSyncState; };
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);

@@ -36,11 +36,11 @@ public:
     void setFolderShape(const EwsFolderShape &shape);
     void setTraversal(EwsTraversalType traversal) { mTraversal = traversal; };
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 
     const QList<EwsFolder> folders() const { return mFolders; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
+    virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
     EwsId mParentId;

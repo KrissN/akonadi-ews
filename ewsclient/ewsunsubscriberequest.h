@@ -52,9 +52,9 @@ public:
 
     const Response &response() const { return *mResponse; };
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
+    virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseUnsubscribeResponse(QXmlStreamReader &reader);
 private:
     QString mSubscriptionId;

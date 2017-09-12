@@ -29,9 +29,9 @@ public:
     EwsCreateContactJob(EwsClient& client, const Akonadi::Item &item,
                         const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateContactJob();
-    virtual bool setSend(bool send = true) Q_DECL_OVERRIDE;
+    virtual bool setSend(bool send = true) override;
 protected:
-    virtual void doStart() Q_DECL_OVERRIDE;
+    virtual void doStart() override;
 };
 
 #endif

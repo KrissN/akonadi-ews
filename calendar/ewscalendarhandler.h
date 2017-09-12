@@ -29,15 +29,15 @@ public:
     virtual ~EwsCalendarHandler();
 
     virtual EwsFetchItemDetailJob *fetchItemDetailJob(EwsClient &client, QObject *parent,
-                                                      const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
-    virtual void setSeenFlag(Akonadi::Item &item, bool value) Q_DECL_OVERRIDE;
-    virtual QString mimeType() Q_DECL_OVERRIDE;
-    virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) Q_DECL_OVERRIDE;
+                                                      const Akonadi::Collection &collection) override;
+    virtual void setSeenFlag(Akonadi::Item &item, bool value) override;
+    virtual QString mimeType() override;
+    virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) override;
     virtual EwsModifyItemJob *modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
-                                            const QSet<QByteArray> &parts, QObject *parent) Q_DECL_OVERRIDE;
+                                            const QSet<QByteArray> &parts, QObject *parent) override;
     virtual EwsCreateItemJob *createItemJob(EwsClient& client, const Akonadi::Item &item,
                                             const Akonadi::Collection &collection,
-                                            EwsTagStore *tagStore, EwsResource *parent) Q_DECL_OVERRIDE;
+                                            EwsTagStore *tagStore, EwsResource *parent) override;
     static EwsItemHandler *factory();
 private:
 };

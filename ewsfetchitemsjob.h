@@ -56,7 +56,7 @@ public:
 
     void setQueuedUpdates(const QueuedUpdateList &updates);
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 private Q_SLOTS:
     void localItemFetchDone(KJob *job);
     void remoteItemFetchDone(KJob *job);

@@ -39,16 +39,16 @@ public:
     explicit EwsMtaResource(const QString &id);
     ~EwsMtaResource();
 
-    virtual void sendItem(const Akonadi::Item &item) Q_DECL_OVERRIDE;
+    virtual void sendItem(const Akonadi::Item &item) override;
 public Q_SLOTS:
-    void configure(WId windowId) Q_DECL_OVERRIDE;
+    void configure(WId windowId) override;
 protected Q_SLOTS:
-    void retrieveCollections() Q_DECL_OVERRIDE;
-    void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
+    void retrieveCollections() override;
+    void retrieveItems(const Akonadi::Collection &collection) override;
 #if (AKONADI_VERSION > 0x50328)
-    bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+    bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) override;
 #else
-    bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+    bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) override;
 #endif
 private Q_SLOTS:
     void messageSent(QString id, QString error);

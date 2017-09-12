@@ -38,7 +38,7 @@ public:
                          const Akonadi::Collection &rootCollection, QObject *parent);
     ~EwsGlobalTagsReadJob();
 
-    void start() Q_DECL_OVERRIDE;
+    void start() override;
 
     const Akonadi::Tag::List &tags() const { return mTags; };
 private Q_SLOTS:

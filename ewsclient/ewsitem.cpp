@@ -43,7 +43,7 @@ public:
 
     EwsItemPrivate();
     EwsItemPrivate(const EwsItemBasePrivate &other);
-    virtual EwsItemBasePrivate *clone() const Q_DECL_OVERRIDE
+    virtual EwsItemBasePrivate *clone() const override
     {
         return new EwsItemPrivate(*this);
     }

@@ -29,7 +29,7 @@ public:
     EwsModifyTaskJob(EwsClient& client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
                      QObject *parent);
     virtual ~EwsModifyTaskJob();
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 };
 
 #endif

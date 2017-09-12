@@ -46,7 +46,7 @@ public:
                           EwsResource *parent);
     ~EwsUpdateItemsTagsJob();
 
-    void start() Q_DECL_OVERRIDE;
+    void start() override;
 
     Akonadi::Item::List items() { return mItems; };
 private Q_SLOTS:

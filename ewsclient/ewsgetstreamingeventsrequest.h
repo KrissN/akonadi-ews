@@ -40,7 +40,7 @@ public:
 
     void setTimeout(uint timeout) { mTimeout = timeout; };
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 public Q_SLOTS:
     void eventsProcessed(const Response &response);
 Q_SIGNALS:

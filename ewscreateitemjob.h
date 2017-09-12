@@ -41,7 +41,7 @@ public:
 
     const Akonadi::Item &item() const;
 
-    void start() Q_DECL_OVERRIDE;
+    void start() override;
 private Q_SLOTS:
     void tagSyncFinished(KJob *job);
 protected:

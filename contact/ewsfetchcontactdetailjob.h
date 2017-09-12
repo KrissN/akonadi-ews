@@ -29,7 +29,7 @@ public:
     EwsFetchContactDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
     virtual ~EwsFetchContactDetailJob();
 protected:
-    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) Q_DECL_OVERRIDE;
+    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
 };
 
 #endif

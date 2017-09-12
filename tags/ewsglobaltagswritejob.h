@@ -36,7 +36,7 @@ public:
                           const Akonadi::Collection &rootCollection, QObject *parent);
     ~EwsGlobalTagsWriteJob();
 
-    void start() Q_DECL_OVERRIDE;
+    void start() override;
 private Q_SLOTS:
     void updateFolderRequestFinished(KJob *job);
 private:

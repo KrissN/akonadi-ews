@@ -42,7 +42,7 @@ public:
 Q_SIGNALS:
     void serverStarted(bool ok);
 protected:
-    virtual void run() Q_DECL_OVERRIDE;
+    virtual void run() override;
 private Q_SLOTS:
     void doQueueEventsXml(const QStringList events);
 private:

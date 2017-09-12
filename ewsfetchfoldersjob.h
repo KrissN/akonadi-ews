@@ -40,7 +40,7 @@ public:
     Akonadi::Collection::List folders() const { return mFolders; };
     const QString &syncState() const { return mSyncState; };
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);

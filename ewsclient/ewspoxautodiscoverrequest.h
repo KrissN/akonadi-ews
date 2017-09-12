@@ -70,7 +70,7 @@ public:
 
     void dump() const;
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 
     Action action() const { return mAction; };
     const Protocol protocol(ProtocolType type) const { return mProtocols.value(type); };

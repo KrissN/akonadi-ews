@@ -63,14 +63,14 @@ public:
     void setFolderShape(const EwsFolderShape &shape);
     void setSyncState(const QString& state);
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 
     bool includesLastItem() const { return mIncludesLastItem; };
 
     const Change::List &changes() const { return mChanges; };
     const QString &syncState() const { return mSyncState; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
+    virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
 

@@ -32,7 +32,7 @@ public:
                         bool enableNTLMv2, QObject *parent);
     virtual ~EwsAutodiscoveryJob();
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 
     const QString &ewsUrl() const { return mEwsUrl; };
     const QString &oabUrl() const { return mOabUrl; };

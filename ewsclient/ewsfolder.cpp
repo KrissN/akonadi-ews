@@ -45,7 +45,7 @@ public:
 
     EwsFolderPrivate();
     EwsFolderPrivate(const EwsItemBasePrivate &other);
-    virtual EwsItemBasePrivate *clone() const Q_DECL_OVERRIDE
+    virtual EwsItemBasePrivate *clone() const override
     {
         return new EwsFolderPrivate(*this);
     }

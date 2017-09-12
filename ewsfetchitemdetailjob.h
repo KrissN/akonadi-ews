@@ -47,7 +47,7 @@ public:
         return mChangedItems;
     }
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 protected:
     virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) = 0;
 

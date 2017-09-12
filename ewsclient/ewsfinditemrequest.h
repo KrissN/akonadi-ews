@@ -52,7 +52,7 @@ public:
         mFractional = true;
     }
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 
     bool includesLastItem() const { return mIncludesLastItem; };
     int nextOffset() const { return mNextOffset; };
@@ -61,7 +61,7 @@ public:
 
     const QList<EwsItem> items() const { return mItems; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
+    virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsId mFolderId;

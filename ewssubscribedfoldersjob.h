@@ -33,7 +33,7 @@ public:
     EwsSubscribedFoldersJob(EwsClient &client, Settings *settings, QObject *parent);
     ~EwsSubscribedFoldersJob();
 
-    void start() Q_DECL_OVERRIDE;
+    void start() override;
 
     EwsId::List folders() { return mFolders; };
 

@@ -40,7 +40,7 @@ public:
         return mResultItems;
     }
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 protected:
     Akonadi::Item::List mItems;
     Akonadi::Item::List mResultItems;

@@ -46,7 +46,7 @@ public:
 public Q_SLOTS:
     void setFilterSelected(bool enabled);
 protected:
-    bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const Q_DECL_OVERRIDE;
+    bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
 private:
     bool hasCheckedChildren(QModelIndex index) const;
     bool mFilterSelected;

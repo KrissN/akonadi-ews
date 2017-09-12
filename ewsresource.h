@@ -61,47 +61,47 @@ public:
     ~EwsResource();
 
     virtual void itemsTagsChanged(const Akonadi::Item::List &items, const QSet<Akonadi::Tag> &addedTags,
-                                  const QSet<Akonadi::Tag> &removedTags) Q_DECL_OVERRIDE;
-    virtual void tagAdded(const Akonadi::Tag &tag) Q_DECL_OVERRIDE;
-    virtual void tagChanged(const Akonadi::Tag &tag) Q_DECL_OVERRIDE;
-    virtual void tagRemoved(const Akonadi::Tag &tag) Q_DECL_OVERRIDE;
+                                  const QSet<Akonadi::Tag> &removedTags) override;
+    virtual void tagAdded(const Akonadi::Tag &tag) override;
+    virtual void tagChanged(const Akonadi::Tag &tag) override;
+    virtual void tagRemoved(const Akonadi::Tag &tag) override;
 
-    virtual void collectionAdded(const Akonadi::Collection &collection, const Akonadi::Collection &parent) Q_DECL_OVERRIDE;
+    virtual void collectionAdded(const Akonadi::Collection &collection, const Akonadi::Collection &parent) override;
     virtual void collectionMoved(const Akonadi::Collection &collection, const Akonadi::Collection &collectionSource,
-                                 const Akonadi::Collection &collectionDestination) Q_DECL_OVERRIDE;
+                                 const Akonadi::Collection &collectionDestination) override;
     virtual void collectionChanged(const Akonadi::Collection &collection,
-                                   const QSet<QByteArray> &changedAttributes) Q_DECL_OVERRIDE;
-    virtual void collectionChanged(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
-    virtual void collectionRemoved(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
-    virtual void itemAdded(const Akonadi::Item &item, const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
-    virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) Q_DECL_OVERRIDE;
+                                   const QSet<QByteArray> &changedAttributes) override;
+    virtual void collectionChanged(const Akonadi::Collection &collection) override;
+    virtual void collectionRemoved(const Akonadi::Collection &collection) override;
+    virtual void itemAdded(const Akonadi::Item &item, const Akonadi::Collection &collection) override;
+    virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) override;
     virtual void itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
-                                  const QSet<QByteArray> &removedFlags) Q_DECL_OVERRIDE;
+                                  const QSet<QByteArray> &removedFlags) override;
     virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
-                            const Akonadi::Collection &destinationCollection) Q_DECL_OVERRIDE;
-    virtual void itemsRemoved(const Akonadi::Item::List &items) Q_DECL_OVERRIDE;
+                            const Akonadi::Collection &destinationCollection) override;
+    virtual void itemsRemoved(const Akonadi::Item::List &items) override;
 
-    virtual void sendItem(const Akonadi::Item &item) Q_DECL_OVERRIDE;
+    virtual void sendItem(const Akonadi::Item &item) override;
 
     const Akonadi::Collection &rootCollection() const { return mRootCollection; };
 
     Settings *settings() { return mSettings.data(); };
 protected:
-    void doSetOnline(bool online) Q_DECL_OVERRIDE;
+    void doSetOnline(bool online) override;
 public Q_SLOTS:
-    void configure(WId windowId) Q_DECL_OVERRIDE;
+    void configure(WId windowId) override;
     Q_SCRIPTABLE void clearFolderSyncState(QString folderId);
     Q_SCRIPTABLE void clearFolderSyncState();
     Q_SCRIPTABLE void clearFolderTreeSyncState();
 protected Q_SLOTS:
-    void retrieveCollections() Q_DECL_OVERRIDE;
-    void retrieveItems(const Akonadi::Collection &collection) Q_DECL_OVERRIDE;
+    void retrieveCollections() override;
+    void retrieveItems(const Akonadi::Collection &collection) override;
 #if (AKONADI_VERSION > 0x50328)
-    bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+    bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) override;
 #else
-    bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) Q_DECL_OVERRIDE;
+    bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) override;
 #endif
-    void retrieveTags() Q_DECL_OVERRIDE;
+    void retrieveTags() override;
 private Q_SLOTS:
     void fetchFoldersJobFinished(KJob *job);
     void fetchFoldersIncrJobFinished(KJob *job);

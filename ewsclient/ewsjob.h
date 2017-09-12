@@ -29,7 +29,7 @@ public:
     explicit EwsJob(QObject *parent);
     virtual ~EwsJob();
 protected:
-    virtual bool doKill() Q_DECL_OVERRIDE;
+    virtual bool doKill() override;
     bool setErrorMsg(const QString msg, int code = KJob::UserDefinedError);
 };
 

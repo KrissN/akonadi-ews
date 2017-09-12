@@ -105,11 +105,11 @@ public:
 
     void addFolderChange(const FolderChange &change) { mChanges.append(change); };
 
-    virtual void start() Q_DECL_OVERRIDE;
+    virtual void start() override;
 
     const QList<Response> &responses() const { return mResponses; };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) Q_DECL_OVERRIDE;
+    virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     QList<FolderChange> mChanges;
