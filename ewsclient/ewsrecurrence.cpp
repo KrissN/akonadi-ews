@@ -569,7 +569,7 @@ bool EwsRecurrence::readDow(QXmlStreamReader &reader, QBitArray &dow)
     bool ok;
     QString text = reader.readElementText();
     QStringList days = text.split(QChar::fromLatin1(' '));
-    Q_FOREACH(const QString& day, days) {
+    Q_FOREACH(const QString &day, days) {
         short dowIndex = decodeEnumString<short>(day, dayOfWeekNames, dayOfWeekNameCount, &ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")

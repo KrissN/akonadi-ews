@@ -34,7 +34,7 @@ class EwsFetchFoldersIncrJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsFetchFoldersIncrJob(EwsClient& client, const QString &syncState,
+    EwsFetchFoldersIncrJob(EwsClient &client, const QString &syncState,
                            const Akonadi::Collection &rootCollection, QObject *parent);
     virtual ~EwsFetchFoldersIncrJob();
 

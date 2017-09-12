@@ -152,7 +152,7 @@ public Q_SLOTS:
     void localFolderFetchDone(KJob *job);
     void localFolderMoveDone(KJob *job);
 public:
-    EwsClient& mClient;
+    EwsClient &mClient;
     int mPendingMoveJobs;
     EwsId::List mRemoteFolderIds;
 

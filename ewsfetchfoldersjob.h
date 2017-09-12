@@ -34,7 +34,7 @@ class EwsFetchFoldersJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsFetchFoldersJob(EwsClient& client, const Akonadi::Collection &rootCollection, QObject *parent);
+    EwsFetchFoldersJob(EwsClient &client, const Akonadi::Collection &rootCollection, QObject *parent);
     virtual ~EwsFetchFoldersJob();
 
     Akonadi::Collection::List folders() const { return mFolders; };

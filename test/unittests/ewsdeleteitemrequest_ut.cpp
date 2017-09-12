@@ -33,7 +33,7 @@ private Q_SLOTS:
     void twoItemsOneFailed();
     void twoItemsSecondFailed();
 private:
-    void verifier(FakeTransferJob* job, const QByteArray& req, const QByteArray &expReq,
+    void verifier(FakeTransferJob* job, const QByteArray &req, const QByteArray &expReq,
                   const QByteArray &resp);
 
     EwsClient mClient;
@@ -74,7 +74,7 @@ void UtEwsDeleteItemRequest::singleItem()
                     "</s:Body>"
                     "</s:Envelope>";
 
-    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
+    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray &req){
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
@@ -130,7 +130,7 @@ void UtEwsDeleteItemRequest::twoItems()
                     "</s:Body>"
                     "</s:Envelope>";
 
-    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
+    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray &req){
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
@@ -191,7 +191,7 @@ void UtEwsDeleteItemRequest::twoItemsOneFailed()
                     "</s:Body>"
                     "</s:Envelope>";
 
-    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
+    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray &req){
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
@@ -260,7 +260,7 @@ void UtEwsDeleteItemRequest::twoItemsSecondFailed()
                     "</s:Body>"
                     "</s:Envelope>";
 
-    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
+    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray &req){
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsDeleteItemRequest> req(new EwsDeleteItemRequest(mClient, this));
@@ -286,7 +286,7 @@ void UtEwsDeleteItemRequest::twoItemsSecondFailed()
     }
 }
 
-void UtEwsDeleteItemRequest::verifier(FakeTransferJob* job, const QByteArray& req,
+void UtEwsDeleteItemRequest::verifier(FakeTransferJob* job, const QByteArray &req,
                                       const QByteArray &expReq, const QByteArray &response)
 {
     bool fail = true;

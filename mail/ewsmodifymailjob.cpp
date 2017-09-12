@@ -28,7 +28,7 @@
 
 using namespace Akonadi;
 
-EwsModifyMailJob::EwsModifyMailJob(EwsClient& client, const Akonadi::Item::List &items,
+EwsModifyMailJob::EwsModifyMailJob(EwsClient &client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)
     : EwsModifyItemJob(client, items, parts, parent)
 {

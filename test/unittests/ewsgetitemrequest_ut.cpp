@@ -30,7 +30,7 @@ class UtEwsGetItemRequest : public QObject
 private Q_SLOTS:
     void twoFailures();
 private:
-    void verifier(FakeTransferJob* job, const QByteArray& req, const QByteArray &expReq,
+    void verifier(FakeTransferJob* job, const QByteArray &req, const QByteArray &expReq,
                   const QByteArray &resp);
 
     EwsClient mClient;
@@ -80,7 +80,7 @@ void UtEwsGetItemRequest::twoFailures()
                     "<m:GetItemResponseMessage ResponseClass=\"Error\"><m:MessageText>The specified object was not found in the store.</m:MessageText><m:ResponseCode>ErrorItemNotFound</m:ResponseCode><m:DescriptiveLinkKey>0</m:DescriptiveLinkKey><m:Items/></m:GetItemResponseMessage>"
                     "</m:ResponseMessages></m:GetItemResponse></s:Body></s:Envelope>";
 
-    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
+    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray &req){
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsGetItemRequest> req(new EwsGetItemRequest(mClient, this));
@@ -129,7 +129,7 @@ void UtEwsGetItemRequest::twoFailures()
     }
 }
 
-void UtEwsGetItemRequest::verifier(FakeTransferJob* job, const QByteArray& req,
+void UtEwsGetItemRequest::verifier(FakeTransferJob* job, const QByteArray &req,
                                       const QByteArray &expReq, const QByteArray &response)
 {
     bool fail = true;

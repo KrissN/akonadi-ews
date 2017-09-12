@@ -26,7 +26,7 @@ class EwsModifyTaskJob : public EwsModifyItemJob
 {
     Q_OBJECT
 public:
-    EwsModifyTaskJob(EwsClient& client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
+    EwsModifyTaskJob(EwsClient &client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
                      QObject *parent);
     virtual ~EwsModifyTaskJob();
     virtual void start() override;

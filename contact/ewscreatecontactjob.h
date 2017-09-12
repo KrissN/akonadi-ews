@@ -26,7 +26,7 @@ class EwsCreateContactJob : public EwsCreateItemJob
 {
     Q_OBJECT
 public:
-    EwsCreateContactJob(EwsClient& client, const Akonadi::Item &item,
+    EwsCreateContactJob(EwsClient &client, const Akonadi::Item &item,
                         const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateContactJob();
     virtual bool setSend(bool send = true) override;

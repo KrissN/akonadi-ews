@@ -26,7 +26,7 @@ class EwsCreateCalendarJob : public EwsCreateItemJob
 {
     Q_OBJECT
 public:
-    EwsCreateCalendarJob(EwsClient& client, const Akonadi::Item &item,
+    EwsCreateCalendarJob(EwsClient &client, const Akonadi::Item &item,
                          const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateCalendarJob();
     virtual bool setSend(bool send = true) override;

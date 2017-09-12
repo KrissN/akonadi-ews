@@ -157,12 +157,12 @@ EwsEffectiveRights::~EwsEffectiveRights()
 {
 }
 
-EwsEffectiveRights& EwsEffectiveRights::operator=(const EwsEffectiveRights &other)
+EwsEffectiveRights &EwsEffectiveRights::operator=(const EwsEffectiveRights &other)
 {
     d = other.d;
     return *this;
 }
-EwsEffectiveRights& EwsEffectiveRights::operator=(EwsEffectiveRights &&other)
+EwsEffectiveRights &EwsEffectiveRights::operator=(EwsEffectiveRights &&other)
 {
     d = std::move(other.d);
     return *this;

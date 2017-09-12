@@ -29,7 +29,7 @@ class EwsModifyItemJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsModifyItemJob(EwsClient& client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
+    EwsModifyItemJob(EwsClient &client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
                      QObject *parent);
     virtual ~EwsModifyItemJob();
 
@@ -40,7 +40,7 @@ public:
 protected:
     Akonadi::Item::List mItems;
     const QSet<QByteArray> mParts;
-    EwsClient& mClient;
+    EwsClient &mClient;
     QSet<QByteArray> mAddedFlags;
     QSet<QByteArray> mRemovedFlags;
 };

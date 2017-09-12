@@ -97,13 +97,13 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     return true;
 }
 
-EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
+EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
                                                 const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyMailJob(client, items, parts, parent);
 }
 
-EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
                                                 const Akonadi::Collection &collection,
                                                 EwsTagStore *tagStore, EwsResource *parent)
 {

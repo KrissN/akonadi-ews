@@ -36,7 +36,7 @@ using namespace Akonadi;
 
 static const EwsPropertyField propPidMessageFlags(0x0e07, EwsPropTypeInteger);
 
-EwsCreateMailJob::EwsCreateMailJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateMailJob::EwsCreateMailJob(EwsClient &client, const Akonadi::Item &item,
                                    const Akonadi::Collection &collection, EwsTagStore *tagStore,
                                    EwsResource *parent)
     : EwsCreateItemJob(client, item, collection, tagStore, parent), mSend(false)
@@ -80,7 +80,7 @@ void EwsCreateMailJob::doStart()
         /* When creating items using the CreateItem request Exchange will by default mark the  message
          * as draft. Setting the extended property below causes the message to appear normally. */
         item.setProperty(propPidMessageFlags, QStringLiteral("1"));
-        const Akonadi::AgentInstance& inst = Akonadi::AgentManager::self()->instance(mCollection.resource());
+        const Akonadi::AgentInstance &inst = Akonadi::AgentManager::self()->instance(mCollection.resource());
 
         /* WORKAROUND: The "Sent Items" folder is a little "special" when it comes to creating items.
          * Unlike other folders when creating items there the creation date/time is always set to the

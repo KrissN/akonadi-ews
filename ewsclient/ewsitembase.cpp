@@ -173,7 +173,7 @@ QVariant EwsItemBase::operator[](EwsItemFields f) const
     }
 }
 
-void EwsItemBase::setField(EwsItemFields f, const QVariant& value)
+void EwsItemBase::setField(EwsItemFields f, const QVariant &value)
 {
     d->mFields[f] = value;
 }

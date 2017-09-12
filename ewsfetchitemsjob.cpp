@@ -258,7 +258,7 @@ void EwsFetchItemsJob::compareItemLists()
     Q_EMIT percent(0);
 
     QHash<QString, Item> itemHash;
-    Q_FOREACH(const Item& item, mLocalItems) {
+    Q_FOREACH(const Item &item, mLocalItems) {
         itemHash.insert(item.remoteId(), item);
     }
 

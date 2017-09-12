@@ -23,7 +23,7 @@
 #include "tags/ewstagstore.h"
 #include "tags/ewsakonaditagssyncjob.h"
 
-EwsCreateItemJob::EwsCreateItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateItemJob::EwsCreateItemJob(EwsClient &client, const Akonadi::Item &item,
                                    const Akonadi::Collection &collection, EwsTagStore *tagStore,
                                    EwsResource *parent)
     : EwsJob(parent), mItem(item), mCollection(collection), mClient(client), mTagStore(tagStore)

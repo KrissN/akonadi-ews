@@ -115,12 +115,12 @@ EwsAttendee::~EwsAttendee()
 {
 }
 
-EwsAttendee& EwsAttendee::operator=(const EwsAttendee &other)
+EwsAttendee &EwsAttendee::operator=(const EwsAttendee &other)
 {
     d = other.d;
     return *this;
 }
-EwsAttendee& EwsAttendee::operator=(EwsAttendee &&other)
+EwsAttendee &EwsAttendee::operator=(EwsAttendee &&other)
 {
     d = std::move(other.d);
     return *this;

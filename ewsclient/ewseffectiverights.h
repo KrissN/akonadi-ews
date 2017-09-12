@@ -39,8 +39,8 @@ public:
     EwsEffectiveRights(EwsEffectiveRights &&other);
     virtual ~EwsEffectiveRights();
 
-    EwsEffectiveRights& operator=(const EwsEffectiveRights &other);
-    EwsEffectiveRights& operator=(EwsEffectiveRights &&other);
+    EwsEffectiveRights &operator=(const EwsEffectiveRights &other);
+    EwsEffectiveRights &operator=(EwsEffectiveRights &&other);
 
     bool isValid() const;
     bool canCreateAssociated() const;

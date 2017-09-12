@@ -47,7 +47,7 @@ public:
     bool mIncludesLastItem;
 };
 
-EwsFindItemRequest::EwsFindItemRequest(EwsClient& client, QObject *parent)
+EwsFindItemRequest::EwsFindItemRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent), mTraversal(EwsTraversalShallow), mPagination(false),
       mPageBasePoint(EwsBasePointBeginning), mPageOffset(0), mFractional(false), mMaxItems(-1),
       mFracNumerator(0), mFracDenominator(0), mTotalItems(0), mNextOffset(-1), mNextNumerator(-1),

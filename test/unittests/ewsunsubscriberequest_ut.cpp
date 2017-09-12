@@ -30,7 +30,7 @@ class UtEwsUnsibscribeRequest : public QObject
 private Q_SLOTS:
     void simple();
 private:
-    void verifier(FakeTransferJob* job, const QByteArray& req, const QByteArray &expReq,
+    void verifier(FakeTransferJob* job, const QByteArray &req, const QByteArray &expReq,
                   const QByteArray &resp);
 
     EwsClient mClient;
@@ -67,7 +67,7 @@ void UtEwsUnsibscribeRequest::simple()
                     "</m:UnsubscribeResponse>"
                     "</s:Body></s:Envelope>";
 
-    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray& req){
+    FakeTransferJob::addVerifier(this, [this](FakeTransferJob* job, const QByteArray &req){
         verifier(job, req, request, response);
     });
     QScopedPointer<EwsUnsubscribeRequest> req(new EwsUnsubscribeRequest(mClient, this));
@@ -78,7 +78,7 @@ void UtEwsUnsibscribeRequest::simple()
     QCOMPARE(req->error(), 0);
 }
 
-void UtEwsUnsibscribeRequest::verifier(FakeTransferJob* job, const QByteArray& req,
+void UtEwsUnsibscribeRequest::verifier(FakeTransferJob* job, const QByteArray &req,
                                       const QByteArray &expReq, const QByteArray &response)
 {
     bool fail = true;

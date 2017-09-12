@@ -41,8 +41,8 @@ public:
     EwsOccurrence(EwsOccurrence &&other);
     virtual ~EwsOccurrence();
 
-    EwsOccurrence& operator=(const EwsOccurrence &other);
-    EwsOccurrence& operator=(EwsOccurrence &&other);
+    EwsOccurrence &operator=(const EwsOccurrence &other);
+    EwsOccurrence &operator=(EwsOccurrence &&other);
 
     bool isValid() const;
     const EwsId &itemId() const;

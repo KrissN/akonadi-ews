@@ -46,14 +46,14 @@ public:
         : EwsFolderShape(other), mBodyType(BodyNone) {};
     explicit EwsItemShape(EwsFolderShape &&other)
         : EwsFolderShape(other), mBodyType(BodyNone) {};
-    EwsItemShape& operator=(EwsItemShape &&other) {
+    EwsItemShape &operator=(EwsItemShape &&other) {
         mBaseShape = other.mBaseShape;
         mProps = std::move(other.mProps);
         mFlags = other.mFlags;
         mBodyType = other.mBodyType;
         return *this;
     }
-    EwsItemShape& operator=(const EwsItemShape &other) {
+    EwsItemShape &operator=(const EwsItemShape &other) {
         mBaseShape = other.mBaseShape;
         mProps = other.mProps;
         mFlags = other.mFlags;

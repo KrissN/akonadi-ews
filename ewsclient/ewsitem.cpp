@@ -495,13 +495,13 @@ EwsItem::~EwsItem()
 {
 }
 
-EwsItem& EwsItem::operator=(const EwsItem &other)
+EwsItem &EwsItem::operator=(const EwsItem &other)
 {
     d = other.d;
     return *this;
 }
 
-EwsItem& EwsItem::operator=(EwsItem &&other)
+EwsItem &EwsItem::operator=(EwsItem &&other)
 {
     d = std::move(other.d);
     return *this;

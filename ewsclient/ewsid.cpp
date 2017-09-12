@@ -109,7 +109,7 @@ EwsId::EwsId(QString id, QString changeKey)
 #endif
 }
 
-EwsId& EwsId::operator=(const EwsId &other)
+EwsId &EwsId::operator=(const EwsId &other)
 {
     mType = other.mType;
     if (mType == Distinguished) {
@@ -122,7 +122,7 @@ EwsId& EwsId::operator=(const EwsId &other)
     return *this;
 }
 
-EwsId& EwsId::operator=(EwsId &&other)
+EwsId &EwsId::operator=(EwsId &&other)
 {
     mType = other.mType;
     if (mType == Distinguished) {

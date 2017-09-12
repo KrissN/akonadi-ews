@@ -44,8 +44,8 @@ public:
     EwsMailbox(EwsMailbox &&other);
     virtual ~EwsMailbox();
 
-    EwsMailbox& operator=(const EwsMailbox &other);
-    EwsMailbox& operator=(EwsMailbox &&other);
+    EwsMailbox &operator=(const EwsMailbox &other);
+    EwsMailbox &operator=(EwsMailbox &&other);
 
     bool isValid() const;
     QString name() const;

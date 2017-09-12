@@ -50,7 +50,7 @@ public:
     QString mSyncState;
 };
 
-EwsSyncFolderHierarchyRequest::EwsSyncFolderHierarchyRequest(EwsClient& client, QObject *parent)
+EwsSyncFolderHierarchyRequest::EwsSyncFolderHierarchyRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent), mIncludesLastItem(false)
 {
     qRegisterMetaType<EwsSyncFolderHierarchyRequest::Change::List>();

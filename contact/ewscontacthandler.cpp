@@ -66,13 +66,13 @@ bool EwsContactHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsIt
     return true;
 }
 
-EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
+EwsModifyItemJob *EwsContactHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
                                                    const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyContactJob(client, items, parts, parent);
 }
 
-EwsCreateItemJob *EwsContactHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateItemJob *EwsContactHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
                                                    const Akonadi::Collection &collection,
                                                    EwsTagStore *tagStore, EwsResource *parent)
 {

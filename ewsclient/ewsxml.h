@@ -104,7 +104,7 @@ public:
                     const ValueHash &values, const QList<T> &keysToWrite = QList<T>()) const
     {
         bool hasKeysToWrite = !keysToWrite.isEmpty();
-        Q_FOREACH(const Item& item, mItems) {
+        Q_FOREACH(const Item &item, mItems) {
             if (!hasKeysToWrite || keysToWrite.contains(item.key)) {
                 typename ValueHash::const_iterator it = values.find(item.key);
                 if (it != values.end()) {

@@ -19,7 +19,7 @@
 
 #include "ewsmodifyitemjob.h"
 
-EwsModifyItemJob::EwsModifyItemJob(EwsClient& client, const Akonadi::Item::List &items,
+EwsModifyItemJob::EwsModifyItemJob(EwsClient &client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)
     : EwsJob(parent), mItems(items), mParts(parts), mClient(client)
 {

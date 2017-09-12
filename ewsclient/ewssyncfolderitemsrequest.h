@@ -59,12 +59,12 @@ public:
         friend class Response;
     };
 
-    EwsSyncFolderItemsRequest(EwsClient& client, QObject *parent);
+    EwsSyncFolderItemsRequest(EwsClient &client, QObject *parent);
     virtual ~EwsSyncFolderItemsRequest();
 
     void setFolderId(const EwsId &id);
     void setItemShape(const EwsItemShape &shape);
-    void setSyncState(const QString& state);
+    void setSyncState(const QString &state);
     void setMaxChanges(uint max);
 
     virtual void start() override;

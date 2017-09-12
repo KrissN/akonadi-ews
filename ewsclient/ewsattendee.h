@@ -41,8 +41,8 @@ public:
     EwsAttendee(EwsAttendee &&other);
     virtual ~EwsAttendee();
 
-    EwsAttendee& operator=(const EwsAttendee &other);
-    EwsAttendee& operator=(EwsAttendee &&other);
+    EwsAttendee &operator=(const EwsAttendee &other);
+    EwsAttendee &operator=(EwsAttendee &&other);
 
     bool isValid() const;
     const EwsMailbox &mailbox() const;

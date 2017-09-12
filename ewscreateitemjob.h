@@ -33,7 +33,7 @@ class EwsCreateItemJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsCreateItemJob(EwsClient& client, const Akonadi::Item &item,
+    EwsCreateItemJob(EwsClient &client, const Akonadi::Item &item,
                      const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateItemJob();
 
@@ -50,7 +50,7 @@ protected:
 
     Akonadi::Item mItem;
     Akonadi::Collection mCollection;
-    EwsClient& mClient;
+    EwsClient &mClient;
     EwsTagStore *mTagStore;
 };
 

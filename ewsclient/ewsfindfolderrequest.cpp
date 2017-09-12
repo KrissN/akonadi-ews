@@ -42,7 +42,7 @@ public:
     QList<EwsFolder> mFolders;
 };
 
-EwsFindFolderRequest::EwsFindFolderRequest(EwsClient& client, QObject *parent)
+EwsFindFolderRequest::EwsFindFolderRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent), mTraversal(EwsTraversalDeep)
 {
 }

@@ -40,8 +40,8 @@ public:
     EwsItem(EwsItem &&other);
     virtual ~EwsItem();
 
-    EwsItem& operator=(const EwsItem &other);
-    EwsItem& operator=(EwsItem &&other);
+    EwsItem &operator=(const EwsItem &other);
+    EwsItem &operator=(EwsItem &&other);
 
     EwsItemType type() const;
     void setType(EwsItemType type);

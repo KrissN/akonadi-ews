@@ -246,7 +246,7 @@ EwsPropertyField::EwsPropertyField(EwsPropertyField &&other)
 {
 }
 
-EwsPropertyField& EwsPropertyField::operator=(EwsPropertyField &&other)
+EwsPropertyField &EwsPropertyField::operator=(EwsPropertyField &&other)
 {
     d = other.d;
     return *this;
@@ -256,7 +256,7 @@ EwsPropertyField::~EwsPropertyField()
 {
 }
 
-EwsPropertyField& EwsPropertyField::operator=(const EwsPropertyField &other)
+EwsPropertyField &EwsPropertyField::operator=(const EwsPropertyField &other)
 {
     d = other.d;
     return *this;

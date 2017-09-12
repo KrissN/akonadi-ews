@@ -65,13 +65,13 @@ bool EwsCalendarHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsI
     return true;
 }
 
-EwsModifyItemJob *EwsCalendarHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
+EwsModifyItemJob *EwsCalendarHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
                                                     const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyCalendarJob(client, items, parts, parent);
 }
 
-EwsCreateItemJob *EwsCalendarHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateItemJob *EwsCalendarHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
                                                     const Akonadi::Collection &collection,
                                                     EwsTagStore *tagStore, EwsResource *parent)
 {

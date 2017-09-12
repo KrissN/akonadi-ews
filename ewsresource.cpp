@@ -417,7 +417,7 @@ void EwsResource::getItemsRequestFinished(KJob *job)
     Item::List items = req->property("items").value<Item::List>();
 
     QHash<QString, Item> itemHash;
-    Q_FOREACH(const Item& item, items) {
+    Q_FOREACH(const Item &item, items) {
         itemHash.insert(item.remoteId(), item);
     }
 

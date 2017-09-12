@@ -56,12 +56,12 @@ public:
         friend class Response;
     };
 
-    EwsSyncFolderHierarchyRequest(EwsClient& client, QObject *parent);
+    EwsSyncFolderHierarchyRequest(EwsClient &client, QObject *parent);
     virtual ~EwsSyncFolderHierarchyRequest();
 
     void setFolderId(const EwsId &id);
     void setFolderShape(const EwsFolderShape &shape);
-    void setSyncState(const QString& state);
+    void setSyncState(const QString &state);
 
     virtual void start() override;
 

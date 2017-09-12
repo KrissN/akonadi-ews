@@ -103,7 +103,7 @@ bool EwsServerVersion::supports(ServerFeature feature) const
     }
 }
 
-const EwsServerVersion& EwsServerVersion::minSupporting(ServerFeature feature)
+const EwsServerVersion &EwsServerVersion::minSupporting(ServerFeature feature)
 {
     switch (feature) {
     case StreamingSubscription:

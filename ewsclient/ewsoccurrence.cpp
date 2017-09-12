@@ -116,12 +116,12 @@ EwsOccurrence::~EwsOccurrence()
 {
 }
 
-EwsOccurrence& EwsOccurrence::operator=(const EwsOccurrence &other)
+EwsOccurrence &EwsOccurrence::operator=(const EwsOccurrence &other)
 {
     d = other.d;
     return *this;
 }
-EwsOccurrence& EwsOccurrence::operator=(EwsOccurrence &&other)
+EwsOccurrence &EwsOccurrence::operator=(EwsOccurrence &&other)
 {
     d = std::move(other.d);
     return *this;

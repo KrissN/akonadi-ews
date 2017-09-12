@@ -91,7 +91,7 @@ public:
     uint minorVersion() const { return mMinor; };
     QString name() const { return mName; };
 
-    static const EwsServerVersion& minSupporting(ServerFeature feature);
+    static const EwsServerVersion &minSupporting(ServerFeature feature);
 
     QString toString() const;
 

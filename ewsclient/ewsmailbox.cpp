@@ -101,12 +101,12 @@ EwsMailbox::~EwsMailbox()
 {
 }
 
-EwsMailbox& EwsMailbox::operator=(const EwsMailbox &other)
+EwsMailbox &EwsMailbox::operator=(const EwsMailbox &other)
 {
     d = other.d;
     return *this;
 }
-EwsMailbox& EwsMailbox::operator=(EwsMailbox &&other)
+EwsMailbox &EwsMailbox::operator=(EwsMailbox &&other)
 {
     d = std::move(other.d);
     return *this;

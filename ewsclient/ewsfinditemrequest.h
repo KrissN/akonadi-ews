@@ -29,7 +29,7 @@ class EwsFindItemRequest : public EwsRequest
 {
     Q_OBJECT
 public:
-    EwsFindItemRequest(EwsClient& client, QObject *parent);
+    EwsFindItemRequest(EwsClient &client, QObject *parent);
     virtual ~EwsFindItemRequest();
 
     void setFolderId(const EwsId &id);

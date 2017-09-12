@@ -69,8 +69,8 @@ public:
     QString changeKey() const { return mChangeKey; };
     EwsDistinguishedId distinguishedId() const { return mDid; };
 
-    EwsId& operator=(const EwsId &other);
-    EwsId& operator=(EwsId &&other);
+    EwsId &operator=(const EwsId &other);
+    EwsId &operator=(EwsId &&other);
     bool operator==(const EwsId &other) const;
     bool operator<(const EwsId &other) const;
 

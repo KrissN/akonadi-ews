@@ -202,13 +202,13 @@ EwsAttachment::EwsAttachment(EwsAttachment &&other)
     d = std::move(other.d);
 }
 
-EwsAttachment& EwsAttachment::operator=(EwsAttachment &&other)
+EwsAttachment &EwsAttachment::operator=(EwsAttachment &&other)
 {
     d = std::move(other.d);
     return *this;
 }
 
-EwsAttachment& EwsAttachment::operator=(const EwsAttachment &other)
+EwsAttachment &EwsAttachment::operator=(const EwsAttachment &other)
 {
     d = other.d;
     return *this;

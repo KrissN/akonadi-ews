@@ -25,7 +25,7 @@
 #include "ewsclient_debug.h"
 #include "ewsserverversion.h"
 
-EwsRequest::EwsRequest(EwsClient& client, QObject *parent)
+EwsRequest::EwsRequest(EwsClient &client, QObject *parent)
     : EwsJob(parent), mClient(client), mServerVersion(EwsServerVersion::ewsVersion2007Sp1)
 {
 }

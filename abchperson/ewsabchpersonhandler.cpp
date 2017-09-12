@@ -65,13 +65,13 @@ bool EwsAbchPersonHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ew
     return true;
 }
 
-EwsModifyItemJob *EwsAbchPersonHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
+EwsModifyItemJob *EwsAbchPersonHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
                                                 const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyAbchPersonJob(client, items, parts, parent);
 }
 
-EwsCreateItemJob *EwsAbchPersonHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateItemJob *EwsAbchPersonHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
                                                 const Akonadi::Collection &collection,
                                                 EwsTagStore *tagStore, EwsResource *parent)
 {

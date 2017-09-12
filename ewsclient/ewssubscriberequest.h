@@ -56,7 +56,6 @@ public:
     EwsSubscribeRequest(EwsClient &client, QObject *parent);
     virtual ~EwsSubscribeRequest();
 
-    //void setSubscription(const EwsSubscription& subscription);
     void setType(Type t) { mType = t; };
     void setFolderIds(EwsId::List folders) { mFolderIds = folders; };
     void setAllFolders(bool allFolders) { mAllFolders = allFolders; };

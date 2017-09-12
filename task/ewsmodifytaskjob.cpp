@@ -21,7 +21,7 @@
 
 #include "ewsclient_debug.h"
 
-EwsModifyTaskJob::EwsModifyTaskJob(EwsClient& client, const Akonadi::Item::List &items,
+EwsModifyTaskJob::EwsModifyTaskJob(EwsClient &client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)
     : EwsModifyItemJob(client, items, parts, parent)
 {

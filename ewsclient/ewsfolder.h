@@ -38,8 +38,8 @@ public:
     EwsFolder(EwsFolder &&other);
     virtual ~EwsFolder();
 
-    EwsFolder& operator=(const EwsFolder &other);
-    EwsFolder& operator=(EwsFolder &&other);
+    EwsFolder &operator=(const EwsFolder &other);
+    EwsFolder &operator=(EwsFolder &&other);
 
     EwsFolderType type() const;
     void setType(EwsFolderType type);

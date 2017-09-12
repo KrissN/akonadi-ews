@@ -44,7 +44,7 @@ public:
 
     typedef QList<QueuedUpdate> QueuedUpdateList;
 
-    EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient& client,
+    EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient &client,
                      const QString &syncState, const EwsId::List &itemsToCheck,
                      EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsFetchItemsJob();
@@ -77,7 +77,7 @@ private:
     typedef QHash<EwsEventType, QHash<QString, QString> > QueuedUpdateHash;
 
     const Akonadi::Collection mCollection;
-    EwsClient& mClient;
+    EwsClient &mClient;
     EwsId::List mItemsToCheck;
     Akonadi::Item::List mLocalItems;
     EwsItem::List mRemoteAddedItems;

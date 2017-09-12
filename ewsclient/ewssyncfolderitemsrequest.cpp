@@ -50,7 +50,7 @@ public:
     QString mSyncState;
 };
 
-EwsSyncFolderItemsRequest::EwsSyncFolderItemsRequest(EwsClient& client, QObject *parent)
+EwsSyncFolderItemsRequest::EwsSyncFolderItemsRequest(EwsClient &client, QObject *parent)
     : EwsRequest(client, parent), mMaxChanges(100), mIncludesLastItem(false)
 {
     qRegisterMetaType<EwsSyncFolderItemsRequest::Change::List>();

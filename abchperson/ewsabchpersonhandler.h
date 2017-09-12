@@ -33,9 +33,9 @@ public:
     virtual void setSeenFlag(Akonadi::Item &item, bool value) override;
     virtual QString mimeType() override;
     virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) override;
-    virtual EwsModifyItemJob *modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
+    virtual EwsModifyItemJob *modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
                                             const QSet<QByteArray> &parts, QObject *parent) override;
-    virtual EwsCreateItemJob *createItemJob(EwsClient& client, const Akonadi::Item &item,
+    virtual EwsCreateItemJob *createItemJob(EwsClient &client, const Akonadi::Item &item,
                                             const Akonadi::Collection &collection,
                                             EwsTagStore *tagStore, EwsResource *parent) override;
     static EwsItemHandler *factory();

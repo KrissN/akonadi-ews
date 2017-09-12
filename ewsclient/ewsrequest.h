@@ -55,7 +55,7 @@ public:
         QString mMessage;
     };
 
-    EwsRequest(EwsClient& client, QObject *parent);
+    EwsRequest(EwsClient &client, QObject *parent);
     virtual ~EwsRequest();
 
     void setMetaData(const KIO::MetaData &md);

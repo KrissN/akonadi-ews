@@ -48,11 +48,11 @@ public:
     EwsPropertyField(const EwsPropertyField &other);
     ~EwsPropertyField();
 
-    EwsPropertyField& operator=(const EwsPropertyField &other);
+    EwsPropertyField &operator=(const EwsPropertyField &other);
     bool operator==(const EwsPropertyField &other) const;
 
     EwsPropertyField(EwsPropertyField &&other);
-    EwsPropertyField& operator=(EwsPropertyField &&other);
+    EwsPropertyField &operator=(EwsPropertyField &&other);
 
     void write(QXmlStreamWriter &writer) const;
     bool read(QXmlStreamReader &reader);

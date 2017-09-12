@@ -58,7 +58,7 @@ public Q_SLOTS:
     void remoteFolderIdFullFetchDone(KJob *job);
     void remoteFolderDetailFetchDone(KJob *job);
 public:
-    EwsClient& mClient;
+    EwsClient &mClient;
     int mPendingFetchJobs;
     int mPendingMoveJobs;
     EwsId::List mRemoteFolderIds;
@@ -225,7 +225,7 @@ void EwsFetchFoldersJobPrivate::remoteFolderDetailFetchDone(KJob *job)
         return;
     }
 
-    Q_FOREACH(const EwsGetFolderRequest::Response& resp, req->responses()) {
+    Q_FOREACH(const EwsGetFolderRequest::Response &resp, req->responses()) {
         if (resp.isSuccess()) {
             mRemoteChangedFolders.append(resp.folder());
         } else {

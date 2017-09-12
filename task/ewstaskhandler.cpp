@@ -65,13 +65,13 @@ bool EwsTaskHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     return true;
 }
 
-EwsModifyItemJob *EwsTaskHandler::modifyItemJob(EwsClient& client, const QVector<Akonadi::Item> &items,
+EwsModifyItemJob *EwsTaskHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
                                                 const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyTaskJob(client, items, parts, parent);
 }
 
-EwsCreateItemJob *EwsTaskHandler::createItemJob(EwsClient& client, const Akonadi::Item &item,
+EwsCreateItemJob *EwsTaskHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
                                                 const Akonadi::Collection &collection,
                                                 EwsTagStore *tagStore, EwsResource *parent)
 {

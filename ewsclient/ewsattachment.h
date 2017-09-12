@@ -49,8 +49,8 @@ public:
     explicit EwsAttachment(QXmlStreamReader &reader);
     EwsAttachment(const EwsAttachment &other);
     EwsAttachment(EwsAttachment &&other);
-    EwsAttachment& operator=(EwsAttachment &&other);
-    EwsAttachment& operator=(const EwsAttachment &other);
+    EwsAttachment &operator=(EwsAttachment &&other);
+    EwsAttachment &operator=(const EwsAttachment &other);
 
     bool isValid() const;
 
