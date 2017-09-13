@@ -41,7 +41,7 @@ class EwsSubscriptionFilterModel : public KRecursiveFilterProxyModel
 {
     Q_OBJECT
 public:
-    EwsSubscriptionFilterModel(QObject *parent = 0);
+    EwsSubscriptionFilterModel(QObject *parent = nullptr);
     ~EwsSubscriptionFilterModel();
 public Q_SLOTS:
     void setFilterSelected(bool enabled);

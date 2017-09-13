@@ -31,7 +31,7 @@ class EwsClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit EwsClient(QObject *parent = 0);
+    explicit EwsClient(QObject *parent = nullptr);
     ~EwsClient();
 
     void setUrl(QString url)

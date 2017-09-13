@@ -185,7 +185,7 @@ void EwsFolder::addChild(EwsFolder &child)
 {
     D_PTR
 
-    if (child.parentFolder() != 0) {
+    if (child.parentFolder() != nullptr) {
         qCWarning(EWSRES_LOG).noquote()
                 << QStringLiteral("Attempt to add child folder which already has a parent (child: %1)").
                 arg(child[EwsFolderFieldFolderId].value<EwsId>().id());

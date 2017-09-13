@@ -193,7 +193,7 @@ bool EwsFindFolderResponse::parseRootFolder(QXmlStreamReader &reader)
 
 EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
 {
-    EwsFolder *folder = 0;
+    EwsFolder *folder = nullptr;
     if (reader.name() == QStringLiteral("Folder") ||
         reader.name() == QStringLiteral("CalendarFolder") ||
         reader.name() == QStringLiteral("ContactsFolder") ||

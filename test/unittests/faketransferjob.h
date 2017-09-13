@@ -60,7 +60,7 @@ public:
         VerifierFn fn;
     };
 
-    FakeTransferJob(const QByteArray &postData, VerifierFn fn, QObject *parent = 0);
+    FakeTransferJob(const QByteArray &postData, VerifierFn fn, QObject *parent = nullptr);
     ~FakeTransferJob();
 
     static void addVerifier(QObject *obj, VerifierFn fn);
