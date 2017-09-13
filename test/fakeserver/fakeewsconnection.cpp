@@ -124,9 +124,9 @@ void FakeEwsConnection::dataAvailable()
             if (!mAuthenticated) {
                 QString codeStr = responseCodes.value(401);
                 QString response(QStringLiteral("HTTP/1.1 %1 %2\r\n"
-                        "WWW-Authenticate: Basic realm=\"Fake EWS Server\"\r\n"
-                        "Connection: close\r\n"
-                        "\r\n").arg(401).arg(codeStr));
+                                                "WWW-Authenticate: Basic realm=\"Fake EWS Server\"\r\n"
+                                                "Connection: close\r\n"
+                                                "\r\n").arg(401).arg(codeStr));
                 response += codeStr;
                 mSock->write(response.toLatin1());
                 mSock->disconnectFromHost();
@@ -155,7 +155,7 @@ void FakeEwsConnection::dataAvailable()
                 QXmlNamePool namePool;
                 resp = defaultReplyCallback(QString::fromUtf8(mContent), ri, namePool);
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from default callback ")
-                        << resp.second << QStringLiteral(": ") << resp.first;
+                                      << resp.second << QStringLiteral(": ") << resp.first;
             }
 
             if (resp == FakeEwsServer::EmptyResponse) {
@@ -213,7 +213,7 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
 
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
     FakeEwsServer::DialogEntry::HttpResponse resp = FakeEwsServer::EmptyResponse;
-    Q_FOREACH(const FakeEwsServer::DialogEntry &de, server->dialog()) {
+    Q_FOREACH (const FakeEwsServer::DialogEntry &de, server->dialog()) {
         QXmlResultItems ri;
         QByteArray resultBytes;
         QString result;
@@ -238,11 +238,11 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::parseRequest(const Q
             if (de.replyCallback) {
                 resp = de.replyCallback(content, ri, query.namePool());
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from callback ")
-                        << resp.second << QStringLiteral(": ") << resp.first;
+                                      << resp.second << QStringLiteral(": ") << resp.first;
             } else {
                 resp = {result.trimmed(), 200};
                 qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning response from XQuery ")
-                        << resp.second << QStringLiteral(": ") << resp.first;
+                                      << resp.second << QStringLiteral(": ") << resp.first;
             }
             break;
         }
@@ -317,12 +317,12 @@ FakeEwsServer::DialogEntry::HttpResponse FakeEwsConnection::handleGetEventsReque
     FakeEwsServer *server = qobject_cast<FakeEwsServer*>(parent());
     const QStringList events = server->retrieveEventsXml();
     qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning %1 events.").arg(events.size());
-    Q_FOREACH(const QString &eventXml, events) {
+    Q_FOREACH (const QString &eventXml, events) {
         resp += eventXml;
     }
 
     resp += QStringLiteral("</m:Notification></m:GetEventsResponseMessage></m:ResponseMessages>"
-            "</m:GetEventsResponse></soap:Body></soap:Envelope>");
+                           "</m:GetEventsResponse></soap:Body></soap:Envelope>");
 
 
     return {resp, 200};
@@ -350,14 +350,14 @@ QString FakeEwsConnection::prepareEventsResponse(const QStringList &events)
         resp += QStringLiteral("<m:Notifications><m:Notification><SubscriptionId>") + mStreamingSubId + QStringLiteral("<SubscriptionId>");
 
         qCInfoNC(EWSFAKE_LOG) << QStringLiteral("Returning %1 events.").arg(events.size());
-        Q_FOREACH(const QString &eventXml, events) {
+        Q_FOREACH (const QString &eventXml, events) {
             resp += eventXml;
         }
 
         resp += QStringLiteral("</m:Notification></m:Notifications>");
     }
     resp += QStringLiteral("</m:GetStreamingEventsResponseMessage></m:ResponseMessages>"
-            "</m:GetStreamingEventsResponse></soap:Body></soap:Envelope>");
+                           "</m:GetStreamingEventsResponse></soap:Body></soap:Envelope>");
 
     return resp;
 }

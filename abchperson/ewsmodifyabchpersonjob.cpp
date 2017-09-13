@@ -22,7 +22,7 @@
 #include "ewsclient_debug.h"
 
 EwsModifyAbchPersonJob::EwsModifyAbchPersonJob(EwsClient &client, const Akonadi::Item::List &items,
-                                   const QSet<QByteArray> &parts, QObject *parent)
+        const QSet<QByteArray> &parts, QObject *parent)
     : EwsModifyItemJob(client, items, parts, parent)
 {
 }

@@ -26,7 +26,7 @@
 using namespace Akonadi;
 
 EwsAkonadiTagsSyncJob::EwsAkonadiTagsSyncJob(EwsTagStore *tagStore, EwsClient &client,
-                                             const Collection &rootCollection, QObject *parent)
+        const Collection &rootCollection, QObject *parent)
     : EwsJob(parent), mTagStore(tagStore), mClient(client), mRootCollection(rootCollection)
 {
 }

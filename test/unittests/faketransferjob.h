@@ -28,19 +28,26 @@
 #include <KCoreAddons/KJob>
 #include <KIO/SpecialJob>
 
-namespace KIO {
+namespace KIO
+{
 class Job;
 }
 
 template <typename F>
 struct Finally {
     Finally(F f): cleanupf{f} {};
-    ~Finally() { cleanupf(); };
+    ~Finally()
+    {
+        cleanupf();
+    };
     F cleanupf;
 };
 
 template <typename F>
-Finally<F> finally(F f) { return Finally<F>(f); }
+Finally<F> finally(F f)
+{
+    return Finally<F>(f);
+}
 
 class FakeTransferJob : public KIO::SpecialJob
 {

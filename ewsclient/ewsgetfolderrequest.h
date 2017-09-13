@@ -35,7 +35,10 @@ public:
         explicit Response(QXmlStreamReader &reader);
         bool parseFolders(QXmlStreamReader &reader);
 
-        const EwsFolder &folder() const { return mFolder; };
+        const EwsFolder &folder() const
+        {
+            return mFolder;
+        };
     private:
         EwsFolder mFolder;
     };
@@ -48,7 +51,10 @@ public:
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseFoldersResponse(QXmlStreamReader &reader);

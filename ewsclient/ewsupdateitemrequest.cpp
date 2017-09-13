@@ -66,14 +66,14 @@ void EwsUpdateItemRequest::start()
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("UpdateItem"));
 
     writer.writeAttribute(QStringLiteral("ConflictResolution"),
-        conflictResolutionNames[mConflictResol]);
+                          conflictResolutionNames[mConflictResol]);
 
     writer.writeAttribute(QStringLiteral("MessageDisposition"),
-        messageDispositionNames[mMessageDisp]);
+                          messageDispositionNames[mMessageDisp]);
 
     if (mMeetingDisp != EwsMeetingDispUnspecified) {
         writer.writeAttribute(QStringLiteral("SendMeetingInvitationsOrCancellations"),
-            meetingDispositionNames[mMeetingDisp]);
+                              meetingDispositionNames[mMeetingDisp]);
     }
 
     if (mSavedFolderId.type() != EwsId::Unspecified) {
@@ -83,7 +83,7 @@ void EwsUpdateItemRequest::start()
     }
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("ItemChanges"));
-    Q_FOREACH(const ItemChange &ch, mChanges) {
+    Q_FOREACH (const ItemChange &ch, mChanges) {
         qDebug() << "writing change";
         ch.write(writer);
     }
@@ -94,7 +94,7 @@ void EwsUpdateItemRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting UpdateItem request (%1 changes)")
-                    .arg(mChanges.size());
+                                  .arg(mChanges.size());
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
@@ -119,10 +119,9 @@ bool EwsUpdateItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateItem response - OK");
-        }
-        else {
+        } else {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateItem response - %1")
-                            .arg(resp.responseMessage());
+                                          .arg(resp.responseMessage());
         }
     }
 
@@ -140,7 +139,7 @@ EwsUpdateItemRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -155,17 +154,16 @@ EwsUpdateItemRequest::Response::Response(QXmlStreamReader &reader)
 
             // Finish the Items element.
             reader.skipCurrentElement();
-        }
-        else if (reader.name() == QStringLiteral("ConflictResults")) {
+        } else if (reader.name() == QStringLiteral("ConflictResults")) {
             if (!reader.readNextStartElement()) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - expected a %1 element inside %2 element.")
-                    .arg(QStringLiteral("Value")).arg(QStringLiteral("ConflictResults")));
+                            .arg(QStringLiteral("Value")).arg(QStringLiteral("ConflictResults")));
                 return;
             }
 
             if (reader.name() != QStringLiteral("Count")) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - expected a %1 element inside %2 element.")
-                    .arg(QStringLiteral("Count")).arg(QStringLiteral("ConflictResults")));
+                            .arg(QStringLiteral("Count")).arg(QStringLiteral("ConflictResults")));
                 return;
             }
 
@@ -174,12 +172,11 @@ EwsUpdateItemRequest::Response::Response(QXmlStreamReader &reader)
 
             if (!ok) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                    .arg(QStringLiteral("ConflictResults/Value")));
+                            .arg(QStringLiteral("ConflictResults/Value")));
             }
             // Finish the Value element.
             reader.skipCurrentElement();
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element %1.").arg(reader.name().toString()));
             return;
         }
@@ -215,7 +212,7 @@ bool EwsUpdateItemRequest::ItemChange::write(QXmlStreamWriter &writer) const
 
     writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Updates"));
 
-    Q_FOREACH(const QSharedPointer<const Update> upd, mUpdates) {
+    Q_FOREACH (const QSharedPointer<const Update> upd, mUpdates) {
         if (!upd->write(writer, mType)) {
             retVal = false;
             break;

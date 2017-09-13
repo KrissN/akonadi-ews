@@ -27,7 +27,8 @@
 class QDialogButtonBox;
 class EwsResource;
 class EwsClient;
-namespace Ui {
+namespace Ui
+{
 class SetupServerView;
 }
 class KJob;

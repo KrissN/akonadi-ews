@@ -68,20 +68,18 @@ bool ewsXmlBoolReader(QXmlStreamReader &reader, QVariant &val)
     QString elmText = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading %1 element")
-                        .arg(reader.name().toString());
+                                .arg(reader.name().toString());
         reader.skipCurrentElement();
         return false;
     }
     if (elmText == QStringLiteral("true")) {
         val = true;
-    }
-    else if (elmText == QStringLiteral("false")) {
+    } else if (elmText == QStringLiteral("false")) {
         val = false;
-    }
-    else {
+    } else {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected invalid boolean value in %1 element:")
-                        .arg(reader.name().toString())
-                        << elmText;
+                                .arg(reader.name().toString())
+                                << elmText;
         return false;
     }
 
@@ -101,7 +99,7 @@ bool ewsXmlBase64Reader(QXmlStreamReader &reader, QVariant &val)
     val = QByteArray::fromBase64(reader.readElementText().toLatin1());
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         reader.skipCurrentElement();
         return false;
     }
@@ -122,7 +120,7 @@ bool ewsXmlIdReader(QXmlStreamReader &reader, QVariant &val)
     EwsId id = EwsId(reader);
     if (id.type() == EwsId::Unspecified) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         reader.skipCurrentElement();
         return false;
     }
@@ -149,7 +147,7 @@ bool ewsXmlTextReader(QXmlStreamReader &reader, QVariant &val)
     val = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         reader.skipCurrentElement();
         return false;
     }
@@ -170,7 +168,7 @@ bool ewsXmlUIntReader(QXmlStreamReader &reader, QVariant &val)
     val = reader.readElementText().toUInt(&ok);
     if (reader.error() != QXmlStreamReader::NoError || !ok) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         return false;
     }
     return true;
@@ -189,7 +187,7 @@ bool ewsXmlDateTimeReader(QXmlStreamReader &reader, QVariant &val)
     QDateTime dt = QDateTime::fromString(reader.readElementText(), Qt::ISODate);
     if (reader.error() != QXmlStreamReader::NoError || !dt.isValid()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         return false;
     }
     val = QVariant::fromValue<QDateTime>(dt);
@@ -202,7 +200,7 @@ bool ewsXmlItemReader(QXmlStreamReader &reader, QVariant &val)
     EwsItem item = EwsItem(reader);
     if (!item.isValid()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         reader.skipCurrentElement();
         return false;
     }
@@ -216,7 +214,7 @@ bool ewsXmlFolderReader(QXmlStreamReader &reader, QVariant &val)
     EwsFolder folder = EwsFolder(reader);
     if (!folder.isValid()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         reader.skipCurrentElement();
         return false;
     }
@@ -230,7 +228,7 @@ bool ewsXmlEnumReader(QXmlStreamReader &reader, QVariant &val, QVector<QString> 
     QString text = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(elmName);
+                                .arg(elmName);
         reader.skipCurrentElement();
         return false;
     }
@@ -245,7 +243,7 @@ bool ewsXmlEnumReader(QXmlStreamReader &reader, QVariant &val, QVector<QString> 
 
     if (it == items.cend()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown value %2.")
-                        .arg(elmName).arg(text);
+                                .arg(elmName).arg(text);
         return false;
     }
     return true;
@@ -284,7 +282,7 @@ QString readXmlElementValue(QXmlStreamReader &reader, bool &ok, const QString &p
     QString val = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                        .arg(parentElement).arg(elmName.toString());
+                                .arg(parentElement).arg(elmName.toString());
         reader.skipCurrentElement();
         val.clear();
         ok = false;
@@ -303,7 +301,7 @@ int readXmlElementValue(QXmlStreamReader &reader, bool &ok, const QString &paren
         val = valStr.toInt(&ok);
         if (!ok) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                            .arg(parentElement).arg(elmName.toString());
+                                    .arg(parentElement).arg(elmName.toString());
         }
     }
 
@@ -320,7 +318,7 @@ long readXmlElementValue(QXmlStreamReader &reader, bool &ok, const QString &pare
         val = valStr.toLong(&ok);
         if (!ok) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                            .arg(parentElement).arg(elmName.toString());
+                                    .arg(parentElement).arg(elmName.toString());
         }
     }
 
@@ -337,7 +335,7 @@ QDateTime readXmlElementValue(QXmlStreamReader &reader, bool &ok, const QString 
         val = QDateTime::fromString(valStr, Qt::ISODate);
         if (!val.isValid()) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                            .arg(parentElement).arg(elmName.toString());
+                                    .arg(parentElement).arg(elmName.toString());
             ok = false;
         }
     }
@@ -358,7 +356,7 @@ bool readXmlElementValue(QXmlStreamReader &reader, bool &ok, const QString &pare
             val = false;
         } else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                            .arg(parentElement).arg(elmName.toString());
+                                    .arg(parentElement).arg(elmName.toString());
             ok = false;
         }
     }

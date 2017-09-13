@@ -38,7 +38,10 @@ public:
     EwsGetStreamingEventsRequest(EwsClient &client, QObject *parent);
     virtual ~EwsGetStreamingEventsRequest();
 
-    void setTimeout(uint timeout) { mTimeout = timeout; };
+    void setTimeout(uint timeout)
+    {
+        mTimeout = timeout;
+    };
 
     virtual void start() override;
 public Q_SLOTS:

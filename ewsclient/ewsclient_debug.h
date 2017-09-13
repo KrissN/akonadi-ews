@@ -46,7 +46,8 @@ Q_DECLARE_LOGGING_CATEGORY(EWSRES_FAILEDREQUEST_LOG)
 #define qCWarningNCS(cat) qCWarning(cat).noquote().nospace()
 #define qCCriticalNCS(cat) qCCritical(cat).noquote().nospace()
 
-inline QString ewsHash(const QString &val) {
+inline QString ewsHash(const QString &val)
+{
     return QString::number(qHash(val), 36);
 }
 

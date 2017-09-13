@@ -65,7 +65,7 @@ EwsAttendee::EwsAttendee(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return;
         }
 
@@ -73,21 +73,19 @@ EwsAttendee::EwsAttendee(QXmlStreamReader &reader)
             d->mMailbox = EwsMailbox(reader);
             if (!d->mMailbox.isValid()) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid attendee %1 element.")
-                                .arg(reader.name().toString());
+                                      .arg(reader.name().toString());
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("ResponseType")) {
+        } else if (reader.name() == QStringLiteral("ResponseType")) {
             bool ok;
             d->mResponse = decodeEnumString<EwsEventResponseType>(reader.readElementText(),
-                                responseTypeNames, responseTypeNameCount, &ok);
+                           responseTypeNames, responseTypeNameCount, &ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid attendee %1 element.")
-                                .arg(reader.name().toString());
+                                      .arg(reader.name().toString());
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("LastResponseTime")) {
+        } else if (reader.name() == QStringLiteral("LastResponseTime")) {
             // Unsupported - ignore
             //qCWarningNC(EWSCLIENT_LOG) << QStringLiteral("Unsupported mailbox element %1").arg(reader.name().toString());
             reader.skipCurrentElement();

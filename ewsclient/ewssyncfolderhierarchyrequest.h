@@ -38,16 +38,29 @@ public:
 
     class Response;
 
-    class Change {
+    class Change
+    {
     public:
         typedef QList<Change> List;
 
-        ChangeType type() const { return mType; };
-        const EwsId &folderId() const { return mId; };
-        const EwsFolder &folder() const { return mFolder; };
+        ChangeType type() const
+        {
+            return mType;
+        };
+        const EwsId &folderId() const
+        {
+            return mId;
+        };
+        const EwsFolder &folder() const
+        {
+            return mFolder;
+        };
     protected:
         Change(QXmlStreamReader &reader);
-        bool isValid() const { return mType != Unknown; };
+        bool isValid() const
+        {
+            return mType != Unknown;
+        };
 
         ChangeType mType;
         EwsId mId;
@@ -65,10 +78,19 @@ public:
 
     virtual void start() override;
 
-    bool includesLastItem() const { return mIncludesLastItem; };
+    bool includesLastItem() const
+    {
+        return mIncludesLastItem;
+    };
 
-    const Change::List &changes() const { return mChanges; };
-    const QString &syncState() const { return mSyncState; };
+    const Change::List &changes() const
+    {
+        return mChanges;
+    };
+    const QString &syncState() const
+    {
+        return mSyncState;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

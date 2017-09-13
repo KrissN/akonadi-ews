@@ -87,9 +87,18 @@ public:
         return mMajor != 0;
     };
 
-    uint majorVersion() const { return mMajor; };
-    uint minorVersion() const { return mMinor; };
-    QString name() const { return mName; };
+    uint majorVersion() const
+    {
+        return mMajor;
+    };
+    uint minorVersion() const
+    {
+        return mMinor;
+    };
+    QString name() const
+    {
+        return mName;
+    };
 
     static const EwsServerVersion &minSupporting(ServerFeature feature);
 

@@ -26,7 +26,8 @@
 
 class EwsTagStore;
 class EwsClient;
-namespace Akonadi {
+namespace Akonadi
+{
 class Collection;
 }
 
@@ -40,7 +41,10 @@ public:
 
     void start() override;
 
-    const Akonadi::Tag::List &tags() const { return mTags; };
+    const Akonadi::Tag::List &tags() const
+    {
+        return mTags;
+    };
 private Q_SLOTS:
     void getFolderRequestFinished(KJob *job);
 private:

@@ -77,7 +77,7 @@ EwsRecurrence::EwsRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return;
         }
 
@@ -85,49 +85,40 @@ EwsRecurrence::EwsRecurrence(QXmlStreamReader &reader)
             if (!readRelativeYearlyRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("AbsoluteYearlyRecurrence")) {
+        } else if (reader.name() == QStringLiteral("AbsoluteYearlyRecurrence")) {
             if (!readAbsoluteYearlyRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("RelativeMonthlyRecurrence")) {
+        } else if (reader.name() == QStringLiteral("RelativeMonthlyRecurrence")) {
             if (!readRelativeMonthlyRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("AbsoluteMonthlyRecurrence")) {
+        } else if (reader.name() == QStringLiteral("AbsoluteMonthlyRecurrence")) {
             if (!readAbsoluteMonthlyRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("WeeklyRecurrence")) {
+        } else if (reader.name() == QStringLiteral("WeeklyRecurrence")) {
             if (!readWeeklyRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("DailyRecurrence")) {
+        } else if (reader.name() == QStringLiteral("DailyRecurrence")) {
             if (!readWeeklyRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("NoEndRecurrence")) {
+        } else if (reader.name() == QStringLiteral("NoEndRecurrence")) {
             // Ignore - this is the default
             reader.skipCurrentElement();
-        }
-        else if (reader.name() == QStringLiteral("EndDateRecurrence")) {
+        } else if (reader.name() == QStringLiteral("EndDateRecurrence")) {
             if (!readEndDateRecurrence(reader)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("NumberedRecurrence")) {
+        } else if (reader.name() == QStringLiteral("NumberedRecurrence")) {
             if (!readNumberedRecurrence(reader)) {
                 return;
             }
-        }
-        else {
+        } else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
-                            .arg(QStringLiteral("Recurrence")).arg(reader.name().toString());
+                                    .arg(QStringLiteral("Recurrence")).arg(reader.name().toString());
             return;
         }
     }
@@ -158,7 +149,7 @@ bool EwsRecurrence::readRelativeYearlyRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -167,35 +158,32 @@ bool EwsRecurrence::readRelativeYearlyRecurrence(QXmlStreamReader &reader)
                 return false;
             }
             hasDow = true;
-        }
-        else if (reader.name() == QStringLiteral("DayOfWeekIndex")) {
+        } else if (reader.name() == QStringLiteral("DayOfWeekIndex")) {
             bool ok;
             QString text = reader.readElementText();
             dowWeekIndex = decodeEnumString<short>(text, dayOfWeekIndexNames, dayOfWeekIndexNameCount, &ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("DayOfWeekIndex").arg(text));
+                                      .arg(QStringLiteral("DayOfWeekIndex").arg(text));
                 return false;
             }
             if (dowWeekIndex == 4) {    // "Last"
                 dowWeekIndex = -1;
             }
             hasDowWeekIndex = true;
-        }
-        else if (reader.name() == QStringLiteral("Month")) {
+        } else if (reader.name() == QStringLiteral("Month")) {
             bool ok;
             QString text = reader.readElementText();
             month = decodeEnumString<short>(text, monthNames, monthNameCount, &ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("Month").arg(text));
+                                      .arg(QStringLiteral("Month").arg(text));
                 return false;
             }
             hasMonth = true;
-        }
-        else {
+        } else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
-                            .arg(QStringLiteral("RelativeYearlyRecurrence")).arg(reader.name().toString());
+                                  .arg(QStringLiteral("RelativeYearlyRecurrence")).arg(reader.name().toString());
             return false;
         }
     }
@@ -221,7 +209,7 @@ bool EwsRecurrence::readAbsoluteYearlyRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -231,25 +219,23 @@ bool EwsRecurrence::readAbsoluteYearlyRecurrence(QXmlStreamReader &reader)
             dom = text.toShort(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("DayOfMonth").arg(text));
+                                      .arg(QStringLiteral("DayOfMonth").arg(text));
                 return false;
             }
             hasDom = true;
-        }
-        else if (reader.name() == QStringLiteral("Month")) {
+        } else if (reader.name() == QStringLiteral("Month")) {
             bool ok;
             QString text = reader.readElementText();
             month = decodeEnumString<short>(text, monthNames, monthNameCount, &ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("Month").arg(text));
+                                      .arg(QStringLiteral("Month").arg(text));
                 return false;
             }
             hasMonth = true;
-        }
-        else {
+        } else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read recurrence element - unknown element: %1.")
-                            .arg(reader.name().toString());
+                                  .arg(reader.name().toString());
             return false;
         }
     }
@@ -284,7 +270,7 @@ bool EwsRecurrence::readRelativeMonthlyRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -294,34 +280,31 @@ bool EwsRecurrence::readRelativeMonthlyRecurrence(QXmlStreamReader &reader)
             interval = text.toInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("Interval").arg(text));
+                                      .arg(QStringLiteral("Interval").arg(text));
                 return false;
             }
             hasInterval = true;
-        }
-        else if (reader.name() == QStringLiteral("DaysOfWeek")) {
+        } else if (reader.name() == QStringLiteral("DaysOfWeek")) {
             if (!readDow(reader, dow)) {
                 return false;
             }
             hasDow = true;
-        }
-        else if (reader.name() == QStringLiteral("DayOfWeekIndex")) {
+        } else if (reader.name() == QStringLiteral("DayOfWeekIndex")) {
             bool ok;
             QString text = reader.readElementText();
             dowWeekIndex = decodeEnumString<short>(text, dayOfWeekIndexNames, dayOfWeekIndexNameCount, &ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("DayOfWeekIndex").arg(text));
+                                      .arg(QStringLiteral("DayOfWeekIndex").arg(text));
                 return false;
             }
             if (dowWeekIndex == 4) {    // "Last"
                 dowWeekIndex = -1;
             }
             hasDowWeekIndex = true;
-        }
-        else {
+        } else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read Recurrence element - unknown element: %1.")
-                            .arg(reader.name().toString());
+                                  .arg(reader.name().toString());
             return false;
         }
     }
@@ -347,7 +330,7 @@ bool EwsRecurrence::readAbsoluteMonthlyRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -357,25 +340,23 @@ bool EwsRecurrence::readAbsoluteMonthlyRecurrence(QXmlStreamReader &reader)
             interval = text.toInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("Interval").arg(text));
+                                        .arg(QStringLiteral("Interval").arg(text));
                 return false;
             }
             hasInterval = true;
-        }
-        else if (reader.name() == QStringLiteral("DayOfMonth")) {
+        } else if (reader.name() == QStringLiteral("DayOfMonth")) {
             bool ok;
             QString text = reader.readElementText();
             dom = text.toShort(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("DayOfMonth").arg(text));
+                                        .arg(QStringLiteral("DayOfMonth").arg(text));
                 return false;
             }
             hasDom = true;
-        }
-        else {
+        } else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read Recurrence element - unknown element: %1.")
-                            .arg(reader.name().toString());
+                                    .arg(reader.name().toString());
             return false;
         }
     }
@@ -403,7 +384,7 @@ bool EwsRecurrence::readWeeklyRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -413,31 +394,28 @@ bool EwsRecurrence::readWeeklyRecurrence(QXmlStreamReader &reader)
             interval = text.toInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("Interval").arg(text));
+                                        .arg(QStringLiteral("Interval").arg(text));
                 return false;
             }
             hasInterval = true;
-        }
-        else if (reader.name() == QStringLiteral("DaysOfWeek")) {
+        } else if (reader.name() == QStringLiteral("DaysOfWeek")) {
             if (!readDow(reader, dow)) {
                 return false;
             }
             hasDow = true;
-        }
-        else if (reader.name() == QStringLiteral("FirstDayOfWeek")) {
+        } else if (reader.name() == QStringLiteral("FirstDayOfWeek")) {
             bool ok;
             QString text = reader.readElementText();
             weekStart = decodeEnumString<int>(text, dayOfWeekNames, dayOfWeekNameCount, &ok) + 1;
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("FirstDayOfWeek").arg(text));
+                                        .arg(QStringLiteral("FirstDayOfWeek").arg(text));
                 return false;
             }
             hasWeekStart = true;
-        }
-        else {
+        } else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
-                            .arg(QStringLiteral("WeeklyRecurrence")).arg(reader.name().toString());
+                                    .arg(QStringLiteral("WeeklyRecurrence")).arg(reader.name().toString());
             return false;
         }
     }
@@ -460,7 +438,7 @@ bool EwsRecurrence::readDailyRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -470,13 +448,12 @@ bool EwsRecurrence::readDailyRecurrence(QXmlStreamReader &reader)
             interval = text.toInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("Interval").arg(text));
+                                      .arg(QStringLiteral("Interval").arg(text));
                 return false;
             }
-        }
-        else {
+        } else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read recurrence element - unknown element: %1.")
-                            .arg(reader.name().toString());
+                                  .arg(reader.name().toString());
             return false;
         }
     }
@@ -498,7 +475,7 @@ bool EwsRecurrence::readEndDateRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -507,17 +484,15 @@ bool EwsRecurrence::readEndDateRecurrence(QXmlStreamReader &reader)
             dateEnd = QDate::fromString(text, Qt::ISODate);
             if (reader.error() != QXmlStreamReader::NoError || !dateEnd.isValid()) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("EndDate").arg(text));
+                                      .arg(QStringLiteral("EndDate").arg(text));
                 return false;
             }
-        }
-        else if (reader.name() == QStringLiteral("StartDate")) {
+        } else if (reader.name() == QStringLiteral("StartDate")) {
             // Don't care
             reader.skipCurrentElement();
-        }
-        else {
+        } else {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
-                            .arg(QStringLiteral("EndDateRecurrence")).arg(reader.name().toString());
+                                    .arg(QStringLiteral("EndDateRecurrence")).arg(reader.name().toString());
             return false;
         }
     }
@@ -534,7 +509,7 @@ bool EwsRecurrence::readNumberedRecurrence(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -544,17 +519,15 @@ bool EwsRecurrence::readNumberedRecurrence(QXmlStreamReader &reader)
             numOccurrences = text.toInt(&ok);
             if (reader.error() != QXmlStreamReader::NoError || !ok) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                                .arg(QStringLiteral("NumberOfOccurrences").arg(text));
+                                      .arg(QStringLiteral("NumberOfOccurrences").arg(text));
                 return false;
             }
-        }
-        else if (reader.name() == QStringLiteral("StartDate")) {
+        } else if (reader.name() == QStringLiteral("StartDate")) {
             // Don't care
             reader.skipCurrentElement();
-        }
-        else {
+        } else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read recurrence element - unknown element: %1.")
-                            .arg(reader.name().toString());
+                                  .arg(reader.name().toString());
             return false;
         }
     }
@@ -569,23 +542,20 @@ bool EwsRecurrence::readDow(QXmlStreamReader &reader, QBitArray &dow)
     bool ok;
     QString text = reader.readElementText();
     QStringList days = text.split(QChar::fromLatin1(' '));
-    Q_FOREACH(const QString &day, days) {
+    Q_FOREACH (const QString &day, days) {
         short dowIndex = decodeEnumString<short>(day, dayOfWeekNames, dayOfWeekNameCount, &ok);
         if (reader.error() != QXmlStreamReader::NoError || !ok) {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element (value: %2).")
-                            .arg(QStringLiteral("DaysOfWeek").arg(day));
+                                  .arg(QStringLiteral("DaysOfWeek").arg(day));
             return false;
         }
         if (dowIndex == 7) { // "Day"
             dow.fill(true, 0, 7);
-        }
-        else if (dowIndex == 8) { // "Weekday"
+        } else if (dowIndex == 8) { // "Weekday"
             dow.fill(true, 0, 5);
-        }
-        else if (dowIndex == 8) { // "WeekendDay"
+        } else if (dowIndex == 8) { // "WeekendDay"
             dow.fill(true, 5, 7);
-        }
-        else {
+        } else {
             dow.setBit(dowIndex);
         }
     }

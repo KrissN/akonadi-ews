@@ -105,7 +105,7 @@ void EwsSyncFolderHierarchyRequest::start()
         QString st = mSyncState.isNull() ? QStringLiteral("none") : QString::number(qHash(mSyncState), 36);
         QString folder;
         qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderHierarchy request (folder: ")
-                        << mFolderId << QStringLiteral(", state: %1").arg(st);
+                                       << mFolderId << QStringLiteral(", state: %1").arg(st);
     }
 
     prepare(reqString);
@@ -133,11 +133,10 @@ bool EwsSyncFolderHierarchyRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp->isSuccess()) {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderHierarchy response (%1 changes, state: %3)")
-                            .arg(mChanges.size()).arg(qHash(mSyncState), 0, 36);
-        }
-        else {
+                                          .arg(mChanges.size()).arg(qHash(mSyncState), 0, 36);
+        } else {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderHierarchy response - %1")
-                            .arg(resp->responseMessage());
+                                          .arg(resp->responseMessage());
         }
     }
 
@@ -215,11 +214,9 @@ EwsSyncFolderHierarchyRequest::Change::Change(QXmlStreamReader &reader)
 
     if (reader.name() == QStringLiteral("Create")) {
         mType = Create;
-    }
-    else if (reader.name() == QStringLiteral("Update")) {
+    } else if (reader.name() == QStringLiteral("Update")) {
         mType = Update;
-    }
-    else if (reader.name() == QStringLiteral("Delete")) {
+    } else if (reader.name() == QStringLiteral("Delete")) {
         mType = Delete;
     }
     if (!ewsReader.readItems(reader, ewsTypeNsUri)) {

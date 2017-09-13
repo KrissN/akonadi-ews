@@ -30,7 +30,7 @@
 using namespace Akonadi;
 
 EwsGlobalTagsWriteJob::EwsGlobalTagsWriteJob(EwsTagStore *tagStore, EwsClient &client,
-                                             const Collection &rootCollection, QObject *parent)
+        const Collection &rootCollection, QObject *parent)
     : EwsJob(parent), mTagStore(tagStore), mClient(client), mRootCollection(rootCollection)
 {
 }
@@ -50,7 +50,7 @@ void EwsGlobalTagsWriteJob::start()
         = new EwsUpdateFolderRequest::SetUpdate(EwsResource::globalTagsProperty, tagList);
     fc.addUpdate(upd);
     upd = new EwsUpdateFolderRequest::SetUpdate(EwsResource::globalTagsVersionProperty,
-                                                QString::number(mTagStore->version()));
+            QString::number(mTagStore->version()));
     fc.addUpdate(upd);
     req->addFolderChange(fc);
     connect(req, &EwsUpdateFolderRequest::result, this, &EwsGlobalTagsWriteJob::updateFolderRequestFinished);

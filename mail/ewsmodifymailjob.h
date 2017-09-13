@@ -27,7 +27,7 @@ class EwsModifyMailJob : public EwsModifyItemJob
     Q_OBJECT
 public:
     EwsModifyMailJob(EwsClient &client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
-                         QObject *parent);
+                     QObject *parent);
     virtual ~EwsModifyMailJob();
     virtual void start() override;
 private Q_SLOTS:

@@ -78,7 +78,8 @@ public:
     {
     public:
         ItemChange(EwsId itemId, EwsItemType type) : mId(itemId), mType(type) {};
-        void addUpdate(const Update *upd) {
+        void addUpdate(const Update *upd)
+        {
             mUpdates.append(QSharedPointer<const Update>(upd));
         }
         bool write(QXmlStreamWriter &writer) const;
@@ -91,8 +92,14 @@ public:
     class Response : public EwsRequest::Response
     {
     public:
-        const EwsId &itemId() const { return mId; };
-        unsigned conflictCount() const { return mConflictCount; };
+        const EwsId &itemId() const
+        {
+            return mId;
+        };
+        unsigned conflictCount() const
+        {
+            return mConflictCount;
+        };
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -105,15 +112,33 @@ public:
     EwsUpdateItemRequest(EwsClient &client, QObject *parent);
     virtual ~EwsUpdateItemRequest();
 
-    void addItemChange(const ItemChange &change) { mChanges.append(change); };
-    void setMessageDisposition(EwsMessageDisposition disp) { mMessageDisp = disp; };
-    void setConflictResolution(EwsConflictResolution resol) { mConflictResol = resol; };
-    void setMeetingDisposition(EwsMeetingDisposition disp) { mMeetingDisp = disp; };
-    void setSavedFolderId(const EwsId &id) { mSavedFolderId = id; };
+    void addItemChange(const ItemChange &change)
+    {
+        mChanges.append(change);
+    };
+    void setMessageDisposition(EwsMessageDisposition disp)
+    {
+        mMessageDisp = disp;
+    };
+    void setConflictResolution(EwsConflictResolution resol)
+    {
+        mConflictResol = resol;
+    };
+    void setMeetingDisposition(EwsMeetingDisposition disp)
+    {
+        mMeetingDisp = disp;
+    };
+    void setSavedFolderId(const EwsId &id)
+    {
+        mSavedFolderId = id;
+    };
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

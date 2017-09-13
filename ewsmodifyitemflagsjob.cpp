@@ -25,7 +25,7 @@
 using namespace Akonadi;
 
 EwsModifyItemFlagsJob::EwsModifyItemFlagsJob(EwsClient &client, QObject *parent, const Item::List items,
-                                             const QSet<QByteArray> &addedFlags, const QSet<QByteArray> &removedFlags)
+        const QSet<QByteArray> &addedFlags, const QSet<QByteArray> &removedFlags)
     : EwsJob(parent), mItems(items), mClient(client), mAddedFlags(addedFlags), mRemovedFlags(removedFlags)
 {
 }
@@ -64,7 +64,7 @@ void EwsModifyItemFlagsJob::start()
 
     Item::List items[EwsItemTypeUnknown];
 
-    Q_FOREACH(const Item &item, mItems) {
+    Q_FOREACH (const Item &item, mItems) {
         EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
         if (type == EwsItemTypeUnknown) {
             setErrorText(QStringLiteral("Unknown item type %1 for item %2").arg(item.mimeType()).arg(item.remoteId()));
@@ -80,7 +80,7 @@ void EwsModifyItemFlagsJob::start()
         if (!items[static_cast<EwsItemType>(type)].isEmpty()) {
             EwsItemHandler *handler = EwsItemHandler::itemHandler(static_cast<EwsItemType>(type));
             EwsModifyItemJob *job = handler->modifyItemJob(mClient, items[type],
-                QSet<QByteArray>() << "FLAGS", this);
+                                    QSet<QByteArray>() << "FLAGS", this);
             connect(job, &EwsModifyItemJob::result, this, &EwsModifyItemFlagsJob::itemModifyFinished);
             addSubjob(job);
             job->start();

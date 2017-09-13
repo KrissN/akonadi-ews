@@ -37,7 +37,7 @@
 using namespace Akonadi;
 
 EwsFetchCalendarDetailJob::EwsFetchCalendarDetailJob(EwsClient &client, QObject *parent,
-                                                     const Collection &collection)
+        const Collection &collection)
     : EwsFetchItemDetailJob(client, parent, collection)
 {
     EwsItemShape shape(EwsShapeIdOnly);
@@ -88,7 +88,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
 
     EwsId::List addItems;
 
-    Q_FOREACH(const EwsGetItemRequest::Response &resp, responses) {
+    Q_FOREACH (const EwsGetItemRequest::Response &resp, responses) {
         Item &item = *it;
 
         qDebug() << item.remoteId();
@@ -105,18 +105,17 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Found %1 events").arg(memcal->events().count());
         KCalCore::Incidence::Ptr incidence;
         if (memcal->events().count() > 1) {
-            Q_FOREACH(KCalCore::Event::Ptr event, memcal->events()) {
+            Q_FOREACH (KCalCore::Event::Ptr event, memcal->events()) {
                 qCDebugNC(EWSRES_LOG) << QString::number(event->recurrence()->recurrenceType(), 16) << event->recurrenceId().dateTime() << event->recurrenceId().isValid();
                 if (!event->recurrenceId().isValid()) {
                     incidence = event;
                 }
             }
             EwsOccurrence::List excList = ewsItem[EwsItemFieldModifiedOccurrences].value<EwsOccurrence::List>();
-            Q_FOREACH(const EwsOccurrence &exc, excList) {
+            Q_FOREACH (const EwsOccurrence &exc, excList) {
                 addItems.append(exc.itemId());
             }
-        }
-        else if (memcal->events().count() == 1) {
+        } else if (memcal->events().count() == 1) {
             incidence = memcal->events()[0];
         }
         //KCalCore::Incidence::Ptr incidence(format.fromString(mimeContent));
@@ -153,8 +152,7 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         qDebug() << "done";
 
         emitResult();
-    }
-    else {
+    } else {
         EwsGetItemRequest *req = new EwsGetItemRequest(mClient, this);
         EwsItemShape shape(EwsShapeIdOnly);
 //        shape << EwsPropertyField(QStringLiteral("item:Attachments"));
@@ -189,7 +187,7 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
     }
 
     KCalCore::ICalFormat format;
-    Q_FOREACH(const EwsGetItemRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsGetItemRequest::Response &resp, req->responses()) {
         if (!resp.isSuccess()) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch item.");
             continue;
@@ -261,14 +259,13 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
         // Special case:
         if (msTimezone == QStringLiteral("tzone://Microsoft/Utc")) {
             ianaTz = QStringLiteral("UTC");
-        }
-        else {
+        } else {
             QLocale locale(culture);
             if (msTimezone.isEmpty()) {
                 msTimezone = currentTime.timeZone().name();
             }
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Time zone '%1' not found on IANA list. Trying to convert with country '%2'")
-                            .arg(currentTime.timeZone().name()).arg(QLocale::countryToString(locale.country()));
+                                  .arg(currentTime.timeZone().name()).arg(QLocale::countryToString(locale.country()));
             qCDebugNC(EWSRES_LOG) << "MSTZ: " << msTimezone;
             ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1(), locale.country()));
             if (ianaTz.isEmpty()) {
@@ -281,7 +278,7 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
                         // Give it one more try with the default country.
                         ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1()));
                         qCWarningNC(EWSRES_LOG)
-                            << QStringLiteral("Failed to convert time zone '%1' or '%2' to IANA id").arg(msTimezone).arg(currentTime.timeZone().name());
+                                << QStringLiteral("Failed to convert time zone '%1' or '%2' to IANA id").arg(msTimezone).arg(currentTime.timeZone().name());
                     }
                 }
             }

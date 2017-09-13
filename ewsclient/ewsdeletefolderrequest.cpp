@@ -47,7 +47,7 @@ void EwsDeleteFolderRequest::start()
     writer.writeAttribute(QStringLiteral("DeleteType"), deleteTypes[mType]);
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderIds"));
-    Q_FOREACH(const EwsId &id, mIds) {
+    Q_FOREACH (const EwsId &id, mIds) {
         id.writeFolderIds(writer);
     }
     writer.writeEndElement();
@@ -57,7 +57,7 @@ void EwsDeleteFolderRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting DeleteFolder request (%1 folders)")
-                    .arg(mIds.size());
+                                  .arg(mIds.size());
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
@@ -82,10 +82,9 @@ bool EwsDeleteFolderRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got DeleteFolder response - OK");
-        }
-        else {
+        } else {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got DeleteFolder response - %1")
-                            .arg(resp.responseMessage());
+                                        .arg(resp.responseMessage());
         }
     }
 
@@ -103,7 +102,7 @@ EwsDeleteFolderRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 

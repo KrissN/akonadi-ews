@@ -78,7 +78,8 @@ public:
     {
     public:
         FolderChange(EwsId folderId, EwsFolderType type) : mId(folderId), mType(type) {};
-        void addUpdate(const Update *upd) {
+        void addUpdate(const Update *upd)
+        {
             mUpdates.append(QSharedPointer<const Update>(upd));
         }
         bool write(QXmlStreamWriter &writer) const;
@@ -91,7 +92,10 @@ public:
     class Response : public EwsRequest::Response
     {
     public:
-        const EwsId &folderId() const { return mId; };
+        const EwsId &folderId() const
+        {
+            return mId;
+        };
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -103,11 +107,17 @@ public:
     EwsUpdateFolderRequest(EwsClient &client, QObject *parent);
     virtual ~EwsUpdateFolderRequest();
 
-    void addFolderChange(const FolderChange &change) { mChanges.append(change); };
+    void addFolderChange(const FolderChange &change)
+    {
+        mChanges.append(change);
+    };
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

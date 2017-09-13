@@ -36,7 +36,7 @@ static Q_CONSTEXPR uint streamingTimeout = 30; /* minutes */
 static Q_CONSTEXPR uint streamingConnTimeout = 60; /* seconds */
 
 EwsSubscriptionManager::EwsSubscriptionManager(EwsClient &client, const EwsId &rootId,
-                                               Settings *settings, QObject *parent)
+        Settings *settings, QObject *parent)
     : QObject(parent), mEwsClient(client), mPollTimer(this), mMsgRootId(rootId), mFolderTreeChanged(false),
       mEventReq(nullptr), mSettings(settings)
 {
@@ -114,8 +114,7 @@ void EwsSubscriptionManager::setupSubscriptionReq(const EwsId::List &ids)
     req->setEventTypes(events);
     if (mStreamingEvents) {
         req->setType(EwsSubscribeRequest::StreamingSubscription);
-    }
-    else {
+    } else {
         req->setType(EwsSubscribeRequest::PullSubscription);
     }
     req->setFolderIds(ids);
@@ -148,8 +147,7 @@ void EwsSubscriptionManager::subscribeRequestFinished(KJob *job)
             mSettings->setEventSubscriptionId(req->response().subscriptionId());
             if (mStreamingEvents) {
                 getEvents();
-            }
-            else {
+            } else {
                 mSettings->setEventSubscriptionWatermark(req->response().watermark());
                 getEvents();
                 mPollTimer.start();
@@ -173,8 +171,7 @@ void EwsSubscriptionManager::getEvents()
         req->start();
         mEventReq = req;
         mStreamingTimer.start();
-    }
-    else {
+    } else {
         EwsGetEventsRequest *req = new EwsGetEventsRequest(mEwsClient, this);
         req->setSubscriptionId(mSettings->eventSubscriptionId());
         req->setWatermark(mSettings->eventSubscriptionWatermark());
@@ -200,7 +197,7 @@ void EwsSubscriptionManager::getEventsRequestFinished(KJob *job)
 
     if ((!req->responses().isEmpty()) &&
         ((req->responses()[0].responseCode() == QStringLiteral("ErrorInvalidSubscription")) ||
-        (req->responses()[0].responseCode() == QStringLiteral("ErrorSubscriptionNotFound")))) {
+         (req->responses()[0].responseCode() == QStringLiteral("ErrorSubscriptionNotFound")))) {
         mSettings->setEventSubscriptionId(QString());
         mSettings->setEventSubscriptionWatermark(QString());
         mSettings->save();
@@ -249,9 +246,9 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
 {
     bool moreEvents = false;
 
-    Q_FOREACH(const EwsGetEventsRequest::Response &resp, req->responses()) {
-        Q_FOREACH(const EwsGetEventsRequest::Notification &nfy, resp.notifications()) {
-            Q_FOREACH(const EwsGetEventsRequest::Event &event, nfy.events()) {
+    Q_FOREACH (const EwsGetEventsRequest::Response &resp, req->responses()) {
+        Q_FOREACH (const EwsGetEventsRequest::Notification &nfy, resp.notifications()) {
+            Q_FOREACH (const EwsGetEventsRequest::Event &event, nfy.events()) {
 
                 bool skip = false;
                 EwsId id = event.itemId();
@@ -273,15 +270,14 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
                         if (!event.itemIsFolder()) {
                             mUpdatedFolderIds.insert(event.oldParentFolderId());
                         }
-                        /* no break */
+                    /* fall through */
                     case EwsCreatedEvent:
                     case EwsDeletedEvent:
                     case EwsModifiedEvent:
                     case EwsNewMailEvent:
                         if (event.itemIsFolder()) {
                             mFolderTreeChanged = true;
-                        }
-                        else {
+                        } else {
                             mUpdatedFolderIds.insert(event.parentFolderId());
                         }
                         break;
@@ -307,8 +303,7 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
 
     if (moreEvents && finished) {
         getEvents();
-    }
-    else {
+    } else {
         if (mFolderTreeChanged) {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Found modified folder tree");
             Q_EMIT folderTreeModified();
@@ -316,7 +311,7 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
         }
         if (!mUpdatedFolderIds.isEmpty()) {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Found %1 modified folders")
-                            .arg(mUpdatedFolderIds.size());
+                                  .arg(mUpdatedFolderIds.size());
             Q_EMIT foldersModified(mUpdatedFolderIds.toList());
             mUpdatedFolderIds.clear();
         }

@@ -38,7 +38,10 @@ public:
     EwsGetEventsRequest(EwsClient &client, QObject *parent);
     virtual ~EwsGetEventsRequest();
 
-    void setWatermark(const QString &watermark) { mWatermark = watermark; };
+    void setWatermark(const QString &watermark)
+    {
+        mWatermark = watermark;
+    };
 
     virtual void start() override;
 

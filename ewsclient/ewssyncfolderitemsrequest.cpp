@@ -101,7 +101,7 @@ void EwsSyncFolderItemsRequest::start()
     }
 
     writer.writeTextElement(ewsMsgNsUri, QStringLiteral("MaxChangesReturned"),
-        QString::number(mMaxChanges));
+                            QString::number(mMaxChanges));
 
     writer.writeEndElement();
 
@@ -113,7 +113,7 @@ void EwsSyncFolderItemsRequest::start()
         QString st = mSyncState.isNull() ? QStringLiteral("none") : ewsHash(mSyncState);
         QString folder;
         qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
-                        << mFolderId << QStringLiteral(", state: %1").arg(st);
+                                       << mFolderId << QStringLiteral(", state: %1").arg(st);
     }
 
     prepare(reqString);
@@ -141,12 +141,11 @@ bool EwsSyncFolderItemsRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp->isSuccess()) {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response (%1 changes, last included: %2, state: %3)")
-                            .arg(mChanges.size()).arg(mIncludesLastItem ? QStringLiteral("true") : QStringLiteral("false"))
-                            .arg(qHash(mSyncState), 0, 36);
-        }
-        else {
+                                          .arg(mChanges.size()).arg(mIncludesLastItem ? QStringLiteral("true") : QStringLiteral("false"))
+                                          .arg(qHash(mSyncState), 0, 36);
+        } else {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response - %1")
-                            .arg(resp->responseMessage());
+                                          .arg(resp->responseMessage());
         }
     }
 
@@ -229,14 +228,11 @@ EwsSyncFolderItemsRequest::Change::Change(QXmlStreamReader &reader)
 
     if (reader.name() == QStringLiteral("Create")) {
         mType = Create;
-    }
-    else if (reader.name() == QStringLiteral("Update")) {
+    } else if (reader.name() == QStringLiteral("Update")) {
         mType = Update;
-    }
-    else if (reader.name() == QStringLiteral("Delete")) {
+    } else if (reader.name() == QStringLiteral("Delete")) {
         mType = Delete;
-    }
-    else if (reader.name() == QStringLiteral("ReadFlagChange")) {
+    } else if (reader.name() == QStringLiteral("ReadFlagChange")) {
         mType = ReadFlagChange;
     }
     if (!ewsReader.readItems(reader, ewsTypeNsUri)) {
@@ -253,7 +249,7 @@ EwsSyncFolderItemsRequest::Change::Change(QXmlStreamReader &reader)
         break;
     case ReadFlagChange:
         mIsRead = values[IsRead].toBool();
-        /* fall through */
+    /* fall through */
     case Delete:
         mId = values[ItemId].value<EwsId>();
         break;

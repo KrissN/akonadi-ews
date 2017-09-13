@@ -40,7 +40,7 @@ public:
     {
     public:
         typedef QPair<QString, ushort> HttpResponse;
-        typedef std::function<HttpResponse (const QString &, QXmlResultItems &, const QXmlNamePool &)> ReplyCallback;
+        typedef std::function<HttpResponse(const QString &, QXmlResultItems &, const QXmlNamePool &)> ReplyCallback;
         QString xQuery;
         ReplyCallback replyCallback;
         QString description;

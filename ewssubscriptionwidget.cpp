@@ -147,8 +147,8 @@ void EwsSubscriptionFilterModel::setFilterSelected(bool enabled)
 }
 
 EwsSubscriptionWidgetPrivate::EwsSubscriptionWidgetPrivate(EwsClient &client, Settings *settings,
-                                                           QObject *parent)
-        : QObject(parent), mClient(client), mSubscribedIdsRetrieved(false), mSettings(settings)
+        QObject *parent)
+    : QObject(parent), mClient(client), mSubscribedIdsRetrieved(false), mSettings(settings)
 {
 }
 
@@ -238,7 +238,7 @@ void EwsSubscriptionWidgetPrivate::populateFolderTree()
     mFolderTreeModel->clear();
     mFolderItemHash.clear();
 
-    Q_FOREACH(const EwsFolder &folder, mFolders) {
+    Q_FOREACH (const EwsFolder &folder, mFolders) {
         QStandardItem *item = new QStandardItem(folder[EwsFolderFieldDisplayName].toString());
         item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         item->setCheckable(true);
@@ -257,7 +257,7 @@ void EwsSubscriptionWidgetPrivate::populateFolderTree()
         mFolderItemHash.insert(id.id(), item);
     }
 
-    Q_FOREACH(QStandardItem* item, mFolderItemHash) {
+    Q_FOREACH (QStandardItem* item, mFolderItemHash) {
         if (!item->parent()) {
             mFolderTreeModel->appendRow(item);
         }
@@ -369,7 +369,7 @@ QStringList EwsSubscriptionWidget::subscribedList() const
     Q_D(const EwsSubscriptionWidget);
 
     QStringList list;
-    Q_FOREACH(const EwsId &id, d->mSubscribedIds) {
+    Q_FOREACH (const EwsId &id, d->mSubscribedIds) {
         list.append(id.id());
     }
 

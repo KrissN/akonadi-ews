@@ -36,7 +36,10 @@ public:
     public:
         explicit Response(QXmlStreamReader &reader);
         bool parseItems(QXmlStreamReader &reader);
-        const EwsItem &item() const { return mItem; };
+        const EwsItem &item() const
+        {
+            return mItem;
+        };
     private:
         EwsItem mItem;
     };
@@ -49,7 +52,10 @@ public:
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

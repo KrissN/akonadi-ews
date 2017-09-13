@@ -33,8 +33,14 @@ public:
     virtual ~FakeEwsServerThread();
 
 //    FakeEwsServer *server() const;
-    ushort portNumber() const { return mPortNumber; };
-    bool isRunning() const { return mIsRunning == 1; };
+    ushort portNumber() const
+    {
+        return mPortNumber;
+    };
+    bool isRunning() const
+    {
+        return mIsRunning == 1;
+    };
     void setDialog(const FakeEwsServer::DialogEntry::List &dialog);
     void setDefaultReplyCallback(FakeEwsServer::DialogEntry::ReplyCallback defaultReplyCallback);
     void queueEventsXml(const QStringList &events);

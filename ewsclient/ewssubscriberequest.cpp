@@ -73,13 +73,13 @@ void EwsSubscribeRequest::start()
     }
 
     writer.writeStartElement(ewsTypeNsUri, QStringLiteral("FolderIds"));
-    Q_FOREACH(const EwsId &id, mFolderIds) {
+    Q_FOREACH (const EwsId &id, mFolderIds) {
         id.writeFolderIds(writer);
     }
     writer.writeEndElement();
 
     writer.writeStartElement(ewsTypeNsUri, QStringLiteral("EventTypes"));
-    Q_FOREACH(const EwsEventType type, mEventTypes) {
+    Q_FOREACH (const EwsEventType type, mEventTypes) {
         writer.writeTextElement(ewsTypeNsUri, QStringLiteral("EventType"), eventTypeNames[type]);
     }
     writer.writeEndElement();   // EventTypes
@@ -131,7 +131,7 @@ EwsSubscribeRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -140,20 +140,18 @@ EwsSubscribeRequest::Response::Response(QXmlStreamReader &reader)
 
             if (reader.error() != QXmlStreamReader::NoError) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                    .arg(QStringLiteral("SubscriptionId")));
+                            .arg(QStringLiteral("SubscriptionId")));
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("Watermark")) {
+        } else if (reader.name() == QStringLiteral("Watermark")) {
             mWatermark = reader.readElementText();
 
             if (reader.error() != QXmlStreamReader::NoError) {
                 setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                    .arg(QStringLiteral("Watermark")));
+                            .arg(QStringLiteral("Watermark")));
                 return;
             }
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }

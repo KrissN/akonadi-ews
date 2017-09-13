@@ -98,8 +98,7 @@ void BasicTest::testBasic()
         {QStringLiteral("ZHJhZnRz"), {rootId, QStringLiteral("document-properties")}}
     };
 
-    FakeEwsServer::DialogEntry::List dialog =
-    {
+    FakeEwsServer::DialogEntry::List dialog = {
         MsgRootInboxDialogEntry(rootId, inboxId,
                                 QStringLiteral("GetFolder request for inbox and msgroot")),
         SubscribedFoldersDialogEntry(folderList,
@@ -116,7 +115,7 @@ void BasicTest::testBasic()
 
     bool unknownRequestEncountered = false;
     mFakeServerThread->setDialog(dialog);
-    mFakeServerThread->setDefaultReplyCallback([&](const QString &req, QXmlResultItems &, const QXmlNamePool &) {
+    mFakeServerThread->setDefaultReplyCallback([&](const QString & req, QXmlResultItems &, const QXmlNamePool &) {
         qDebug() << "Unknown EWS request encountered." << req;
         unknownRequestEncountered = true;
         return FakeEwsServer::EmptyResponse;

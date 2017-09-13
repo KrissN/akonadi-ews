@@ -25,7 +25,8 @@
 #include "ewsjob.h"
 #include "ewsfinditemrequest.h"
 
-namespace Akonadi {
+namespace Akonadi
+{
 class Collection;
 }
 class EwsClient;
@@ -49,10 +50,22 @@ public:
                      EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsFetchItemsJob();
 
-    Akonadi::Item::List changedItems() const { return mChangedItems; };
-    Akonadi::Item::List deletedItems() const { return mDeletedItems; };
-    const QString &syncState() const { return mSyncState; };
-    const Akonadi::Collection &collection() const { return mCollection; };
+    Akonadi::Item::List changedItems() const
+    {
+        return mChangedItems;
+    };
+    Akonadi::Item::List deletedItems() const
+    {
+        return mDeletedItems;
+    };
+    const QString &syncState() const
+    {
+        return mSyncState;
+    };
+    const Akonadi::Collection &collection() const
+    {
+        return mCollection;
+    };
 
     void setQueuedUpdates(const QueuedUpdateList &updates);
 

@@ -27,7 +27,8 @@
 #include "ewspropertyfield.h"
 #include "ewstypes.h"
 
-namespace Akonadi {
+namespace Akonadi
+{
 class Collection;
 class Item;
 }
@@ -45,7 +46,7 @@ public:
     virtual ~EwsItemHandler();
 
     virtual EwsFetchItemDetailJob *fetchItemDetailJob(EwsClient &client, QObject *parent,
-                                                      const Akonadi::Collection &collection) = 0;
+            const Akonadi::Collection &collection) = 0;
     virtual void setSeenFlag(Akonadi::Item &item, bool value) = 0;
     virtual QString mimeType() = 0;
     virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) = 0;
@@ -71,13 +72,13 @@ private:
 };
 
 #define EWS_DECLARE_ITEM_HANDLER(clsname, type) \
-class type ## _itemhandler_registrar { \
-public: \
-    type ## _itemhandler_registrar()  \
-    { \
-        EwsItemHandler::registerItemHandler(type, &clsname::factory); \
-    } \
-}; \
-const type ## _itemhandler_registrar type ## _itemhandler_registrar_object;
+    class type ## _itemhandler_registrar { \
+    public: \
+        type ## _itemhandler_registrar()  \
+        { \
+            EwsItemHandler::registerItemHandler(type, &clsname::factory); \
+        } \
+    }; \
+    const type ## _itemhandler_registrar type ## _itemhandler_registrar_object;
 
 #endif

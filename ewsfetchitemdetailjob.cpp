@@ -34,15 +34,14 @@ EwsFetchItemDetailJob::~EwsFetchItemDetailJob()
 }
 
 void EwsFetchItemDetailJob::setItemLists(Akonadi::Item::List changedItems,
-                                         Akonadi::Item::List *deletedItems)
+        Akonadi::Item::List *deletedItems)
 {
     mChangedItems = changedItems;
     mDeletedItems = deletedItems;
 
     EwsId::List ids;
 
-    Q_FOREACH(const Akonadi::Item &item, changedItems)
-    {
+    Q_FOREACH (const Akonadi::Item &item, changedItems) {
         EwsId id(item.remoteId(), item.remoteRevision());
         ids.append(id);
     }

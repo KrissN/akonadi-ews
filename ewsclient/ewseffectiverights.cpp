@@ -64,19 +64,17 @@ bool EwsEffectiveRightsPrivate::readRight(QXmlStreamReader &reader, Right right)
     QString text = reader.readElementText();
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
-                        .arg(QStringLiteral("EffectiveRights")).arg(elm);
+                              .arg(QStringLiteral("EffectiveRights")).arg(elm);
         return false;
     }
 
     if (text == QStringLiteral("true")) {
         mRights.setBit(right);
-    }
-    else if (text == QStringLiteral("false")) {
+    } else if (text == QStringLiteral("false")) {
         mRights.clearBit(right);
-    }
-    else {
+    } else {
         qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element value: %3.")
-                        .arg(QStringLiteral("EffectiveRights")).arg(elm).arg(text);
+                              .arg(QStringLiteral("EffectiveRights")).arg(elm).arg(text);
         return false;
     }
 
@@ -94,7 +92,7 @@ EwsEffectiveRights::EwsEffectiveRights(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in mailbox element:")
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return;
         }
 
@@ -102,40 +100,33 @@ EwsEffectiveRights::EwsEffectiveRights(QXmlStreamReader &reader)
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::CreateAssociated)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("CreateContents")) {
+        } else if (reader.name() == QStringLiteral("CreateContents")) {
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::CreateContents)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("CreateHierarchy")) {
+        } else if (reader.name() == QStringLiteral("CreateHierarchy")) {
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::CreateHierarchy)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("Delete")) {
+        } else if (reader.name() == QStringLiteral("Delete")) {
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::Delete)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("Modify")) {
+        } else if (reader.name() == QStringLiteral("Modify")) {
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::Modify)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("Read")) {
+        } else if (reader.name() == QStringLiteral("Read")) {
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::Read)) {
                 return;
             }
-        }
-        else if (reader.name() == QStringLiteral("ViewPrivateItems")) {
+        } else if (reader.name() == QStringLiteral("ViewPrivateItems")) {
             if (!d->readRight(reader, EwsEffectiveRightsPrivate::ViewPrivateItems)) {
                 return;
             }
-        }
-        else {
+        } else {
             qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown element: %2.")
-                            .arg(QStringLiteral("EffectiveRights")).arg(reader.name().toString());
+                                  .arg(QStringLiteral("EffectiveRights")).arg(reader.name().toString());
             return;
         }
     }

@@ -45,7 +45,7 @@ EwsItemHandler *EwsMailHandler::factory()
 }
 
 EwsFetchItemDetailJob *EwsMailHandler::fetchItemDetailJob(EwsClient &client, QObject *parent,
-                                                          const Akonadi::Collection &collection)
+        const Akonadi::Collection &collection)
 {
     return new EwsFetchMailDetailJob(client, parent, collection);
 }
@@ -54,8 +54,7 @@ void EwsMailHandler::setSeenFlag(Item &item, bool value)
 {
     if (value) {
         item.setFlag(MessageFlags::Seen);
-    }
-    else {
+    } else {
         item.clearFlag(MessageFlags::Seen);
     }
 }
@@ -87,7 +86,7 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     if (msg->body().isEmpty()) {
         msg->setBody("\n");
     }
-    Q_FOREACH(KMime::Content* c, msg->attachments()) {
+    Q_FOREACH (KMime::Content* c, msg->attachments()) {
         KMime::Headers::ContentID *cid = c->contentID(false);
         if (cid) {
             qDebug() << cid->asUnicodeString();
@@ -98,14 +97,14 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
 }
 
 EwsModifyItemJob *EwsMailHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
-                                                const QSet<QByteArray> &parts, QObject *parent)
+        const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyMailJob(client, items, parts, parent);
 }
 
 EwsCreateItemJob *EwsMailHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
-                                                const Akonadi::Collection &collection,
-                                                EwsTagStore *tagStore, EwsResource *parent)
+        const Akonadi::Collection &collection,
+        EwsTagStore *tagStore, EwsResource *parent)
 {
     return new EwsCreateMailJob(client, item, collection, tagStore, parent);
 }
@@ -120,13 +119,13 @@ QHash<EwsPropertyField, QVariant> EwsMailHandler::writeFlags(const QSet<QByteArr
     bool isRead = false;
     bool isFlagged = false;
 
-    Q_FOREACH(const QByteArray &flag, flags) {
+    Q_FOREACH (const QByteArray &flag, flags) {
         if (flag == MessageFlags::Seen) {
             isRead = true;
         } else if (flag == MessageFlags::Flagged) {
             isFlagged = true;
         } else if (flag == MessageFlags::HasAttachment || flag == MessageFlags::HasInvitation ||
-                        flag == MessageFlags::Signed || flag == MessageFlags::Encrypted) {
+                   flag == MessageFlags::Signed || flag == MessageFlags::Encrypted) {
             // These flags are read-only. Remove them from the unknown list but don't do anything with them.
         } else {
             unknownFlags.insert(flag);
@@ -134,11 +133,10 @@ QHash<EwsPropertyField, QVariant> EwsMailHandler::writeFlags(const QSet<QByteArr
     }
 
     propertyHash.insert(EwsPropertyField(QStringLiteral("message:IsRead")),
-        isRead ? QStringLiteral("true") : QStringLiteral("false"));
+                        isRead ? QStringLiteral("true") : QStringLiteral("false"));
     if (isFlagged) {
         propertyHash.insert(propPidFlagStatus, QStringLiteral("2"));
-    }
-    else {
+    } else {
         propertyHash.insert(propPidFlagStatus, QVariant());
     }
 

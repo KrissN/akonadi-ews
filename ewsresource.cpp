@@ -85,15 +85,13 @@ static const QVector<SpecialFolders> specialFolderList = {
 const QString EwsResource::akonadiEwsPropsetUuid = QStringLiteral("9bf757ae-69b5-4d8a-bf1d-2dd0c0871a28");
 
 const EwsPropertyField EwsResource::globalTagsProperty(EwsResource::akonadiEwsPropsetUuid,
-                                                       QStringLiteral("GlobalTags"),
-                                                       EwsPropTypeStringArray);
+        QStringLiteral("GlobalTags"), EwsPropTypeStringArray);
 const EwsPropertyField EwsResource::globalTagsVersionProperty(EwsResource::akonadiEwsPropsetUuid,
-                                                              QStringLiteral("GlobalTagsVersion"),
-                                                              EwsPropTypeInteger);
+        QStringLiteral("GlobalTagsVersion"), EwsPropTypeInteger);
 const EwsPropertyField EwsResource::tagsProperty(EwsResource::akonadiEwsPropsetUuid,
-                                                 QStringLiteral("Tags"), EwsPropTypeStringArray);
+        QStringLiteral("Tags"), EwsPropTypeStringArray);
 const EwsPropertyField EwsResource::flagsProperty(EwsResource::akonadiEwsPropsetUuid,
-                                                  QStringLiteral("Flags"), EwsPropTypeStringArray);
+        QStringLiteral("Flags"), EwsPropTypeStringArray);
 
 static Q_CONSTEXPR int InitialReconnectTimeout = 60;
 static Q_CONSTEXPR int ReconnectTimeout = 300;
@@ -170,7 +168,7 @@ void EwsResource::delayedInit()
     new SettingsAdaptor(mSettings.data());
     new WalletAdaptor(mSettings.data());
     QDBusConnection::sessionBus().registerObject(QStringLiteral("/Settings"),
-                mSettings.data(), QDBusConnection::ExportAdaptors);
+            mSettings.data(), QDBusConnection::ExportAdaptors);
 }
 
 void EwsResource::resetUrl()
@@ -307,7 +305,7 @@ void EwsResource::retrieveCollections()
          * be, as it needs to be the anchor point.
          */
         CollectionFetchJob *fetchJob = new CollectionFetchJob(mRootCollection,
-            CollectionFetchJob::Base);
+                CollectionFetchJob::Base);
         connect(fetchJob, &CollectionFetchJob::result, this, &EwsResource::rootCollectionFetched);
         fetchJob->start();
     } else {
@@ -343,10 +341,9 @@ void EwsResource::doRetrieveCollections()
         EwsFetchFoldersJob *job = new EwsFetchFoldersJob(mEwsClient, mRootCollection, this);
         connect(job, &EwsFetchFoldersJob::result, this, &EwsResource::fetchFoldersJobFinished);
         job->start();
-    }
-    else {
+    } else {
         EwsFetchFoldersIncrJob *job = new EwsFetchFoldersIncrJob(mEwsClient, mFolderSyncState,
-            mRootCollection, this);
+                mRootCollection, this);
         connect(job, &EwsFetchFoldersIncrJob::result, this, &EwsResource::fetchFoldersIncrJobFinished);
         job->start();
     }
@@ -366,11 +363,11 @@ void EwsResource::retrieveItems(const Collection &collection)
 
     QString rid = collection.remoteId();
     EwsFetchItemsJob *job = new EwsFetchItemsJob(collection, mEwsClient,
-        mSyncState.value(rid), mItemsToCheck.value(rid), mTagStore, this);
+            mSyncState.value(rid), mItemsToCheck.value(rid), mTagStore, this);
     job->setQueuedUpdates(mQueuedUpdates.value(collection.remoteId()));
     mQueuedUpdates.remove(collection.remoteId());
     connect(job, &EwsFetchItemsJob::result, this, &EwsResource::itemFetchJobFinished);
-    connect(job, &EwsFetchItemsJob::status, this, [this](int s, const QString &message) {
+    connect(job, &EwsFetchItemsJob::status, this, [this](int s, const QString & message) {
         status(s, message);
     });
     connect(job, &EwsFetchItemsJob::percent, this, [this](int p) {
@@ -386,7 +383,7 @@ bool EwsResource::retrieveItems(const Item::List &items, const QSet<QByteArray> 
 
     EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
     EwsId::List ids;
-    Q_FOREACH(const Item &item, items) {
+    Q_FOREACH (const Item &item, items) {
         ids << EwsId(item.remoteId(), item.remoteRevision());
     }
     req->setItemIds(ids);
@@ -417,7 +414,7 @@ void EwsResource::getItemsRequestFinished(KJob *job)
     Item::List items = req->property("items").value<Item::List>();
 
     QHash<QString, Item> itemHash;
-    Q_FOREACH(const Item &item, items) {
+    Q_FOREACH (const Item &item, items) {
         itemHash.insert(item.remoteId(), item);
     }
 
@@ -435,7 +432,7 @@ void EwsResource::getItemsRequestFinished(KJob *job)
 
     }
 
-    Q_FOREACH(const EwsGetItemRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsGetItemRequest::Response &resp, req->responses()) {
         const EwsItem &ewsItem = resp.item();
         EwsId id = ewsItem[EwsItemFieldItemId].value<EwsId>();
         auto it = itemHash.find(id.id());
@@ -607,15 +604,13 @@ void EwsResource::itemFetchJobFinished(KJob *job)
             // Retry with a clear sync state.
             mSyncState.remove(fetchJob->collection().remoteId());
             retrieveItems(fetchJob->collection());
-        }
-        else {
+        } else {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Clean sync failed.");
             // No more hope
             cancelTask(job->errorString());
             return;
         }
-    }
-    else {
+    } else {
         mSyncState[fetchJob->collection().remoteId()] = fetchJob->syncState();
         itemsRetrievedIncremental(fetchJob->changedItems(), fetchJob->deletedItems());
     }
@@ -632,17 +627,16 @@ void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> 
     if (isEwsMessageItemType(type)) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: Item type not supported for changing";
         cancelTask(i18nc("@info:status", "Item type not supported for changing"));
-    }
-    else {
+    } else {
         EwsModifyItemJob *job = EwsItemHandler::itemHandler(type)->modifyItemJob(mEwsClient,
-            Item::List() << item, partIdentifiers, this);
+                                Item::List() << item, partIdentifiers, this);
         connect(job, SIGNAL(result(KJob*)), SLOT(itemChangeRequestFinished(KJob*)));
         job->start();
     }
 }
 
 void EwsResource::itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
-                                   const QSet<QByteArray> &removedFlags)
+                                    const QSet<QByteArray> &removedFlags)
 {
     qCDebug(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged: start" << items << addedFlags << removedFlags;
 
@@ -696,7 +690,7 @@ void EwsResource::itemsMoved(const Item::List &items, const Collection &sourceCo
 
     EwsId::List ids;
 
-    Q_FOREACH(const Item &item, items) {
+    Q_FOREACH (const Item &item, items) {
         EwsId id(item.remoteId(), item.remoteRevision());
         ids.append(id);
     }
@@ -747,11 +741,11 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
     Collection srcCol = req->property("sourceCollection").value<Collection>();
     Collection dstCol = req->property("destinationCollection").value<Collection>();
     Item::List::iterator it = items.begin();
-    Q_FOREACH(const EwsMoveItemRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsMoveItemRequest::Response &resp, req->responses()) {
         Item &item = *it;
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsMoved: succeeded for item %1 (new id: %2)")
-                .arg(ewsHash(item.remoteId())).arg(ewsHash(resp.itemId().id()));
+                                          .arg(ewsHash(item.remoteId())).arg(ewsHash(resp.itemId().id()));
             if (item.isValid()) {
                 /* Log item deletion in the source folder so that the next sync doesn't trip over
                  * non-existent items. Use old remote ids for that. */
@@ -764,8 +758,7 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
                 item.setRemoteRevision(resp.itemId().changeKey());
                 movedItems.append(item);
             }
-        }
-        else {
+        } else {
             warning(QStringLiteral("Move failed for item %1").arg(item.remoteId()));
             qCDebugNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsMoved: failed for item %1").arg(ewsHash(item.remoteId()));
             failedIds.append(EwsId(item.remoteId(), QString()));
@@ -775,7 +768,7 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
 
     if (!failedIds.isEmpty()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to move %1 items. Forcing src & dst folder sync.")
-                        .arg(failedIds.size());
+                                .arg(failedIds.size());
         mItemsToCheck[srcCol.remoteId()] += failedIds;
         foldersModifiedEvent(EwsId::List({EwsId(srcCol.remoteId(), QString())}));
         mItemsToCheck[dstCol.remoteId()] += failedIds;
@@ -792,7 +785,7 @@ void EwsResource::itemsRemoved(const Item::List &items)
 
     EwsId::List ids;
 
-    Q_FOREACH(const Item &item, items) {
+    Q_FOREACH (const Item &item, items) {
         EwsId id(item.remoteId(), item.remoteRevision());
         ids.append(id);
     }
@@ -837,7 +830,7 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
     EwsId::List foldersToSync;
 
     Item::List::iterator it = items.begin();
-    Q_FOREACH(const EwsDeleteItemRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsDeleteItemRequest::Response &resp, req->responses()) {
         Item &item = *it;
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsRemoved: succeeded for item %1").arg(ewsHash(item.remoteId()));
@@ -845,8 +838,7 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
                 mSubManager->queueUpdate(EwsDeletedEvent, item.remoteId(), QString());
             }
             mQueuedUpdates[item.parentCollection().remoteId()].append({item.remoteId(), QString(), EwsDeletedEvent});
-        }
-        else {
+        } else {
             warning(QStringLiteral("Delete failed for item %1").arg(item.remoteId()));
             qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("itemsRemoved: failed for item %1").arg(ewsHash(item.remoteId()));
             EwsId colId = EwsId(item.parentCollection().remoteId(), QString());
@@ -860,7 +852,7 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
 
     if (!foldersToSync.isEmpty()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Need to force sync for %1 folders.")
-                        .arg(foldersToSync.size());
+                                .arg(foldersToSync.size());
         foldersModifiedEvent(foldersToSync);
     }
 
@@ -873,10 +865,9 @@ void EwsResource::itemAdded(const Item &item, const Collection &collection)
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
     if (isEwsMessageItemType(type)) {
         cancelTask(i18nc("@info:status", "Item type not supported for creation"));
-    }
-    else {
+    } else {
         EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
-            collection, mTagStore, this);
+                                collection, mTagStore, this);
         connect(job, &EwsCreateItemJob::result, this, &EwsResource::itemCreateRequestFinished);
         job->start();
     }
@@ -904,17 +895,13 @@ void EwsResource::collectionAdded(const Collection &collection, const Collection
     QStringList mimeTypes = collection.contentMimeTypes();
     if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeCalendarItem)->mimeType())) {
         type = EwsFolderTypeCalendar;
-    }
-    else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeContact)->mimeType())) {
+    } else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeContact)->mimeType())) {
         type = EwsFolderTypeContacts;
-    }
-    else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeTask)->mimeType())) {
+    } else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeTask)->mimeType())) {
         type = EwsFolderTypeTasks;
-    }
-    else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeMessage)->mimeType())) {
+    } else if (mimeTypes.contains(EwsItemHandler::itemHandler(EwsItemTypeMessage)->mimeType())) {
         type = EwsFolderTypeMail;
-    }
-    else {
+    } else {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Cannot determine EWS folder type.");
         cancelTask(QStringLiteral("Cannot determine EWS folder type."));
         return;
@@ -952,14 +939,13 @@ void EwsResource::folderCreateRequestFinished(KJob *job)
         col.setRemoteId(id.id());
         col.setRemoteRevision(id.changeKey());
         changeCommitted(col);
-    }
-    else {
+    } else {
         cancelTask(i18nc("@info:status", "Failed to create folder"));
     }
 }
 
 void EwsResource::collectionMoved(const Collection &collection, const Collection &collectionSource,
-                                 const Collection &collectionDestination)
+                                  const Collection &collectionDestination)
 {
     Q_UNUSED(collectionSource)
 
@@ -1000,8 +986,7 @@ void EwsResource::folderMoveRequestFinished(KJob *job)
         col.setRemoteId(id.id());
         col.setRemoteRevision(id.changeKey());
         changeCommitted(col);
-    }
-    else {
+    } else {
         cancelTask(i18nc("@info:status", "Failed to move folder"));
     }
 }
@@ -1015,7 +1000,7 @@ void EwsResource::collectionChanged(const Collection &collection,
                                                 EwsFolderTypeMail);
         EwsUpdateFolderRequest::Update *upd
             = new EwsUpdateFolderRequest::SetUpdate(EwsPropertyField(QStringLiteral("folder:DisplayName")),
-                                                    collection.name());
+                    collection.name());
         fc.addUpdate(upd);
         req->addFolderChange(fc);
         req->setProperty("collection", QVariant::fromValue<Collection>(collection));
@@ -1056,8 +1041,7 @@ void EwsResource::folderUpdateRequestFinished(KJob *job)
         col.setRemoteId(id.id());
         col.setRemoteRevision(id.changeKey());
         changeCommitted(col);
-    }
-    else {
+    } else {
         cancelTask(i18nc("@info:status", "Failed to update folder"));
     }
 }
@@ -1089,8 +1073,7 @@ void EwsResource::folderDeleteRequestFinished(KJob *job)
     EwsDeleteFolderRequest::Response resp = req->responses().first();
     if (resp.isSuccess()) {
         changeProcessed();
-    }
-    else {
+    } else {
         cancelTask(i18nc("@info:status", "Failed to delete folder"));
         mFolderSyncState.clear();
         synchronizeCollectionTree();
@@ -1102,10 +1085,9 @@ void EwsResource::sendItem(const Akonadi::Item &item)
     EwsItemType type = EwsItemHandler::mimeToItemType(item.mimeType());
     if (isEwsMessageItemType(type)) {
         itemSent(item, TransportFailed, QStringLiteral("Item type not supported for creation"));
-    }
-    else {
+    } else {
         EwsCreateItemJob *job = EwsItemHandler::itemHandler(type)->createItemJob(mEwsClient, item,
-            Collection(), mTagStore, this);
+                                Collection(), mTagStore, this);
         job->setSend(true);
         job->setProperty("item", QVariant::fromValue<Item>(item));
         connect(job, &EwsCreateItemJob::result, this, &EwsResource::itemSendRequestFinished);
@@ -1169,8 +1151,7 @@ void EwsResource::messageSendRequestFinished(KJob *job)
     EwsCreateItemRequest::Response resp = req->responses().first();
     if (resp.isSuccess()) {
         Q_EMIT messageSent(id, QString());
-    }
-    else {
+    } else {
         Q_EMIT messageSent(id, resp.responseMessage());
     }
 }
@@ -1178,7 +1159,7 @@ void EwsResource::messageSendRequestFinished(KJob *job)
 
 void EwsResource::foldersModifiedEvent(EwsId::List folders)
 {
-    Q_FOREACH(const EwsId &id, folders) {
+    Q_FOREACH (const EwsId &id, folders) {
         Collection c;
         c.setRemoteId(id.id());
         CollectionFetchJob *job = new CollectionFetchJob(c, CollectionFetchJob::Base);
@@ -1233,7 +1214,7 @@ void EwsResource::fetchSpecialFolders()
 {
     CollectionFetchJob *job = new CollectionFetchJob(mRootCollection, CollectionFetchJob::Recursive, this);
     connect(job, &CollectionFetchJob::collectionsReceived, this, &EwsResource::specialFoldersCollectionsRetrieved);
-    connect(job, &CollectionFetchJob::result, this, [this](KJob *job) {
+    connect(job, &CollectionFetchJob::result, this, [this](KJob * job) {
         if (job->error()) {
             qCWarningNC(EWSRES_LOG) << "Special folders fetch failed:" << job->errorString();
         }
@@ -1246,7 +1227,7 @@ void EwsResource::specialFoldersCollectionsRetrieved(const Collection::List &fol
     QStringList queryItemNames;
     EwsId::List queryItems;
 
-    Q_FOREACH(const SpecialFolders &sf, specialFolderList) {
+    Q_FOREACH (const SpecialFolders &sf, specialFolderList) {
         queryItems.append(EwsId(sf.did));
     }
 
@@ -1270,7 +1251,7 @@ void EwsResource::specialFoldersFetchFinished(KJob *job)
     EwsGetFolderRequest *req = qobject_cast<EwsGetFolderRequest*>(job);
     if (!req) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Special collection fetch failed:")
-                        << QStringLiteral("Invalid EwsGetFolderRequest job object");
+                                << QStringLiteral("Invalid EwsGetFolderRequest job object");
         return;
     }
 
@@ -1278,23 +1259,23 @@ void EwsResource::specialFoldersFetchFinished(KJob *job)
 
     if (req->responses().size() != specialFolderList.size()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Special collection fetch failed:")
-                        << QStringLiteral("Invalid number of responses received");
+                                << QStringLiteral("Invalid number of responses received");
         return;
     }
 
     QMap<QString, Collection> map;
-    Q_FOREACH(const Collection &col, collections) {
+    Q_FOREACH (const Collection &col, collections) {
         map.insert(col.remoteId(), col);
     }
 
     auto it = specialFolderList.cbegin();
-    Q_FOREACH(const EwsGetFolderRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsGetFolderRequest::Response &resp, req->responses()) {
         if (resp.isSuccess()) {
             EwsId fid = resp.folder()[EwsFolderFieldFolderId].value<EwsId>();
             QMap<QString, Collection>::iterator mapIt = map.find(fid.id());
             if (mapIt != map.end()) {
                 qCDebugNC(EWSRES_LOG) << QStringLiteral("Registering folder %1(%2) as special collection %3")
-                                .arg(ewsHash(mapIt->remoteId())).arg(mapIt->id()).arg(it->type);
+                                      .arg(ewsHash(mapIt->remoteId())).arg(mapIt->id()).arg(it->type);
                 SpecialMailCollections::self()->registerCollection(it->type, *mapIt);
                 if (!mapIt->hasAttribute<EntityDisplayAttribute>()) {
                     EntityDisplayAttribute *attr = mapIt->attribute<EntityDisplayAttribute>(Collection::AddIfMissing);

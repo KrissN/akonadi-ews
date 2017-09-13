@@ -53,7 +53,7 @@ void EwsUpdateFolderRequest::start()
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("UpdateFolder"));
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderChanges"));
-    Q_FOREACH(const FolderChange &ch, mChanges) {
+    Q_FOREACH (const FolderChange &ch, mChanges) {
         ch.write(writer);
     }
     writer.writeEndElement();
@@ -63,7 +63,7 @@ void EwsUpdateFolderRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting UpdateFolder request (%1 changes)")
-                    .arg(mChanges.size());
+                                  .arg(mChanges.size());
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
@@ -88,10 +88,9 @@ bool EwsUpdateFolderRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateFolder response - OK");
-        }
-        else {
+        } else {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateFolder response - %1")
-                            .arg(resp.responseMessage());
+                                          .arg(resp.responseMessage());
         }
     }
 
@@ -109,7 +108,7 @@ EwsUpdateFolderRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -124,8 +123,7 @@ EwsUpdateFolderRequest::Response::Response(QXmlStreamReader &reader)
 
             // Finish the Folders element.
             reader.skipCurrentElement();
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }
@@ -161,7 +159,7 @@ bool EwsUpdateFolderRequest::FolderChange::write(QXmlStreamWriter &writer) const
 
     writer.writeStartElement(ewsTypeNsUri, QStringLiteral("Updates"));
 
-    Q_FOREACH(const QSharedPointer<const Update> upd, mUpdates) {
+    Q_FOREACH (const QSharedPointer<const Update> upd, mUpdates) {
         if (!upd->write(writer, mType)) {
             retVal = false;
             break;

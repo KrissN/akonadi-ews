@@ -62,7 +62,7 @@ void EwsGetStreamingEventsRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetStreamingEvents request (subId: %1, timeout: %2)")
-                    .arg(ewsHash(mSubscriptionId)).arg(mTimeout);
+                                  .arg(ewsHash(mSubscriptionId)).arg(mTimeout);
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
@@ -100,13 +100,12 @@ void EwsGetStreamingEventsRequest::requestDataTimeout()
 
     QXmlStreamReader reader(mResponseData);
     if (!readResponse(reader)) {
-        Q_FOREACH(KJob *job, subjobs()) {
+        Q_FOREACH (KJob *job, subjobs()) {
             removeSubjob(job);
             job->kill();
         }
         emitResult();
-    }
-    else {
+    } else {
         Q_EMIT eventsReceived(this);
     }
 

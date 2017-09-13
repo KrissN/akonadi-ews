@@ -46,8 +46,7 @@ EwsItemHandler *EwsItemHandler::itemHandler(EwsItemType type)
     HandlerHash::iterator it = handlers->find(type);
     if (it != handlers->end()) {
         return it->data();
-    }
-    else {
+    } else {
         HandlerList::const_iterator it;
         for (it = handlerFactories->cbegin(); it != handlerFactories->cend(); ++it) {
             if (it->type == type) {
@@ -66,17 +65,13 @@ EwsItemType EwsItemHandler::mimeToItemType(QString mimeType)
 {
     if (mimeType == itemHandler(EwsItemTypeMessage)->mimeType()) {
         return EwsItemTypeMessage;
-    }
-    else if (mimeType == itemHandler(EwsItemTypeCalendarItem)->mimeType()) {
+    } else if (mimeType == itemHandler(EwsItemTypeCalendarItem)->mimeType()) {
         return EwsItemTypeCalendarItem;
-    }
-    else if (mimeType == itemHandler(EwsItemTypeTask)->mimeType()) {
+    } else if (mimeType == itemHandler(EwsItemTypeTask)->mimeType()) {
         return EwsItemTypeTask;
-    }
-    else if (mimeType == itemHandler(EwsItemTypeContact)->mimeType()) {
+    } else if (mimeType == itemHandler(EwsItemTypeContact)->mimeType()) {
         return EwsItemTypeContact;
-    }
-    else {
+    } else {
         return EwsItemTypeItem;
     }
 }
@@ -89,7 +84,7 @@ QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(QSet<QByteArray> fl
         propertyHash.insert(EwsResource::flagsProperty, QVariant());
     } else {
         QStringList flagList;
-        Q_FOREACH(const QByteArray &flag, flags) {
+        Q_FOREACH (const QByteArray &flag, flags) {
             flagList.append(QString::fromLatin1(flag));
         }
         propertyHash.insert(EwsResource::flagsProperty, flagList);
@@ -105,7 +100,7 @@ QSet<QByteArray> EwsItemHandler::readFlags(const EwsItem &item)
     QVariant flagProp = item[EwsResource::flagsProperty];
     if (!flagProp.isNull() && (flagProp.canConvert<QStringList>())) {
         QStringList flagList = flagProp.toStringList();
-        Q_FOREACH(const QString &flag, flagList) {
+        Q_FOREACH (const QString &flag, flagList) {
             flags.insert(flag.toAscii());
         }
     }

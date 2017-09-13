@@ -35,7 +35,10 @@ public:
 
     void start() override;
 
-    EwsId::List folders() { return mFolders; };
+    EwsId::List folders()
+    {
+        return mFolders;
+    };
 
     static const EwsId::List &defaultSubscriptionFolders();
 private Q_SLOTS:

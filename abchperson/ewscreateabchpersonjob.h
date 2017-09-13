@@ -27,7 +27,7 @@ class EwsCreateAbchPersonJob : public EwsCreateItemJob
     Q_OBJECT
 public:
     EwsCreateAbchPersonJob(EwsClient &client, const Akonadi::Item &item,
-                     const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
+                           const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
     virtual ~EwsCreateAbchPersonJob();
     virtual bool setSend(bool send = true) override;
 protected:

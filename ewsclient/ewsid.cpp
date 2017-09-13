@@ -59,7 +59,8 @@ static const QString distinguishedIdNames[] = {
 class EwsIdComparatorRegistrar
 {
 public:
-    EwsIdComparatorRegistrar() {
+    EwsIdComparatorRegistrar()
+    {
         QMetaType::registerComparators<EwsId>();
     };
 };
@@ -114,8 +115,7 @@ EwsId &EwsId::operator=(const EwsId &other)
     mType = other.mType;
     if (mType == Distinguished) {
         mDid = other.mDid;
-    }
-    else if (mType == Real) {
+    } else if (mType == Real) {
         mId = other.mId;
         mChangeKey = other.mChangeKey;
     }
@@ -127,8 +127,7 @@ EwsId &EwsId::operator=(EwsId &&other)
     mType = other.mType;
     if (mType == Distinguished) {
         mDid = other.mDid;
-    }
-    else if (mType == Real) {
+    } else if (mType == Real) {
         mId = std::move(other.mId);
         mChangeKey = std::move(other.mChangeKey);
     }
@@ -142,8 +141,7 @@ bool EwsId::operator==(const EwsId &other) const
 
     if (mType == Distinguished) {
         return (mDid == other.mDid);
-    }
-    else if (mType == Real) {
+    } else if (mType == Real) {
         return (mId == other.mId && mChangeKey == other.mChangeKey);
     }
     return true;
@@ -156,8 +154,7 @@ bool EwsId::operator<(const EwsId &other) const
 
     if (mType == Distinguished) {
         return (mDid < other.mDid);
-    }
-    else if (mType == Real) {
+    } else if (mType == Real) {
         return (mId < other.mId && mChangeKey < other.mChangeKey);
     }
     return false;
@@ -169,8 +166,7 @@ void EwsId::writeFolderIds(QXmlStreamWriter &writer) const
         writer.writeStartElement(ewsTypeNsUri, QStringLiteral("DistinguishedFolderId"));
         writer.writeAttribute(QStringLiteral("Id"), distinguishedIdNames[mDid]);
         writer.writeEndElement();
-    }
-    else if (mType == Real) {
+    } else if (mType == Real) {
 #ifdef HAVE_INBOX_FILTERING_WORKAROUND
         if (mId == QStringLiteral("INBOX")) {
             if (inboxId.isEmpty()) {
@@ -239,13 +235,11 @@ QDebug operator<<(QDebug debug, const EwsId &id)
     QDebug d = debug.nospace().noquote();
     d << QStringLiteral("EwsId(");
 
-    switch (id.mType)
-    {
+    switch (id.mType) {
     case EwsId::Distinguished:
         d << QStringLiteral("Distinguished: ") << distinguishedIdNames[id.mDid];
         break;
-    case EwsId::Real:
-    {
+    case EwsId::Real: {
         QString name = EwsClient::folderHash.value(id.mId, ewsHash(id.mId));
         d << name << QStringLiteral(", ") << ewsHash(id.mChangeKey);
         break;

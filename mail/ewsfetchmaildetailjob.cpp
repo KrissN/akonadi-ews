@@ -48,10 +48,10 @@ EwsFetchMailDetailJob::EwsFetchMailDetailJob(EwsClient &client, QObject *parent,
     shape << EwsPropertyField(QStringLiteral("message:ReplyTo"));
     shape << EwsPropertyField(QStringLiteral("message:InternetMessageId"));
     shape << EwsPropertyField(QStringLiteral("item:Size"));
-    Q_FOREACH(const EwsPropertyField &field, EwsMailHandler::flagsProperties()) {
+    Q_FOREACH (const EwsPropertyField &field, EwsMailHandler::flagsProperties()) {
         shape << field;
     }
-    Q_FOREACH(const EwsPropertyField &field, EwsItemHandler::tagsProperties()) {
+    Q_FOREACH (const EwsPropertyField &field, EwsItemHandler::tagsProperties()) {
         shape << field;
     }
     mRequest->setItemShape(shape);
@@ -66,7 +66,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
 {
     Item::List::iterator it = mChangedItems.begin();
 
-    Q_FOREACH(const EwsGetItemRequest::Response &resp, responses) {
+    Q_FOREACH (const EwsGetItemRequest::Response &resp, responses) {
         Item &item = *it;
 
         if (!resp.isSuccess()) {
@@ -93,7 +93,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         if (Q_LIKELY(v.isValid())) {
             EwsMailbox::List mboxList = v.value<EwsMailbox::List>();
             QStringList addrList;
-            Q_FOREACH(const EwsMailbox &mbox, mboxList) {
+            Q_FOREACH (const EwsMailbox &mbox, mboxList) {
                 msg->to()->addAddress(mbox);
             }
         }
@@ -102,7 +102,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         if (Q_LIKELY(v.isValid())) {
             EwsMailbox::List mboxList = v.value<EwsMailbox::List>();
             QStringList addrList;
-            Q_FOREACH(const EwsMailbox &mbox, mboxList) {
+            Q_FOREACH (const EwsMailbox &mbox, mboxList) {
                 msg->cc()->addAddress(mbox);
             }
         }
@@ -111,7 +111,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         if (v.isValid()) {
             EwsMailbox::List mboxList = v.value<EwsMailbox::List>();
             QStringList addrList;
-            Q_FOREACH(const EwsMailbox &mbox, mboxList) {
+            Q_FOREACH (const EwsMailbox &mbox, mboxList) {
                 msg->bcc()->addAddress(mbox);
             }
         }
@@ -156,7 +156,7 @@ void EwsFetchMailDetailJob::processItems(const QList<EwsGetItemRequest::Response
         // records flags added and removed. In the latter it sets a flag indicating that flags were
         // reset.
         // For some strange reason Akonadi is not seeing the flags in the latter case.
-        Q_FOREACH(const QByteArray &flag, EwsMailHandler::readFlags(ewsItem)) {
+        Q_FOREACH (const QByteArray &flag, EwsMailHandler::readFlags(ewsItem)) {
             item.setFlag(flag);
         }
         qCDebugNC(EWSRES_LOG) << "EwsFetchMailDetailJob::processItems:" << ewsHash(item.remoteId()) << item.flags();

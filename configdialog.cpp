@@ -107,7 +107,7 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
 
     int selectedIndex = -1;
     int i = 0;
-    Q_FOREACH(const StringPair &item, userAgents) {
+    Q_FOREACH (const StringPair &item, userAgents) {
         mUi->userAgentCombo->addItem(item.first, item.second);
         if (mParentResource->settings()->userAgent() == item.second) {
             selectedIndex = i;
@@ -159,8 +159,7 @@ void ConfigDialog::save()
     mConfigManager->updateSettings();
     if (mUi->pollRadioButton->isChecked()) {
         mParentResource->settings()->setRetrievalMethod(0);
-    }
-    else {
+    } else {
         mParentResource->settings()->setRetrievalMethod(1);
     }
 
@@ -190,9 +189,9 @@ void ConfigDialog::save()
 void ConfigDialog::performAutoDiscovery()
 {
     mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
-        fullUsername(), mUi->passwordEdit->text(),
-        mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(),
-        mUi->kcfg_EnableNTLMv2->isChecked(), this);
+            fullUsername(), mUi->passwordEdit->text(),
+            mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(),
+            mUi->kcfg_EnableNTLMv2->isChecked(), this);
     connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
     mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
     connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -205,8 +204,7 @@ void ConfigDialog::autoDiscoveryFinished(KJob *job)
     if (job->error() || job != mAutoDiscoveryJob) {
         KMessageBox::error(this, job->errorText(), i18nc("Exchange server autodiscovery", "Autodiscovery failed"));
         mProgressDialog->reject();
-    }
-    else {
+    } else {
         mProgressDialog->accept();
         mUi->kcfg_BaseUrl->setText(mAutoDiscoveryJob->ewsUrl());
     }
@@ -223,8 +221,7 @@ void ConfigDialog::tryConnectFinished(KJob *job)
         mUi->serverStatusText->setText(i18nc("Exchange server status", "Failed"));
         mUi->serverVersionText->setText(i18nc("Exchange server version", "Unknown"));
         mProgressDialog->reject();
-    }
-    else {
+    } else {
         mUi->serverStatusText->setText(i18nc("Exchange server status", "OK"));
         mUi->serverVersionText->setText(mTryConnectJob->serverVersion().toString());
         mProgressDialog->accept();
@@ -280,9 +277,9 @@ void ConfigDialog::dialogAccepted()
 {
     if (mUi->kcfg_AutoDiscovery->isChecked() && mAutoDiscoveryNeeded) {
         mAutoDiscoveryJob = new EwsAutodiscoveryJob(mUi->kcfg_Email->text(),
-            fullUsername(), mUi->passwordEdit->text(),
-            mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(),
-            mUi->kcfg_EnableNTLMv2->isChecked(), this);
+                fullUsername(), mUi->passwordEdit->text(),
+                mUi->userAgentGroupBox->isEnabled() ? mUi->userAgentEdit->text() : QString(),
+                mUi->kcfg_EnableNTLMv2->isChecked(), this);
         connect(mAutoDiscoveryJob, &EwsAutodiscoveryJob::result, this, &ConfigDialog::autoDiscoveryFinished);
         mProgressDialog = new ProgressDialog(this, ProgressDialog::AutoDiscovery);
         connect(mProgressDialog, &QDialog::rejected, this, &ConfigDialog::autoDiscoveryCancelled);
@@ -293,8 +290,7 @@ void ConfigDialog::dialogAccepted()
                                            i18n("Exchange server autodiscovery")) == KMessageBox::Yes) {
                 accept();
                 return;
-            }
-            else {
+            } else {
                 return;
             }
         }
@@ -321,12 +317,10 @@ void ConfigDialog::dialogAccepted()
                                            i18n("Exchange server connection")) == KMessageBox::Yes) {
                 accept();
                 return;
-            }
-            else {
+            } else {
                 return;
             }
-        }
-        else {
+        } else {
             accept();
         }
     }
@@ -370,8 +364,7 @@ void ConfigDialog::tryConnect()
         mUi->serverStatusText->setText(i18nc("Exchange server status", "Failed"));
         mUi->serverVersionText->setText(i18nc("Exchange server version", "Unknown"));
         KMessageBox::error(this, mTryConnectJob->errorText(), i18n("Connection failed"));
-    }
-    else {
+    } else {
         mUi->serverStatusText->setText(i18nc("Exchange server status", "OK"));
         mUi->serverVersionText->setText(mTryConnectJob->serverVersion().toString());
     }

@@ -76,16 +76,22 @@ public:
     virtual void itemAdded(const Akonadi::Item &item, const Akonadi::Collection &collection) override;
     virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) override;
     virtual void itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
-                                  const QSet<QByteArray> &removedFlags) override;
+                                   const QSet<QByteArray> &removedFlags) override;
     virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
                             const Akonadi::Collection &destinationCollection) override;
     virtual void itemsRemoved(const Akonadi::Item::List &items) override;
 
     virtual void sendItem(const Akonadi::Item &item) override;
 
-    const Akonadi::Collection &rootCollection() const { return mRootCollection; };
+    const Akonadi::Collection &rootCollection() const
+    {
+        return mRootCollection;
+    };
 
-    Settings *settings() { return mSettings.data(); };
+    Settings *settings()
+    {
+        return mSettings.data();
+    };
 protected:
     void doSetOnline(bool online) override;
 public Q_SLOTS:

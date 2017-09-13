@@ -43,7 +43,7 @@ void EwsCreateItemJob::start()
 {
     /* Before starting check if all Akonadi tags are known to the tag store */
     bool syncNeeded = false;
-    Q_FOREACH(const Akonadi::Tag &tag, mItem.tags()) {
+    Q_FOREACH (const Akonadi::Tag &tag, mItem.tags()) {
         if (!mTagStore->containsId(tag.id())) {
             syncNeeded = true;
             break;
@@ -53,7 +53,7 @@ void EwsCreateItemJob::start()
     if (syncNeeded) {
         qDebug() << "EwsCreateItemJob: sync needed";
         EwsAkonadiTagsSyncJob *job = new EwsAkonadiTagsSyncJob(mTagStore,
-            mClient, qobject_cast<EwsResource*>(parent())->rootCollection(), this);
+                mClient, qobject_cast<EwsResource*>(parent())->rootCollection(), this);
         connect(job, &EwsAkonadiTagsSyncJob::result, this, &EwsCreateItemJob::tagSyncFinished);
         job->start();
     } else {

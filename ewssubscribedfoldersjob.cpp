@@ -43,7 +43,7 @@ void EwsSubscribedFoldersJob::start()
     if (mSettings->serverSubscriptionList() == QStringList() << QStringLiteral("default")) {
         ids = defaultSubscriptionFolders();
     } else {
-        Q_FOREACH(const QString &id, mSettings->serverSubscriptionList()) {
+        Q_FOREACH (const QString &id, mSettings->serverSubscriptionList()) {
             ids << EwsId(id);
         }
     }
@@ -70,7 +70,7 @@ void EwsSubscribedFoldersJob::verifySubFoldersRequestFinished(KJob *job)
 
         auto it = sourceIds.cbegin();
 
-        Q_FOREACH(const EwsGetFolderRequest::Response &resp, req->responses()) {
+        Q_FOREACH (const EwsGetFolderRequest::Response &resp, req->responses()) {
             if (resp.isSuccess()) {
                 // Take just the id without the change key as the actual folder version is irrelevant
                 // here
@@ -94,7 +94,7 @@ void EwsSubscribedFoldersJob::verifySubFoldersRequestFinished(KJob *job)
 const EwsId::List &EwsSubscribedFoldersJob::defaultSubscriptionFolders()
 {
     static const EwsId::List list = {EwsId(EwsDIdInbox), EwsId(EwsDIdCalendar), EwsId(EwsDIdTasks),
-        EwsId(EwsDIdContacts)};
+                                     EwsId(EwsDIdContacts)};
 
     return list;
 }

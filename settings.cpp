@@ -44,7 +44,7 @@ bool Settings::requestPassword(QString &password, bool ask)
     }
 
     QScopedPointer<KWallet::Wallet> wallet(KWallet::Wallet::openWallet(KWallet::Wallet::NetworkWallet(),
-                                                                       mWindowId));
+                                           mWindowId));
     if (wallet && wallet->isOpen()) {
         if (wallet->hasFolder(QStringLiteral("akonadi-ews"))) {
             wallet->setFolder(QStringLiteral("akonadi-ews"));
@@ -83,7 +83,7 @@ void Settings::setPassword(const QString &password)
 {
     mPassword = password;
     QScopedPointer<KWallet::Wallet> wallet(KWallet::Wallet::openWallet(KWallet::Wallet::NetworkWallet(),
-                                                                       mWindowId));
+                                           mWindowId));
     if (wallet && wallet->isOpen()) {
         if (!wallet->hasFolder(QStringLiteral("akonadi-ews"))) {
             wallet->createFolder(QStringLiteral("akonadi-ews"));

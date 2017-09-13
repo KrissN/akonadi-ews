@@ -53,11 +53,11 @@ void EwsCreateItemRequest::start()
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("CreateItem"));
 
     writer.writeAttribute(QStringLiteral("MessageDisposition"),
-        messageDispositionNames[mMessageDisp]);
+                          messageDispositionNames[mMessageDisp]);
 
     if (mMeetingDisp != EwsMeetingDispUnspecified) {
         writer.writeAttribute(QStringLiteral("SendMeetingInvitations"),
-            meetingDispositionNames[mMeetingDisp]);
+                              meetingDispositionNames[mMeetingDisp]);
     }
 
     if (mMessageDisp == EwsDispSaveOnly || mMessageDisp == EwsDispSendAndSaveCopy) {
@@ -67,7 +67,7 @@ void EwsCreateItemRequest::start()
     }
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("Items"));
-    Q_FOREACH(const EwsItem &item, mItems) {
+    Q_FOREACH (const EwsItem &item, mItems) {
         item.write(writer);
     }
     writer.writeEndElement();
@@ -77,7 +77,7 @@ void EwsCreateItemRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting CreateItem request (%1 items, parent %2)")
-                    .arg(mItems.size()).arg(mSavedFolderId.id());
+                                  .arg(mItems.size()).arg(mSavedFolderId.id());
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
@@ -102,10 +102,9 @@ bool EwsCreateItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got CreateItem response - OK");
-        }
-        else {
+        } else {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got CreateItem response - %1")
-                            .arg(resp.responseMessage());
+                                        .arg(resp.responseMessage());
         }
     }
     mResponses.append(resp);
@@ -122,7 +121,7 @@ EwsCreateItemRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -137,8 +136,7 @@ EwsCreateItemRequest::Response::Response(QXmlStreamReader &reader)
                 // Finish the Items element.
                 reader.skipCurrentElement();
             }
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }

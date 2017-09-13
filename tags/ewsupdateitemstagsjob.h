@@ -48,7 +48,10 @@ public:
 
     void start() override;
 
-    Akonadi::Item::List items() { return mItems; };
+    Akonadi::Item::List items()
+    {
+        return mItems;
+    };
 private Q_SLOTS:
     void itemsTagsChangedTagsFetched(KJob *job);
     void updateItemsTagsRequestFinished(KJob *job);

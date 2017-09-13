@@ -24,7 +24,7 @@
 #include "ewsclient_debug.h"
 
 EwsAutodiscoveryJob::EwsAutodiscoveryJob(QString email, QString username, QString password,
-                                         const QString &userAgent, bool enableNTLMv2, QObject *parent)
+        const QString &userAgent, bool enableNTLMv2, QObject *parent)
     : EwsJob(parent), mEmail(email), mUsername(username), mPassword(password), mUserAgent(userAgent),
       mEnableNTLMv2(enableNTLMv2), mUsedCreds(false)
 {
@@ -79,7 +79,7 @@ void EwsAutodiscoveryJob::sendNextRequest(bool useCreds)
     }
     mUsedCreds = useCreds;
     EwsPoxAutodiscoverRequest *req = new EwsPoxAutodiscoverRequest(url, mEmail, mUserAgent,
-                                                                   mEnableNTLMv2, this);
+            mEnableNTLMv2, this);
     connect(req, &EwsPoxAutodiscoverRequest::result, this,
             &EwsAutodiscoveryJob::autodiscoveryRequestFinished);
     req->start();
@@ -106,8 +106,7 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
             mUrlQueue.head() = req->lastHttpUrl().toString();
             sendNextRequest(true);
             return;
-        }
-        else {
+        } else {
             mUrlQueue.removeFirst();
         }
 
@@ -115,20 +114,16 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
             setErrorText(job->errorText());
             setError(job->error());
             emitResult();
-        }
-        else {
+        } else {
             sendNextRequest(false);
         }
-    }
-    else {
+    } else {
         switch (req->action()) {
-        case EwsPoxAutodiscoverRequest::Settings:
-        {
+        case EwsPoxAutodiscoverRequest::Settings: {
             EwsPoxAutodiscoverRequest::Protocol proto = req->protocol(EwsPoxAutodiscoverRequest::ExchangeProto);
             if (!proto.isValid()) {
                 setErrorMsg(i18n("Exchange protocol information not found"));
-            }
-            else {
+            } else {
                 mEwsUrl = proto.ewsUrl();
                 mOabUrl = proto.oabUrl();
             }

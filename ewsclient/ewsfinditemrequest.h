@@ -34,7 +34,10 @@ public:
 
     void setFolderId(const EwsId &id);
     void setItemShape(const EwsItemShape &shape);
-    void setTraversal(EwsTraversalType traversal) { mTraversal = traversal; };
+    void setTraversal(EwsTraversalType traversal)
+    {
+        mTraversal = traversal;
+    };
     void setPagination(EwsIndexedViewBasePoint basePoint, unsigned offset, int maxItems = -1)
     {
         mFractional = false;
@@ -54,12 +57,27 @@ public:
 
     virtual void start() override;
 
-    bool includesLastItem() const { return mIncludesLastItem; };
-    int nextOffset() const { return mNextOffset; };
-    int nextNumerator() const { return mNextNumerator; };
-    int nextDenominator() const { return mNextDenominator; };
+    bool includesLastItem() const
+    {
+        return mIncludesLastItem;
+    };
+    int nextOffset() const
+    {
+        return mNextOffset;
+    };
+    int nextNumerator() const
+    {
+        return mNextNumerator;
+    };
+    int nextDenominator() const
+    {
+        return mNextDenominator;
+    };
 
-    const QList<EwsItem> items() const { return mItems; };
+    const QList<EwsItem> items() const
+    {
+        return mItems;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

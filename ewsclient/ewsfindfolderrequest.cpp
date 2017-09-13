@@ -112,7 +112,7 @@ EwsFindFolderResponse::EwsFindFolderResponse(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -120,8 +120,7 @@ EwsFindFolderResponse::EwsFindFolderResponse(QXmlStreamReader &reader)
             if (!parseRootFolder(reader)) {
                 return;
             }
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }
@@ -132,34 +131,34 @@ bool EwsFindFolderResponse::parseRootFolder(QXmlStreamReader &reader)
 {
     if (reader.namespaceUri() != ewsMsgNsUri || reader.name() != QStringLiteral("RootFolder")) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
-                        .arg(QStringLiteral("RootFolder")).arg(reader.qualifiedName().toString()));
+                           .arg(QStringLiteral("RootFolder")).arg(reader.qualifiedName().toString()));
     }
 
     if (!reader.attributes().hasAttribute(QStringLiteral("TotalItemsInView"))
         || !reader.attributes().hasAttribute(QStringLiteral("TotalItemsInView"))) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - missing attributes of %1 element.")
-                                .arg(QStringLiteral("RootFolder")));
+                           .arg(QStringLiteral("RootFolder")));
     }
     bool ok;
     unsigned totalItems = reader.attributes().value(QStringLiteral("TotalItemsInView")).toUInt(&ok);
     if (!ok) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - failed to read %1 attribute.")
-                                        .arg(QStringLiteral("TotalItemsInView")));
+                           .arg(QStringLiteral("TotalItemsInView")));
     }
 
     if (!reader.readNextStartElement()) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
-                        .arg(QStringLiteral("RootFolder")));
+                           .arg(QStringLiteral("RootFolder")));
     }
 
     if (reader.namespaceUri() != ewsTypeNsUri || reader.name() != QStringLiteral("Folders")) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected %1 element (got %2).")
-                        .arg(QStringLiteral("Folders")).arg(reader.qualifiedName().toString()));
+                           .arg(QStringLiteral("Folders")).arg(reader.qualifiedName().toString()));
     }
 
     if (!reader.readNextStartElement()) {
         return setErrorMsg(QStringLiteral("Failed to read EWS request - expected a child element in %1 element.")
-                        .arg(QStringLiteral("Folders")));
+                           .arg(QStringLiteral("Folders")));
     }
 
     if (reader.namespaceUri() != ewsTypeNsUri) {
@@ -203,15 +202,14 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
         folder = new EwsFolder(reader);
         if (!folder->isValid()) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                     .arg(QStringLiteral("Folder")));
+                        .arg(QStringLiteral("Folder")));
             return 0;
         }
         QVariant dn = (*folder)[EwsFolderFieldDisplayName];
         if (!dn.isNull()) {
             EwsClient::folderHash[(*folder)[EwsFolderFieldFolderId].value<EwsId>().id()] = dn.toString();
         }
-    }
-    else {
+    } else {
         qCWarning(EWSRES_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
         reader.skipCurrentElement();
     }

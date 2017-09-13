@@ -170,7 +170,7 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
 
     if (!itemReq->error()) {
         removeSubjob(job);
-        Q_FOREACH(const EwsSyncFolderItemsRequest::Change &change, itemReq->changes()) {
+        Q_FOREACH (const EwsSyncFolderItemsRequest::Change &change, itemReq->changes()) {
             switch (change.type()) {
             case EwsSyncFolderItemsRequest::Create:
                 mRemoteAddedItems.append(change.item());
@@ -201,8 +201,7 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
             addSubjob(syncItemsReq);
             syncItemsReq->start();
             qDebug() << "remoteItemFetchDone: started next batch";
-        }
-        else {
+        } else {
             mSyncState = itemReq->syncState();
             --mPendingJobs;
             if (mPendingJobs == 0) {
@@ -229,13 +228,11 @@ void EwsFetchItemsJob::checkedItemsFetchFinished(KJob *job)
         Q_ASSERT(mItemsToCheck.size() == req->responses().size());
 
         EwsId::List::const_iterator it = mItemsToCheck.cbegin();
-        Q_FOREACH(const EwsGetItemRequest::Response &resp, req->responses())
-        {
+        Q_FOREACH (const EwsGetItemRequest::Response &resp, req->responses()) {
             if (resp.isSuccess()) {
                 qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 found - readding").arg(ewsHash(it->id()));
                 mRemoteAddedItems.append(resp.item());
-            }
-            else {
+            } else {
                 qCDebugNC(EWSRES_LOG) << QStringLiteral("Checked item %1 not found - removing").arg(ewsHash(it->id()));
                 mRemoteDeletedIds.append(*it);
             }
@@ -258,11 +255,11 @@ void EwsFetchItemsJob::compareItemLists()
     Q_EMIT percent(0);
 
     QHash<QString, Item> itemHash;
-    Q_FOREACH(const Item &item, mLocalItems) {
+    Q_FOREACH (const Item &item, mLocalItems) {
         itemHash.insert(item.remoteId(), item);
     }
 
-    Q_FOREACH(const EwsItem &ewsItem, mRemoteAddedItems) {
+    Q_FOREACH (const EwsItem &ewsItem, mRemoteAddedItems) {
         /* In case of a full sync all existing items appear as added on the remote side. Therefore
          * look for the item in the local list before creating a new copy. */
         EwsId id(ewsItem[EwsItemFieldItemId].value<EwsId>());
@@ -285,8 +282,7 @@ void EwsFetchItemsJob::compareItemLists()
                 return;
             }
             toFetchItems[type].append(item);
-        }
-        else {
+        } else {
             Item &item = *it;
             item.clearPayload();
             item.setRemoteRevision(id.changeKey());
@@ -307,14 +303,13 @@ void EwsFetchItemsJob::compareItemLists()
         for (it = itemHash.begin(); it != itemHash.end(); ++it) {
             mDeletedItems.append(it.value());
         }
-    }
-    else {
-        Q_FOREACH(const EwsItem &ewsItem, mRemoteChangedItems) {
+    } else {
+        Q_FOREACH (const EwsItem &ewsItem, mRemoteChangedItems) {
             EwsId id(ewsItem[EwsItemFieldItemId].value<EwsId>());
             QHash<QString, Item>::iterator it = itemHash.find(id.id());
             if (it == itemHash.end()) {
                 setErrorMsg(QStringLiteral("Got update for item %1, but item not found in local store.")
-                                .arg(ewsHash(id.id())));
+                            .arg(ewsHash(id.id())));
                 emitResult();
                 return;
             }
@@ -332,7 +327,7 @@ void EwsFetchItemsJob::compareItemLists()
         }
 
         // In case of an incremental sync deleted items will be given explicitly. */
-        Q_FOREACH(const EwsId &id, mRemoteDeletedIds) {
+        Q_FOREACH (const EwsId &id, mRemoteDeletedIds) {
             QHash<QString, Item>::iterator it = itemHash.find(id.id());
             /* If one or more items marked as deleted are not found it means that the folder is out
              * of sync. The only way to fix this is to issue a full sync.
@@ -345,7 +340,7 @@ void EwsFetchItemsJob::compareItemLists()
                 }
                 if (!mItemsToCheck.contains(id) && qit == mQueuedUpdates[EwsDeletedEvent].end()) {
                     setErrorMsg(QStringLiteral("Got delete for item %1, but item not found in local store.")
-                                    .arg(ewsHash(id.id())));
+                                .arg(ewsHash(id.id())));
                     emitResult();
                     return;
                 }
@@ -360,7 +355,7 @@ void EwsFetchItemsJob::compareItemLists()
             QHash<QString, Item>::iterator iit = itemHash.find(it.key().id());
             if (iit == itemHash.end()) {
                 setErrorMsg(QStringLiteral("Got read flag change for item %1, but item not found in local store.")
-                                .arg(it.key().id()));
+                            .arg(it.key().id()));
                 emitResult();
                 return;
             }
@@ -372,8 +367,8 @@ void EwsFetchItemsJob::compareItemLists()
     }
 
     qCDebugNC(EWSRES_LOG) << QStringLiteral("Changed %2, deleted %3, new %4")
-                    .arg(mRemoteChangedItems.size())
-                    .arg(mDeletedItems.size()).arg(mRemoteAddedItems.size());
+                          .arg(mRemoteChangedItems.size())
+                          .arg(mDeletedItems.size()).arg(mRemoteAddedItems.size());
 
     bool fetch = false;
     for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); ++iType) {
@@ -384,12 +379,11 @@ void EwsFetchItemsJob::compareItemLists()
                 if (!handler) {
                     // TODO: Temporarily ignore unsupported item types.
                     qCWarning(EWSRES_LOG) << QStringLiteral("Unable to initialize fetch for item type %1")
-                                    .arg(iType);
+                                          .arg(iType);
                     /*setErrorMsg(QStringLiteral("Unable to initialize fetch for item type %1").arg(iType));
                     emitResult();
                     return;*/
-                }
-                else {
+                } else {
                     EwsFetchItemDetailJob *job = handler->fetchItemDetailJob(mClient, this, mCollection);
                     Item::List itemList = toFetchItems[iType].mid(i, fetchBatchSize);
                     job->setItemLists(itemList, &mDeletedItems);
@@ -404,8 +398,7 @@ void EwsFetchItemsJob::compareItemLists()
     if (!fetch) {
         // Nothing to fetch - we're done here.
         emitResult();
-    }
-    else {
+    } else {
         qDebug() << "compareItemLists: jobs" << subjobs().size();
         subjobs().first()->start();
     }
@@ -424,8 +417,7 @@ void EwsFetchItemsJob::itemDetailFetchDone(KJob *job)
         qDebug() << "itemDetailFetchDone: jobs" << subjobs().size();
         if (subjobs().size() == 0) {
             emitResult();
-        }
-        else {
+        } else {
             subjobs().first()->start();
         }
     }
@@ -434,7 +426,7 @@ void EwsFetchItemsJob::itemDetailFetchDone(KJob *job)
 void EwsFetchItemsJob::setQueuedUpdates(const QueuedUpdateList &updates)
 {
     mQueuedUpdates.clear();
-    Q_FOREACH(const QueuedUpdate &upd, updates) {
+    Q_FOREACH (const QueuedUpdate &upd, updates) {
         mQueuedUpdates[upd.type].insert(upd.id, upd.changeKey);
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Queued update %1 for item %2").arg(upd.type).arg(ewsHash(upd.id));
     }
@@ -447,7 +439,7 @@ void EwsFetchItemsJob::syncTags()
         emitResult();
     } else {
         EwsAkonadiTagsSyncJob *job = new EwsAkonadiTagsSyncJob(mTagStore, mClient,
-            qobject_cast<EwsResource*>(parent())->rootCollection(), this);
+                qobject_cast<EwsResource*>(parent())->rootCollection(), this);
         connect(job, &EwsAkonadiTagsSyncJob::result, this, &EwsFetchItemsJob::tagSyncFinished);
         job->start();
         mTagsSynced = true;

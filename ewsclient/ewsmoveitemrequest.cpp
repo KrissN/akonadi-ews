@@ -43,7 +43,7 @@ void EwsMoveItemRequest::start()
     writer.writeEndElement();
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("ItemIds"));
-    Q_FOREACH(const EwsId &id, mIds) {
+    Q_FOREACH (const EwsId &id, mIds) {
         id.writeItemIds(writer);
     }
     writer.writeEndElement();
@@ -77,10 +77,9 @@ bool EwsMoveItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got MoveItem response - OK");
-        }
-        else {
+        } else {
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got MoveItem response - %1")
-                .arg(resp.responseMessage());
+                                          .arg(resp.responseMessage());
         }
     }
     mResponses.append(resp);
@@ -97,7 +96,7 @@ EwsMoveItemRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -112,8 +111,7 @@ EwsMoveItemRequest::Response::Response(QXmlStreamReader &reader)
                 // Finish the Items element.
                 reader.skipCurrentElement();
             }
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }

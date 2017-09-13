@@ -36,12 +36,14 @@ public:
         : mBaseShape(other.mBaseShape), mProps(other.mProps) {};
     EwsFolderShape(EwsFolderShape &&other)
         : mBaseShape(other.mBaseShape), mProps(other.mProps) {};
-    EwsFolderShape &operator=(EwsFolderShape &&other) {
+    EwsFolderShape &operator=(EwsFolderShape &&other)
+    {
         mBaseShape = other.mBaseShape;
         mProps = std::move(other.mProps);
         return *this;
     }
-    EwsFolderShape &operator=(const EwsFolderShape &other) {
+    EwsFolderShape &operator=(const EwsFolderShape &other)
+    {
         mBaseShape = other.mBaseShape;
         mProps = other.mProps;
         return *this;

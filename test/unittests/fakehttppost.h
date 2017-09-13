@@ -26,7 +26,8 @@
 
 #include "faketransferjob.h"
 
-namespace KIO {
+namespace KIO
+{
 
 TransferJob *http_post(const QUrl &url, const QByteArray &postData, JobFlags flags)
 {

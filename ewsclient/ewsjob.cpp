@@ -31,7 +31,7 @@ EwsJob::~EwsJob()
 
 bool EwsJob::doKill()
 {
-    Q_FOREACH(KJob *job, subjobs()) {
+    Q_FOREACH (KJob *job, subjobs()) {
         job->kill(KJob::Quietly);
     }
     clearSubjobs();

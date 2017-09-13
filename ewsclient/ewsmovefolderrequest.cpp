@@ -43,7 +43,7 @@ void EwsMoveFolderRequest::start()
     writer.writeEndElement();
 
     writer.writeStartElement(ewsMsgNsUri, QStringLiteral("FolderIds"));
-    Q_FOREACH(const EwsId &id, mIds) {
+    Q_FOREACH (const EwsId &id, mIds) {
         id.writeFolderIds(writer);
     }
     writer.writeEndElement();
@@ -53,7 +53,7 @@ void EwsMoveFolderRequest::start()
     endSoapDocument(writer);
 
     qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting MoveFolder request (%1 folders, to %2)")
-                    .arg(mIds.size()).arg(mDestFolderId.id());
+                                  .arg(mIds.size()).arg(mDestFolderId.id());
 
     qCDebug(EWSRES_PROTO_LOG) << reqString;
 
@@ -78,10 +78,9 @@ bool EwsMoveFolderRequest::parseItemsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got MoveFolder response - OK");
-        }
-        else {
+        } else {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got MoveFolder response - %1")
-                            .arg(resp.responseMessage());
+                                        .arg(resp.responseMessage());
         }
     }
     mResponses.append(resp);
@@ -98,7 +97,7 @@ EwsMoveFolderRequest::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -113,8 +112,7 @@ EwsMoveFolderRequest::Response::Response(QXmlStreamReader &reader)
                 // Finish the Folders element.
                 reader.skipCurrentElement();
             }
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element."));
             return;
         }

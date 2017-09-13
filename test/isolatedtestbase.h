@@ -27,7 +27,8 @@
 
 #include "fakeewsserver.h"
 
-namespace Akonadi {
+namespace Akonadi
+{
 class AgentInstance;
 }
 class FakeEwsServerThread;
@@ -38,7 +39,8 @@ class IsolatedTestBase : public QObject
 {
     Q_OBJECT
 public:
-    class Folder {
+    class Folder
+    {
     public:
         enum DistinguishedType {
             None,
@@ -132,9 +134,8 @@ class SyncFolderHierInitialDialogEntry : public DialogEntryBase
 {
 public:
     explicit SyncFolderHierInitialDialogEntry(const IsolatedTestBase::FolderList &folders,
-                                              const QString &syncState,
-                                              const QString &descr = QString(),
-                                              const ReplyCallback &callback = ReplyCallback());
+            const QString &syncState, const QString &descr = QString(),
+            const ReplyCallback &callback = ReplyCallback());
 };
 
 class UnsubscribeDialogEntry : public DialogEntryBase

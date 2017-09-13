@@ -22,8 +22,8 @@
 #include "ewsclient_debug.h"
 
 EwsCreateAbchPersonJob::EwsCreateAbchPersonJob(EwsClient &client, const Akonadi::Item &item,
-                                   const Akonadi::Collection &collection, EwsTagStore *tagStore,
-                                   EwsResource *parent)
+        const Akonadi::Collection &collection, EwsTagStore *tagStore,
+        EwsResource *parent)
     : EwsCreateItemJob(client, item, collection, tagStore, parent)
 {
 }

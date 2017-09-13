@@ -38,9 +38,18 @@ public:
                            const Akonadi::Collection &rootCollection, QObject *parent);
     virtual ~EwsFetchFoldersIncrJob();
 
-    Akonadi::Collection::List changedFolders() const { return mChangedFolders; };
-    Akonadi::Collection::List deletedFolders() const { return mDeletedFolders; };
-    const QString &syncState() const { return mSyncState; };
+    Akonadi::Collection::List changedFolders() const
+    {
+        return mChangedFolders;
+    };
+    Akonadi::Collection::List deletedFolders() const
+    {
+        return mDeletedFolders;
+    };
+    const QString &syncState() const
+    {
+        return mSyncState;
+    };
 
     virtual void start() override;
 Q_SIGNALS:

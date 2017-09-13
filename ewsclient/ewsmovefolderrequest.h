@@ -37,7 +37,10 @@ public:
     class Response : public EwsRequest::Response
     {
     public:
-        const EwsId &folderId() const { return mId; };
+        const EwsId &folderId() const
+        {
+            return mId;
+        };
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -49,12 +52,21 @@ public:
     EwsMoveFolderRequest(EwsClient &client, QObject *parent);
     virtual ~EwsMoveFolderRequest();
 
-    void setFolderIds(const EwsId::List &ids) { mIds = ids; };
-    void setDestinationFolderId(const EwsId &id) { mDestFolderId = id; };
+    void setFolderIds(const EwsId::List &ids)
+    {
+        mIds = ids;
+    };
+    void setDestinationFolderId(const EwsId &id)
+    {
+        mDestFolderId = id;
+    };
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

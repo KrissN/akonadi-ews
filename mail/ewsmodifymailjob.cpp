@@ -43,7 +43,7 @@ void EwsModifyMailJob::start()
     EwsUpdateItemRequest *req = new EwsUpdateItemRequest(mClient, this);
     EwsId itemId;
 
-    Q_FOREACH(const Item &item, mItems) {
+    Q_FOREACH (const Item &item, mItems) {
         itemId = EwsId(item.remoteId(), item.remoteRevision());
 
         if (mParts.contains("FLAGS")) {
@@ -69,8 +69,7 @@ void EwsModifyMailJob::start()
     if (doSubmit) {
         connect(req, SIGNAL(result(KJob*)), SLOT(updateItemFinished(KJob*)));
         req->start();
-    }
-    else {
+    } else {
         delete req;
         qDebug() << "Nothing to do for parts" << mParts;
         emitResult();
@@ -95,7 +94,7 @@ void EwsModifyMailJob::updateItemFinished(KJob *job)
     Q_ASSERT(req->responses().size() == mItems.size());
 
     Item::List::iterator it = mItems.begin();
-    Q_FOREACH(const EwsUpdateItemRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsUpdateItemRequest::Response &resp, req->responses()) {
         if (!resp.isSuccess()) {
             setErrorText(QStringLiteral("Item update failed: ") + resp.responseMessage());
             emitResult();

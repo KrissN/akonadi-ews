@@ -153,8 +153,7 @@ void EwsCreateMailJob::mailCreateFinished(KJob *job)
         mItem.setRemoteId(id.id());
         mItem.setRemoteRevision(id.changeKey());
         mItem.setParentCollection(mCollection);
-    }
-    else {
+    } else {
         setErrorMsg(i18n("Failed to create mail item"));
     }
 
@@ -193,8 +192,7 @@ void EwsCreateMailJob::mailCreateWorkaroundFinished(KJob *job)
         connect(req, &EwsCreateItemRequest::finished, this, &EwsCreateMailJob::mailMoveWorkaroundFinished);
         addSubjob(req);
         req->start();
-    }
-    else {
+    } else {
         setErrorMsg(i18n("Failed to create mail item"));
         emitResult();
     }
@@ -229,8 +227,7 @@ void EwsCreateMailJob::mailMoveWorkaroundFinished(KJob *job)
         mItem.setRemoteId(id.id());
         mItem.setRemoteRevision(id.changeKey());
         mItem.setParentCollection(mCollection);
-    }
-    else {
+    } else {
         setErrorMsg(i18n("Failed to create mail item"));
     }
 

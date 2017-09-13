@@ -148,24 +148,22 @@ bool EwsItemPrivate::bodyReader(QXmlStreamReader &reader, QVariant &val)
     QStringRef bodyType = reader.attributes().value(QStringLiteral("BodyType"));
     if (bodyType.isNull()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - missing %2 attribute")
-                        .arg(QStringLiteral("Body")).arg(QStringLiteral("BodyType"));
+                                .arg(QStringLiteral("Body")).arg(QStringLiteral("BodyType"));
         return false;
     }
     bool isHtml;
     if (bodyType == QStringLiteral("HTML")) {
         isHtml = true;
-    }
-    else if (bodyType == QStringLiteral("Text")) {
+    } else if (bodyType == QStringLiteral("Text")) {
         isHtml = false;
-    }
-    else {
+    } else {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read Body element- unknown body type");
         return false;
     }
     vl.append(reader.readElementText());
     if (reader.error() != QXmlStreamReader::NoError) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid content.")
-                        .arg(QStringLiteral("Body"));
+                                .arg(QStringLiteral("Body"));
         return false;
     }
     vl.append(isHtml);
@@ -180,7 +178,7 @@ bool EwsItemPrivate::messageHeadersReader(QXmlStreamReader &reader, QVariant &va
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in InternetMessageHeaders element:")
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -195,7 +193,7 @@ bool EwsItemPrivate::messageHeadersReader(QXmlStreamReader &reader, QVariant &va
             map.insert(name, value);
             if (reader.error() != QXmlStreamReader::NoError) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                                                        .arg(QStringLiteral("InternetMessageHeader"));
+                                      .arg(QStringLiteral("InternetMessageHeader"));
                 return false;
             }
         }
@@ -213,7 +211,7 @@ bool EwsItemPrivate::recipientsReader(QXmlStreamReader &reader, QVariant &val)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
         EwsMailbox mbox(reader);
@@ -237,7 +235,7 @@ bool EwsItemPrivate::mailboxReader(QXmlStreamReader &reader, QVariant &val)
 
     if (reader.namespaceUri() != ewsTypeNsUri) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                << reader.namespaceUri();
         reader.skipCurrentElement();
         return false;
     }
@@ -262,11 +260,10 @@ bool EwsItemPrivate::timezoneReader(QXmlStreamReader &reader, QVariant &val)
     QStringRef idRef = reader.attributes().value(QStringLiteral("Id"));
     if (idRef.isNull()) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading %1 element - missing %2 attribute")
-                        .arg(reader.name().toString()).arg(QStringLiteral("Id"));
+                                .arg(reader.name().toString()).arg(QStringLiteral("Id"));
         reader.skipCurrentElement();
         return false;
-    }
-    else {
+    } else {
         reader.skipCurrentElement();
         val = idRef.toString();
         return true;
@@ -280,7 +277,7 @@ bool EwsItemPrivate::attendeesReader(QXmlStreamReader &reader, QVariant &val)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
         EwsAttendee att(reader);
@@ -312,8 +309,8 @@ bool EwsItemPrivate::occurrencesReader(QXmlStreamReader &reader, QVariant &val)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
-                            .arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    .arg(reader.name().toString())
+                                    << reader.namespaceUri();
             return false;
         }
         EwsOccurrence occ(reader);
@@ -335,8 +332,8 @@ bool EwsItemPrivate::categoriesReader(QXmlStreamReader &reader, QVariant &val)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:")
-                            .arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    .arg(reader.name().toString())
+                                    << reader.namespaceUri();
             return false;
         }
 
@@ -344,7 +341,7 @@ bool EwsItemPrivate::categoriesReader(QXmlStreamReader &reader, QVariant &val)
             categories.append(reader.readElementText());
             if (reader.error() !=  QXmlStreamReader::NoError) {
                 qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - invalid %1 element.")
-                                                        .arg(QStringLiteral("Categories/Value"));
+                                      .arg(QStringLiteral("Categories/Value"));
                 return false;
             }
         }
@@ -359,7 +356,7 @@ bool EwsItemPrivate::categoriesWriter(QXmlStreamWriter &writer, const QVariant &
 {
     QStringList categories = val.toStringList();
 
-    Q_FOREACH(const QString &cat, categories) {
+    Q_FOREACH (const QString &cat, categories) {
         writer.writeTextElement(ewsTypeNsUri, QStringLiteral("String"), cat);
     }
 
@@ -380,7 +377,7 @@ bool EwsItemPrivate::attachmentsReader(QXmlStreamReader &reader, QVariant &val)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in %1 element:").arg(reader.name().toString())
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return false;
         }
         EwsAttachment att(reader);
@@ -433,42 +430,32 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
                 d->mType = EwsItemTypeAbchPerson;
             }
         }
-    }
-    else if (reader.name() == QStringLiteral("Message")) {
+    } else if (reader.name() == QStringLiteral("Message")) {
         d->mType = EwsItemTypeMessage;
-    }
-    else if (reader.name() == QStringLiteral("CalendarItem")) {
+    } else if (reader.name() == QStringLiteral("CalendarItem")) {
         d->mType = EwsItemTypeCalendarItem;
-    }
-    else if (reader.name() == QStringLiteral("Contact")) {
+    } else if (reader.name() == QStringLiteral("Contact")) {
         d->mType = EwsItemTypeContact;
-    }
-    else if (reader.name() == QStringLiteral("DistributionList")) {
+    } else if (reader.name() == QStringLiteral("DistributionList")) {
         d->mType = EwsItemTypeDistributionList;
-    }
-    else if (reader.name() == QStringLiteral("MeetingMessage")) {
+    } else if (reader.name() == QStringLiteral("MeetingMessage")) {
         d->mType = EwsItemTypeMeetingMessage;
-    }
-    else if (reader.name() == QStringLiteral("MeetingRequest")) {
+    } else if (reader.name() == QStringLiteral("MeetingRequest")) {
         d->mType = EwsItemTypeMeetingRequest;
-    }
-    else if (reader.name() == QStringLiteral("MeetingResponse")) {
+    } else if (reader.name() == QStringLiteral("MeetingResponse")) {
         d->mType = EwsItemTypeMeetingResponse;
-    }
-    else if (reader.name() == QStringLiteral("MeetingCancellation")) {
+    } else if (reader.name() == QStringLiteral("MeetingCancellation")) {
         d->mType = EwsItemTypeMeetingCancellation;
-    }
-    else if (reader.name() == QStringLiteral("PostItem")) {
+    } else if (reader.name() == QStringLiteral("PostItem")) {
         d->mType = EwsItemTypePostItem;
-    }
-    else if (reader.name() == QStringLiteral("Task")) {
+    } else if (reader.name() == QStringLiteral("Task")) {
         d->mType = EwsItemTypeTask;
     }
 
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
             qCWarningNC(EWSRES_LOG) << "Unexpected namespace in Item element:"
-                            << reader.namespaceUri();
+                                    << reader.namespaceUri();
             return;
         }
 

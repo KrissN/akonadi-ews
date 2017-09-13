@@ -50,12 +50,21 @@ public:
     EwsDeleteItemRequest(EwsClient &client, QObject *parent);
     virtual ~EwsDeleteItemRequest();
 
-    void setItemIds(const EwsId::List &ids) { mIds = ids; };
-    void setType(Type type) { mType = type; };
+    void setItemIds(const EwsId::List &ids)
+    {
+        mIds = ids;
+    };
+    void setType(Type type)
+    {
+        mType = type;
+    };
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

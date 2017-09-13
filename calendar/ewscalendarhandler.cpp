@@ -41,7 +41,7 @@ EwsItemHandler *EwsCalendarHandler::factory()
 }
 
 EwsFetchItemDetailJob *EwsCalendarHandler::fetchItemDetailJob(EwsClient &client, QObject *parent,
-                                                          const Akonadi::Collection &collection)
+        const Akonadi::Collection &collection)
 {
     return new EwsFetchCalendarDetailJob(client, parent, collection);
 }
@@ -66,14 +66,14 @@ bool EwsCalendarHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsI
 }
 
 EwsModifyItemJob *EwsCalendarHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
-                                                    const QSet<QByteArray> &parts, QObject *parent)
+        const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyCalendarJob(client, items, parts, parent);
 }
 
 EwsCreateItemJob *EwsCalendarHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
-                                                    const Akonadi::Collection &collection,
-                                                    EwsTagStore *tagStore, EwsResource *parent)
+        const Akonadi::Collection &collection,
+        EwsTagStore *tagStore, EwsResource *parent)
 {
     return new EwsCreateCalendarJob(client, item, collection, tagStore, parent);
 }

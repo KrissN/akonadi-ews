@@ -29,7 +29,7 @@ public:
     virtual ~EwsTaskHandler();
 
     virtual EwsFetchItemDetailJob *fetchItemDetailJob(EwsClient &client, QObject *parent,
-                                                      const Akonadi::Collection &collection) override;
+            const Akonadi::Collection &collection) override;
     virtual void setSeenFlag(Akonadi::Item &item, bool value) override;
     virtual QString mimeType() override;
     virtual bool setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem) override;

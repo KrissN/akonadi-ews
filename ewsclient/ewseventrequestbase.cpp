@@ -68,15 +68,14 @@ bool EwsEventRequestBase::parseNotificationsResponse(QXmlStreamReader &reader)
     if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
             uint numEv = 0;
-            Q_FOREACH(const Notification &nfy, resp.notifications()) {
+            Q_FOREACH (const Notification &nfy, resp.notifications()) {
                 numEv += nfy.events().size();
             }
             qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got %1 response (%2 notifications, %3 events)")
-                            .arg(mReqName).arg(resp.notifications().size()).arg(numEv);
-        }
-        else {
+                                          .arg(mReqName).arg(resp.notifications().size()).arg(numEv);
+        } else {
             qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got %1 response - %2")
-                            .arg(mReqName).arg(resp.responseMessage());
+                                        .arg(mReqName).arg(resp.responseMessage());
         }
     }
 
@@ -94,7 +93,7 @@ EwsEventRequestBase::Response::Response(QXmlStreamReader &reader)
     while (reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsMsgNsUri && reader.namespaceUri() != ewsTypeNsUri) {
             setErrorMsg(QStringLiteral("Unexpected namespace in %1 element: %2")
-                .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
+                        .arg(QStringLiteral("ResponseMessage")).arg(reader.namespaceUri().toString()));
             return;
         }
 
@@ -106,8 +105,7 @@ EwsEventRequestBase::Response::Response(QXmlStreamReader &reader)
                 return;
             }
             mNotifications.append(nfy);
-        }
-        else if (reader.name() == QStringLiteral("Notifications")) {
+        } else if (reader.name() == QStringLiteral("Notifications")) {
             while (reader.readNextStartElement()) {
                 if (reader.name() == QStringLiteral("Notification")) {
                     Notification nfy(reader);
@@ -117,18 +115,15 @@ EwsEventRequestBase::Response::Response(QXmlStreamReader &reader)
                         return;
                     }
                     mNotifications.append(nfy);
-                }
-                else {
+                } else {
                     setErrorMsg(QStringLiteral("Failed to read EWS request - expected Notification inside Notifications"));
                 }
             }
-        }
-        else if (reader.name() == QStringLiteral("ConnectionStatus")) {
+        } else if (reader.name() == QStringLiteral("ConnectionStatus")) {
             reader.skipCurrentElement();
-        }
-        else if (!readResponseElement(reader)) {
+        } else if (!readResponseElement(reader)) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid response element '%1'")
-                .arg(reader.name().toString()));
+                        .arg(reader.name().toString()));
             return;
         }
     }
@@ -203,31 +198,23 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
 
     if (reader.name() == QStringLiteral("CopiedEvent")) {
         mType = EwsCopiedEvent;
-    }
-    else if (reader.name() == QStringLiteral("CreatedEvent")) {
+    } else if (reader.name() == QStringLiteral("CreatedEvent")) {
         mType = EwsCreatedEvent;
-    }
-    else if (reader.name() == QStringLiteral("DeletedEvent")) {
+    } else if (reader.name() == QStringLiteral("DeletedEvent")) {
         mType = EwsDeletedEvent;
-    }
-    else if (reader.name() == QStringLiteral("ModifiedEvent")) {
+    } else if (reader.name() == QStringLiteral("ModifiedEvent")) {
         mType = EwsModifiedEvent;
-    }
-    else if (reader.name() == QStringLiteral("MovedEvent")) {
+    } else if (reader.name() == QStringLiteral("MovedEvent")) {
         mType = EwsMovedEvent;
-    }
-    else if (reader.name() == QStringLiteral("NewMailEvent")) {
+    } else if (reader.name() == QStringLiteral("NewMailEvent")) {
         mType = EwsNewMailEvent;
-    }
-    else if (reader.name() == QStringLiteral("StatusEvent")) {
+    } else if (reader.name() == QStringLiteral("StatusEvent")) {
         mType = EwsStatusEvent;
-    }
-    else if (reader.name() == QStringLiteral("FreeBusyChangedEvent")) {
+    } else if (reader.name() == QStringLiteral("FreeBusyChangedEvent")) {
         mType = EwsFreeBusyChangedEvent;
-    }
-    else {
+    } else {
         qCWarning(EWSRES_LOG) << QStringLiteral("Unknown notification event type: %1")
-                        .arg(reader.name().toString());
+                              .arg(reader.name().toString());
         return;
     }
 
@@ -244,8 +231,7 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
         mId = values[ItemId].value<EwsId>();
         mOldId = values[OldItemId].value<EwsId>();
         mIsFolder = false;
-    }
-    else {
+    } else {
         mId = values[FolderId].value<EwsId>();
         mOldId = values[OldFolderId].value<EwsId>();
         mIsFolder = true;
@@ -256,10 +242,9 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
 
     if (mType == EwsStatusEvent) {
         qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1").arg(evName);
-    }
-    else {
+    } else {
         qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1, %2, parent: ").arg(evName).arg(mIsFolder ? 'F' : 'I')
-                        << mParentFolderId << QStringLiteral(", id: ") << mId;
+                               << mParentFolderId << QStringLiteral(", id: ") << mId;
     }
 }
 
@@ -271,14 +256,14 @@ bool EwsEventRequestBase::Response::operator==(const Response &other) const
 bool EwsEventRequestBase::Notification::operator==(const Notification &other) const
 {
     return (mSubscriptionId == other.mSubscriptionId) && (mWatermark == other.mWatermark) &&
-                    (mMoreEvents == other.mMoreEvents) && (mEvents == other.mEvents);
+           (mMoreEvents == other.mMoreEvents) && (mEvents == other.mEvents);
 }
 
 bool EwsEventRequestBase::Event::operator==(const Event &other) const
 {
     return (mType == other.mType) && (mWatermark == other.mWatermark) &&
-                    (mTimestamp == other.mTimestamp) && (mId == other.mId) &&
-                    (mParentFolderId == other.mParentFolderId) && (mUnreadCount == other.mUnreadCount) &&
-                    (mOldId == other.mOldId) && (mOldParentFolderId == other.mOldParentFolderId) &&
-                    (mIsFolder == other.mIsFolder);
+           (mTimestamp == other.mTimestamp) && (mId == other.mId) &&
+           (mParentFolderId == other.mParentFolderId) && (mUnreadCount == other.mUnreadCount) &&
+           (mOldId == other.mOldId) && (mOldParentFolderId == other.mOldParentFolderId) &&
+           (mIsFolder == other.mIsFolder);
 }

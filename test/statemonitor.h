@@ -45,7 +45,10 @@ public:
     CollectionStateMonitor(QObject *parent, const QHash<QString, T> &stateHash,
                            const QString &inboxId, const StateComparisonFunc &comparisonFunc);
     ~CollectionStateMonitor() = default;
-    Akonadi::Monitor &monitor() { return mMonitor; };
+    Akonadi::Monitor &monitor()
+    {
+        return mMonitor;
+    };
 private:
     void stateChanged(const Akonadi::Collection &col);
 
@@ -58,16 +61,16 @@ private:
 
 template <typename T>
 CollectionStateMonitor<T>::CollectionStateMonitor(QObject *parent, const QHash<QString, T> &stateHash,
-                                                  const QString &inboxId, const StateComparisonFunc &comparisonFunc)
+        const QString &inboxId, const StateComparisonFunc &comparisonFunc)
     : StateMonitorBase(parent), mMonitor(this), mPending(stateHash.keys().toSet()), mStateHash(stateHash),
       mComparisonFunc(comparisonFunc), mInboxId(inboxId)
 {
     connect(&mMonitor, &Akonadi::Monitor::collectionAdded, this,
-            [this](const Akonadi::Collection &col, const Akonadi::Collection &) {
+    [this](const Akonadi::Collection & col, const Akonadi::Collection &) {
         stateChanged(col);
     });
     connect(&mMonitor, QOverload<const Akonadi::Collection&>::of(&Akonadi::Monitor::collectionChanged), this,
-            [this](const Akonadi::Collection &col) {
+    [this](const Akonadi::Collection & col) {
         stateChanged(col);
     });
 }

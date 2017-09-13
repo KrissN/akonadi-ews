@@ -41,7 +41,7 @@ void EwsFetchContactDetailJob::processItems(const QList<EwsGetItemRequest::Respo
 {
     Item::List::iterator it = mChangedItems.begin();
 
-    Q_FOREACH(const EwsGetItemRequest::Response &resp, responses) {
+    Q_FOREACH (const EwsGetItemRequest::Response &resp, responses) {
         Item &item = *it;
 
         if (!resp.isSuccess()) {

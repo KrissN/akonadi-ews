@@ -24,7 +24,8 @@
 
 class EwsTagStore;
 class EwsClient;
-namespace Akonadi {
+namespace Akonadi
+{
 class Collection;
 }
 

@@ -76,8 +76,8 @@ void FakeEwsServer::queueEventsXml(const QStringList &events)
 {
     if (QThread::currentThread() != thread()) {
         qCWarningNC(EWSFAKE_LOG) << QStringLiteral("queueEventsXml called from wrong thread "
-                "(called from ") << QThread::currentThread() << QStringLiteral(", should be ")
-                << thread() << QStringLiteral(")");
+                                 "(called from ") << QThread::currentThread() << QStringLiteral(", should be ")
+                                 << thread() << QStringLiteral(")");
         return;
     }
     mEventQueue += events;

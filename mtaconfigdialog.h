@@ -23,10 +23,12 @@
 #include <QDialog>
 
 class QDialogButtonBox;
-namespace Akonadi {
+namespace Akonadi
+{
 class ManageAccountWidget;
 }
-namespace Ui {
+namespace Ui
+{
 class SetupServerView;
 }
 class EwsMtaResource;

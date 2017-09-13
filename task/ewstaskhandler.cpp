@@ -41,7 +41,7 @@ EwsItemHandler *EwsTaskHandler::factory()
 }
 
 EwsFetchItemDetailJob *EwsTaskHandler::fetchItemDetailJob(EwsClient &client, QObject *parent,
-                                                          const Akonadi::Collection &collection)
+        const Akonadi::Collection &collection)
 {
     return new EwsFetchTaskDetailJob(client, parent, collection);
 }
@@ -66,14 +66,13 @@ bool EwsTaskHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
 }
 
 EwsModifyItemJob *EwsTaskHandler::modifyItemJob(EwsClient &client, const QVector<Akonadi::Item> &items,
-                                                const QSet<QByteArray> &parts, QObject *parent)
+        const QSet<QByteArray> &parts, QObject *parent)
 {
     return new EwsModifyTaskJob(client, items, parts, parent);
 }
 
 EwsCreateItemJob *EwsTaskHandler::createItemJob(EwsClient &client, const Akonadi::Item &item,
-                                                const Akonadi::Collection &collection,
-                                                EwsTagStore *tagStore, EwsResource *parent)
+        const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent)
 {
     return new EwsCreateTaskJob(client, item, collection, tagStore, parent);
 }

@@ -75,7 +75,7 @@ public:
 };
 
 EwsFetchFoldersJobPrivate::EwsFetchFoldersJobPrivate(EwsFetchFoldersJob *parent, EwsClient &client,
-                                                     const Collection &rootCollection)
+        const Collection &rootCollection)
     : QObject(parent), mClient(client), mRootCollection(rootCollection), q_ptr(parent)
 {
     mPendingFetchJobs = 0;
@@ -116,7 +116,7 @@ void EwsFetchFoldersJobPrivate::remoteFolderFullFetchDone(KJob *job)
         return;
     }
 
-    Q_FOREACH(const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
+    Q_FOREACH (const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
         if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
             mRemoteChangedFolders.append(ch.folder());
         } else {
@@ -165,7 +165,7 @@ void EwsFetchFoldersJobPrivate::remoteFolderIdFullFetchDone(KJob *job)
         return;
     }
 
-    Q_FOREACH(const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
+    Q_FOREACH (const EwsSyncFolderHierarchyRequest::Change &ch, req->changes()) {
         if (ch.type() == EwsSyncFolderHierarchyRequest::Create) {
             mRemoteFolderIds.append(ch.folder()[EwsFolderFieldFolderId].value<EwsId>());
         } else {
@@ -225,7 +225,7 @@ void EwsFetchFoldersJobPrivate::remoteFolderDetailFetchDone(KJob *job)
         return;
     }
 
-    Q_FOREACH(const EwsGetFolderRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsGetFolderRequest::Response &resp, req->responses()) {
         if (resp.isSuccess()) {
             mRemoteChangedFolders.append(resp.folder());
         } else {
@@ -245,7 +245,7 @@ void EwsFetchFoldersJobPrivate::remoteFolderDetailFetchDone(KJob *job)
 
 
         q->emitResult();
-   }
+    }
 }
 
 void EwsFetchFoldersJobPrivate::processRemoteFolders()
@@ -254,7 +254,7 @@ void EwsFetchFoldersJobPrivate::processRemoteFolders()
     /* mParentMap contains the parent->child map for each collection. */
 
     /* Iterate over all changed folders. */
-    Q_FOREACH(const EwsFolder &folder, mRemoteChangedFolders) {
+    Q_FOREACH (const EwsFolder &folder, mRemoteChangedFolders) {
         /* Create a collection for each folder. */
         Collection c = createFolderCollection(folder);
 
@@ -289,7 +289,7 @@ void EwsFetchFoldersJobPrivate::buildChildCollectionList(const Collection &col)
     Q_Q(EwsFetchFoldersJob);
 
     QStringList children = mParentMap.values(col.remoteId());
-    Q_FOREACH(const QString &childId, children) {
+    Q_FOREACH (const QString &childId, children) {
         Collection child(mCollectionMap.take(childId));
         child.setParentCollection(col);
         q->mFolders.append(child);

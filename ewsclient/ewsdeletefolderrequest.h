@@ -50,12 +50,21 @@ public:
     EwsDeleteFolderRequest(EwsClient &client, QObject *parent);
     virtual ~EwsDeleteFolderRequest();
 
-    void setFolderIds(const EwsId::List &ids) { mIds = ids; };
-    void setType(Type type) { mType = type; };
+    void setFolderIds(const EwsId::List &ids)
+    {
+        mIds = ids;
+    };
+    void setType(Type type)
+    {
+        mType = type;
+    };
 
     virtual void start() override;
 
-    const QList<Response> &responses() const { return mResponses; };
+    const QList<Response> &responses() const
+    {
+        return mResponses;
+    };
 protected:
     virtual bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

@@ -48,9 +48,15 @@ public:
     EwsUnsubscribeRequest(EwsClient &client, QObject *parent);
     virtual ~EwsUnsubscribeRequest();
 
-    void setSubscriptionId(const QString &id) { mSubscriptionId = id; };
+    void setSubscriptionId(const QString &id)
+    {
+        mSubscriptionId = id;
+    };
 
-    const Response &response() const { return *mResponse; };
+    const Response &response() const
+    {
+        return *mResponse;
+    };
 
     virtual void start() override;
 protected:

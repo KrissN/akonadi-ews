@@ -37,8 +37,14 @@ public:
     EwsFetchFoldersJob(EwsClient &client, const Akonadi::Collection &rootCollection, QObject *parent);
     virtual ~EwsFetchFoldersJob();
 
-    Akonadi::Collection::List folders() const { return mFolders; };
-    const QString &syncState() const { return mSyncState; };
+    Akonadi::Collection::List folders() const
+    {
+        return mFolders;
+    };
+    const QString &syncState() const
+    {
+        return mSyncState;
+    };
 
     virtual void start() override;
 Q_SIGNALS:

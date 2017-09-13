@@ -55,7 +55,7 @@ QByteArray EwsTagStore::serializeTag(const Akonadi::Tag &tag) const
     Attribute::List attrs = tag.attributes();
     stream << (int)attrs.size();
 
-    Q_FOREACH(const Attribute *attr, attrs) {
+    Q_FOREACH (const Attribute *attr, attrs) {
         stream << attr->type();
         stream << attr->serialized();
     }
@@ -104,7 +104,7 @@ bool EwsTagStore::unserializeTag(const QByteArray &data, Akonadi::Tag &tag) cons
     tag.setName(name);
     tag.setGid(gid);
 
-    Q_FOREACH(Attribute *attr, attributes) {
+    Q_FOREACH (Attribute *attr, attributes) {
         tag.addAttribute(attr);
     }
 
@@ -116,7 +116,7 @@ bool EwsTagStore::readTags(const QStringList &taglist, int version)
 
     if (version < mVersion) {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Reading tags from older version (have %1, got %2)")
-                        .arg(mVersion).arg(version);
+                                .arg(mVersion).arg(version);
         return false;
     } else if (version == mVersion) {
         qCDebugNC(EWSRES_LOG) << QStringLiteral("Both tag lists in version %1 - not syncing").arg(version);
@@ -125,7 +125,7 @@ bool EwsTagStore::readTags(const QStringList &taglist, int version)
 
     mTagData.clear();
 
-    Q_FOREACH(const QString &tag, taglist) {
+    Q_FOREACH (const QString &tag, taglist) {
         QByteArray tagdata = qUncompress(QByteArray::fromBase64(tag.toAscii()));
         if (tagdata.isNull()) {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Incorrect tag data");
@@ -206,7 +206,7 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
     bool changed = false;
 
     QList<QByteArray> tagIds = mTagData.keys();
-    Q_FOREACH(const Tag &tag, tags) {
+    Q_FOREACH (const Tag &tag, tags) {
         QByteArray serialized = serializeTag(tag);
         auto it = mTagData.find(tag.gid());
         /* First check if the tag exists or if it has been changed. Only once that is done
@@ -220,7 +220,7 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
             changed = true;
         }
         if (it != mTagData.end()) {
-        	tagIds.removeOne(tag.gid());
+            tagIds.removeOne(tag.gid());
         }
         if (!mTagIdMap.contains(tag.id())) {
             mTagIdMap.insert(tag.id(), tag.gid());
@@ -236,7 +236,7 @@ bool EwsTagStore::syncTags(const Akonadi::Tag::List &tags)
         }
     }
 
-    Q_FOREACH(const QByteArray &tagId, tagIds) {
+    Q_FOREACH (const QByteArray &tagId, tagIds) {
         mTagData.remove(tagId);
     }
 
@@ -278,7 +278,7 @@ bool EwsTagStore::readEwsProperties(Akonadi::Item &item, const EwsItem &ewsItem,
     if (tagProp.isValid() && tagProp.canConvert<QStringList>()) {
         QStringList tagRids = tagProp.toStringList();
         Tag::List tags;
-        Q_FOREACH(const QString &tagRid, tagRids) {
+        Q_FOREACH (const QString &tagRid, tagRids) {
             Tag::Id tagId = tagIdForRid(tagRid.toAscii());
             if (tagId == -1) {
                 /* Tag not found. */
@@ -302,7 +302,7 @@ bool EwsTagStore::writeEwsProperties(const Akonadi::Item &item, EwsItem &ewsItem
     if (!item.tags().isEmpty()) {
         QStringList tagList;
         QStringList categoryList;
-        Q_FOREACH(const Tag &tag, item.tags()) {
+        Q_FOREACH (const Tag &tag, item.tags()) {
             if (!containsId(tag.id())) {
                 return false;
             }

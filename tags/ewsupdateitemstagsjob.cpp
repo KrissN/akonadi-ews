@@ -35,7 +35,7 @@
 using namespace Akonadi;
 
 EwsUpdateItemsTagsJob::EwsUpdateItemsTagsJob(const Akonadi::Item::List &items, EwsTagStore *tagStore,
-                                             EwsClient &client, EwsResource *parent)
+        EwsClient &client, EwsResource *parent)
     : EwsJob(parent), mItems(items), mTagStore(tagStore), mClient(client)
 {
 }
@@ -54,9 +54,9 @@ void EwsUpdateItemsTagsJob::start()
      * as the uid. If the EWS resource hasn't seen these tags yet it is necessary to fetch them
      * first before any further processing.
      */
-    Q_FOREACH(const Item &item, mItems) {
+    Q_FOREACH (const Item &item, mItems) {
         qDebug() << item.tags().size();
-        Q_FOREACH(const Tag &tag, item.tags()) {
+        Q_FOREACH (const Tag &tag, item.tags()) {
             qDebug() << tag.name() << tag.url() << tag.gid() << tag.id();
             if (!mTagStore->containsId(tag.id())) {
                 unknownTags.append(tag);
@@ -95,7 +95,7 @@ void EwsUpdateItemsTagsJob::itemsTagsChangedTagsFetched(KJob *job)
     EwsResource *res = qobject_cast<EwsResource*>(parent());
     Q_ASSERT(res);
     EwsGlobalTagsWriteJob *writeJob = new EwsGlobalTagsWriteJob(mTagStore, mClient,
-        res->rootCollection(), this);
+            res->rootCollection(), this);
     connect(writeJob, &EwsGlobalTagsWriteJob::result, this,
             &EwsUpdateItemsTagsJob::globalTagsWriteFinished);
     writeJob->start();
@@ -115,13 +115,13 @@ void EwsUpdateItemsTagsJob::globalTagsWriteFinished(KJob *job)
 void EwsUpdateItemsTagsJob::doUpdateItemsTags()
 {
     EwsUpdateItemRequest *req = new EwsUpdateItemRequest(mClient, this);
-    Q_FOREACH(const Item &item, mItems) {
+    Q_FOREACH (const Item &item, mItems) {
         EwsUpdateItemRequest::ItemChange ic(EwsId(item.remoteId(), item.remoteRevision()),
                                             EwsItemHandler::mimeToItemType(item.mimeType()));
         if (!item.tags().isEmpty()) {
             QStringList tagList;
             QStringList categoryList;
-            Q_FOREACH(const Tag &tag, item.tags()) {
+            Q_FOREACH (const Tag &tag, item.tags()) {
                 Q_ASSERT(mTagStore->containsId(tag.id()));
                 tagList.append(QString::fromLatin1(mTagStore->tagRemoteId(tag.id())));
                 QString name = mTagStore->tagName(tag.id());
@@ -136,7 +136,7 @@ void EwsUpdateItemsTagsJob::doUpdateItemsTags()
             ic.addUpdate(upd);
         } else {
             EwsUpdateItemRequest::Update *upd
-                            = new EwsUpdateItemRequest::DeleteUpdate(EwsResource::tagsProperty);
+                = new EwsUpdateItemRequest::DeleteUpdate(EwsResource::tagsProperty);
             ic.addUpdate(upd);
             upd = new EwsUpdateItemRequest::DeleteUpdate(EwsPropertyField(QStringLiteral("item:Categories")));
             ic.addUpdate(upd);
@@ -166,7 +166,7 @@ void EwsUpdateItemsTagsJob::updateItemsTagsRequestFinished(KJob *job)
     Q_ASSERT(mItems.count() == req->responses().count());
 
     auto itemIt = mItems.begin();
-    Q_FOREACH(const EwsUpdateItemRequest::Response &resp, req->responses()) {
+    Q_FOREACH (const EwsUpdateItemRequest::Response &resp, req->responses()) {
         if (resp.isSuccess()) {
             itemIt->setRemoteRevision(resp.itemId().changeKey());
         }

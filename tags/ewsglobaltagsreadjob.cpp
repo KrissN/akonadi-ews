@@ -29,7 +29,7 @@
 using namespace Akonadi;
 
 EwsGlobalTagsReadJob::EwsGlobalTagsReadJob(EwsTagStore *tagStore, EwsClient &client,
-                                           const Collection &rootCollection, QObject *parent)
+        const Collection &rootCollection, QObject *parent)
     : EwsJob(parent), mTagStore(tagStore), mClient(client), mRootCollection(rootCollection)
 {
 }
@@ -75,7 +75,7 @@ void EwsGlobalTagsReadJob::getFolderRequestFinished(KJob *job)
 
     EwsFolder folder = req->responses().first().folder();
     bool status = mTagStore->readTags(folder[EwsResource::globalTagsProperty].toStringList(),
-        folder[EwsResource::globalTagsVersionProperty].toInt());
+                                      folder[EwsResource::globalTagsVersionProperty].toInt());
     if (!status) {
         qCWarning(EWSRES_LOG) << QStringLiteral("Incorrect server tag data");
         setErrorMsg(QStringLiteral("Incorrect server tag data"));

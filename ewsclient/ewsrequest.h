@@ -41,10 +41,22 @@ public:
     class Response
     {
     public:
-        EwsResponseClass responseClass() const { return mClass; };
-        bool isSuccess() const { return mClass == EwsResponseSuccess; };
-        QString responseCode() const { return mCode; };
-        QString responseMessage() const { return mMessage; };
+        EwsResponseClass responseClass() const
+        {
+            return mClass;
+        };
+        bool isSuccess() const
+        {
+            return mClass == EwsResponseSuccess;
+        };
+        QString responseCode() const
+        {
+            return mCode;
+        };
+        QString responseMessage() const
+        {
+            return mMessage;
+        };
     protected:
         Response(QXmlStreamReader &reader);
         bool readResponseElement(QXmlStreamReader &reader);
@@ -62,7 +74,10 @@ public:
     void addMetaData(QString key, QString value);
 
     void setServerVersion(const EwsServerVersion &version);
-    const EwsServerVersion &serverVersion() const { return mServerVersion; };
+    const EwsServerVersion &serverVersion() const
+    {
+        return mServerVersion;
+    };
 
     void dump() const;
 

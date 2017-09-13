@@ -67,15 +67,15 @@ void IsolatedTestBase::init()
     qDebug() << mFakeServerThread->portNumber();
 
     mEwsSettingsInterface.reset(new OrgKdeAkonadiEwsSettingsInterface(
-        QStringLiteral("org.freedesktop.Akonadi.Resource.") + mEwsResIdentifier
-            + QStringLiteral(".") + mAkonadiInstanceIdentifier,
-        QStringLiteral("/Settings"), QDBusConnection::sessionBus(), this));
+                                    QStringLiteral("org.freedesktop.Akonadi.Resource.") + mEwsResIdentifier
+                                    + QStringLiteral(".") + mAkonadiInstanceIdentifier,
+                                    QStringLiteral("/Settings"), QDBusConnection::sessionBus(), this));
     QVERIFY(mEwsSettingsInterface->isValid());
 
     mEwsWalletInterface.reset(new OrgKdeAkonadiEwsWalletInterface(
-        QStringLiteral("org.freedesktop.Akonadi.Resource.") + mEwsResIdentifier
-            + QStringLiteral(".") + mAkonadiInstanceIdentifier,
-        QStringLiteral("/Settings"), QDBusConnection::sessionBus(), this));
+                                  QStringLiteral("org.freedesktop.Akonadi.Resource.") + mEwsResIdentifier
+                                  + QStringLiteral(".") + mAkonadiInstanceIdentifier,
+                                  QStringLiteral("/Settings"), QDBusConnection::sessionBus(), this));
     QVERIFY(mEwsWalletInterface->isValid());
 
     /* The EWS resource initializes its DBus adapters asynchronously. Therefore it can happen that
@@ -149,16 +149,16 @@ bool IsolatedTestBase::setEwsResOnline(bool online, bool wait)
 
 
 MsgRootInboxDialogEntry::MsgRootInboxDialogEntry(const QString &rootId, const QString &inboxId,
-                                                 const QString &descr, const ReplyCallback &callback)
+        const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
     xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/getfolder-inbox-msgroot"))
-        .arg(rootId).arg(inboxId);
+             .arg(rootId).arg(inboxId);
     description = QStringLiteral("GetFolder request for inbox and msgroot");
 }
 
 SubscribedFoldersDialogEntry::SubscribedFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
-                                                           const QString &descr, const ReplyCallback &callback)
+        const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
     static const QVector<IsolatedTestBase::Folder::DistinguishedType> specialFolders = {
@@ -191,7 +191,7 @@ SubscribedFoldersDialogEntry::SubscribedFoldersDialogEntry(const IsolatedTestBas
 }
 
 SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::FolderList &list,
-                                                     const QString &descr, const ReplyCallback &callback)
+        const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
     static const QVector<IsolatedTestBase::Folder::DistinguishedType> specialFolders = {
@@ -225,7 +225,7 @@ SpecialFoldersDialogEntry::SpecialFoldersDialogEntry(const IsolatedTestBase::Fol
 }
 
 GetTagsEmptyDialogEntry::GetTagsEmptyDialogEntry(const QString &rootId, const QString &descr,
-                                                 const ReplyCallback &callback)
+        const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
     xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/getfolder-tags")).arg(rootId);
@@ -238,8 +238,7 @@ SubscribeStreamingDialogEntry::SubscribeStreamingDialogEntry(const QString &desc
 }
 
 SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const IsolatedTestBase::FolderList &list,
-                                                                   const QString &syncState,
-                                                                   const QString &descr, const ReplyCallback &callback)
+        const QString &syncState, const QString &descr, const ReplyCallback &callback)
     : DialogEntryBase(descr, callback)
 {
     QHash<QString, int> childCount;
@@ -259,18 +258,18 @@ SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const Isolate
         QString folderClass;
         QString extraXml;
         switch (folder.type) {
-            case IsolatedTestBase::Folder::Calendar:
-                folderClass = QStringLiteral("IPF.Calendar");
-                break;
-            case IsolatedTestBase::Folder::Contacts:
-                folderClass = QStringLiteral("IPF.Contacts");
-                break;
-            case IsolatedTestBase::Folder::Tasks:
-                folderClass = QStringLiteral("IPF.Tasks");
-                break;
-            default:
-                folderClass = QStringLiteral("IPF.Note");
-                extraXml = QStringLiteral("<t:UnreadCount>0</t:UnreadCount>");
+        case IsolatedTestBase::Folder::Calendar:
+            folderClass = QStringLiteral("IPF.Calendar");
+            break;
+        case IsolatedTestBase::Folder::Contacts:
+            folderClass = QStringLiteral("IPF.Contacts");
+            break;
+        case IsolatedTestBase::Folder::Tasks:
+            folderClass = QStringLiteral("IPF.Tasks");
+            break;
+        default:
+            folderClass = QStringLiteral("IPF.Note");
+            extraXml = QStringLiteral("<t:UnreadCount>0</t:UnreadCount>");
         }
         xml += QStringLiteral("<t:FolderClass>%1</t:FolderClass>").arg(folderClass);
         xml += QStringLiteral("<t:TotalCount>0</t:TotalCount>");
@@ -282,7 +281,7 @@ SyncFolderHierInitialDialogEntry::SyncFolderHierInitialDialogEntry(const Isolate
 
     }
     xQuery = IsolatedTestBase::loadResourceAsString(QStringLiteral(":/xquery/syncfolderhierarhy-emptystate"))
-        .arg(syncState).arg(xml);
+             .arg(syncState).arg(xml);
 }
 
 UnsubscribeDialogEntry::UnsubscribeDialogEntry(const QString &descr, const ReplyCallback &callback)
