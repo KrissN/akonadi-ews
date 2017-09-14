@@ -58,7 +58,7 @@ public:
     typedef QList<EwsId> List;
 
     explicit EwsId(EwsDistinguishedId did) : mType(Distinguished), mDid(did) {};
-    explicit EwsId(QString id, QString changeKey = QString());
+    explicit EwsId(const QString &id, const QString &changeKey = QString());
     EwsId(const EwsId &id)
     {
         *this = id;

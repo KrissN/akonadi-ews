@@ -500,7 +500,7 @@ typedef enum {
     EwsUnknownEvent
 } EwsEventType;
 
-template <typename T> T decodeEnumString(QString str, const QString* table, unsigned count, bool *ok)
+template <typename T> T decodeEnumString(const QString &str, const QString* table, unsigned count, bool *ok)
 {
     unsigned i;
     T enumVal = T();

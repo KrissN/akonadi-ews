@@ -38,12 +38,12 @@ public:
     };
 
     EwsPropertyField();
-    explicit EwsPropertyField(QString uri);  // FieldURI
-    EwsPropertyField(QString uri, unsigned index);   // IndexedFieldURI
+    explicit EwsPropertyField(const QString &uri);  // FieldURI
+    EwsPropertyField(const QString &uri, unsigned index);   // IndexedFieldURI
     EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, EwsPropertyType type);
-    EwsPropertyField(EwsDistinguishedPropSetId psid, QString name, EwsPropertyType type);
-    EwsPropertyField(QString psid, unsigned id, EwsPropertyType type);
-    EwsPropertyField(QString psid, QString name, EwsPropertyType type);
+    EwsPropertyField(EwsDistinguishedPropSetId psid, const QString &name, EwsPropertyType type);
+    EwsPropertyField(const QString &psid, unsigned id, EwsPropertyType type);
+    EwsPropertyField(const QString &psid, const QString &name, EwsPropertyType type);
     EwsPropertyField(unsigned tag, EwsPropertyType type);
     EwsPropertyField(const EwsPropertyField &other);
     ~EwsPropertyField();

@@ -59,8 +59,8 @@ public:
     typedef std::function<EwsItemHandler*()> ItemHandlerFactory;
     static void registerItemHandler(EwsItemType type, ItemHandlerFactory factory);
     static EwsItemHandler *itemHandler(EwsItemType type);
-    static EwsItemType mimeToItemType(QString mimeType);
-    static QHash<EwsPropertyField, QVariant> writeFlags(QSet<QByteArray> flags);
+    static EwsItemType mimeToItemType(const QString &mimeType);
+    static QHash<EwsPropertyField, QVariant> writeFlags(const QSet<QByteArray> &flags);
     static QSet<QByteArray> readFlags(const EwsItem &item);
     static QList<EwsPropertyField> flagsProperties();
     static QList<EwsPropertyField> tagsProperties();

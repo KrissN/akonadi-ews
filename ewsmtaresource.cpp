@@ -101,7 +101,7 @@ void EwsMtaResource::sendItem(const Akonadi::Item &item)
     mEwsResource->sendMessage(item.remoteId(), mimeContent);
 }
 
-void EwsMtaResource::messageSent(QString id, QString error)
+void EwsMtaResource::messageSent(const QString &id, const QString &error)
 {
     qDebug() << "messageSent" << id << error;
     QHash<QString, Item>::iterator it = mItemHash.find(id);

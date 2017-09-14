@@ -48,7 +48,7 @@ public:
             Unknown
         };
 
-        Update(EwsPropertyField field, QVariant val, Type type)
+        Update(EwsPropertyField field, const QVariant &val, Type type)
             : mField(field), mValue(val), mType(type) {};
 
         EwsPropertyField mField;
@@ -59,13 +59,13 @@ public:
     class AppendUpdate : public Update
     {
     public:
-        AppendUpdate(EwsPropertyField field, QVariant val) : Update(field, val, Append) {};
+        AppendUpdate(EwsPropertyField field, const QVariant &val) : Update(field, val, Append) {};
     };
 
     class SetUpdate : public Update
     {
     public:
-        SetUpdate(EwsPropertyField field, QVariant val) : Update(field, val, Set) {};
+        SetUpdate(EwsPropertyField field, const QVariant &val) : Update(field, val, Set) {};
     };
 
     class DeleteUpdate : public Update

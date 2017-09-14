@@ -23,7 +23,7 @@
 #include "ewspoxautodiscoverrequest.h"
 #include "ewsclient_debug.h"
 
-EwsAutodiscoveryJob::EwsAutodiscoveryJob(QString email, QString username, QString password,
+EwsAutodiscoveryJob::EwsAutodiscoveryJob(const QString &email, const QString &username, const QString &password,
         const QString &userAgent, bool enableNTLMv2, QObject *parent)
     : EwsJob(parent), mEmail(email), mUsername(username), mPassword(password), mUserAgent(userAgent),
       mEnableNTLMv2(enableNTLMv2), mUsedCreds(false)

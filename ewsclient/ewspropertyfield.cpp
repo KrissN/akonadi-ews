@@ -144,7 +144,7 @@ EwsPropertyField::EwsPropertyField()
 {
 }
 
-EwsPropertyField::EwsPropertyField(QString uri)
+EwsPropertyField::EwsPropertyField(const QString &uri)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = Field;
@@ -152,7 +152,7 @@ EwsPropertyField::EwsPropertyField(QString uri)
     d->recalcHash();
 }
 
-EwsPropertyField::EwsPropertyField(QString uri, unsigned index)
+EwsPropertyField::EwsPropertyField(const QString &uri, unsigned index)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = IndexedField;
@@ -176,7 +176,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, unsigned id, 
     d->recalcHash();
 }
 
-EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name, EwsPropertyType type)
+EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, const QString &name, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = ExtendedField;
@@ -191,7 +191,7 @@ EwsPropertyField::EwsPropertyField(EwsDistinguishedPropSetId psid, QString name,
     d->recalcHash();
 }
 
-EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType type)
+EwsPropertyField::EwsPropertyField(const QString &psid, unsigned id, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = ExtendedField;
@@ -206,7 +206,7 @@ EwsPropertyField::EwsPropertyField(QString psid, unsigned id, EwsPropertyType ty
     d->recalcHash();
 }
 
-EwsPropertyField::EwsPropertyField(QString psid, QString name, EwsPropertyType type)
+EwsPropertyField::EwsPropertyField(const QString &psid, const QString &name, EwsPropertyType type)
     : d(new EwsPropertyFieldPrivate())
 {
     d->mPropType = ExtendedField;

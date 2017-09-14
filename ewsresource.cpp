@@ -1112,7 +1112,7 @@ void EwsResource::itemSendRequestFinished(KJob *job)
     itemSent(item, TransportSucceeded);
 }
 
-void EwsResource::sendMessage(QString id, QByteArray content)
+void EwsResource::sendMessage(const QString &id, const QByteArray &content)
 {
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
     EwsCreateItemRequest *req = new EwsCreateItemRequest(mEwsClient, this);
@@ -1198,7 +1198,7 @@ void EwsResource::clearFolderSyncState()
     saveState();
 }
 
-void EwsResource::clearFolderSyncState(QString folderId)
+void EwsResource::clearFolderSyncState(const QString &folderId)
 {
     mSyncState.remove(folderId);
     saveState();

@@ -72,7 +72,7 @@ public:
     EwsSubscriptionManager(EwsClient &client, const EwsId &rootId, Settings *settings, QObject *parent);
     virtual ~EwsSubscriptionManager();
     void start();
-    void queueUpdate(EwsEventType type, QString id, QString changeKey);
+    void queueUpdate(EwsEventType type, const QString &id, const QString &changeKey);
 Q_SIGNALS:
     void foldersModified(EwsId::List folders);
     void folderTreeModified();

@@ -28,7 +28,7 @@ class EwsAutodiscoveryJob : public EwsJob
 {
     Q_OBJECT
 public:
-    EwsAutodiscoveryJob(QString email, QString username, QString password, const QString &userAgent,
+    EwsAutodiscoveryJob(const QString &email, const QString &username, const QString &password, const QString &userAgent,
                         bool enableNTLMv2, QObject *parent);
     virtual ~EwsAutodiscoveryJob();
 

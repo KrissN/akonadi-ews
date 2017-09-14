@@ -61,7 +61,7 @@ EwsItemHandler *EwsItemHandler::itemHandler(EwsItemType type)
     }
 }
 
-EwsItemType EwsItemHandler::mimeToItemType(QString mimeType)
+EwsItemType EwsItemHandler::mimeToItemType(const QString &mimeType)
 {
     if (mimeType == itemHandler(EwsItemTypeMessage)->mimeType()) {
         return EwsItemTypeMessage;
@@ -76,7 +76,7 @@ EwsItemType EwsItemHandler::mimeToItemType(QString mimeType)
     }
 }
 
-QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(QSet<QByteArray> flags)
+QHash<EwsPropertyField, QVariant> EwsItemHandler::writeFlags(const QSet<QByteArray> &flags)
 {
     QHash<EwsPropertyField, QVariant> propertyHash;
 

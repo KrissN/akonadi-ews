@@ -96,7 +96,7 @@ protected:
     void doSetOnline(bool online) override;
 public Q_SLOTS:
     void configure(WId windowId) override;
-    Q_SCRIPTABLE void clearFolderSyncState(QString folderId);
+    Q_SCRIPTABLE void clearFolderSyncState(const QString &folderId);
     Q_SCRIPTABLE void clearFolderSyncState();
     Q_SCRIPTABLE void clearFolderTreeSyncState();
 protected Q_SLOTS:
@@ -142,9 +142,9 @@ private Q_SLOTS:
     void connectionError();
     void reloadConfig();
 public Q_SLOTS:
-    Q_SCRIPTABLE void sendMessage(QString id, QByteArray content);
+    Q_SCRIPTABLE void sendMessage(const QString &id, const QByteArray &content);
 Q_SIGNALS:
-    Q_SCRIPTABLE void messageSent(QString id, QString error);
+    Q_SCRIPTABLE void messageSent(const QString &id, const QString &error);
 #ifdef HAVE_SEPARATE_MTA_RESOURCE
 private Q_SLOTS:
     void messageSendRequestFinished(KJob *job);

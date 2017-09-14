@@ -238,9 +238,10 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
 /* This function is a lousy workaround for Exchange returning Windows timezone names instead of
  * IANA ones.
  */
-void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString msTimezone, QString culture)
+void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, const QString &msTimezone, const QString &culture)
 {
     KDateTime resultDt;
+    QString msTz = msTimezone;
 
     if (!QTimeZone::isTimeZoneIdAvailable(currentTime.timeZone().name().toLatin1())) {
         // The event uses an incorrect IANA timezone, so this will most likely be a
@@ -248,28 +249,31 @@ void EwsFetchCalendarDetailJob::convertTimezone(KDateTime &currentTime, QString 
 
         QString ianaTz;
         // Special case:
-        if (msTimezone == QStringLiteral("tzone://Microsoft/Utc")) {
+        if (msTz == QStringLiteral("tzone://Microsoft/Utc")) {
             ianaTz = QStringLiteral("UTC");
         } else {
             QLocale locale(culture);
-            if (msTimezone.isEmpty()) {
-                msTimezone = currentTime.timeZone().name();
+            if (msTz.isEmpty()) {
+                msTz = currentTime.timeZone().name();
             }
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Time zone '%1' not found on IANA list. Trying to convert with country '%2'")
                                   .arg(currentTime.timeZone().name()).arg(QLocale::countryToString(locale.country()));
-            qCDebugNC(EWSRES_LOG) << "MSTZ: " << msTimezone;
-            ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1(), locale.country()));
+            qCDebugNC(EWSRES_LOG) << "MSTZ: " << msTz;
+            ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTz.toLatin1(), locale.country()));
             if (ianaTz.isEmpty()) {
                 // Give it one more try with the default country.
-                ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTimezone.toLatin1()));
+                ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(msTz.toLatin1()));
                 if (ianaTz.isEmpty()) {
                     // Give it two more tries with the timezone name from the event.
-                    ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1(), locale.country()));
+                    ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1(),
+                            locale.country()));
                     if (ianaTz.isEmpty()) {
                         // Give it one more try with the default country.
-                        ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(currentTime.timeZone().name().toLatin1()));
+                        ianaTz = QString::fromLatin1(QTimeZone::windowsIdToDefaultIanaId(
+                                currentTime.timeZone().name().toLatin1()));
                         qCWarningNC(EWSRES_LOG)
-                                << QStringLiteral("Failed to convert time zone '%1' or '%2' to IANA id").arg(msTimezone).arg(currentTime.timeZone().name());
+                                << QStringLiteral("Failed to convert time zone '%1' or '%2' to IANA id")
+                                .arg(msTz).arg(currentTime.timeZone().name());
                     }
                 }
             }

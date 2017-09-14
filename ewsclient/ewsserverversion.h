@@ -34,7 +34,7 @@ public:
     };
 
     EwsServerVersion() : mMajor(0), mMinor(0), mMajorBuild(0), mMinorBuild(0) {};
-    EwsServerVersion(uint major, uint minor, QString name, QString friendlyName)
+    EwsServerVersion(uint major, uint minor, const QString &name, const QString &friendlyName)
         : mMajor(major), mMinor(minor), mMajorBuild(0), mMinorBuild(0), mName(name),
           mFriendlyName(friendlyName) {};
     explicit EwsServerVersion(QXmlStreamReader &reader);

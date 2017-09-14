@@ -100,7 +100,7 @@ EwsId::EwsId(QXmlStreamReader &reader)
     mType = Real;
 }
 
-EwsId::EwsId(QString id, QString changeKey)
+EwsId::EwsId(const QString &id, const QString &changeKey)
     : mType(Real), mId(id), mChangeKey(changeKey), mDid(EwsDIdCalendar)
 {
 #ifdef HAVE_INBOX_FILTERING_WORKAROUND

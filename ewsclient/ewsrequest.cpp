@@ -74,7 +74,7 @@ void EwsRequest::endSoapDocument(QXmlStreamWriter &writer)
     writer.writeEndDocument();
 }
 
-void EwsRequest::prepare(const QString body)
+void EwsRequest::prepare(const QString &body)
 {
     mBody = body;
     KIO::TransferJob *job = KIO::http_post(mClient.url(), body.toUtf8(),
@@ -100,7 +100,7 @@ void EwsRequest::setMetaData(const KIO::MetaData &md)
     mMd = md;
 }
 
-void EwsRequest::addMetaData(QString key, QString value)
+void EwsRequest::addMetaData(const QString &key, const QString &value)
 {
     mMd.insert(key, value);
 }
@@ -212,7 +212,7 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
     mResponseData += QString::fromUtf8(data);
 }
 
-bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, QString reqName,
+bool EwsRequest::parseResponseMessage(QXmlStreamReader &reader, const QString &reqName,
                                       ContentReaderFn contentReader)
 {
     if (reader.name() != reqName + QStringLiteral("Response")
@@ -317,7 +317,7 @@ bool EwsRequest::readHeader(QXmlStreamReader &reader)
     return true;
 }
 
-bool EwsRequest::Response::setErrorMsg(const QString msg)
+bool EwsRequest::Response::setErrorMsg(const QString &msg)
 {
     mClass = EwsResponseParseError;
     mCode = QStringLiteral("ResponseParseError");

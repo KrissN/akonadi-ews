@@ -32,7 +32,7 @@ public:
     virtual ~EwsFetchCalendarDetailJob();
 protected:
     virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
-    void convertTimezone(KDateTime &currentTime, QString msTimezone, QString culture);
+    void convertTimezone(KDateTime &currentTime, const QString &msTimezone, const QString &culture);
 private Q_SLOTS:
     void exceptionItemsFetched(KJob *job);
 };

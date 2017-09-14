@@ -40,7 +40,7 @@ public:
 
     struct Item {
         Item() : key(Ignore) {};
-        Item(T k, QString n, ReadFunction rfn = ReadFunction(), WriteFunction wfn = WriteFunction())
+        Item(T k, const QString &n, ReadFunction rfn = ReadFunction(), WriteFunction wfn = WriteFunction())
             : key(k), elmName(n), readFn(rfn), writeFn(wfn) {};
         T key;
         QString elmName;
@@ -62,7 +62,7 @@ public:
         rebuildItemHash();
     };
 
-    bool readItem(QXmlStreamReader &reader, QString parentElm, const QString &nsUri,
+    bool readItem(QXmlStreamReader &reader, const QString &parentElm, const QString &nsUri,
                   UnknownElementFunction unknownElmFn = &defaultUnknownElmFunction)
     {
         typename QHash<QString, Item>::iterator it = mItemHash.find(reader.name().toString());

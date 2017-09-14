@@ -34,12 +34,12 @@ public:
     explicit EwsClient(QObject *parent = nullptr);
     ~EwsClient();
 
-    void setUrl(QString url)
+    void setUrl(const QString &url)
     {
         mUrl.setUrl(url);
     }
 
-    void setCredentials(QString username, QString password)
+    void setCredentials(const QString &username, const QString &password)
     {
         mUrl.setUserName(username);
         mUrl.setPassword(password);

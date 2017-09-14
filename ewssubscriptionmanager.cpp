@@ -318,7 +318,7 @@ void EwsSubscriptionManager::processEvents(EwsEventRequestBase *req, bool finish
     }
 }
 
-void EwsSubscriptionManager::queueUpdate(EwsEventType type, QString id, QString changeKey)
+void EwsSubscriptionManager::queueUpdate(EwsEventType type, const QString &id, const QString &changeKey)
 {
     mQueuedUpdates.insert(id, {type, changeKey});
 }
