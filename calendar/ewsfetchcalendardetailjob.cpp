@@ -91,8 +91,6 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
     Q_FOREACH (const EwsGetItemRequest::Response &resp, responses) {
         Item &item = *it;
 
-        qDebug() << item.remoteId();
-
         if (!resp.isSuccess()) {
             qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to fetch item %1").arg(item.remoteId());
             continue;
@@ -149,8 +147,6 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
     }
 
     if (addItems.isEmpty()) {
-        qDebug() << "done";
-
         emitResult();
     } else {
         EwsGetItemRequest *req = new EwsGetItemRequest(mClient, this);

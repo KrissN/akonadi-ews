@@ -247,7 +247,7 @@ bool EwsPoxAutodiscoverRequest::readProtocol(QXmlStreamReader &reader)
         }
     }
 
-    qDebug() << "Adding proto type" << proto.mType << proto.isValid();
+    qCDebug(EWSRES_LOG) << "Adding proto type" << proto.mType << proto.isValid();
     mProtocols[proto.mType] = proto;
 
     return true;

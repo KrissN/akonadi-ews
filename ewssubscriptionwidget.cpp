@@ -112,8 +112,6 @@ bool EwsSubscriptionFilterModel::filterAcceptsRow(int sourceRow, const QModelInd
 
         show = sourceIndex.data(Qt::CheckStateRole).toInt() == Qt::Checked;
         show |= hasCheckedChildren(sourceIndex);
-
-        qDebug() << sourceIndex.data(Qt::CheckStateRole).toInt() << sourceRow << sourceParent;
     }
 
     if (!show) {
@@ -266,14 +264,12 @@ void EwsSubscriptionWidgetPrivate::populateFolderTree()
 
 void EwsSubscriptionWidgetPrivate::treeItemChanged(QStandardItem *item)
 {
-    qDebug() << "treeItemChanged";
     EwsId id = EwsId(item->data(ItemIdRole).toString());
     if (item->checkState() == Qt::Checked) {
         mSubscribedIds += id;
     } else {
         mSubscribedIds.removeOne(id);
     }
-    qDebug() << mSubscribedIds;
 }
 
 void EwsSubscriptionWidgetPrivate::filterTextChanged(const QString &text)

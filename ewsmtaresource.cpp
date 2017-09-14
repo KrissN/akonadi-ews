@@ -35,7 +35,6 @@ using namespace Akonadi;
 EwsMtaResource::EwsMtaResource(const QString &id)
     : Akonadi::ResourceBase(id), mEwsResource(nullptr)
 {
-    qDebug() << "EwsMtaResource";
 }
 
 EwsMtaResource::~EwsMtaResource()
@@ -50,7 +49,6 @@ bool EwsMtaResource::connectEws()
     mEwsResource = new OrgKdeAkonadiEwsResourceInterface(
         QStringLiteral("org.freedesktop.Akonadi.Resource.") + MtaSettings::ewsResource(),
         QStringLiteral("/"), QDBusConnection::sessionBus(), this);
-    qDebug() << QStringLiteral("org.freedesktop.akonadi.Resource.") + MtaSettings::ewsResource() << mEwsResource->isValid();
     if (!mEwsResource->isValid()) {
         delete mEwsResource;
         mEwsResource = nullptr;
@@ -72,8 +70,6 @@ void EwsMtaResource::configure(WId windowId)
 
 void EwsMtaResource::sendItem(const Akonadi::Item &item)
 {
-    qDebug() << "sendItem" << item.remoteId();
-
     if (!connectEws()) {
         itemSent(item, TransportFailed, i18n("Unable to connect to master EWS resource"));
         return;
@@ -103,7 +99,6 @@ void EwsMtaResource::sendItem(const Akonadi::Item &item)
 
 void EwsMtaResource::messageSent(const QString &id, const QString &error)
 {
-    qDebug() << "messageSent" << id << error;
     QHash<QString, Item>::iterator it = mItemHash.find(id);
     if (it != mItemHash.end()) {
         if (error.isEmpty()) {

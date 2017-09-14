@@ -51,7 +51,6 @@ void EwsCreateItemJob::start()
     }
 
     if (syncNeeded) {
-        qDebug() << "EwsCreateItemJob: sync needed";
         EwsAkonadiTagsSyncJob *job = new EwsAkonadiTagsSyncJob(mTagStore,
                 mClient, qobject_cast<EwsResource*>(parent())->rootCollection(), this);
         connect(job, &EwsAkonadiTagsSyncJob::result, this, &EwsCreateItemJob::tagSyncFinished);

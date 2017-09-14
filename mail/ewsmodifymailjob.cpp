@@ -48,7 +48,6 @@ void EwsModifyMailJob::start()
 
         if (mParts.contains("FLAGS")) {
             EwsUpdateItemRequest::ItemChange ic(itemId, EwsItemTypeMessage);
-            qDebug() << "Item flags" << item.flags();
             QHash<EwsPropertyField, QVariant> propertyHash = EwsMailHandler::writeFlags(item.flags());
 
             for (auto it = propertyHash.cbegin(); it != propertyHash.cend(); ++it) {
@@ -71,7 +70,6 @@ void EwsModifyMailJob::start()
         req->start();
     } else {
         delete req;
-        qDebug() << "Nothing to do for parts" << mParts;
         emitResult();
     }
 }

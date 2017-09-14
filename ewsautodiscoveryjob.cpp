@@ -87,7 +87,6 @@ void EwsAutodiscoveryJob::sendNextRequest(bool useCreds)
 
 void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
 {
-    qDebug() << "autodiscoveryRequestFinished";
     EwsPoxAutodiscoverRequest *req = qobject_cast<EwsPoxAutodiscoverRequest*>(job);
     if (!req) {
         setErrorMsg(QStringLiteral("Invalid EwsPoxAutodiscoverRequest job object"));
@@ -131,7 +130,7 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
             break;
         }
         case EwsPoxAutodiscoverRequest::RedirectAddr:
-            qDebug() << req->redirectAddr();
+            qCDebug(EWSRES_LOG) << "Redirected to e-mail addr" << req->redirectAddr();
             mEmail = req->redirectAddr();
             mUrlQueue.clear();
             parseEmail();
@@ -140,7 +139,7 @@ void EwsAutodiscoveryJob::autodiscoveryRequestFinished(KJob *job)
             }
             break;
         case EwsPoxAutodiscoverRequest::RedirectUrl:
-            qDebug() << req->redirectUrl();
+            qCDebug(EWSRES_LOG) << "Redirected to URL" << req->redirectUrl();
             mUrlQueue.clear();
             mUrlQueue.enqueue(req->redirectUrl());
             sendNextRequest(false);

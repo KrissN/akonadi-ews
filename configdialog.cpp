@@ -124,7 +124,6 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
     }
 
     QIcon ewsIcon = QIcon::fromTheme(QStringLiteral("akonadi-ews"));
-    qDebug() << ewsIcon.availableSizes();
     mUi->aboutIconLabel->setPixmap(ewsIcon.pixmap(96, 96, QIcon::Normal, QIcon::On));
     mUi->aboutTextLabel->setText(i18nc("@info", "Akonadi Resource for Microsoft Exchange Web Services (EWS)"));
     mUi->aboutCopyrightLabel->setText(i18nc("@info", "Copyright (c) Krzysztof Nowicki 2015-2016"));

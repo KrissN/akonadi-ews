@@ -82,7 +82,6 @@ MtaConfigDialog::~MtaConfigDialog()
 
 void MtaConfigDialog::save()
 {
-    qDebug() << mUi->resourceWidget->currentAgentInstance().identifier();
     MtaSettings::setEwsResource(mUi->resourceWidget->selectedAgentInstances().first().identifier());
     mParentResource->setName(mUi->accountName->text());
     MtaSettings::self()->save();

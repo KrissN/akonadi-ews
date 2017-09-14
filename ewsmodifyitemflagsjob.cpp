@@ -60,8 +60,6 @@ void EwsModifyItemFlagsJob::itemModifyFinished(KJob *job)
 
 void EwsModifyItemFlagsJob::start()
 {
-    qDebug() << "started";
-
     Item::List items[EwsItemTypeUnknown];
 
     Q_FOREACH (const Item &item, mItems) {

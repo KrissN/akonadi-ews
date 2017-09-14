@@ -200,7 +200,6 @@ void EwsFetchItemsJob::remoteItemFetchDone(KJob *job)
             connect(syncItemsReq, SIGNAL(result(KJob*)), SLOT(remoteItemFetchDone(KJob*)));
             addSubjob(syncItemsReq);
             syncItemsReq->start();
-            qDebug() << "remoteItemFetchDone: started next batch";
         } else {
             mSyncState = itemReq->syncState();
             --mPendingJobs;
@@ -373,7 +372,6 @@ void EwsFetchItemsJob::compareItemLists()
     bool fetch = false;
     for (unsigned iType = 0; iType < sizeof(toFetchItems) / sizeof(toFetchItems[0]); ++iType) {
         if (!toFetchItems[iType].isEmpty()) {
-            qDebug() << "compareItemLists: fetching" << iType;
             for (int i = 0; i < toFetchItems[iType].size(); i += fetchBatchSize) {
                 EwsItemHandler *handler = EwsItemHandler::itemHandler(static_cast<EwsItemType>(iType));
                 if (!handler) {
@@ -389,7 +387,6 @@ void EwsFetchItemsJob::compareItemLists()
                     job->setItemLists(itemList, &mDeletedItems);
                     connect(job, SIGNAL(result(KJob*)), SLOT(itemDetailFetchDone(KJob*)));
                     addSubjob(job);
-                    qDebug() << "compareItemLists: job created";
                     fetch = true;
                 }
             }
@@ -399,7 +396,6 @@ void EwsFetchItemsJob::compareItemLists()
         // Nothing to fetch - we're done here.
         emitResult();
     } else {
-        qDebug() << "compareItemLists: jobs" << subjobs().size();
         subjobs().first()->start();
     }
 }
@@ -414,7 +410,6 @@ void EwsFetchItemsJob::itemDetailFetchDone(KJob *job)
             mChangedItems += detailJob->changedItems();
         }
 
-        qDebug() << "itemDetailFetchDone: jobs" << subjobs().size();
         if (subjobs().size() == 0) {
             emitResult();
         } else {

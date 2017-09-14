@@ -60,6 +60,5 @@ void EwsFetchItemDetailJob::itemDetailFetched(KJob *job)
 
 void EwsFetchItemDetailJob::start()
 {
-    qDebug() << "started";
     mRequest->start();
 }

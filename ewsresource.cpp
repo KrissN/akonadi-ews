@@ -517,7 +517,6 @@ void EwsResource::getItemRequestFinished(KJob *job)
 void EwsResource::reloadConfig()
 {
     mSubManager.reset(nullptr);
-    qDebug() << QUrl(mSettings->baseUrl());
     mEwsClient.setUrl(mSettings->baseUrl());
     mSettings->requestPassword(mPassword, false);
     if (mSettings->domain().isEmpty()) {

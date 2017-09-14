@@ -55,9 +55,7 @@ void EwsUpdateItemsTagsJob::start()
      * first before any further processing.
      */
     Q_FOREACH (const Item &item, mItems) {
-        qDebug() << item.tags().size();
         Q_FOREACH (const Tag &tag, item.tags()) {
-            qDebug() << tag.name() << tag.url() << tag.gid() << tag.id();
             if (!mTagStore->containsId(tag.id())) {
                 unknownTags.append(tag);
             }

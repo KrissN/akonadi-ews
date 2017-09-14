@@ -127,7 +127,6 @@ void EwsCreateMailJob::doStart()
 
 void EwsCreateMailJob::mailCreateFinished(KJob *job)
 {
-    qDebug() << "mailCreateFinished";
     EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
     if (job->error()) {
         setErrorMsg(job->errorString());
@@ -162,8 +161,6 @@ void EwsCreateMailJob::mailCreateFinished(KJob *job)
 
 void EwsCreateMailJob::mailCreateWorkaroundFinished(KJob *job)
 {
-    qDebug() << "mailCreateWorkaroundFinished";
-
     EwsCreateItemRequest *req = qobject_cast<EwsCreateItemRequest*>(job);
     if (job->error()) {
         setErrorMsg(job->errorString());
@@ -200,8 +197,6 @@ void EwsCreateMailJob::mailCreateWorkaroundFinished(KJob *job)
 
 void EwsCreateMailJob::mailMoveWorkaroundFinished(KJob *job)
 {
-    qDebug() << "mailMoveWorkaroundFinished";
-
     EwsMoveItemRequest *req = qobject_cast<EwsMoveItemRequest*>(job);
     if (job->error()) {
         setErrorMsg(job->errorString());

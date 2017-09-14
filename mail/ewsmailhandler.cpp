@@ -66,7 +66,6 @@ QString EwsMailHandler::mimeType()
 
 bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
 {
-    qDebug() << "EwsMailHandler::setItemPayload";
     QByteArray mimeContent = ewsItem[EwsItemFieldMimeContent].toByteArray();
     if (mimeContent.isEmpty()) {
         qWarning() << QStringLiteral("MIME content is empty!");
@@ -78,7 +77,6 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     KMime::Message::Ptr msg(new KMime::Message);
     msg->setContent(mimeContent);
     msg->parse();
-    qDebug() << msg->attachments().size() << "attachments";
     // Some messages might just be empty (just headers). This results in the body being empty.
     // The problem is that when Akonadi sees an empty body it will interpret this as "body not
     // yet loaded" and will retry which will cause an endless loop. To work around this put a
@@ -88,9 +86,6 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     }
     Q_FOREACH (KMime::Content* c, msg->attachments()) {
         KMime::Headers::ContentID *cid = c->contentID(false);
-        if (cid) {
-            qDebug() << cid->asUnicodeString();
-        }
     }
     item.setPayload<KMime::Message::Ptr>(msg);
     return true;
