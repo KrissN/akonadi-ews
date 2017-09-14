@@ -420,7 +420,8 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
     EwsItemPrivate *d = reinterpret_cast<EwsItemPrivate*>(this->d.data());
 
     // Check what item type are we
-    if (reader.name() == QStringLiteral("Item")) {
+    QStringRef elmName = reader.name();
+    if (elmName == QStringLiteral("Item")) {
         d->mType = EwsItemTypeItem;
         QStringRef subtype = reader.attributes().value(QStringLiteral("xsi:type"));
         if (!subtype.isEmpty()) {
@@ -430,25 +431,25 @@ EwsItem::EwsItem(QXmlStreamReader &reader)
                 d->mType = EwsItemTypeAbchPerson;
             }
         }
-    } else if (reader.name() == QStringLiteral("Message")) {
+    } else if (elmName == QStringLiteral("Message")) {
         d->mType = EwsItemTypeMessage;
-    } else if (reader.name() == QStringLiteral("CalendarItem")) {
+    } else if (elmName == QStringLiteral("CalendarItem")) {
         d->mType = EwsItemTypeCalendarItem;
-    } else if (reader.name() == QStringLiteral("Contact")) {
+    } else if (elmName == QStringLiteral("Contact")) {
         d->mType = EwsItemTypeContact;
-    } else if (reader.name() == QStringLiteral("DistributionList")) {
+    } else if (elmName == QStringLiteral("DistributionList")) {
         d->mType = EwsItemTypeDistributionList;
-    } else if (reader.name() == QStringLiteral("MeetingMessage")) {
+    } else if (elmName == QStringLiteral("MeetingMessage")) {
         d->mType = EwsItemTypeMeetingMessage;
-    } else if (reader.name() == QStringLiteral("MeetingRequest")) {
+    } else if (elmName == QStringLiteral("MeetingRequest")) {
         d->mType = EwsItemTypeMeetingRequest;
-    } else if (reader.name() == QStringLiteral("MeetingResponse")) {
+    } else if (elmName == QStringLiteral("MeetingResponse")) {
         d->mType = EwsItemTypeMeetingResponse;
-    } else if (reader.name() == QStringLiteral("MeetingCancellation")) {
+    } else if (elmName == QStringLiteral("MeetingCancellation")) {
         d->mType = EwsItemTypeMeetingCancellation;
-    } else if (reader.name() == QStringLiteral("PostItem")) {
+    } else if (elmName == QStringLiteral("PostItem")) {
         d->mType = EwsItemTypePostItem;
-    } else if (reader.name() == QStringLiteral("Task")) {
+    } else if (elmName == QStringLiteral("Task")) {
         d->mType = EwsItemTypeTask;
     }
 

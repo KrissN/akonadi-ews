@@ -194,27 +194,27 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
     static const EventReader staticReader(items);
 
     EventReader ewsreader(staticReader);
-    QString evName = reader.name().toString();
 
-    if (reader.name() == QStringLiteral("CopiedEvent")) {
+    QStringRef elmName = reader.name();
+    if (elmName == QStringLiteral("CopiedEvent")) {
         mType = EwsCopiedEvent;
-    } else if (reader.name() == QStringLiteral("CreatedEvent")) {
+    } else if (elmName == QStringLiteral("CreatedEvent")) {
         mType = EwsCreatedEvent;
-    } else if (reader.name() == QStringLiteral("DeletedEvent")) {
+    } else if (elmName == QStringLiteral("DeletedEvent")) {
         mType = EwsDeletedEvent;
-    } else if (reader.name() == QStringLiteral("ModifiedEvent")) {
+    } else if (elmName == QStringLiteral("ModifiedEvent")) {
         mType = EwsModifiedEvent;
-    } else if (reader.name() == QStringLiteral("MovedEvent")) {
+    } else if (elmName == QStringLiteral("MovedEvent")) {
         mType = EwsMovedEvent;
-    } else if (reader.name() == QStringLiteral("NewMailEvent")) {
+    } else if (elmName == QStringLiteral("NewMailEvent")) {
         mType = EwsNewMailEvent;
-    } else if (reader.name() == QStringLiteral("StatusEvent")) {
+    } else if (elmName == QStringLiteral("StatusEvent")) {
         mType = EwsStatusEvent;
-    } else if (reader.name() == QStringLiteral("FreeBusyChangedEvent")) {
+    } else if (elmName == QStringLiteral("FreeBusyChangedEvent")) {
         mType = EwsFreeBusyChangedEvent;
     } else {
         qCWarning(EWSRES_LOG) << QStringLiteral("Unknown notification event type: %1")
-                              .arg(reader.name().toString());
+                              .arg(elmName.toString());
         return;
     }
 
@@ -241,9 +241,9 @@ EwsEventRequestBase::Event::Event(QXmlStreamReader &reader)
     mUnreadCount = values[UnreadCount].toUInt();
 
     if (mType == EwsStatusEvent) {
-        qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1").arg(evName);
+        qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1").arg(elmName.toString());
     } else {
-        qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1, %2, parent: ").arg(evName).arg(mIsFolder ? 'F' : 'I')
+        qCDebugNCS(EWSRES_LOG) << QStringLiteral(" %1, %2, parent: ").arg(elmName.toString()).arg(mIsFolder ? 'F' : 'I')
                                << mParentFolderId << QStringLiteral(", id: ") << mId;
     }
 }
