@@ -35,7 +35,7 @@ class BasicTest : public IsolatedTestBase
 {
     Q_OBJECT
 public:
-    BasicTest(QObject *parent = nullptr);
+    explicit BasicTest(QObject *parent = nullptr);
     virtual ~BasicTest();
 private Q_SLOTS:
     void initTestCase();
