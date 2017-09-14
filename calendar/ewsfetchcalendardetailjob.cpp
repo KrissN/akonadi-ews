@@ -235,15 +235,6 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
     emitResult();
 }
 
-/*
- *  This method does its best to convert the timezone found in the EWS calendar event to a IANA
- *  timezone. This is a cumbersome process as there is no guarantee that the
- */
-/*KTimeZone EwsFetchCalendarDetailJob::getTimezone(QString msTimezone, QString culture)
-{
-    return KTimeZone();
-}*/
-
 /* This function is a lousy workaround for Exchange returning Windows timezone names instead of
  * IANA ones.
  */
