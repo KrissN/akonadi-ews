@@ -109,6 +109,8 @@ target_link_libraries(akonadi_ews_resource
     KF5::Contacts
     KF5::Wallet
     KF5::WidgetsAddons
+    KF5::I18n
+    KF5::WindowSystem
     ewsclient)
 
 if (HAVE_SEPARATE_MTA_RESOURCE)

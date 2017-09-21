@@ -22,8 +22,6 @@
 
 #include "ewsfetchitemdetailjob.h"
 
-class KDateTime;
-
 class EwsFetchCalendarDetailJob : public EwsFetchItemDetailJob
 {
     Q_OBJECT
@@ -32,7 +30,6 @@ public:
     virtual ~EwsFetchCalendarDetailJob();
 protected:
     virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
-    void convertTimezone(KDateTime &currentTime, const QString &msTimezone, const QString &culture);
 private Q_SLOTS:
     void exceptionItemsFetched(KJob *job);
 };
