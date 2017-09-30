@@ -19,7 +19,7 @@
 
 #include "ewscreatetaskjob.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsCreateTaskJob::EwsCreateTaskJob(EwsClient &client, const Akonadi::Item &item,
                                    const Akonadi::Collection &collection, EwsTagStore *tagStore,

@@ -33,7 +33,7 @@
 #include "ewsgetfolderrequest.h"
 #include "ewseffectiverights.h"
 #include "ewsclient.h"
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 using namespace Akonadi;
 

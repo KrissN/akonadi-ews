@@ -97,7 +97,7 @@ void EwsSubscribeRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 

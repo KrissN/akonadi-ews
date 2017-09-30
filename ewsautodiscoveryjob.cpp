@@ -21,7 +21,7 @@
 
 #include <KI18n/KLocalizedString>
 #include "ewspoxautodiscoverrequest.h"
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsAutodiscoveryJob::EwsAutodiscoveryJob(const QString &email, const QString &username, const QString &password,
         const QString &userAgent, bool enableNTLMv2, QObject *parent)

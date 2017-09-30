@@ -81,7 +81,7 @@ void EwsFindFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -210,7 +210,7 @@ EwsFolder* EwsFindFolderResponse::readFolder(QXmlStreamReader &reader)
             EwsClient::folderHash[(*folder)[EwsFolderFieldFolderId].value<EwsId>().id()] = dn.toString();
         }
     } else {
-        qCWarning(EWSRES_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
+        qCWarning(EWSCLI_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
         reader.skipCurrentElement();
     }
 

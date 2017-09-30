@@ -24,7 +24,7 @@
 #include <AkonadiCore/AttributeFactory>
 #include <AkonadiCore/TagAttribute>
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 #include "ewsitem.h"
 #include "ewsresource.h"
 

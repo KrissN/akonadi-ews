@@ -107,14 +107,14 @@ void EwsRequest::addMetaData(const QString &key, const QString &value)
 
 void EwsRequest::requestResult(KJob *job)
 {
-    if (EWSRES_PROTO_LOG().isDebugEnabled()) {
+    if (EWSCLI_PROTO_LOG().isDebugEnabled()) {
         ewsLogDir.setAutoRemove(false);
         if (ewsLogDir.isValid()) {
             QTemporaryFile dumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmldump_XXXXXXX.xml"));
             dumpFile.open();
             dumpFile.setAutoRemove(false);
             dumpFile.write(mResponseData.toUtf8());
-            qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
+            qCDebug(EWSCLI_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
             dumpFile.close();
         }
     }
@@ -174,7 +174,7 @@ bool EwsRequest::readSoapBody(QXmlStreamReader &reader)
         }
 
         if (!parseResult(reader)) {
-            if (EWSRES_FAILEDREQUEST_LOG().isDebugEnabled()) {
+            if (EWSCLI_FAILEDREQUEST_LOG().isDebugEnabled()) {
                 dump();
             }
             return false;
@@ -197,7 +197,7 @@ bool EwsRequest::readSoapFault(QXmlStreamReader &reader)
 
     setErrorMsg(faultCode + QStringLiteral(": ") + faultString);
 
-    if (EWSRES_FAILEDREQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_FAILEDREQUEST_LOG().isDebugEnabled()) {
         dump();
     }
 
@@ -208,7 +208,7 @@ void EwsRequest::requestData(KIO::Job *job, const QByteArray &data)
 {
     Q_UNUSED(job);
 
-    qCDebug(EWSRES_PROTO_LOG) << "data" << job << data;
+    qCDebug(EWSCLI_PROTO_LOG) << "data" << job << data;
     mResponseData += QString::fromUtf8(data);
 }
 
@@ -263,7 +263,7 @@ EwsRequest::Response::Response(QXmlStreamReader &reader)
     QStringRef respClassRef = reader.attributes().value(QStringLiteral("ResponseClass"));
     if (respClassRef.isNull()) {
         mClass = EwsResponseParseError;
-        qCWarning(EWSRES_LOG) << "ResponseClass attribute not found in response element";
+        qCWarning(EWSCLI_LOG) << "ResponseClass attribute not found in response element";
         return;
     }
 
@@ -303,7 +303,7 @@ bool EwsRequest::readHeader(QXmlStreamReader &reader)
         if (reader.name() == QStringLiteral("ServerVersionInfo") && reader.namespaceUri() == ewsTypeNsUri) {
             EwsServerVersion version(reader);
             if (!version.isValid()) {
-                qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read EWS request - error parsing server version.");
+                qCWarningNC(EWSCLI_LOG) << QStringLiteral("Failed to read EWS request - error parsing server version.");
                 return false;
             }
             mServerVersion = version;
@@ -322,7 +322,7 @@ bool EwsRequest::Response::setErrorMsg(const QString &msg)
     mClass = EwsResponseParseError;
     mCode = QStringLiteral("ResponseParseError");
     mMessage = msg;
-    qCWarningNC(EWSRES_LOG) << msg;
+    qCWarningNC(EWSCLI_LOG) << msg;
     return false;
 }
 
@@ -340,9 +340,9 @@ void EwsRequest::dump() const
         resDumpFile.setAutoRemove(false);
         resDumpFile.write(mResponseData.toUtf8());
         resDumpFile.close();
-        qCDebug(EWSRES_LOG) << "request  dumped to" << reqDumpFile.fileName();
-        qCDebug(EWSRES_LOG) << "response dumped to" << resDumpFile.fileName();
+        qCDebug(EWSCLI_LOG) << "request  dumped to" << reqDumpFile.fileName();
+        qCDebug(EWSCLI_LOG) << "response dumped to" << resDumpFile.fileName();
     } else {
-        qCWarning(EWSRES_LOG) << "failed to dump request and response";
+        qCWarning(EWSCLI_LOG) << "failed to dump request and response";
     }
 }

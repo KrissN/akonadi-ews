@@ -108,9 +108,9 @@ void EwsFindItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting FindItems request (folder: ")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting FindItems request (folder: ")
                                   << mFolderId << QStringLiteral(")");
 
     prepare(reqString);
@@ -138,12 +138,12 @@ bool EwsFindItemRequest::parseItemsResponse(QXmlStreamReader &reader)
     mNextDenominator = resp->mNextDenominator;
     mIncludesLastItem = resp->mIncludesLastItem;
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp->isSuccess()) {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got FindItems response (%1 items, last included: %2)")
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got FindItems response (%1 items, last included: %2)")
                                           .arg(mItems.size()).arg(mIncludesLastItem ? QStringLiteral("true") : QStringLiteral("false"));
         } else {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got FindItems response - %1")
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got FindItems response - %1")
                                         .arg(resp->responseMessage());
         }
     }
@@ -262,7 +262,7 @@ EwsItem* EwsFindItemResponse::readItem(QXmlStreamReader &reader)
         reader.name() == QStringLiteral("MeetingResponse") ||
         reader.name() == QStringLiteral("MeetingCancellation") ||
         reader.name() == QStringLiteral("Task")) {
-        qCDebug(EWSRES_LOG).noquote() << QStringLiteral("Processing %1").arg(reader.name().toString());
+        qCDebug(EWSCLI_LOG).noquote() << QStringLiteral("Processing %1").arg(reader.name().toString());
         item = new EwsItem(reader);
         if (!item->isValid()) {
             setErrorMsg(QStringLiteral("Failed to read EWS request - invalid %1 element.")
@@ -270,7 +270,7 @@ EwsItem* EwsFindItemResponse::readItem(QXmlStreamReader &reader)
             return 0;
         }
     } else {
-        qCWarning(EWSRES_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
+        qCWarning(EWSCLI_LOG).noquote() << QStringLiteral("Unsupported folder type %1").arg(reader.name().toString());
         reader.skipCurrentElement();
     }
 

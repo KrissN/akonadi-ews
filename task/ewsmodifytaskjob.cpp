@@ -19,7 +19,7 @@
 
 #include "ewsmodifytaskjob.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsModifyTaskJob::EwsModifyTaskJob(EwsClient &client, const Akonadi::Item::List &items,
                                    const QSet<QByteArray> &parts, QObject *parent)

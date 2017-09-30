@@ -19,7 +19,7 @@
 
 #include "ewsmodifycontactjob.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsModifyContactJob::EwsModifyContactJob(EwsClient &client, const Akonadi::Item::List &items,
         const QSet<QByteArray> &parts, QObject *parent)

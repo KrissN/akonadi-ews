@@ -27,8 +27,8 @@
 
 #include "ewsclient.h"
 #include "ewsclient_debug.h"
-
-Q_DECLARE_LOGGING_CATEGORY(EWSRES_AGENTIF_LOG)
+#include "ewsres_agentif_debug.h"
+#include "ewsres_debug.h"
 
 inline QDebug operator<<(QDebug debug, const Akonadi::Item::List &items)
 {

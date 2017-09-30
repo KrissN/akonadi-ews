@@ -22,14 +22,10 @@
 
 #include <QLoggingCategory>
 #include <QTemporaryDir>
-
-Q_DECLARE_LOGGING_CATEGORY(EWSRES_LOG)
-
-Q_DECLARE_LOGGING_CATEGORY(EWSRES_PROTO_LOG)
-
-Q_DECLARE_LOGGING_CATEGORY(EWSRES_REQUEST_LOG)
-
-Q_DECLARE_LOGGING_CATEGORY(EWSRES_FAILEDREQUEST_LOG)
+#include <ewscli_debug.h>
+#include <ewscli_proto_debug.h>
+#include <ewscli_req_debug.h>
+#include <ewscli_failedreq_debug.h>
 
 #define qCDebugNC(cat) qCDebug(cat).noquote()
 #define qCInfoNC(cat) qCInfo(cat).noquote()

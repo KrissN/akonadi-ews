@@ -56,9 +56,9 @@ void EwsDeleteItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting DeleteItem request (") << mIds << ")";
+    qCDebugNCS(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting DeleteItem request (") << mIds << ")";
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -78,11 +78,11 @@ bool EwsDeleteItemRequest::parseItemsResponse(QXmlStreamReader &reader)
         return false;
     }
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got DeleteItem response - OK, deleted items") << mIds;
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got DeleteItem response - OK, deleted items") << mIds;
         } else {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got DeleteItem response - %1")
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got DeleteItem response - %1")
                                           .arg(resp.responseMessage());
         }
     }

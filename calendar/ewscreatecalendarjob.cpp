@@ -19,7 +19,7 @@
 
 #include "ewscreatecalendarjob.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsCreateCalendarJob::EwsCreateCalendarJob(EwsClient &client, const Akonadi::Item &item,
         const Akonadi::Collection &collection,

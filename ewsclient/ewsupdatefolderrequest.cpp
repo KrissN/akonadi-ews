@@ -62,10 +62,10 @@ void EwsUpdateFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting UpdateFolder request (%1 changes)")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting UpdateFolder request (%1 changes)")
                                   .arg(mChanges.size());
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -85,11 +85,11 @@ bool EwsUpdateFolderRequest::parseItemsResponse(QXmlStreamReader &reader)
         return false;
     }
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateFolder response - OK");
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got UpdateFolder response - OK");
         } else {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got UpdateFolder response - %1")
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got UpdateFolder response - %1")
                                           .arg(resp.responseMessage());
         }
     }

@@ -19,7 +19,7 @@
 
 #include "ewsmodifycalendarjob.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsModifyCalendarJob::EwsModifyCalendarJob(EwsClient &client, const Akonadi::Item::List &items,
         const QSet<QByteArray> &parts, QObject *parent)

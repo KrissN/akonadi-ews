@@ -19,7 +19,7 @@
 
 #include "ewscreatecontactjob.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 EwsCreateContactJob::EwsCreateContactJob(EwsClient &client, const Akonadi::Item &item,
         const Akonadi::Collection &collection,

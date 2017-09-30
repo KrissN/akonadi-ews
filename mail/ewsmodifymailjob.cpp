@@ -24,7 +24,7 @@
 #include "ewsupdateitemrequest.h"
 #include "ewsmailhandler.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 using namespace Akonadi;
 

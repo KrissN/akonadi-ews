@@ -56,10 +56,10 @@ void EwsDeleteFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting DeleteFolder request (%1 folders)")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting DeleteFolder request (%1 folders)")
                                   .arg(mIds.size());
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -79,11 +79,11 @@ bool EwsDeleteFolderRequest::parseItemsResponse(QXmlStreamReader &reader)
         return false;
     }
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got DeleteFolder response - OK");
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got DeleteFolder response - OK");
         } else {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got DeleteFolder response - %1")
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got DeleteFolder response - %1")
                                         .arg(resp.responseMessage());
         }
     }

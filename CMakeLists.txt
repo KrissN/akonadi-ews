@@ -31,6 +31,7 @@ add_subdirectory(ewsclient)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ewsclient)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/ewsclient)
 
 add_definitions(-DTRANSLATION_DOMAIN=\"akonadi_ews_resource\")
 
@@ -71,12 +72,21 @@ set(ewsresource_SRCS
     ewsmodifyitemjob.cpp
     ewsmodifyitemflagsjob.cpp
     ewsresource.cpp
-    ewsresource_debug.cpp
     ewssubscribedfoldersjob.cpp
     ewssubscriptionmanager.cpp
     ewssubscriptionwidget.cpp
     progressdialog.cpp
     settings.cpp)
+
+ecm_qt_declare_logging_category(ewsresource_SRCS
+  HEADER ewsres_debug.h
+  IDENTIFIER EWSRES_LOG
+  CATEGORY_NAME org.kde.pim.ews)
+ecm_qt_declare_logging_category(ewsresource_SRCS
+  HEADER ewsres_agentif_debug.h
+  IDENTIFIER EWSRES_AGENTIF_LOG
+  CATEGORY_NAME org.kde.pim.ews.agentif)
+
 
 ki18n_wrap_ui(ewsresource_SRCS configdialog.ui)
 

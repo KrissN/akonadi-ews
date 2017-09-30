@@ -107,12 +107,12 @@ void EwsSyncFolderItemsRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         QString st = mSyncState.isNull() ? QStringLiteral("none") : ewsHash(mSyncState);
         QString folder;
-        qCDebugNCS(EWSRES_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
+        qCDebugNCS(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting SyncFolderItems request (folder: ")
                                        << mFolderId << QStringLiteral(", state: %1").arg(st);
     }
 
@@ -138,13 +138,13 @@ bool EwsSyncFolderItemsRequest::parseItemsResponse(QXmlStreamReader &reader)
     mIncludesLastItem = resp->mIncludesLastItem;
     mSyncState = resp->mSyncState;
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp->isSuccess()) {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response (%1 changes, last included: %2, state: %3)")
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response (%1 changes, last included: %2, state: %3)")
                                           .arg(mChanges.size()).arg(mIncludesLastItem ? QStringLiteral("true") : QStringLiteral("false"))
                                           .arg(qHash(mSyncState), 0, 36);
         } else {
-            qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response - %1")
+            qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got SyncFolderItems response - %1")
                                           .arg(resp->responseMessage());
         }
     }
@@ -196,7 +196,7 @@ bool EwsSyncFolderItemsRequest::Response::changeReader(QXmlStreamReader &reader,
     while (reader.readNextStartElement()) {
         Change change(reader);
         if (!change.isValid()) {
-            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element").arg(elmName);
+            qCWarningNC(EWSCLI_LOG) << QStringLiteral("Failed to read %1 element").arg(elmName);
             return false;
         }
         changes.append(change);

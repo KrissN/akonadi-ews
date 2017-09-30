@@ -38,7 +38,7 @@ EwsClient::~EwsClient()
 void EwsClient::setServerVersion(const EwsServerVersion &version)
 {
     if (mServerVersion.isValid() && mServerVersion != version) {
-        qCWarning(EWSRES_LOG) << "Warning - server version changed." << mServerVersion << version;
+        qCWarning(EWSCLI_LOG) << "Warning - server version changed." << mServerVersion << version;
     }
     mServerVersion = version;
 }

@@ -87,7 +87,7 @@ EwsAttachment::EwsAttachment(QXmlStreamReader &reader)
     bool ok = true;
 
     if (reader.namespaceUri() != ewsTypeNsUri) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in Attachment element:")
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Unexpected namespace in Attachment element:")
                                 << reader.namespaceUri();
         reader.skipCurrentElement();
         return;
@@ -100,13 +100,13 @@ EwsAttachment::EwsAttachment(QXmlStreamReader &reader)
     } else if (reader.name() == QStringLiteral("ReferenceAttachment")) {
         d->mType = ReferenceAttachment;
     } else {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Unknown attachment type %1").arg(reader.name().toString());
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Unknown attachment type %1").arg(reader.name().toString());
         ok = false;
     }
 
     // Skip this attachment type as it's not clearly documented.
     if (d->mType == ReferenceAttachment) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Attachment type ReferenceAttachment not fully supported");
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Attachment type ReferenceAttachment not fully supported");
         reader.skipCurrentElement();
         d->mValid = true;
         return;
@@ -114,7 +114,7 @@ EwsAttachment::EwsAttachment(QXmlStreamReader &reader)
 
     while (ok && reader.readNextStartElement()) {
         if (reader.namespaceUri() != ewsTypeNsUri) {
-            qCWarningNC(EWSRES_LOG) << QStringLiteral("Unexpected namespace in Attachment element:")
+            qCWarningNC(EWSCLI_LOG) << QStringLiteral("Unexpected namespace in Attachment element:")
                                     << reader.namespaceUri();
             reader.skipCurrentElement();
             ok = false;
@@ -125,7 +125,7 @@ EwsAttachment::EwsAttachment(QXmlStreamReader &reader)
         if (elmName == QStringLiteral("AttachmentId")) {
             QXmlStreamAttributes attrs = reader.attributes();
             if (!attrs.hasAttribute(QStringLiteral("Id"))) {
-                qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - missing Id in AttachmentId element.")
+                qCWarningNC(EWSCLI_LOG) << QStringLiteral("Failed to read %1 element - missing Id in AttachmentId element.")
                                         .arg(QStringLiteral("Attachment"));
                 reader.skipCurrentElement();
                 ok = false;
@@ -171,7 +171,7 @@ EwsAttachment::EwsAttachment(QXmlStreamReader &reader)
                    elmName == QStringLiteral("Task"))) {
             d->mItem = EwsItem(reader);
             if (!d->mItem.isValid()) {
-                qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
+                qCWarningNC(EWSCLI_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
                                         .arg(QStringLiteral("Attachment")).arg(QStringLiteral("Item"));
                 reader.skipCurrentElement();
                 ok = false;
@@ -179,7 +179,7 @@ EwsAttachment::EwsAttachment(QXmlStreamReader &reader)
                 d->mValidFields.setBit(EwsAttachmentPrivate::Item);
             }
         } else {
-            qCWarningNC(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - unknown %2 element.")
+            qCWarningNC(EWSCLI_LOG) << QStringLiteral("Failed to read %1 element - unknown %2 element.")
                                     .arg(QStringLiteral("Attachment")).arg(elmName);
             reader.skipCurrentElement();
             ok = false;
@@ -228,13 +228,13 @@ void EwsAttachment::write(QXmlStreamWriter &writer) const
         elmName = QStringLiteral("ReferenceAttachment");
         break;
     default:
-        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to write Attachment element - invalid attachment type.");
+        qCWarning(EWSCLI_LOG) << QStringLiteral("Failed to write Attachment element - invalid attachment type.");
         return;
     }
     writer.writeStartElement(ewsTypeNsUri, elmName);
 
     if (d->mType == ReferenceAttachment) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Attachment type ReferenceAttachment not fully supported");
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Attachment type ReferenceAttachment not fully supported");
         writer.writeEndElement();
         return;
     }

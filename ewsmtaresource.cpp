@@ -25,7 +25,7 @@
 #include <KI18n/KLocalizedString>
 #include <KMime/Message>
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 #include "mtaconfigdialog.h"
 #include "mtasettings.h"
 #include "resourceinterface.h"

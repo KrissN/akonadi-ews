@@ -62,19 +62,19 @@ EwsServerVersion::EwsServerVersion(QXmlStreamReader &reader)
     QStringRef nameRef = attrs.value(QStringLiteral("Version"));
 
     if (majorRef.isNull() || minorRef.isNull()) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading server version info - missing attribute.");
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Error reading server version info - missing attribute.");
         return;
     }
 
     bool ok;
     uint majorVer = majorRef.toUInt(&ok);
     if (!ok) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading server version info - invalid major version number.");
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Error reading server version info - invalid major version number.");
         return;
     }
     uint minorVer = minorRef.toUInt(&ok);
     if (!ok) {
-        qCWarningNC(EWSRES_LOG) << QStringLiteral("Error reading server version info - invalid minor version number.");
+        qCWarningNC(EWSCLI_LOG) << QStringLiteral("Error reading server version info - invalid minor version number.");
         return;
     }
 

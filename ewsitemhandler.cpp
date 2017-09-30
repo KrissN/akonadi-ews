@@ -20,7 +20,7 @@
 #include "ewsitemhandler.h"
 
 #include "ewsresource.h"
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 struct HandlerFactory {
     EwsItemType type;

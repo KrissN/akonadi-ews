@@ -53,10 +53,10 @@ void EwsCreateFolderRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting CreateFolder request (%1 folders, parent %2)")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting CreateFolder request (%1 folders, parent %2)")
                                   .arg(mFolders.size()).arg(mParentFolderId.id());
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -76,11 +76,11 @@ bool EwsCreateFolderRequest::parseItemsResponse(QXmlStreamReader &reader)
         return false;
     }
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got CreateFolder response - OK");
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got CreateFolder response - OK");
         } else {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got CreateFolder response - %1")
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got CreateFolder response - %1")
                                         .arg(resp.responseMessage());
         }
     }

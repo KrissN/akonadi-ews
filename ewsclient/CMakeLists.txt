@@ -60,6 +60,26 @@ set(EWSCLIENT_SRCS
   ewsxml.cpp
   ewsclient_debug.cpp)
 
+ecm_qt_declare_logging_category(EWSCLIENT_SRCS
+  HEADER ewscli_debug.h
+  IDENTIFIER EWSCLI_LOG
+  CATEGORY_NAME org.kde.pim.ews.client)
+ecm_qt_declare_logging_category(EWSCLIENT_SRCS
+  HEADER ewscli_proto_debug.h
+  IDENTIFIER EWSCLI_PROTO_LOG
+  CATEGORY_NAME org.kde.pim.ews.client.proto
+  DEFAULT_SEVERITY Warning)
+ecm_qt_declare_logging_category(EWSCLIENT_SRCS
+  HEADER ewscli_req_debug.h
+  IDENTIFIER EWSCLI_REQUEST_LOG
+  CATEGORY_NAME org.kde.pim.ews.client.request
+  DEFAULT_SEVERITY Warning)
+ecm_qt_declare_logging_category(EWSCLIENT_SRCS
+  HEADER ewscli_failedreq_debug.h
+  IDENTIFIER EWSCLI_FAILEDREQUEST_LOG
+  CATEGORY_NAME org.kde.pim.ews.client.failedrequest
+  DEFAULT_SEVERITY Warning)
+
 add_library(ewsclient STATIC ${EWSCLIENT_SRCS})
 target_link_libraries(ewsclient 
   Qt5::Network

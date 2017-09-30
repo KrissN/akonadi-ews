@@ -76,10 +76,10 @@ void EwsCreateItemRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting CreateItem request (%1 items, parent %2)")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting CreateItem request (%1 items, parent %2)")
                                   .arg(mItems.size()).arg(mSavedFolderId.id());
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -99,11 +99,11 @@ bool EwsCreateItemRequest::parseItemsResponse(QXmlStreamReader &reader)
         return false;
     }
 
-    if (EWSRES_REQUEST_LOG().isDebugEnabled()) {
+    if (EWSCLI_REQUEST_LOG().isDebugEnabled()) {
         if (resp.isSuccess()) {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got CreateItem response - OK");
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got CreateItem response - OK");
         } else {
-            qCDebug(EWSRES_REQUEST_LOG) << QStringLiteral("Got CreateItem response - %1")
+            qCDebug(EWSCLI_REQUEST_LOG) << QStringLiteral("Got CreateItem response - %1")
                                         .arg(resp.responseMessage());
         }
     }

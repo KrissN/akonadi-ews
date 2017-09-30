@@ -31,7 +31,7 @@
 #include "tags/ewstagstore.h"
 #include "tags/ewsakonaditagssyncjob.h"
 #include "ewsresource.h"
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 using namespace Akonadi;
 

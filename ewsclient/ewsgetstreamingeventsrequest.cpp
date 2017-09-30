@@ -61,10 +61,10 @@ void EwsGetStreamingEventsRequest::start()
 
     endSoapDocument(writer);
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting GetStreamingEvents request (subId: %1, timeout: %2)")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting GetStreamingEvents request (subId: %1, timeout: %2)")
                                   .arg(ewsHash(mSubscriptionId)).arg(mTimeout);
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
     prepare(reqString);
 
@@ -76,7 +76,7 @@ void EwsGetStreamingEventsRequest::requestData(KIO::Job *job, const QByteArray &
     Q_UNUSED(job);
 
     mRespTimer.stop();
-    qCDebug(EWSRES_PROTO_LOG) << "data" << job << data;
+    qCDebug(EWSCLI_PROTO_LOG) << "data" << job << data;
     mResponseData += QString::fromUtf8(data);
     mRespTimer.start();
 }
@@ -86,14 +86,14 @@ void EwsGetStreamingEventsRequest::requestDataTimeout()
     if (mResponseData.isEmpty()) {
         return;
     }
-    if (EWSRES_PROTO_LOG().isDebugEnabled()) {
+    if (EWSCLI_PROTO_LOG().isDebugEnabled()) {
         ewsLogDir.setAutoRemove(false);
         if (ewsLogDir.isValid()) {
             QTemporaryFile dumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmldump_XXXXXXX.xml"));
             dumpFile.open();
             dumpFile.setAutoRemove(false);
             dumpFile.write(mResponseData.toUtf8());
-            qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
+            qCDebug(EWSCLI_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
             dumpFile.close();
         }
     }

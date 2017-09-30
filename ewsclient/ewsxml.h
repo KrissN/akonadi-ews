@@ -68,12 +68,12 @@ public:
         typename QHash<QString, Item>::iterator it = mItemHash.find(reader.name().toString());
         if (it != mItemHash.end() && nsUri == reader.namespaceUri()) {
             if (it->key == Ignore) {
-                qCInfoNC(EWSRES_LOG) << QStringLiteral("Unsupported %1 child element %2 - ignoring.")
+                qCInfoNC(EWSCLI_LOG) << QStringLiteral("Unsupported %1 child element %2 - ignoring.")
                                      .arg(parentElm).arg(reader.name().toString());
                 reader.skipCurrentElement();
                 return true;
             } else if (!it->readFn) {
-                qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - no read support for %2 element.")
+                qCWarning(EWSCLI_LOG) << QStringLiteral("Failed to read %1 element - no read support for %2 element.")
                                       .arg(parentElm).arg(reader.name().toString());
                 return false;
             } else {
@@ -109,7 +109,7 @@ public:
                 typename ValueHash::const_iterator it = values.find(item.key);
                 if (it != values.end()) {
                     if (!item.writeFn) {
-                        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to write %1 element - no write support for %2 element.")
+                        qCWarning(EWSCLI_LOG) << QStringLiteral("Failed to write %1 element - no write support for %2 element.")
                                               .arg(parentElm).arg(item.elmName);
                         return false;
                     }
@@ -133,7 +133,7 @@ public:
 private:
     static bool defaultUnknownElmFunction(QXmlStreamReader &reader, const QString &parentElm)
     {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
+        qCWarning(EWSCLI_LOG) << QStringLiteral("Failed to read %1 element - invalid %2 element.")
                               .arg(parentElm).arg(reader.name().toString());
         return false;
     }

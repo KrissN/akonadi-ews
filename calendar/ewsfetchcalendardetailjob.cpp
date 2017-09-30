@@ -28,7 +28,7 @@
 #include <KDE/KSystemTimeZones>
 #include <KDE/KTimeZone>
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 #include "ewsgetitemrequest.h"
 #include "ewsitemshape.h"
 #include "ewsmailbox.h"

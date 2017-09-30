@@ -24,7 +24,7 @@
 #include "ewstagstore.h"
 #include "ewsresource.h"
 
-#include "ewsclient_debug.h"
+#include "ewsresource_debug.h"
 
 using namespace Akonadi;
 

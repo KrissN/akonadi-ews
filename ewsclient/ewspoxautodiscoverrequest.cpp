@@ -93,9 +93,9 @@ void EwsPoxAutodiscoverRequest::start()
 
     writer.writeEndDocument();
 
-    qCDebug(EWSRES_PROTO_LOG) << reqString;
+    qCDebug(EWSCLI_PROTO_LOG) << reqString;
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Starting POX Autodiscovery request (url: ")
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Starting POX Autodiscovery request (url: ")
                                   << mUrl << QStringLiteral(", email: ") << mEmail;
     prepare(reqString);
 
@@ -107,20 +107,20 @@ void EwsPoxAutodiscoverRequest::requestData(KIO::Job *job, const QByteArray &dat
 {
     Q_UNUSED(job);
 
-    qCDebug(EWSRES_PROTO_LOG) << "data" << job << data;
+    qCDebug(EWSCLI_PROTO_LOG) << "data" << job << data;
     mResponseData += QString::fromUtf8(data);
 }
 
 void EwsPoxAutodiscoverRequest::requestResult(KJob *job)
 {
-    if (EWSRES_PROTO_LOG().isDebugEnabled()) {
+    if (EWSCLI_PROTO_LOG().isDebugEnabled()) {
         ewsLogDir.setAutoRemove(false);
         if (ewsLogDir.isValid()) {
             QTemporaryFile dumpFile(ewsLogDir.path() + QStringLiteral("/ews_xmldump_XXXXXXX.xml"));
             dumpFile.open();
             dumpFile.setAutoRemove(false);
             dumpFile.write(mResponseData.toUtf8());
-            qCDebug(EWSRES_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
+            qCDebug(EWSCLI_PROTO_LOG) << "response dumped to" << dumpFile.fileName();
             dumpFile.close();
         }
     }
@@ -247,7 +247,7 @@ bool EwsPoxAutodiscoverRequest::readProtocol(QXmlStreamReader &reader)
         }
     }
 
-    qCDebug(EWSRES_LOG) << "Adding proto type" << proto.mType << proto.isValid();
+    qCDebug(EWSCLI_LOG) << "Adding proto type" << proto.mType << proto.isValid();
     mProtocols[proto.mType] = proto;
 
     return true;
@@ -257,7 +257,7 @@ void EwsPoxAutodiscoverRequest::requestRedirect(KIO::Job *job, const QUrl &url)
 {
     Q_UNUSED(job);
 
-    qCDebugNC(EWSRES_REQUEST_LOG) << QStringLiteral("Got HTTP redirect to: ") << mUrl;
+    qCDebugNC(EWSCLI_REQUEST_LOG) << QStringLiteral("Got HTTP redirect to: ") << mUrl;
 
     mLastUrl = url;
 }
@@ -276,9 +276,9 @@ void EwsPoxAutodiscoverRequest::dump() const
         resDumpFile.setAutoRemove(false);
         resDumpFile.write(mResponseData.toUtf8());
         resDumpFile.close();
-        qCDebug(EWSRES_LOG) << "request  dumped to" << reqDumpFile.fileName();
-        qCDebug(EWSRES_LOG) << "response dumped to" << resDumpFile.fileName();
+        qCDebug(EWSCLI_LOG) << "request  dumped to" << reqDumpFile.fileName();
+        qCDebug(EWSCLI_LOG) << "response dumped to" << resDumpFile.fileName();
     } else {
-        qCWarning(EWSRES_LOG) << "failed to dump request and response";
+        qCWarning(EWSCLI_LOG) << "failed to dump request and response";
     }
 }
