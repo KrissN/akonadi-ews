@@ -499,7 +499,7 @@ void EwsResource::getItemRequestFinished(KJob *job)
     EwsItemType type = ewsItem.internalType();
     if (type == EwsItemTypeUnknown) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Unknown item type!");
-        cancelTask(i18nc("@info:status", "Failed to retrieve item - Unknown item type", id.id()));
+        cancelTask(i18nc("@info:status", "Failed to retrieve item - Unknown item type %1", id.id()));
         return;
     }
     if (!EwsItemHandler::itemHandler(type)->setItemPayload(item, ewsItem)) {
@@ -614,7 +614,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     }
     saveState();
     mItemsToCheck.remove(fetchJob->collection().remoteId());
-    Q_EMIT status(Idle, i18nc("@info:status", "The resource is ready", "Ready"));
+    Q_EMIT status(Idle, i18nc("@info:status", "The resource is ready"), "Ready"));
 }
 
 void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers)
@@ -901,7 +901,7 @@ void EwsResource::collectionAdded(const Collection &collection, const Collection
         type = EwsFolderTypeMail;
     } else {
         qCWarningNC(EWSRES_LOG) << QStringLiteral("Cannot determine EWS folder type.");
-        cancelTask(i18nc("@info:statys", "Failed to add collection - cannot determine EWS folder type"));
+        cancelTask(i18nc("@info:status", "Failed to add collection - cannot determine EWS folder type"));
         return;
     }
 
