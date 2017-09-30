@@ -605,7 +605,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
         } else {
             qCDebugNC(EWSRES_LOG) << QStringLiteral("Clean sync failed.");
             // No more hope
-            cancelTask(i18nc("@info:status", "Failed to retrieve items");
+            cancelTask(i18nc("@info:status", "Failed to retrieve items"));
             return;
         }
     } else {
@@ -614,7 +614,7 @@ void EwsResource::itemFetchJobFinished(KJob *job)
     }
     saveState();
     mItemsToCheck.remove(fetchJob->collection().remoteId());
-    Q_EMIT status(Idle, i18nc("@info:status", "The resource is ready"), "Ready"));
+    Q_EMIT status(Idle, i18nc("@info:status The resource is ready", "Ready"));
 }
 
 void EwsResource::itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers)
@@ -647,14 +647,14 @@ void EwsResource::itemModifyFlagsRequestFinished(KJob *job)
 {
     if (job->error()) {
         qCWarning(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged:" << job->errorString();
-        cancelTask(i18nc("@info:status", "Failed to process item flags update request");
+        cancelTask(i18nc("@info:status", "Failed to process item flags update request"));
         return;
     }
 
     EwsModifyItemFlagsJob *req = qobject_cast<EwsModifyItemFlagsJob*>(job);
     if (!req) {
         qCWarning(EWSRES_AGENTIF_LOG) << "itemsFlagsChanged: Invalid EwsModifyItemFlagsJob job object";
-        cancelTask(i18nc("@info:status", "Failed to update item flags - internal error");
+        cancelTask(i18nc("@info:status", "Failed to update item flags - internal error"));
         return;
     }
 
@@ -666,14 +666,14 @@ void EwsResource::itemChangeRequestFinished(KJob *job)
 {
     if (job->error()) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: " << job->errorString();
-        cancelTask(i18nc("@info:status", "Failed to process item update request");
+        cancelTask(i18nc("@info:status", "Failed to process item update request"));
         return;
     }
 
     EwsModifyItemJob *req = qobject_cast<EwsModifyItemJob*>(job);
     if (!req) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemChanged: Invalid EwsModifyItemJob job object";
-        cancelTask(i18nc("@info:status", "Failed to update item - internal error");
+        cancelTask(i18nc("@info:status", "Failed to update item - internal error"));
         return;
     }
 
@@ -708,14 +708,14 @@ void EwsResource::itemMoveRequestFinished(KJob *job)
 {
     if (job->error()) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsMoved: " << job->errorString();
-        cancelTask(i18nc("@info:status", "Failed to process item move request");
+        cancelTask(i18nc("@info:status", "Failed to process item move request"));
         return;
     }
 
     EwsMoveItemRequest *req = qobject_cast<EwsMoveItemRequest*>(job);
     if (!req) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsMoved: Invalid EwsMoveItemRequest job object";
-        cancelTask(i18nc("@info:status", "Failed to move item - internal error");
+        cancelTask(i18nc("@info:status", "Failed to move item - internal error"));
         return;
     }
     Item::List items = job->property("items").value<Item::List>();
@@ -800,14 +800,14 @@ void EwsResource::itemDeleteRequestFinished(KJob *job)
 {
     if (job->error()) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsRemoved: " << job->errorString();
-        cancelTask(i18nc("@info:status", "Failed to process item delete request");
+        cancelTask(i18nc("@info:status", "Failed to process item delete request"));
         return;
     }
 
     EwsDeleteItemRequest *req = qobject_cast<EwsDeleteItemRequest*>(job);
     if (!req) {
         qCWarningNC(EWSRES_AGENTIF_LOG) << "itemsRemoved: Invalid EwsDeleteItemRequest job object";
-        cancelTask(i18nc("@info:status", "Failed to delete item - internal error");
+        cancelTask(i18nc("@info:status", "Failed to delete item - internal error"));
         return;
     }
     Item::List items = job->property("items").value<Item::List>();
@@ -874,13 +874,13 @@ void EwsResource::itemAdded(const Item &item, const Collection &collection)
 void EwsResource::itemCreateRequestFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process item create request");
+        cancelTask(i18nc("@info:status", "Failed to process item create request"));
         return;
     }
 
     EwsCreateItemJob *req = qobject_cast<EwsCreateItemJob*>(job);
     if (!req) {
-        cancelTask(i18nc("@info:status", "Failed to create item - internal error");
+        cancelTask(i18nc("@info:status", "Failed to create item - internal error"));
         return;
     }
 
@@ -920,13 +920,13 @@ void EwsResource::collectionAdded(const Collection &collection, const Collection
 void EwsResource::folderCreateRequestFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process folder create request");
+        cancelTask(i18nc("@info:status", "Failed to process folder create request"));
         return;
     }
 
     EwsCreateFolderRequest *req = qobject_cast<EwsCreateFolderRequest*>(job);
     if (!req) {
-        cancelTask(i18nc("@info:status", "Failed to create folder - internal error");
+        cancelTask(i18nc("@info:status", "Failed to create folder - internal error"));
         return;
     }
     Collection col = job->property("collection").value<Collection>();
@@ -962,13 +962,13 @@ void EwsResource::collectionMoved(const Collection &collection, const Collection
 void EwsResource::folderMoveRequestFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process folder move request");
+        cancelTask(i18nc("@info:status", "Failed to process folder move request"));
         return;
     }
 
     EwsMoveFolderRequest *req = qobject_cast<EwsMoveFolderRequest*>(job);
     if (!req) {
-        cancelTask(i18nc("@info:status", "Failed to move folder - internal error");
+        cancelTask(i18nc("@info:status", "Failed to move folder - internal error"));
         return;
     }
     Collection col = job->property("collection").value<Collection>();
@@ -1017,13 +1017,13 @@ void EwsResource::collectionChanged(const Akonadi::Collection &collection)
 void EwsResource::folderUpdateRequestFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process folder update request");
+        cancelTask(i18nc("@info:status", "Failed to process folder update request"));
         return;
     }
 
     EwsUpdateFolderRequest *req = qobject_cast<EwsUpdateFolderRequest*>(job);
     if (!req) {
-        cancelTask(i18nc("@info:status", "Failed to update folder - internal error");
+        cancelTask(i18nc("@info:status", "Failed to update folder - internal error"));
         return;
     }
     Collection col = job->property("collection").value<Collection>();
@@ -1058,13 +1058,13 @@ void EwsResource::collectionRemoved(const Collection &collection)
 void EwsResource::folderDeleteRequestFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process folder delete request");
+        cancelTask(i18nc("@info:status", "Failed to process folder delete request"));
         return;
     }
 
     EwsDeleteFolderRequest *req = qobject_cast<EwsDeleteFolderRequest*>(job);
     if (!req) {
-        cancelTask(i18nc("@info:status", "Failed to delete folder - internal error");
+        cancelTask(i18nc("@info:status", "Failed to delete folder - internal error"));
         return;
     }
 
@@ -1328,13 +1328,13 @@ void EwsResource::itemsTagsChanged(const Item::List &items, const QSet<Tag> &add
 void EwsResource::itemsTagChangeFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process item tags update request");
+        cancelTask(i18nc("@info:status", "Failed to process item tags update request"));
         return;
     }
 
     EwsUpdateItemsTagsJob *updJob = qobject_cast<EwsUpdateItemsTagsJob*>(job);
     if (!updJob) {
-        cancelTask(i18nc("@info:status", "Failed to update item tags - internal error");
+        cancelTask(i18nc("@info:status", "Failed to update item tags - internal error"));
         return;
     }
 
@@ -1372,7 +1372,7 @@ void EwsResource::tagRemoved(const Tag &tag)
 void EwsResource::globalTagChangeFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process global tag update request");
+        cancelTask(i18nc("@info:status", "Failed to process global tag update request"));
     } else {
         changeProcessed();
     }
@@ -1389,7 +1389,7 @@ void EwsResource::retrieveTags()
 void EwsResource::globalTagsRetrievalFinished(KJob *job)
 {
     if (job->error()) {
-        cancelTask(i18nc("@info:status", "Failed to process global tags retrieval request");
+        cancelTask(i18nc("@info:status", "Failed to process global tags retrieval request"));
     } else {
         EwsGlobalTagsReadJob *readJob = qobject_cast<EwsGlobalTagsReadJob*>(job);
         Q_ASSERT(readJob);
