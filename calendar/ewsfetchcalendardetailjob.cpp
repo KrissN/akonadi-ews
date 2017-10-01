@@ -69,10 +69,10 @@ EwsFetchCalendarDetailJob::EwsFetchCalendarDetailJob(EwsClient &client, QObject 
     shape << EwsPropertyField(QStringLiteral("calendar:ModifiedOccurrences"));
     shape << EwsPropertyField(QStringLiteral("calendar:DeletedOccurrences"));
     shape << EwsPropertyField(QStringLiteral("item:Body"));
-    shape << EwsPropertyField(QStringLiteral("item:Culture"));
+//    shape << EwsPropertyField(QStringLiteral("item:Culture"));
     shape << EwsPropertyField(QStringLiteral("item:MimeContent"));
     shape << EwsPropertyField(QStringLiteral("item:Subject"));
-    shape << EwsPropertyField(QStringLiteral("calendar:TimeZone"));
+//    shape << EwsPropertyField(QStringLiteral("calendar:TimeZone"));
     mRequest->setItemShape(shape);
 }
 
@@ -119,8 +119,6 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
         //KCalCore::Incidence::Ptr incidence(format.fromString(mimeContent));
 
         if (incidence) {
-            QString msTz = ewsItem[EwsItemFieldTimeZone].toString();
-            QString culture = ewsItem[EwsItemFieldCulture].toString();
             QDateTime dt(incidence->dtStart());
             if (dt.isValid()) {
                 incidence->setDtStart(dt);
@@ -151,8 +149,8 @@ void EwsFetchCalendarDetailJob::processItems(const QList<EwsGetItemRequest::Resp
 //        shape << EwsPropertyField(QStringLiteral("item:Attachments"));
         shape << EwsPropertyField(QStringLiteral("item:Body"));
         shape << EwsPropertyField(QStringLiteral("item:MimeContent"));
-        shape << EwsPropertyField(QStringLiteral("calendar:TimeZone"));
-        shape << EwsPropertyField(QStringLiteral("item:Culture"));
+//        shape << EwsPropertyField(QStringLiteral("calendar:TimeZone"));
+//        shape << EwsPropertyField(QStringLiteral("item:Culture"));
         req->setItemShape(shape);
 
         req->setItemIds(addItems);
@@ -199,8 +197,6 @@ void EwsFetchCalendarDetailJob::exceptionItemsFetched(KJob *job)
         KCalCore::Incidence::Ptr incidence(memcal->events().last());
         incidence->clearRecurrence();
 
-        QString msTz = ewsItem[EwsItemFieldStartTimeZone].toString();
-        QString culture = ewsItem[EwsItemFieldCulture].toString();
         QDateTime dt(incidence->dtStart());
         if (dt.isValid()) {
             incidence->setDtStart(dt);
