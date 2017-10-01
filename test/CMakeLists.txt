@@ -89,5 +89,6 @@ file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../ewsresource.desktop DESTINATION ${EWS_T
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testenv/config.xml.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.xml)
 
-add_akonadi_isolated_test(basictest.cpp)
+# Disable for now - needs to be properly ported to kdepim-runtime
+#add_akonadi_isolated_test(basictest.cpp)
 

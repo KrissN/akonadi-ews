@@ -24,7 +24,7 @@ target_link_libraries(uttesthelpers Qt5::Core KF5::KIOCore)
 macro(akonadi_ews_add_ut utname)
   add_executable(${utname} ${utname}.cpp)
   target_link_libraries(${utname} Qt5::Test uttesthelpers ewsclient)
-  add_test(${utname} ${CMAKE_CURRENT_BINARY_DIR}/${utname})
+  add_test(NAME ${utname} COMMAND ${utname})
 endmacro(akonadi_ews_add_ut utname)
 
 akonadi_ews_add_ut(ewsmoveitemrequest_ut)
