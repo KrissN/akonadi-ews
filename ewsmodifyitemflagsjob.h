@@ -33,14 +33,14 @@ class EwsModifyItemFlagsJob : public EwsJob
 public:
     EwsModifyItemFlagsJob(EwsClient &client, QObject *parent, const Akonadi::Item::List,
                           const QSet<QByteArray> &addedFlags, const QSet<QByteArray> &removedFlags);
-    virtual ~EwsModifyItemFlagsJob();
+    ~EwsModifyItemFlagsJob() override;
 
     Akonadi::Item::List items() const
     {
         return mResultItems;
     }
 
-    virtual void start() override;
+    void start() override;
 protected:
     Akonadi::Item::List mItems;
     Akonadi::Item::List mResultItems;

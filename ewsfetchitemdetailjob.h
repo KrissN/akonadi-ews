@@ -38,7 +38,7 @@ class EwsFetchItemDetailJob : public KCompositeJob
     Q_OBJECT
 public:
     EwsFetchItemDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
-    virtual ~EwsFetchItemDetailJob();
+    ~EwsFetchItemDetailJob() override;
 
     void setItemLists(Akonadi::Item::List changedItems, Akonadi::Item::List *deletedItems);
 
@@ -47,7 +47,7 @@ public:
         return mChangedItems;
     }
 
-    virtual void start() override;
+    void start() override;
 protected:
     virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) = 0;
 

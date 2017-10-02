@@ -31,7 +31,7 @@ class EwsModifyItemJob : public EwsJob
 public:
     EwsModifyItemJob(EwsClient &client, const Akonadi::Item::List &items, const QSet<QByteArray> &parts,
                      QObject *parent);
-    virtual ~EwsModifyItemJob();
+    ~EwsModifyItemJob() override;
 
     void setModifiedFlags(const QSet<QByteArray> &addedFlags, const QSet<QByteArray> &removedFlags);
 

@@ -42,7 +42,7 @@ class ConfigDialog : public QDialog
     Q_OBJECT
 public:
     explicit ConfigDialog(EwsResource *parentResource, EwsClient &client, WId windowId);
-    virtual ~ConfigDialog();
+    ~ConfigDialog() override;
 private Q_SLOTS:
     void save();
     void autoDiscoveryFinished(KJob *job);

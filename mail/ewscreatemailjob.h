@@ -28,10 +28,10 @@ class EwsCreateMailJob : public EwsCreateItemJob
 public:
     EwsCreateMailJob(EwsClient &client, const Akonadi::Item &item,
                      const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
-    virtual ~EwsCreateMailJob();
-    virtual bool setSend(bool send = true) override;
+    ~EwsCreateMailJob() override;
+    bool setSend(bool send = true) override;
 protected:
-    virtual void doStart() override;
+    void doStart() override;
 private Q_SLOTS:
     void mailCreateFinished(KJob *job);
     void mailCreateWorkaroundFinished(KJob *job);

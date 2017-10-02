@@ -36,14 +36,14 @@ class EwsGetEventsRequest : public EwsEventRequestBase
     Q_OBJECT
 public:
     EwsGetEventsRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsGetEventsRequest();
+    ~EwsGetEventsRequest() override;
 
     void setWatermark(const QString &watermark)
     {
         mWatermark = watermark;
     };
 
-    virtual void start() override;
+    void start() override;
 
 protected:
     QString mWatermark;

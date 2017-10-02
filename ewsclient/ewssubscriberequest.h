@@ -60,7 +60,7 @@ public:
     };
 
     EwsSubscribeRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsSubscribeRequest();
+    ~EwsSubscribeRequest() override;
 
     void setType(Type t)
     {
@@ -92,9 +92,9 @@ public:
         return *mResponse;
     };
 
-    virtual void start() override;
+    void start() override;
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseSubscribeResponse(QXmlStreamReader &reader);
 private:
     //QSharedPointer<EwsSubscription> mSubscription;

@@ -68,7 +68,7 @@ public:
     };
 
     EwsRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsRequest();
+    ~EwsRequest() override;
 
     void setMetaData(const KIO::MetaData &md);
     void addMetaData(const QString &key, const QString &value);

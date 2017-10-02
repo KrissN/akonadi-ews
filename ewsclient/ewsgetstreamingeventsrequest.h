@@ -36,14 +36,14 @@ class EwsGetStreamingEventsRequest : public EwsEventRequestBase
     Q_OBJECT
 public:
     EwsGetStreamingEventsRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsGetStreamingEventsRequest();
+    ~EwsGetStreamingEventsRequest() override;
 
     void setTimeout(uint timeout)
     {
         mTimeout = timeout;
     };
 
-    virtual void start() override;
+    void start() override;
 public Q_SLOTS:
     void eventsProcessed(const Response &response);
 Q_SIGNALS:

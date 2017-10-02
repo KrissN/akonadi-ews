@@ -76,14 +76,14 @@ public:
     };
 
     EwsSyncFolderItemsRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsSyncFolderItemsRequest();
+    ~EwsSyncFolderItemsRequest() override;
 
     void setFolderId(const EwsId &id);
     void setItemShape(const EwsItemShape &shape);
     void setSyncState(const QString &state);
     void setMaxChanges(uint max);
 
-    virtual void start() override;
+    void start() override;
 
     bool includesLastItem() const
     {
@@ -99,7 +99,7 @@ public:
         return mSyncState;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
 

@@ -28,10 +28,10 @@ class EwsCreateAbchPersonJob : public EwsCreateItemJob
 public:
     EwsCreateAbchPersonJob(EwsClient &client, const Akonadi::Item &item,
                            const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
-    virtual ~EwsCreateAbchPersonJob();
-    virtual bool setSend(bool send = true) override;
+    ~EwsCreateAbchPersonJob();
+    bool setSend(bool send = true) override;
 protected:
-    virtual void doStart() override;
+    void doStart() override;
 };
 
 #endif

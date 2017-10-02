@@ -50,7 +50,7 @@ public:
     };
 
     EwsCreateFolderRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsCreateFolderRequest();
+    ~EwsCreateFolderRequest() override;
 
     void setFolders(const EwsFolder::List &folders)
     {
@@ -61,14 +61,14 @@ public:
         mParentFolderId = id;
     };
 
-    virtual void start() override;
+    void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsFolder::List mFolders;

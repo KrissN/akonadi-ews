@@ -78,7 +78,7 @@ public:
 
     EwsPoxAutodiscoverRequest(const QUrl &url, const QString &email, const QString &userAgent,
                               bool useNTLMv2, QObject *parent);
-    virtual ~EwsPoxAutodiscoverRequest();
+    ~EwsPoxAutodiscoverRequest() override;
 
     const EwsServerVersion &serverVersion() const
     {
@@ -87,7 +87,7 @@ public:
 
     void dump() const;
 
-    virtual void start() override;
+    void start() override;
 
     Action action() const
     {

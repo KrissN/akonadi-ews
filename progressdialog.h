@@ -34,7 +34,7 @@ public:
     };
 
     ProgressDialog(QWidget *parent, Type type);
-    virtual ~ProgressDialog();
+    ~ProgressDialog() override;
 };
 
 #endif

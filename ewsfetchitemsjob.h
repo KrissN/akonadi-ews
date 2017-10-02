@@ -48,7 +48,7 @@ public:
     EwsFetchItemsJob(const Akonadi::Collection &collection, EwsClient &client,
                      const QString &syncState, const EwsId::List &itemsToCheck,
                      EwsTagStore *tagStore, EwsResource *parent);
-    virtual ~EwsFetchItemsJob();
+    ~EwsFetchItemsJob() override;
 
     Akonadi::Item::List changedItems() const
     {
@@ -69,7 +69,7 @@ public:
 
     void setQueuedUpdates(const QueuedUpdateList &updates);
 
-    virtual void start() override;
+    void start() override;
 private Q_SLOTS:
     void localItemFetchDone(KJob *job);
     void remoteItemFetchDone(KJob *job);

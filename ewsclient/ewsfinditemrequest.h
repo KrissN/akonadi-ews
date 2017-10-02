@@ -30,7 +30,7 @@ class EwsFindItemRequest : public EwsRequest
     Q_OBJECT
 public:
     EwsFindItemRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsFindItemRequest();
+    ~EwsFindItemRequest() override;
 
     void setFolderId(const EwsId &id);
     void setItemShape(const EwsItemShape &shape);
@@ -55,7 +55,7 @@ public:
         mFractional = true;
     }
 
-    virtual void start() override;
+    void start() override;
 
     bool includesLastItem() const
     {
@@ -79,7 +79,7 @@ public:
         return mItems;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     EwsId mFolderId;

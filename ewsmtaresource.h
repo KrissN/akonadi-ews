@@ -39,7 +39,7 @@ public:
     explicit EwsMtaResource(const QString &id);
     ~EwsMtaResource();
 
-    virtual void sendItem(const Akonadi::Item &item) override;
+    void sendItem(const Akonadi::Item &item) override;
 public Q_SLOTS:
     void configure(WId windowId) override;
 protected Q_SLOTS:

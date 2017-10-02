@@ -27,9 +27,9 @@ class EwsJob : public KCompositeJob
     Q_OBJECT
 public:
     explicit EwsJob(QObject *parent);
-    virtual ~EwsJob();
+    ~EwsJob() override;
 protected:
-    virtual bool doKill() override;
+    bool doKill() override;
     bool setErrorMsg(const QString msg, int code = KJob::UserDefinedError);
 };
 

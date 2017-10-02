@@ -30,7 +30,7 @@ class Q_DECL_EXPORT FakeEwsServerThread : public QThread
     Q_OBJECT
 public:
     explicit FakeEwsServerThread(QObject *parent = 0);
-    virtual ~FakeEwsServerThread();
+    ~FakeEwsServerThread() override;
 
 //    FakeEwsServer *server() const;
     ushort portNumber() const
@@ -48,7 +48,7 @@ public:
 Q_SIGNALS:
     void serverStarted(bool ok);
 protected:
-    virtual void run() override;
+    void run() override;
 private Q_SLOTS:
     void doQueueEventsXml(const QStringList events);
 private:

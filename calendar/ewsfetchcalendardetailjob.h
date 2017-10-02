@@ -27,9 +27,9 @@ class EwsFetchCalendarDetailJob : public EwsFetchItemDetailJob
     Q_OBJECT
 public:
     EwsFetchCalendarDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
-    virtual ~EwsFetchCalendarDetailJob();
+    ~EwsFetchCalendarDetailJob() override;
 protected:
-    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
+    void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
 private Q_SLOTS:
     void exceptionItemsFetched(KJob *job);
 };

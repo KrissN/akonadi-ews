@@ -38,7 +38,7 @@ class MtaConfigDialog : public QDialog
     Q_OBJECT
 public:
     explicit MtaConfigDialog(EwsMtaResource *parentResource, WId windowId);
-    virtual ~MtaConfigDialog();
+    ~MtaConfigDialog() override;
 private Q_SLOTS:
     void save();
     void dialogAccepted();

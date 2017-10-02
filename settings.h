@@ -28,7 +28,7 @@ class Settings : public SettingsBase
     Q_CLASSINFO("D-Bus Interface", "org.kde.Akonadi.Ews.Wallet")
 public:
     explicit Settings(WId windowId);
-    virtual ~Settings();
+    ~Settings() override;
 
     bool requestPassword(QString &password, bool ask);
 public Q_SLOTS:

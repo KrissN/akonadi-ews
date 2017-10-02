@@ -60,28 +60,27 @@ public:
     explicit EwsResource(const QString &id);
     ~EwsResource();
 
-    virtual void itemsTagsChanged(const Akonadi::Item::List &items, const QSet<Akonadi::Tag> &addedTags,
+    void itemsTagsChanged(const Akonadi::Item::List &items, const QSet<Akonadi::Tag> &addedTags,
                                   const QSet<Akonadi::Tag> &removedTags) override;
-    virtual void tagAdded(const Akonadi::Tag &tag) override;
-    virtual void tagChanged(const Akonadi::Tag &tag) override;
-    virtual void tagRemoved(const Akonadi::Tag &tag) override;
+    void tagAdded(const Akonadi::Tag &tag) override;
+    void tagChanged(const Akonadi::Tag &tag) override;
+    void tagRemoved(const Akonadi::Tag &tag) override;
 
-    virtual void collectionAdded(const Akonadi::Collection &collection, const Akonadi::Collection &parent) override;
-    virtual void collectionMoved(const Akonadi::Collection &collection, const Akonadi::Collection &collectionSource,
-                                 const Akonadi::Collection &collectionDestination) override;
-    virtual void collectionChanged(const Akonadi::Collection &collection,
-                                   const QSet<QByteArray> &changedAttributes) override;
-    virtual void collectionChanged(const Akonadi::Collection &collection) override;
-    virtual void collectionRemoved(const Akonadi::Collection &collection) override;
-    virtual void itemAdded(const Akonadi::Item &item, const Akonadi::Collection &collection) override;
-    virtual void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) override;
-    virtual void itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
-                                   const QSet<QByteArray> &removedFlags) override;
-    virtual void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
-                            const Akonadi::Collection &destinationCollection) override;
-    virtual void itemsRemoved(const Akonadi::Item::List &items) override;
+    void collectionAdded(const Akonadi::Collection &collection, const Akonadi::Collection &parent) override;
+    void collectionMoved(const Akonadi::Collection &collection, const Akonadi::Collection &collectionSource,
+                         const Akonadi::Collection &collectionDestination) override;
+    void collectionChanged(const Akonadi::Collection &collection, const QSet<QByteArray> &changedAttributes) override;
+    void collectionChanged(const Akonadi::Collection &collection) override;
+    void collectionRemoved(const Akonadi::Collection &collection) override;
+    void itemAdded(const Akonadi::Item &item, const Akonadi::Collection &collection) override;
+    void itemChanged(const Akonadi::Item &item, const QSet<QByteArray> &partIdentifiers) override;
+    void itemsFlagsChanged(const Akonadi::Item::List &items, const QSet<QByteArray> &addedFlags,
+                           const QSet<QByteArray> &removedFlags) override;
+    void itemsMoved(const Akonadi::Item::List &items, const Akonadi::Collection &sourceCollection,
+                    const Akonadi::Collection &destinationCollection) override;
+    void itemsRemoved(const Akonadi::Item::List &items) override;
 
-    virtual void sendItem(const Akonadi::Item &item) override;
+    void sendItem(const Akonadi::Item &item) override;
 
     const Akonadi::Collection &rootCollection() const
     {

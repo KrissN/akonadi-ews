@@ -28,10 +28,10 @@ class EwsCreateCalendarJob : public EwsCreateItemJob
 public:
     EwsCreateCalendarJob(EwsClient &client, const Akonadi::Item &item,
                          const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
-    virtual ~EwsCreateCalendarJob();
-    virtual bool setSend(bool send = true) override;
+    ~EwsCreateCalendarJob() override;
+    bool setSend(bool send = true) override;
 protected:
-    virtual void doStart() override;
+    void doStart() override;
 };
 
 #endif

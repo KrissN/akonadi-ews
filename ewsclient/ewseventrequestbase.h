@@ -154,7 +154,7 @@ public:
         friend class EwsEventRequestBase;
     };
 
-    virtual ~EwsEventRequestBase();
+    ~EwsEventRequestBase() override;
 
     void setSubscriptionId(const QString &id)
     {
@@ -167,7 +167,7 @@ public:
     };
 protected:
     EwsEventRequestBase(EwsClient &client, const QString &reqName, QObject *parent);
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseNotificationsResponse(QXmlStreamReader &reader);
 
     QString mSubscriptionId;

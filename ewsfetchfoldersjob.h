@@ -35,7 +35,7 @@ class EwsFetchFoldersJob : public EwsJob
     Q_OBJECT
 public:
     EwsFetchFoldersJob(EwsClient &client, const Akonadi::Collection &rootCollection, QObject *parent);
-    virtual ~EwsFetchFoldersJob();
+    ~EwsFetchFoldersJob() override;
 
     Akonadi::Collection::List folders() const
     {
@@ -46,7 +46,7 @@ public:
         return mSyncState;
     };
 
-    virtual void start() override;
+    void start() override;
 Q_SIGNALS:
     void status(int status, const QString &message = QString());
     void percent(int progress);

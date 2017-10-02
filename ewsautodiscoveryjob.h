@@ -30,9 +30,9 @@ class EwsAutodiscoveryJob : public EwsJob
 public:
     EwsAutodiscoveryJob(const QString &email, const QString &username, const QString &password, const QString &userAgent,
                         bool enableNTLMv2, QObject *parent);
-    virtual ~EwsAutodiscoveryJob();
+    ~EwsAutodiscoveryJob() override;
 
-    virtual void start() override;
+    void start() override;
 
     const QString &ewsUrl() const
     {

@@ -51,7 +51,7 @@ public:
     static const DialogEntry::HttpResponse EmptyResponse;
 
     explicit FakeEwsServer(QObject *parent);
-    virtual ~FakeEwsServer();
+    ~FakeEwsServer() override;
     bool start();
     void setDefaultReplyCallback(DialogEntry::ReplyCallback defaultReplyCallback);
     void queueEventsXml(const QStringList &events);

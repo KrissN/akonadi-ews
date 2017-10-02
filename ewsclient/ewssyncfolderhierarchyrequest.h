@@ -70,13 +70,13 @@ public:
     };
 
     EwsSyncFolderHierarchyRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsSyncFolderHierarchyRequest();
+    ~EwsSyncFolderHierarchyRequest() override;
 
     void setFolderId(const EwsId &id);
     void setFolderShape(const EwsFolderShape &shape);
     void setSyncState(const QString &state);
 
-    virtual void start() override;
+    void start() override;
 
     bool includesLastItem() const
     {
@@ -92,7 +92,7 @@ public:
         return mSyncState;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
 

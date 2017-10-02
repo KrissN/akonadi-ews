@@ -36,7 +36,7 @@ public:
     explicit EwsFolder(QXmlStreamReader &reader);
     EwsFolder(const EwsFolder &other);
     EwsFolder(EwsFolder &&other);
-    virtual ~EwsFolder();
+    ~EwsFolder() override;
 
     EwsFolder &operator=(const EwsFolder &other);
     EwsFolder &operator=(EwsFolder &&other);

@@ -30,7 +30,7 @@ class EwsFindFolderRequest : public EwsRequest
     Q_OBJECT
 public:
     EwsFindFolderRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsFindFolderRequest();
+    ~EwsFindFolderRequest() override;
 
     void setParentFolderId(const EwsId &id);
     void setFolderShape(const EwsFolderShape &shape);
@@ -39,14 +39,14 @@ public:
         mTraversal = traversal;
     };
 
-    virtual void start() override;
+    void start() override;
 
     const QList<EwsFolder> folders() const
     {
         return mFolders;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
     EwsId mParentId;

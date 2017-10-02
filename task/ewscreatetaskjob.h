@@ -28,10 +28,10 @@ class EwsCreateTaskJob : public EwsCreateItemJob
 public:
     EwsCreateTaskJob(EwsClient &client, const Akonadi::Item &item,
                      const Akonadi::Collection &collection, EwsTagStore *tagStore, EwsResource *parent);
-    virtual ~EwsCreateTaskJob();
-    virtual bool setSend(bool send = true) override;
+    ~EwsCreateTaskJob() override;
+    bool setSend(bool send = true) override;
 protected:
-    virtual void doStart() override;
+    void doStart() override;
 };
 
 #endif

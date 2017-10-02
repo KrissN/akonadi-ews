@@ -105,21 +105,21 @@ public:
     };
 
     EwsUpdateFolderRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsUpdateFolderRequest();
+    ~EwsUpdateFolderRequest() override;
 
     void addFolderChange(const FolderChange &change)
     {
         mChanges.append(change);
     };
 
-    virtual void start() override;
+    void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
 private:
     QList<FolderChange> mChanges;

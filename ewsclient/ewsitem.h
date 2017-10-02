@@ -38,7 +38,7 @@ public:
     explicit EwsItem(QXmlStreamReader &reader);
     EwsItem(const EwsItem &other);
     EwsItem(EwsItem &&other);
-    virtual ~EwsItem();
+    ~EwsItem() override;
 
     EwsItem &operator=(const EwsItem &other);
     EwsItem &operator=(EwsItem &&other);

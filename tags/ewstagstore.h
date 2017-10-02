@@ -87,7 +87,7 @@ class EwsTagStore : public QObject
     Q_OBJECT
 public:
     explicit EwsTagStore(QObject *parent);
-    virtual ~EwsTagStore();
+    ~EwsTagStore() override;
 
     /**
      *  @brief  Load the tag information from the supplied server-side list.

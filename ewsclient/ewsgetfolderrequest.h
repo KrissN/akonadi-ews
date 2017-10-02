@@ -44,19 +44,19 @@ public:
     };
 
     EwsGetFolderRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsGetFolderRequest();
+    ~EwsGetFolderRequest() override;
 
     void setFolderIds(const EwsId::List &ids);
     void setFolderShape(const EwsFolderShape &shape);
 
-    virtual void start() override;
+    void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
     };
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseFoldersResponse(QXmlStreamReader &reader);
 private:
     EwsId::List mIds;

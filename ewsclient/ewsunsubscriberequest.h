@@ -46,7 +46,7 @@ public:
     };
 
     EwsUnsubscribeRequest(EwsClient &client, QObject *parent);
-    virtual ~EwsUnsubscribeRequest();
+    ~EwsUnsubscribeRequest() override;
 
     void setSubscriptionId(const QString &id)
     {
@@ -58,9 +58,9 @@ public:
         return *mResponse;
     };
 
-    virtual void start() override;
+    void start() override;
 protected:
-    virtual bool parseResult(QXmlStreamReader &reader) override;
+    bool parseResult(QXmlStreamReader &reader) override;
     bool parseUnsubscribeResponse(QXmlStreamReader &reader);
 private:
     QString mSubscriptionId;

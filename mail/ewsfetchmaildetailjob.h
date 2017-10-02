@@ -27,9 +27,9 @@ class EwsFetchMailDetailJob : public EwsFetchItemDetailJob
     Q_OBJECT
 public:
     EwsFetchMailDetailJob(EwsClient &client, QObject *parent, const Akonadi::Collection &collection);
-    virtual ~EwsFetchMailDetailJob();
+    ~EwsFetchMailDetailJob() override;
 protected:
-    virtual void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
+    void processItems(const QList<EwsGetItemRequest::Response> &responses) override;
 };
 
 #endif

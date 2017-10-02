@@ -34,7 +34,7 @@ class FakeEwsConnection : public QObject
 public:
 
     FakeEwsConnection(QTcpSocket *sock, FakeEwsServer *parent);
-    virtual ~FakeEwsConnection();
+    ~FakeEwsConnection() override;
     void sendEvents(const QStringList &events);
 private Q_SLOTS:
     void disconnected();
