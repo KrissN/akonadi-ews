@@ -39,7 +39,6 @@ public:
                                     const Akonadi::Collection &collection,
                                     EwsTagStore *tagStore, EwsResource *parent) override;
     static EwsItemHandler *factory();
-private:
 };
 
 #endif

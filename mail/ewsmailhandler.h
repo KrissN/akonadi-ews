@@ -42,7 +42,6 @@ public:
     static QHash<EwsPropertyField, QVariant> writeFlags(const QSet<QByteArray> flags);
     static QSet<QByteArray> readFlags(const EwsItem &item);
     static QList<EwsPropertyField> flagsProperties();
-private:
 };
 
 #endif
