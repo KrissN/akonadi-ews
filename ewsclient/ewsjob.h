@@ -30,7 +30,7 @@ public:
     ~EwsJob() override;
 protected:
     bool doKill() override;
-    bool setErrorMsg(const QString msg, int code = KJob::UserDefinedError);
+    bool setErrorMsg(const QString &msg, int code = KJob::UserDefinedError);
 };
 
 #endif

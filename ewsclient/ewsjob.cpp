@@ -39,7 +39,7 @@ bool EwsJob::doKill()
     return true;
 }
 
-bool EwsJob::setErrorMsg(const QString msg, int code)
+bool EwsJob::setErrorMsg(const QString &msg, int code)
 {
     setError(code);
     setErrorText(msg);
