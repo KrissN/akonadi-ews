@@ -26,7 +26,7 @@
 
 #include "ewstypes.h"
 
-#include <config.h>
+#include <ewsconfig.h>
 
 class QXmlStreamWriter;
 class QXmlStreamReader;

@@ -30,7 +30,7 @@
 #include "ewsfetchitemsjob.h"
 #include "ewsid.h"
 
-#include <config.h>
+#include <ewsconfig.h>
 
 // Some older variants of akonadi_version.h use a different name
 #ifndef AKONADI_VERSION
