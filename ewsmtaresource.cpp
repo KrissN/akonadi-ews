@@ -122,7 +122,6 @@ void EwsMtaResource::retrieveItems(const Akonadi::Collection &collection)
     itemsRetrieved(Item::List());
 }
 
-#if (AKONADI_VERSION > 0x50328)
 bool EwsMtaResource::retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts)
 {
     Q_UNUSED(parts)
@@ -131,15 +130,5 @@ bool EwsMtaResource::retrieveItems(const Akonadi::Item::List &items, const QSet<
 
     return true;
 }
-#else
-bool EwsMtaResource::retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts)
-{
-    Q_UNUSED(parts)
-
-    itemRetrieved(item);
-
-    return true;
-}
-#endif
 
 AKONADI_RESOURCE_MAIN(EwsMtaResource)

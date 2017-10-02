@@ -32,11 +32,6 @@
 
 #include <ewsconfig.h>
 
-// Some older variants of akonadi_version.h use a different name
-#ifndef AKONADI_VERSION
-#define AKONADI_VERSION AKONADILIBRARIES_VERSION
-#endif
-
 class FetchItemState;
 class EwsGetItemRequest;
 class EwsFindFolderRequest;
@@ -101,21 +96,13 @@ public Q_SLOTS:
 protected Q_SLOTS:
     void retrieveCollections() override;
     void retrieveItems(const Akonadi::Collection &collection) override;
-#if (AKONADI_VERSION > 0x50328)
     bool retrieveItems(const Akonadi::Item::List &items, const QSet<QByteArray> &parts) override;
-#else
-    bool retrieveItem(const Akonadi::Item &item, const QSet<QByteArray> &parts) override;
-#endif
     void retrieveTags() override;
 private Q_SLOTS:
     void fetchFoldersJobFinished(KJob *job);
     void fetchFoldersIncrJobFinished(KJob *job);
     void itemFetchJobFinished(KJob *job);
-#if (AKONADI_VERSION > 0x50328)
     void getItemsRequestFinished(KJob *job);
-#else
-    void getItemRequestFinished(KJob *job);
-#endif
     void itemChangeRequestFinished(KJob *job);
     void itemModifyFlagsRequestFinished(KJob *job);
     void itemMoveRequestFinished(KJob *job);

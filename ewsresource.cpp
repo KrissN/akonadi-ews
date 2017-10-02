@@ -375,7 +375,6 @@ void EwsResource::retrieveItems(const Collection &collection)
     job->start();
 }
 
-#if (AKONADI_VERSION > 0x50328)
 bool EwsResource::retrieveItems(const Item::List &items, const QSet<QByteArray> &parts)
 {
     qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItems: start " << items << parts;
@@ -456,62 +455,6 @@ void EwsResource::getItemsRequestFinished(KJob *job)
     qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItems: done";
     itemsRetrieved(itemHash.values().toVector());
 }
-#else
-bool EwsResource::retrieveItem(const Item &item, const QSet<QByteArray> &parts)
-{
-    qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItem: start " << item << parts;
-
-    EwsGetItemRequest *req = new EwsGetItemRequest(mEwsClient, this);
-    EwsId::List ids;
-    ids << EwsId(item.remoteId(), item.remoteRevision());
-    req->setItemIds(ids);
-    EwsItemShape shape(EwsShapeIdOnly);
-    shape << EwsPropertyField("item:MimeContent");
-    req->setItemShape(shape);
-    req->setProperty("item", QVariant::fromValue<Item>(item));
-    connect(req, &EwsGetItemRequest::result, this, &EwsResource::getItemRequestFinished);
-    req->start();
-    return true;
-}
-
-void EwsResource::getItemRequestFinished(KJob *job)
-{
-    if (job->error()) {
-        qWarning() << "ERROR" << job->errorString();
-        cancelTask(i18nc("@info:status", "Failed to process item retrieval request"));
-        return;
-    }
-    EwsGetItemRequest *req = qobject_cast<EwsGetItemRequest*>(job);
-    if (!req) {
-        qCWarning(EWSRES_LOG) << QStringLiteral("Invalid EwsGetItemRequest job object");
-        cancelTask(i18nc("@info:status", "Failed to retrieve item - internal error"));
-        return;
-    }
-
-    Item item = req->property("item").value<Item>();
-    const EwsGetItemRequest::Response &resp = req->responses()[0];
-    if (!resp.isSuccess()) {
-        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Item fetch failed!");
-        cancelTask(i18nc("@info:status", "Failed to retrieve item"));
-        return;
-    }
-    const EwsItem &ewsItem = resp.item();
-    EwsItemType type = ewsItem.internalType();
-    if (type == EwsItemTypeUnknown) {
-        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Unknown item type!");
-        cancelTask(i18nc("@info:status", "Failed to retrieve item - Unknown item type %1", id.id()));
-        return;
-    }
-    if (!EwsItemHandler::itemHandler(type)->setItemPayload(item, ewsItem)) {
-        qCWarningNC(EWSRES_AGENTIF_LOG) << QStringLiteral("retrieveItem: Failed to fetch item payload.");
-        cancelTask(i18nc("@info:status", "Failed to fetch item payload"));
-        return;
-    }
-
-    qCDebugNC(EWSRES_AGENTIF_LOG) << "retrieveItem: done";
-    itemRetrieved(item);
-}
-#endif
 
 void EwsResource::reloadConfig()
 {
