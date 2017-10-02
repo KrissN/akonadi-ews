@@ -30,6 +30,8 @@ FakeTransferJob::FakeTransferJob(const QByteArray &postData, VerifierFn fn, QObj
     : KIO::SpecialJob(QUrl(QStringLiteral("file:///tmp/")), QByteArray()), mPostData(postData),
       mVerifier(fn)
 {
+    Q_UNUSED(parent);
+
     metaObject()->invokeMethod(this, "callVerifier", Qt::QueuedConnection);
 }
 
