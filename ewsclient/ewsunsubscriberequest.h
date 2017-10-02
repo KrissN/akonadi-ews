@@ -51,12 +51,12 @@ public:
     void setSubscriptionId(const QString &id)
     {
         mSubscriptionId = id;
-    };
+    }
 
     const Response &response() const
     {
         return *mResponse;
-    };
+    }
 
     void start() override;
 protected:

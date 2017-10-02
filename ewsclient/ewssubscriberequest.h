@@ -45,11 +45,12 @@ public:
         const QString &subscriptionId() const
         {
             return mId;
-        };
+        }
+
         const QString &watermark() const
         {
             return mWatermark;
-        };
+        }
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -65,32 +66,37 @@ public:
     void setType(Type t)
     {
         mType = t;
-    };
+    }
+
     void setFolderIds(EwsId::List folders)
     {
         mFolderIds = folders;
-    };
+    }
+
     void setAllFolders(bool allFolders)
     {
         mAllFolders = allFolders;
-    };
+    }
+
     void setEventTypes(QList<EwsEventType> types)
     {
         mEventTypes = types;
-    };
+    }
+
     void setWatermark(const QString &watermark)
     {
         mWatermark = watermark;
-    };
+    }
+
     void setTimeout(uint timeout)
     {
         mTimeout = timeout;
-    };
+    }
 
     const Response &response() const
     {
         return *mResponse;
-    };
+    }
 
     void start() override;
 protected:

@@ -44,7 +44,7 @@ public:
     const Akonadi::Tag::List &tags() const
     {
         return mTags;
-    };
+    }
 private Q_SLOTS:
     void getFolderRequestFinished(KJob *job);
 private:

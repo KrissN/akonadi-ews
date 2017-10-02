@@ -40,11 +40,11 @@ public:
     Akonadi::Collection::List folders() const
     {
         return mFolders;
-    };
+    }
     const QString &syncState() const
     {
         return mSyncState;
-    };
+    }
 
     void start() override;
 Q_SIGNALS:

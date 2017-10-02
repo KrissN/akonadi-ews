@@ -37,14 +37,14 @@ public:
     void setTraversal(EwsTraversalType traversal)
     {
         mTraversal = traversal;
-    };
+    }
 
     void start() override;
 
     const QList<EwsFolder> folders() const
     {
         return mFolders;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseFoldersResponse(QXmlStreamReader &reader);

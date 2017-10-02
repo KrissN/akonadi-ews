@@ -37,11 +37,11 @@ public:
     const QString &ewsUrl() const
     {
         return mEwsUrl;
-    };
+    }
     const QString &oabUrl() const
     {
         return mOabUrl;
-    };
+    }
 
 private Q_SLOTS:
     void autodiscoveryRequestFinished(KJob *job);

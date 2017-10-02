@@ -53,22 +53,26 @@ public:
     {
     public:
         Protocol() : mType(UnknownProto) {};
+
         bool isValid() const
         {
             return mType != UnknownProto;
-        };
+        }
+
         ProtocolType type() const
         {
             return mType;
-        };
+        }
+
         const QString &ewsUrl() const
         {
             return mEwsUrl;
-        };
+        }
+
         const QString &oabUrl() const
         {
             return mOabUrl;
-        };
+        }
     private:
         ProtocolType mType;
         QString mEwsUrl;
@@ -83,7 +87,7 @@ public:
     const EwsServerVersion &serverVersion() const
     {
         return mServerVersion;
-    };
+    }
 
     void dump() const;
 
@@ -92,23 +96,27 @@ public:
     Action action() const
     {
         return mAction;
-    };
+    }
+
     const Protocol protocol(ProtocolType type) const
     {
         return mProtocols.value(type);
-    };
+    }
+
     const QString &redirectAddr() const
     {
         return mRedirectAddr;
-    };
+    }
+
     const QString &redirectUrl() const
     {
         return mRedirectUrl;
-    };
+    }
+
     const QUrl &lastHttpUrl() const
     {
         return mLastUrl;
-    };
+    }
 
 protected:
     void doSend();

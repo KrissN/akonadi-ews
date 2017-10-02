@@ -59,22 +59,27 @@ public:
     {
         return (mMajor > other.mMajor) ? true : ((mMinor > other.mMinor) ? true : false);
     }
+
     bool operator<(const EwsServerVersion &other) const
     {
         return (mMajor < other.mMajor) ? true : ((mMinor < other.mMinor) ? true : false);
     }
+
     bool operator>=(const EwsServerVersion &other) const
     {
         return !(*this < other);
     }
+
     bool operator<=(const EwsServerVersion &other) const
     {
         return !(*this > other);
     }
+
     bool operator==(const EwsServerVersion &other) const
     {
         return (mMajor == other.mMajor) && (mMinor == other.mMinor);
     }
+
     bool operator!=(const EwsServerVersion &other) const
     {
         return !(*this == other);
@@ -85,20 +90,22 @@ public:
     bool isValid() const
     {
         return mMajor != 0;
-    };
+    }
 
     uint majorVersion() const
     {
         return mMajor;
-    };
+    }
+
     uint minorVersion() const
     {
         return mMinor;
-    };
+    }
+
     QString name() const
     {
         return mName;
-    };
+    }
 
     static const EwsServerVersion &minSupporting(ServerFeature feature);
 

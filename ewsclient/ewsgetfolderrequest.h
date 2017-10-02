@@ -38,7 +38,7 @@ public:
         const EwsFolder &folder() const
         {
             return mFolder;
-        };
+        }
     private:
         EwsFolder mFolder;
     };
@@ -54,7 +54,7 @@ public:
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseFoldersResponse(QXmlStreamReader &reader);

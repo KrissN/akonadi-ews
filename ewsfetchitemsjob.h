@@ -53,19 +53,19 @@ public:
     Akonadi::Item::List changedItems() const
     {
         return mChangedItems;
-    };
+    }
     Akonadi::Item::List deletedItems() const
     {
         return mDeletedItems;
-    };
+    }
     const QString &syncState() const
     {
         return mSyncState;
-    };
+    }
     const Akonadi::Collection &collection() const
     {
         return mCollection;
-    };
+    }
 
     void setQueuedUpdates(const QueuedUpdateList &updates);
 

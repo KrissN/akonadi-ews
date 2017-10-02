@@ -52,7 +52,8 @@ public:
     EwsXml(const QVector<Item> &items) : mItems(items)
     {
         rebuildItemHash();
-    };
+    }
+
     EwsXml(const EwsXml &other)
         : mItems(other.mItems), mValues(other.mValues), mItemHash(other.mItemHash) {};
 
@@ -60,7 +61,7 @@ public:
     {
         mItems = items;
         rebuildItemHash();
-    };
+    }
 
     bool readItem(QXmlStreamReader &reader, const QString &parentElm, const QString &nsUri,
                   UnknownElementFunction unknownElmFn = &defaultUnknownElmFunction)

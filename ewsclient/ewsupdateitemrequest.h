@@ -95,11 +95,12 @@ public:
         const EwsId &itemId() const
         {
             return mId;
-        };
+        }
+
         unsigned conflictCount() const
         {
             return mConflictCount;
-        };
+        }
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -115,30 +116,34 @@ public:
     void addItemChange(const ItemChange &change)
     {
         mChanges.append(change);
-    };
+    }
+
     void setMessageDisposition(EwsMessageDisposition disp)
     {
         mMessageDisp = disp;
-    };
+    }
+
     void setConflictResolution(EwsConflictResolution resol)
     {
         mConflictResol = resol;
-    };
+    }
+
     void setMeetingDisposition(EwsMeetingDisposition disp)
     {
         mMeetingDisp = disp;
-    };
+    }
+
     void setSavedFolderId(const EwsId &id)
     {
         mSavedFolderId = id;
-    };
+    }
 
     void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

@@ -39,7 +39,7 @@ public:
         const EwsItem &item() const
         {
             return mItem;
-        };
+        }
     private:
         EwsItem mItem;
     };
@@ -55,7 +55,7 @@ public:
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

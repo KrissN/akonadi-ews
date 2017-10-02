@@ -41,7 +41,7 @@ public:
     void setWatermark(const QString &watermark)
     {
         mWatermark = watermark;
-    };
+    }
 
     void start() override;
 

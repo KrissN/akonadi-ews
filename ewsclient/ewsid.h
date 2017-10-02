@@ -62,30 +62,35 @@ public:
     EwsId(const EwsId &id)
     {
         *this = id;
-    };
+    }
+
     EwsId(EwsId &&id)
     {
         *this = std::move(id);
-    };
+    }
+
     EwsId() : mType(Unspecified), mDid(EwsDIdCalendar) {};
     explicit EwsId(QXmlStreamReader &reader);
 
     Type type() const
     {
         return mType;
-    };
+    }
+
     QString id() const
     {
         return mId;
-    };
+    }
+
     QString changeKey() const
     {
         return mChangeKey;
-    };
+    }
+
     EwsDistinguishedId distinguishedId() const
     {
         return mDid;
-    };
+    }
 
     EwsId &operator=(const EwsId &other);
     EwsId &operator=(EwsId &&other);

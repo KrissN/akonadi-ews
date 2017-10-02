@@ -39,7 +39,7 @@ struct Finally {
     ~Finally()
     {
         cleanupf();
-    };
+    }
     F cleanupf;
 };
 

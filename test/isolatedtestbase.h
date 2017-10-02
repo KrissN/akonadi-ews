@@ -89,7 +89,7 @@ public:
     {
         replyCallback = callback;
         description = descr;
-    };
+    }
 };
 
 class MsgRootInboxDialogEntry : public DialogEntryBase

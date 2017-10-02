@@ -37,7 +37,8 @@ public:
     void setTraversal(EwsTraversalType traversal)
     {
         mTraversal = traversal;
-    };
+    }
+
     void setPagination(EwsIndexedViewBasePoint basePoint, unsigned offset, int maxItems = -1)
     {
         mFractional = false;
@@ -46,6 +47,7 @@ public:
         mPageOffset = offset;
         mPagination = true;
     }
+
     void setFractional(unsigned numerator, unsigned denominator, int maxItems = -1)
     {
         mPagination = false;
@@ -60,24 +62,27 @@ public:
     bool includesLastItem() const
     {
         return mIncludesLastItem;
-    };
+    }
+
     int nextOffset() const
     {
         return mNextOffset;
-    };
+    }
+
     int nextNumerator() const
     {
         return mNextNumerator;
-    };
+    }
+
     int nextDenominator() const
     {
         return mNextDenominator;
-    };
+    }
 
     const QList<EwsItem> items() const
     {
         return mItems;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

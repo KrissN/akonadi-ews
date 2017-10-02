@@ -44,19 +44,19 @@ public:
         EwsResponseClass responseClass() const
         {
             return mClass;
-        };
+        }
         bool isSuccess() const
         {
             return mClass == EwsResponseSuccess;
-        };
+        }
         QString responseCode() const
         {
             return mCode;
-        };
+        }
         QString responseMessage() const
         {
             return mMessage;
-        };
+        }
     protected:
         Response(QXmlStreamReader &reader);
         bool readResponseElement(QXmlStreamReader &reader);
@@ -77,7 +77,7 @@ public:
     const EwsServerVersion &serverVersion() const
     {
         return mServerVersion;
-    };
+    }
 
     void dump() const;
 

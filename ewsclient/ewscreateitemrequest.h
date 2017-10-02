@@ -40,7 +40,7 @@ public:
         const EwsId &itemId() const
         {
             return mId;
-        };
+        }
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -55,26 +55,29 @@ public:
     void setItems(const EwsItem::List &items)
     {
         mItems = items;
-    };
+    }
+
     void setMessageDisposition(EwsMessageDisposition disp)
     {
         mMessageDisp = disp;
-    };
+    }
+
     void setMeetingDisposition(EwsMeetingDisposition disp)
     {
         mMeetingDisp = disp;
-    };
+    }
+
     void setSavedFolderId(const EwsId &id)
     {
         mSavedFolderId = id;
-    };
+    }
 
     void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

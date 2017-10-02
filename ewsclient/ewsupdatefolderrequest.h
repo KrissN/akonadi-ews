@@ -95,7 +95,7 @@ public:
         const EwsId &folderId() const
         {
             return mId;
-        };
+        }
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -110,14 +110,14 @@ public:
     void addFolderChange(const FolderChange &change)
     {
         mChanges.append(change);
-    };
+    }
 
     void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

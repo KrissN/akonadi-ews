@@ -85,12 +85,12 @@ public:
     const Akonadi::Collection &rootCollection() const
     {
         return mRootCollection;
-    };
+    }
 
     Settings *settings()
     {
         return mSettings.data();
-    };
+    }
 protected:
     void doSetOnline(bool online) override;
 public Q_SLOTS:

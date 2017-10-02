@@ -130,23 +130,23 @@ public:
     bool isCreated() const
     {
         return flags & RemoteCreated;
-    };
+    }
     bool isModified() const
     {
         return flags & RemoteUpdated;
-    };
+    }
     bool isRemoved() const
     {
         return flags & RemoteDeleted;
-    };
+    }
     bool isProcessed() const
     {
         return flags & Processed;
-    };
+    }
     QString parent() const
     {
         return ewsFolder.isValid() ? ewsFolder[EwsFolderFieldParentFolderId].value<EwsId>().id() : QString();
-    };
+    }
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(FolderDescr::Flags)

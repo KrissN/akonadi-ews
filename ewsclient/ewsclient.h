@@ -65,25 +65,25 @@ public:
     const EwsServerVersion &serverVersion() const
     {
         return mServerVersion;
-    };
+    }
 
     void setUserAgent(const QString &userAgent)
     {
         mUserAgent = userAgent;
-    };
+    }
     const QString &userAgent() const
     {
         return mUserAgent;
-    };
+    }
 
     void setEnableNTLMv2(bool enable)
     {
         mEnableNTLMv2 = enable;
-    };
+    }
     bool isNTLMv2Enabled() const
     {
         return mEnableNTLMv2;
-    };
+    }
 
     static QHash<QString, QString> folderHash;
 private:

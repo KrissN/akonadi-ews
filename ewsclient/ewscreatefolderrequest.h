@@ -40,7 +40,7 @@ public:
         const EwsId &folderId() const
         {
             return mId;
-        };
+        }
     protected:
         Response(QXmlStreamReader &reader);
 
@@ -55,18 +55,19 @@ public:
     void setFolders(const EwsFolder::List &folders)
     {
         mFolders = folders;
-    };
+    }
+
     void setParentFolderId(const EwsId &id)
     {
         mParentFolderId = id;
-    };
+    }
 
     void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);

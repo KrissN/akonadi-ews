@@ -38,7 +38,7 @@ public:
     EwsId::List folders()
     {
         return mFolders;
-    };
+    }
 
     static const EwsId::List &defaultSubscriptionFolders();
 private Q_SLOTS:

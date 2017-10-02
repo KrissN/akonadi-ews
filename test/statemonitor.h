@@ -48,7 +48,7 @@ public:
     Akonadi::Monitor &monitor()
     {
         return mMonitor;
-    };
+    }
 private:
     void stateChanged(const Akonadi::Collection &col);
 

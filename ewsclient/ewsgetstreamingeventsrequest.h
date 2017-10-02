@@ -41,7 +41,7 @@ public:
     void setTimeout(uint timeout)
     {
         mTimeout = timeout;
-    };
+    }
 
     void start() override;
 public Q_SLOTS:

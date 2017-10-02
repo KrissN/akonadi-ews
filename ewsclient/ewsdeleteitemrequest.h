@@ -53,18 +53,19 @@ public:
     void setItemIds(const EwsId::List &ids)
     {
         mIds = ids;
-    };
+    }
+
     void setType(Type type)
     {
         mType = type;
-    };
+    }
 
     void start() override;
 
     const QList<Response> &responses() const
     {
         return mResponses;
-    };
+    }
 protected:
     bool parseResult(QXmlStreamReader &reader) override;
     bool parseItemsResponse(QXmlStreamReader &reader);
