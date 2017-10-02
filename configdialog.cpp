@@ -56,7 +56,7 @@ ConfigDialog::ConfigDialog(EwsResource *parentResource, EwsClient &client, WId w
         KWindowSystem::setMainWindow(this, wId);
     }
 
-    mButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    mButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     QWidget *mainWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout();
     setLayout(mainLayout);
