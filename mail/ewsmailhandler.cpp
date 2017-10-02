@@ -84,9 +84,6 @@ bool EwsMailHandler::setItemPayload(Akonadi::Item &item, const EwsItem &ewsItem)
     if (msg->body().isEmpty()) {
         msg->setBody("\n");
     }
-    Q_FOREACH (KMime::Content* c, msg->attachments()) {
-        KMime::Headers::ContentID *cid = c->contentID(false);
-    }
     item.setPayload<KMime::Message::Ptr>(msg);
     return true;
 }
