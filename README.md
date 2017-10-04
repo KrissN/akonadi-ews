@@ -1,5 +1,11 @@
 ## Akonadi resource for Microsoft Exchange Web Services
 
+**THIS REPOSITORY IS NOW OBSOLETE**
+
+**Note**: The Akonadi EWS resource has been merged into KDE PIM and will be
+released with KDE PIM 17.12. The code now lives in the ``kdepim-runtime``
+repository under ``resources/ews``.
+
 This Akonadi resource provides the ability to use Microsoft Exchange accounts
 with KDE PIM applications like KMail and KOrganizer.
 
