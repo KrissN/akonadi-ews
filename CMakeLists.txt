@@ -34,17 +34,21 @@ include(KDEFrameworkCompilerSettings)
 include(KDECMakeSettings)
 include(FeatureSummary)
 
-find_package(KF5KIO)
-find_package(KF5Akonadi)
-find_package(KF5AkonadiMime)
-find_package(Xsltproc)
-find_package(KF5Mime)
-find_package(KF5CalendarCore)
-find_package(KF5Contacts)
-find_package(KF5Codecs)
-find_package(KF5KDELibs4Support)
-find_package(KF5Wallet)
-find_package(KF5WidgetsAddons)
+find_package(Xsltproc REQUIRED)
+
+set(KF5_MIN_VERSION "5.2.0")
+find_package(KF5 ${REQUIRED_KF5_VERSION} MODULE REQUIRED COMPONENTS
+  KIO
+  Akonadi
+  AkonadiMime
+  Mime
+  CalendarCore
+  Contacts
+  Codecs
+  KDELibs4Support
+  Wallet
+  WidgetsAddons
+)
 
 option(HAVE_SEPARATE_MTA_RESOURCE "Build a separate resource for sending e-mail." TRUE)
 option(HAVE_INBOX_FILTERING_WORKAROUND "Include inbox filtering workaround." TRUE)
