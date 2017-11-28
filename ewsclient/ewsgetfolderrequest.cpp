@@ -118,7 +118,11 @@ EwsGetFolderRequest::Response::Response(QXmlStreamReader &reader)
         }
 
         if (reader.name() == QStringLiteral("Folders")) {
-            if (!parseFolders(reader)) {
+            if (responseClass() == EwsResponseError) {
+                // Skip empty folders element
+                reader.skipCurrentElement();
+            }
+            else if (!parseFolders(reader)) {
                 return;
             }
         }
